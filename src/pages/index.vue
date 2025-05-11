@@ -9,7 +9,7 @@
           cols="12"
         >
           <v-card
-            :image="item.image"
+            :image="Capacitor.convertFileSrc(item.image)"
             min-height="200"
             :to="{
               name: '/comics/[id]/',
@@ -45,6 +45,7 @@
 
 <script lang="ts" setup>
 import { useAppStore } from '@/stores/app.ts';
+import { Capacitor } from '@capacitor/core';
 
 const appStore = useAppStore();
 </script>

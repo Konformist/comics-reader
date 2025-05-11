@@ -24,6 +24,7 @@
       />
       <p>
         <v-btn
+          class="w-100"
           :disabled="!canParse"
           :loading="loading"
           text="Загрузить"

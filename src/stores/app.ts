@@ -1,15 +1,11 @@
+import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import type { IComicDTO } from '@/core/entities/comic/ComicTypes.ts';
+import ParserModel from '@/core/entities/parser/ParserModel.ts';
 import type { IParserDTO } from '@/core/entities/parser/ParserTypes.ts';
 import { dedupe } from '@/core/utils/array.ts';
+import { COMICS_STORE, COMICS_VERSION, PARSERS_STORE, PARSERS_VERSION } from '@/core/utils/variables.ts';
 import { Preferences } from '@capacitor/preferences';
-import { defineStore } from 'pinia'
-import ComicModel from '@/core/entities/comic/ComicModel.ts';
-import ParserModel from '@/core/entities/parser/ParserModel.ts';
-
-const PARSERS_STORE = 'parsers';
-const PARSERS_VERSION = 1;
-const COMICS_STORE = 'comics';
-const COMICS_VERSION = 2;
+import { defineStore } from 'pinia';
 
 export const useAppStore = defineStore('app', {
   state: () => ({

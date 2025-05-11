@@ -3,11 +3,9 @@
     <v-btn
       icon="$arrow-left"
       slim
-      @click="toList()"
+      @click="$router.back()"
     />
-    <v-app-bar-title>
-      Парсинг комикса
-    </v-app-bar-title>
+    <v-app-bar-title text="Загрузка комикса" />
   </v-app-bar>
   <v-main>
     <v-container>
@@ -141,8 +139,4 @@ const onCreate = async () => {
     loading.value = false;
   }
 };
-
-const toList = () => {
-  router.push('/parsers');
-}
 </script>

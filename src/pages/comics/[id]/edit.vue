@@ -3,11 +3,9 @@
     <v-btn
       icon="$arrow-left"
       slim
-      :to="{ name: '/comics/[id]/' }"
+      @click="$router.back()"
     />
-    <v-app-bar-title>
-      {{ comic?.name }}
-    </v-app-bar-title>
+    <v-app-bar-title text="Редактирование комикса" />
   </v-app-bar>
   <v-main>
     <v-container v-if="comic">
@@ -174,7 +172,7 @@ import ParserController from '@/core/entities/parser/ParserController.ts';
 import { useAppStore } from '@/stores/app.ts';
 import { Toast } from '@capacitor/toast';
 
-const route = useRoute('/comics/[id]/');
+const route = useRoute('/comics/[id]/edit');
 const appStore = useAppStore();
 
 const comic = computed(() => (appStore.comics.find(e => e.id === +route.params.id)))

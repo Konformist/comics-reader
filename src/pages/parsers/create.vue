@@ -3,11 +3,9 @@
     <v-btn
       icon="$arrow-left"
       slim
-      :to="{ name: '/parsers/' }"
+      @click="$router.back()"
     />
-    <v-app-bar-title>
-      Создание парсера
-    </v-app-bar-title>
+    <v-app-bar-title text="Создание парсера" />
   </v-app-bar>
   <v-main>
     <v-container>

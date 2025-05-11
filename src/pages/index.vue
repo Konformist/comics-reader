@@ -4,7 +4,7 @@
     <v-container>
       <v-row>
         <v-col
-          v-for="item in appStore.comics"
+          v-for="item in comics"
           :key="item.id"
           cols="12"
         >
@@ -48,7 +48,14 @@
 </template>
 
 <script lang="ts" setup>
-import { useAppStore } from '@/stores/app.ts';
+import ComicController from '@/core/entities/comic/ComicController.ts';
+import type ComicModel from '@/core/entities/comic/ComicModel.ts';
 
-const appStore = useAppStore();
+const comics = ref<ComicModel[]>([]);
+
+const loadComics = async () => {
+  comics.value = await ComicController.loadAll();
+}
+
+loadComics();
 </script>

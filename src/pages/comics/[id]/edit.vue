@@ -193,7 +193,7 @@ const addPage = () => {
 
   const lastId = comic.value.images[comic.value.images.length - 1]?.id || 0;
   comic.value.images.push({
-    id: lastId,
+    id: lastId + 1,
     url: '',
     from: '',
   })

@@ -116,12 +116,18 @@
           label="Ссылка на страницу"
           rows="2"
         />
-        <p>
+        <p class="d-flex">
           <v-btn
-            class="w-100"
             :loading="loading"
             text="Перезагрузить"
             @click="onReloadImage(item)"
+          />
+          <v-btn
+            class="ml-auto"
+            color="red"
+            :loading="loading"
+            text="Удалить"
+            @click="delPage(item)"
           />
         </p>
       </template>
@@ -198,6 +204,18 @@ const addPage = () => {
     from: '',
   })
 }
+
+const delPage = async (item: IComicImageDTO) => {
+  if (!comic.value) return;
+
+  const index = comic.value.images.findIndex(e => e.id === item.id);
+
+  if (index !== -1) {
+    const image = comic.value.images.splice(index, 1)[0];
+    if (image.url) await ParserController.deleteFS(image.url)
+    await appStore.saveComics();
+  }
+};
 
 const loading = ref(false);
 

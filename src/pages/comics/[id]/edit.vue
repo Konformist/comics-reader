@@ -191,8 +191,9 @@ const keyTags = computed({
 const addPage = () => {
   if (!comic.value) return;
 
+  const lastId = comic.value.images[comic.value.images.length - 1]?.id || 0;
   comic.value.images.push({
-    id: comic.value.images[comic.value.images.length - 1].id + 1,
+    id: lastId,
     url: '',
     from: '',
   })

@@ -198,8 +198,8 @@ const onReloadInfo = async () => {
   }
 };
 
-const uploadCover = async (event: File) => {
-  if (!comic.value) return;
+const uploadCover = async (event: File|File[]) => {
+  if (!comic.value || Array.isArray(event)) return;
 
   comic.value.image = await ParserController.writeFSCover(
     comic.value.id,

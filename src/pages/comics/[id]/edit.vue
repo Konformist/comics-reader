@@ -95,6 +95,24 @@
           @click="onReloadCover()"
         />
       </p>
+      <v-divider class="my-8" />
+      <v-textarea
+        v-model.trim="imagesTemplate"
+        hint="Пример: https://domain.com/12/23/<ID>.jpeg"
+        label="Шаблон для автозаполнения"
+        rows="2"
+      />
+      <v-text-field
+        v-model.number="imagesTemplateStart"
+        class="mt-4"
+        label="Начальный ID"
+        type="number"
+      />
+      <v-btn
+        class="w-100"
+        text="Заполнить"
+        @click="setTemplate()"
+      />
       <template
         v-for="item in comic.images"
         :key="item.id"
@@ -161,6 +179,15 @@ const appStore = useAppStore();
 
 const comic = computed(() => (appStore.comics.find(e => e.id === +route.params.id)))
 const parser = computed(() => (appStore.parsers.find(e => e.id === comic.value?.parser)))
+
+const imagesTemplate = ref('');
+const imagesTemplateStart = ref(1);
+
+const setTemplate = () => {
+  comic.value?.images.forEach((image, index) => {
+    image.from = imagesTemplate.value.replace('<ID>', (imagesTemplateStart.value + index).toString());
+  })
+};
 
 const keyLanguage = computed({
   get () {

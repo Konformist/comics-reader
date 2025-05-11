@@ -67,6 +67,7 @@
 <script lang="ts" setup>
 import ParserModel from '@/core/entities/parser/ParserModel.ts';
 import { useAppStore } from '@/stores/app.ts';
+import { Toast } from '@capacitor/toast';
 
 const router = useRouter();
 const appStore = useAppStore();
@@ -78,6 +79,7 @@ const loading = ref(false);
 const onCreate = async () => {
   loading.value = true;
   await appStore.createParser(parser.value);
+  Toast.show({ text: 'Парсер создан' });
   await router.push({
     name: '/parsers/[id]',
     params: { id: parser.value.id },

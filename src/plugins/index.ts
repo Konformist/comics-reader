@@ -3,14 +3,21 @@
  *
  * Automatically included in `./src/main.ts`
  */
-
-// Plugins
-import vuetify from './vuetify'
-import pinia from '../stores'
-import router from '../router'
+import { App as AppPlugin } from '@capacitor/app';
 
 // Types
-import type { App } from 'vue'
+import type { App } from 'vue';
+import router from '../router';
+import pinia from '../stores';
+
+// Plugins
+import vuetify from './vuetify';
+
+AppPlugin.addListener('backButton', event => {
+  if (event.canGoBack) {
+    router.back();
+  }
+});
 
 export function registerPlugins (app: App) {
   app

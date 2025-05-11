@@ -11,18 +11,17 @@
   </v-app-bar>
   <v-main>
     <v-container v-if="comic">
-      <v-img
+      <ComicImage
         v-for="(image, index) in comic.images"
         :key="image.id"
         :class="index ? 'mt-4' : ''"
-        :src="Capacitor.convertFileSrc(image.url)"
+        :src="image.url"
       />
     </v-container>
   </v-main>
 </template>
 <script lang="ts" setup>
 import { useAppStore } from '@/stores/app.ts';
-import { Capacitor } from '@capacitor/core';
 
 const route = useRoute('/comics/[id]/');
 const appStore = useAppStore();

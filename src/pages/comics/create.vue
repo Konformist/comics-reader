@@ -42,6 +42,7 @@ import type { IComicImageDTO } from '@/core/entities/comic/ComicTypes.ts';
 import ParserController from '@/core/entities/parser/ParserController.ts';
 import type ParserModel from '@/core/entities/parser/ParserModel.ts';
 import { useAppStore } from '@/stores/app.ts';
+import { Toast } from '@capacitor/toast';
 
 const router = useRouter();
 const appStore = useAppStore();
@@ -125,6 +126,7 @@ const onCreate = async () => {
 
     appStore.comics.push(comic);
     await appStore.saveComics();
+    Toast.show({ text: 'Комикс сохранён' })
     await router.push({
       name: '/comics/[id]/',
       params: { id: comic.id },
@@ -134,7 +136,7 @@ const onCreate = async () => {
     comic.images.forEach(e => {
       if (e) ParserController.deleteFS(e.url);
     })
-    console.error(e);
+    Toast.show({ text: `Комикс не сохранён. Ошибка: ${e}` })
   } finally {
     loading.value = false;
   }

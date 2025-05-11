@@ -16,8 +16,17 @@ import { createApp } from 'vue'
 // Styles
 import 'unfonts.css'
 
-const app = createApp(App)
+import { useAppStore } from '@/stores/app.ts';
 
-registerPlugins(app)
+const init = async () => {
+  const app = createApp(App)
 
-app.mount('#app')
+  registerPlugins(app)
+
+  const appStore = useAppStore();
+
+  await appStore.loadData();
+  app.mount('#app')
+}
+
+init();

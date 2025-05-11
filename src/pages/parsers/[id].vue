@@ -58,13 +58,14 @@
       app
       class="mb-4"
       icon="$save"
-      @click="appStore.saveParsers()"
+      @click="onSave()"
     />
   </v-main>
 </template>
 
 <script lang="ts" setup>
 import { useAppStore } from '@/stores/app.ts';
+import { Toast } from '@capacitor/toast';
 
 const route = useRoute('/parsers/[id]');
 
@@ -72,4 +73,9 @@ const appStore = useAppStore();
 const parserId = +(route.params?.id);
 
 const parser = computed(() => (appStore.parsers.find(e => e.id === parserId)))
+
+const onSave = async () => {
+  await appStore.saveParsers();
+  Toast.show({ text: 'Парсер сохранён' });
+}
 </script>

@@ -12,9 +12,9 @@
   <v-main>
     <v-container>
       <template v-if="comic">
-        <v-img
+        <ComicImage
           rounded
-          :src="coverUrl"
+          :src="comic.image"
         />
         <p
           v-if="comic.authors.length"
@@ -47,6 +47,10 @@
             :text="tag"
           />
         </p>
+        <p class="mt-2 d-flex flex-wrap ga-1 align-center">
+          <b class="font-weight-medium">Страниц:</b>
+          <v-chip :text="comic.images.length" />
+        </p>
         <p class="mt-4">
           <v-btn
             class="w-100"
@@ -67,16 +71,9 @@
 
 <script lang="ts" setup>
 import { useAppStore } from '@/stores/app.ts';
-import { Capacitor } from '@capacitor/core';
 
 const route = useRoute('/comics/[id]/');
 const appStore = useAppStore();
 
 const comic = computed(() => (appStore.comics.find(e => e.id === +route.params.id)))
-
-const coverUrl = computed(() => (
-  comic.value?.image
-    ? Capacitor.convertFileSrc(comic.value.image)
-    : ''
-))
 </script>

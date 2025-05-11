@@ -75,7 +75,7 @@
         v-if="comic.image"
         height="150"
       >
-        <v-img :src="Capacitor.convertFileSrc(comic.image)" />
+        <ComicImage :src="comic.image" />
       </v-card>
       <v-file-input
         class="mt-4"
@@ -104,7 +104,7 @@
           v-if="item.url"
           height="150"
         >
-          <v-img :src="Capacitor.convertFileSrc(item.url)" />
+          <ComicImage :src="item.url" />
         </v-card>
         <v-file-input
           class="mt-4"
@@ -144,16 +144,17 @@
       class="mb-4"
       icon="$save"
       :loading="loading"
-      @click="appStore.saveComics()"
+      @click="onSave()"
     />
   </v-main>
 </template>
 
 <script lang="ts" setup>
+import ComicImage from '@/components/ComicImage.vue';
 import type { IComicImageDTO } from '@/core/entities/comic/ComicTypes.ts';
 import ParserController from '@/core/entities/parser/ParserController.ts';
 import { useAppStore } from '@/stores/app.ts';
-import { Capacitor } from '@capacitor/core';
+import { Toast } from '@capacitor/toast';
 
 const route = useRoute('/comics/[id]/');
 const appStore = useAppStore();
@@ -214,6 +215,7 @@ const delPage = async (item: IComicImageDTO) => {
     const image = comic.value.images.splice(index, 1)[0];
     if (image.url) await ParserController.deleteFS(image.url)
     await appStore.saveComics();
+    Toast.show({ text: 'Комикс сохранён' })
   }
 };
 
@@ -232,8 +234,9 @@ const onReloadInfo = async () => {
 
     Object.assign(comic.value, comicDTO);
     await appStore.saveComics();
+    Toast.show({ text: 'Комикс сохранён' })
   } catch (e) {
-    console.error(e);
+    Toast.show({ text: `Комикс не сохранён. Ошибка: ${e}` })
   } finally {
     loading.value = false;
   }
@@ -249,6 +252,7 @@ const uploadCover = async (event: File|File[]) => {
   );
 
   await appStore.saveComics();
+  Toast.show({ text: 'Комикс сохранён' })
 }
 
 const uploadImage = async (item: IComicImageDTO, event: File|File[]) => {
@@ -259,6 +263,7 @@ const uploadImage = async (item: IComicImageDTO, event: File|File[]) => {
   if (item.url !== savedUrl) await ParserController.deleteFS(savedUrl);
 
   await appStore.saveComics();
+  Toast.show({ text: 'Комикс сохранён' })
 }
 
 const onReloadCover = async () => {
@@ -273,8 +278,9 @@ const onReloadCover = async () => {
       result,
     );
     await appStore.saveComics();
+    Toast.show({ text: 'Комикс сохранён' })
   } catch (e) {
-    console.error(e);
+    Toast.show({ text: `Комикс не сохранён. Ошибка: ${e}` })
   } finally {
     loading.value = false;
   }
@@ -292,10 +298,16 @@ const onReloadImage = async (item: IComicImageDTO) => {
     if (item.url !== savedUrl) await ParserController.deleteFS(savedUrl);
 
     await appStore.saveComics();
+    Toast.show({ text: 'Комикс сохранён' })
   } catch (e) {
-    console.error(e);
+    Toast.show({ text: `Комикс не сохранён. Ошибка: ${e}` })
   } finally {
     loading.value = false;
   }
 }
+
+const onSave = async () => {
+  await appStore.saveComics();
+  Toast.show({ text: 'Комикс сохранён' });
+};
 </script>

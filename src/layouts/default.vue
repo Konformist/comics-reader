@@ -9,6 +9,10 @@
       <v-icon>$list</v-icon>
       Парсеры
     </v-btn>
+    <v-btn :to="{ path: '/filemanager/' }">
+      <v-icon>$list</v-icon>
+      Файлы
+    </v-btn>
   </v-bottom-navigation>
 </template>
 

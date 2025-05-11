@@ -9,90 +9,121 @@ import { VueRouterAutoImports } from 'unplugin-vue-router'
 import Vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 
 // Utilities
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite';
 import { fileURLToPath, URL } from 'node:url'
 
 // https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [
-    VueRouter({
-      dts: 'src/typed-router.d.ts',
-    }),
-    Layouts(),
-    AutoImport({
-      imports: [
-        'vue',
-        VueRouterAutoImports,
-        {
-          'pinia': ['defineStore', 'storeToRefs'],
-        },
-      ],
-      dts: 'src/auto-imports.d.ts',
-      eslintrc: {
-        enabled: true,
-      },
-      vueTemplate: true,
-    }),
-    Components({
-      dts: 'src/components.d.ts',
-    }),
-    Vue({
-      template: { transformAssetUrls },
-    }),
-    // https://github.com/vuetifyjs/vuetify-loader/tree/master/packages/vite-plugin#readme
-    Vuetify({
-      autoImport: true,
-      styles: {
-        configFile: 'src/styles/settings.scss',
-      },
-    }),
-    Fonts({
-      fontsource: {
-        families: [
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd());
+
+  Object.assign(process.env, env);
+
+  return {
+    plugins: [
+      VueRouter({
+        dts: 'src/typed-router.d.ts',
+      }),
+      Layouts(),
+      AutoImport({
+        imports: [
+          'vue',
+          VueRouterAutoImports,
           {
-            name: 'Roboto',
-            weights: [100, 300, 400, 500, 700, 900],
-            styles: ['normal', 'italic'],
+            'pinia': ['defineStore', 'storeToRefs'],
           },
         ],
-      },
-    }),
-  ],
-  optimizeDeps: {
-    exclude: [
-      'vuetify',
-      'vue-router',
-      'unplugin-vue-router/runtime',
-      'unplugin-vue-router/data-loaders',
-      'unplugin-vue-router/data-loaders/basic',
+        dts: 'src/auto-imports.d.ts',
+        eslintrc: {
+          enabled: true,
+        },
+        vueTemplate: true,
+      }),
+      Components({
+        dts: 'src/components.d.ts',
+      }),
+      Vue({
+        template: { transformAssetUrls },
+      }),
+      // https://github.com/vuetifyjs/vuetify-loader/tree/master/packages/vite-plugin#readme
+      Vuetify({
+        autoImport: true,
+        styles: {
+          configFile: 'src/styles/settings.scss',
+        },
+      }),
+      Fonts({
+        fontsource: {
+          families: [
+            {
+              name: 'Roboto',
+              weights: [400, 500],
+              styles: ['normal'],
+              subset: 'latin',
+            },
+            {
+              name: 'Roboto',
+              weights: [400, 500],
+              styles: ['normal'],
+              subset: 'cyrillic',
+            },
+          ],
+        },
+      }),
     ],
-  },
-  define: { 'process.env': {} },
-  resolve: {
-    alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url)),
+    optimizeDeps: {
+      exclude: [
+        'vuetify',
+        'vue-router',
+        'unplugin-vue-router/runtime',
+        'unplugin-vue-router/data-loaders',
+        'unplugin-vue-router/data-loaders/basic',
+      ],
     },
-    extensions: [
-      '.js',
-      '.json',
-      '.jsx',
-      '.mjs',
-      '.ts',
-      '.tsx',
-      '.vue',
-    ],
-  },
-  server: {
-    port: 3000,
-  },
-  css: {
-    preprocessorOptions: {
-      sass: {
-        api: 'modern-compiler',
+    define: { 'process.env': env },
+    resolve: {
+      alias: {
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
       },
-      scss: {
-        api: 'modern-compiler',
+      extensions: [
+        '.js',
+        '.json',
+        '.jsx',
+        '.mjs',
+        '.ts',
+        '.tsx',
+        '.vue',
+      ],
+    },
+    server: {
+      port: 3000,
+      proxy: {
+        '/test-url': {
+          target: process.env.VITE_TEST_SITE,
+          changeOrigin: true,
+          followRedirects: true,
+          rewrite (path: string) {
+            return path.replace('/test-url', '');
+          },
+        },
+        '/test-image-url': {
+          target: process.env.VITE_TEST_IMAGE_SITE,
+          changeOrigin: true,
+          followRedirects: true,
+          rewrite (path: string) {
+            return path.replace('/test-image-url', '');
+          },
+        },
       },
     },
-  },
+    css: {
+      preprocessorOptions: {
+        sass: {
+          api: 'modern-compiler',
+        },
+        scss: {
+          api: 'modern-compiler',
+        },
+      },
+    },
+  }
 })

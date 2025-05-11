@@ -1,6 +1,7 @@
 export interface IFile {
   type: 'file'
   path: string
+  size: number
 }
 
 export interface IDirectory {

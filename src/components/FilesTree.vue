@@ -1,8 +1,5 @@
 <template>
-  <v-list
-    :class="isChild ? 'pl-4' : ''"
-    style="list-style-type: none"
-  >
+  <v-list :class="isChild ? 'pl-4' : ''">
     <template
       v-for="(item, index) in tree"
       :key="item.path"
@@ -45,6 +42,7 @@ const clickDirectory = async (value: IDirectory|IFile) => {
       return {
         type: file.type,
         path: file.name,
+        size: file.size,
       }
     }
   })

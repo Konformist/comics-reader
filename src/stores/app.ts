@@ -84,19 +84,6 @@ export const useAppStore = defineStore('app', {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     migrateComicsStore (value: any) {
-      if (value.version < COMICS_VERSION) {
-        console.log(value);
-        value.items.forEach((item: IComicDTO) => {
-          // @ts-expect-error parsing
-          item.images = item.images.map((e: string, i) => ({
-            id: i + 1,
-            url: e,
-            // @ts-expect-error parsing
-            from: item.imagesUrl[i],
-          }))
-        })
-      }
-
       return value;
     },
 

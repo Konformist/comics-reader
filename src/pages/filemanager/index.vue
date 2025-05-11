@@ -13,7 +13,6 @@
 import FilesTree from '@/components/FilesTree.vue';
 import type { IDirectory, IFile } from '@/core/utils/filemanager.ts';
 import { useAppStore } from '@/stores/app.ts';
-import { Directory, Filesystem } from '@capacitor/filesystem';
 
 const appStore = useAppStore();
 

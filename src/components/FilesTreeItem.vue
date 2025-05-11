@@ -36,15 +36,12 @@ const { item } = defineProps<{
 
 const opened = ref(false);
 
-const canOpened = computed(() => (
-  item.type === 'directory' && item.children.length
-))
 const toggleOpened = () => {
-  opened.value = canOpened.value ? !opened.value : false;
+  opened.value = !opened.value;
 }
 
 const onClick = () => {
   toggleOpened();
-  if (opened.value) emit('click')
+  emit('click')
 };
 </script>

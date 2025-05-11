@@ -64,28 +64,32 @@
       />
       <p>
         <v-btn
+          class="w-100"
           :loading="loading"
           text="Перезагрузить"
           @click="onReloadInfo()"
         />
       </p>
       <v-divider class="my-8" />
-      <v-img
+      <v-card
         v-if="comic.image"
         height="150"
-        :src="Capacitor.convertFileSrc(comic.image)"
-      />
+      >
+        <v-img :src="Capacitor.convertFileSrc(comic.image)" />
+      </v-card>
       <v-file-input
+        class="mt-4"
         label="Загрузить свою картинку"
         @update:model-value="uploadCover($event)"
       />
       <v-textarea
-        v-model="comic.imageUrl"
+        v-model.trim="comic.imageUrl"
         label="Ссылка на картинку"
         rows="2"
       />
       <p>
         <v-btn
+          class="w-100"
           :loading="loading"
           text="Перезагрузить"
           @click="onReloadCover()"
@@ -96,12 +100,14 @@
         :key="index"
       >
         <v-divider class="my-8" />
-        <v-img
-          v-if="comic.image"
+        <v-card
+          v-if="comic.images[index]"
           height="150"
-          :src="Capacitor.convertFileSrc(comic.image)"
-        />
+        >
+          <v-img :src="Capacitor.convertFileSrc(comic.images[index])" />
+        </v-card>
         <v-textarea
+          class="mt-4"
           label="Ссылка на страницу"
           :model-value="item"
           rows="2"
@@ -109,6 +115,7 @@
         />
         <p>
           <v-btn
+            class="w-100"
             :loading="loading"
             text="Перезагрузить"
             @click="onReloadImage(index)"

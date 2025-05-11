@@ -12,46 +12,46 @@
   <v-main>
     <v-container v-if="parser">
       <v-text-field
-        v-model="parser.name"
+        v-model.trim="parser.name"
         label="Название парсера"
       />
       <v-textarea
-        v-model="parser.title"
+        v-model.trim="parser.title"
         label="Название комикса"
-        rows="3"
+        rows="2"
       />
       <v-textarea
-        v-model="parser.image"
+        v-model.trim="parser.image"
         label="Изображение"
-        rows="3"
+        rows="2"
       />
       <v-textarea
-        v-model="parser.authors"
+        v-model.trim="parser.authors"
         label="Авторы"
-        rows="3"
+        rows="2"
       />
       <v-text-field
-        v-model="parser.authorsText"
+        v-model.trim="parser.authorsText"
         label="Текст авторов"
       />
       <v-textarea
-        v-model="parser.language"
+        v-model.trim="parser.language"
         label="Язык"
-        rows="3"
+        rows="2"
       />
       <v-textarea
-        v-model="parser.tags"
+        v-model.trim="parser.tags"
         label="Теги"
-        rows="3"
+        rows="2"
       />
       <v-text-field
-        v-model="parser.tagsText"
+        v-model.trim="parser.tagsText"
         label="Текст тега"
       />
       <v-textarea
-        v-model="parser.images"
+        v-model.trim="parser.images"
         label="Страницы"
-        rows="3"
+        rows="2"
       />
     </v-container>
     <v-fab

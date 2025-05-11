@@ -12,43 +12,42 @@
   <v-main>
     <v-container>
       <v-text-field
-        v-model="parser.name"
+        v-model.trim="parser.name"
         label="Название парсера"
       />
-      <v-text-field
-        v-model="parser.title"
+      <v-textarea
+        v-model.trim="parser.title"
         label="Название комикса"
+        rows="2"
       />
-      <v-text-field
-        v-model="parser.image"
+      <v-textarea
+        v-model.trim="parser.image"
         label="Изображение"
+        rows="2"
       />
-      <div class="d-flex">
-        <v-text-field
-          v-model="parser.authors"
-          class="mr-4"
-          label="Авторы"
-        />
-        <v-text-field
-          v-model="parser.authorsText"
-          label="Текст авторов"
-        />
-      </div>
+      <v-textarea
+        v-model.trim="parser.authors"
+        label="Авторы"
+        rows="2"
+      />
       <v-text-field
-        v-model="parser.language"
-        label="Язык"
+        v-model.trim="parser.authorsText"
+        label="Текст авторов"
       />
-      <div class="d-flex">
-        <v-text-field
-          v-model="parser.tags"
-          class="mr-4"
-          label="Теги"
-        />
-        <v-text-field
-          v-model="parser.tagsText"
-          label="Текст тега"
-        />
-      </div>
+      <v-textarea
+        v-model.trim="parser.language"
+        label="Язык"
+        rows="2"
+      />
+      <v-textarea
+        v-model.trim="parser.tags"
+        label="Теги"
+        rows="2"
+      />
+      <v-text-field
+        v-model.trim="parser.tagsText"
+        label="Текст тега"
+      />
     </v-container>
     <v-fab
       app

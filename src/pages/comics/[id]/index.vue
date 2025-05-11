@@ -49,9 +49,9 @@
         </p>
         <p class="mt-4">
           <v-btn
+            class="w-100"
             text="Читать"
             :to="{ name: '/comics/[id]/read' }"
-            width="100%"
           />
         </p>
       </template>

@@ -18,9 +18,10 @@
         :items="parserItems"
         label="Парсер"
       />
-      <v-text-field
-        v-model="parseOptions.url"
+      <v-textarea
+        v-model.trim="parseOptions.url"
         label="Ссылка на комикс"
+        rows="2"
       />
       <p>
         <v-btn

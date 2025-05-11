@@ -48,6 +48,11 @@
         v-model.trim="parser.tagsText"
         label="Текст тега"
       />
+      <v-textarea
+        v-model.trim="parser.images"
+        label="Страницы"
+        rows="2"
+      />
     </v-container>
     <v-fab
       app

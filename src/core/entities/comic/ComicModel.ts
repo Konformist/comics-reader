@@ -1,5 +1,5 @@
 import Entity from '@/core/entities/Entity.ts';
-import type { IComicDTO } from '@/core/entities/comic/ComicTypes.ts';
+import type { IComicDTO, IComicImageDTO } from '@/core/entities/comic/ComicTypes.ts';
 import type { TParserOverride } from '@/core/entities/parser/ParserTypes.ts';
 
 export default class ComicModel extends Entity<IComicDTO> {
@@ -12,8 +12,7 @@ export default class ComicModel extends Entity<IComicDTO> {
   public authors: string[] = [];
   public tags: string[] = [];
   public language: string = '';
-  public images: string[] = [];
-  public imagesUrl: string[] = [];
+  public images: IComicImageDTO[] = [];
   public override: TParserOverride = {};
 
   constructor (dto?: Partial<IComicDTO>) {
@@ -29,8 +28,7 @@ export default class ComicModel extends Entity<IComicDTO> {
       this.tags = dto.tags ? [...dto.tags] : [];
       this.authors = dto.authors ? [...dto.authors] : [];
       this.language = dto.language ?? '';
-      this.images = dto.images ? [...dto.images] : [];
-      this.imagesUrl = dto.imagesUrl ? [...dto.imagesUrl] : [];
+      this.images = (dto.images ?? []).map(e => ({ ...e }));
       this.override = dto.override ? { ...dto.override } : {};
     }
   }
@@ -46,8 +44,7 @@ export default class ComicModel extends Entity<IComicDTO> {
       tags: [...this.tags],
       authors: [...this.authors],
       language: this.language,
-      images: [...this.images],
-      imagesUrl: [...this.imagesUrl],
+      images: this.images.map(e => ({ ...e })),
       override: { ...this.override },
     }
   }

@@ -9,7 +9,7 @@ import ParserModel from '@/core/entities/parser/ParserModel.ts';
 const PARSERS_STORE = 'parsers';
 const PARSERS_VERSION = 1;
 const COMICS_STORE = 'comics';
-const COMICS_VERSION = 1;
+const COMICS_VERSION = 2;
 
 export const useAppStore = defineStore('app', {
   state: () => ({
@@ -33,13 +33,6 @@ export const useAppStore = defineStore('app', {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     migrateParsersStore (value: any) {
-      if (!value.version) {
-        return {
-          version: PARSERS_VERSION,
-          items: value,
-        }
-      }
-
       return value;
     },
 
@@ -91,11 +84,17 @@ export const useAppStore = defineStore('app', {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     migrateComicsStore (value: any) {
-      if (!value.version) {
-        return {
-          version: COMICS_VERSION,
-          items: value,
-        }
+      if (value.version < COMICS_VERSION) {
+        console.log(value);
+        value.items.forEach((item: IComicDTO) => {
+          // @ts-expect-error parsing
+          item.images = item.images.map((e: string, i) => ({
+            id: i + 1,
+            url: e,
+            // @ts-expect-error parsing
+            from: item.imagesUrl[i],
+          }))
+        })
       }
 
       return value;
@@ -108,7 +107,7 @@ export const useAppStore = defineStore('app', {
 
       let result = JSON.parse(store.value);
 
-      if (result.version !== PARSERS_VERSION) {
+      if (result.version !== COMICS_VERSION) {
         result = this.migrateComicsStore(result)
         this.comics = result.items
           .map((e: IComicDTO) => new ComicModel(e));

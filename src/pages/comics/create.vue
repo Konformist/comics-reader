@@ -38,6 +38,7 @@
 
 <script lang="ts" setup>
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
+import type { IComicImageDTO } from '@/core/entities/comic/ComicTypes.ts';
 import ParserController from '@/core/entities/parser/ParserController.ts';
 import type ParserModel from '@/core/entities/parser/ParserModel.ts';
 import { useAppStore } from '@/stores/app.ts';
@@ -73,7 +74,7 @@ const loading = ref(false);
 
 const createComic = async (value: ParserModel, options: typeof parseOptions.value) => {
   const result = await ParserController.loadComic(options.url);
-  const comicDTO = value.parseV2(result);
+  const comicDTO = value.parse(result);
   const comic = new ComicModel(comicDTO);
   const lastId = appStore.comics[appStore.comics.length - 1]?.id || 0;
 
@@ -95,21 +96,15 @@ const createCover = async (comic: ComicModel) => {
 }
 
 const createImages = async (comic: ComicModel) => {
-  const arr = [];
+  const arr: IComicImageDTO[] = [];
 
-  for (let i = 0; i < comic.imagesUrl.length; i++){
-    const image = comic.imagesUrl[i];
-
+  for (const image of comic.images) {
     if (!image) continue;
 
-    const blob = await ParserController.loadImage(image);
+    const blob = await ParserController.loadImage(image.from);
+    const path = await ParserController.writeFSPage(comic.id, image, blob);
 
-    arr.push(await ParserController.writeFSPage(
-      comic.id,
-      i,
-      ParserController.getExtension(image),
-      blob,
-    ));
+    arr.push({ ...image, url: path });
   }
 
   return arr;
@@ -126,7 +121,7 @@ const onCreate = async () => {
     comic = await createComic(parser.value, parseOptions.value);
 
     if (comic.imageUrl) comic.image = await createCover(comic);
-    if (comic.imagesUrl.length) comic.images = await createImages(comic);
+    if (comic.images.length) comic.images = await createImages(comic);
 
     appStore.comics.push(comic);
     await appStore.saveComics();
@@ -137,7 +132,7 @@ const onCreate = async () => {
   } catch (e) {
     if (comic.image) ParserController.deleteFS(comic.image);
     comic.images.forEach(e => {
-      if (e) ParserController.deleteFS(e);
+      if (e) ParserController.deleteFS(e.url);
     })
     console.error(e);
   } finally {

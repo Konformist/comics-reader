@@ -1,5 +1,11 @@
 import type { IParserDTO } from '@/core/entities/parser/ParserTypes.ts';
 
+export interface IComicImageDTO {
+  id: number
+  url: string
+  from: string
+}
+
 export interface IComicDTO {
   id: number
   url: string
@@ -10,7 +16,6 @@ export interface IComicDTO {
   tags: string[]
   authors: string[]
   language: string
-  images: string[]
-  imagesUrl: string[]
+  images: IComicImageDTO[]
   override: Partial<Omit<IParserDTO, 'id'|'name'>>
 }

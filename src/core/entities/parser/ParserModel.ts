@@ -1,4 +1,3 @@
-import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import type { IComicDTO } from '@/core/entities/comic/ComicTypes.ts';
 import Entity from '@/core/entities/Entity.ts';
 import type { IParserDTO, TParserOverride } from '@/core/entities/parser/ParserTypes.ts';
@@ -90,14 +89,14 @@ export default class ParserModel extends Entity<IParserDTO> {
       : [];
   }
 
-  parseV2 (value: string, override?: TParserOverride) {
+  parse (value: string, override?: TParserOverride) {
     const cleaned = this.cleanHTML(value);
     const parser = new DOMParser();
     const result = parser
       .parseFromString(cleaned, 'text/html')
       .body;
 
-    const comicDTO: Partial<Omit<IComicDTO, 'id'|'image'|'images'>> = {};
+    const comicDTO: Partial<Omit<IComicDTO, 'id'|'image'>> = {};
 
     const name = this.parseTitle(result, override?.title);
     if (name) comicDTO.name = name;
@@ -106,7 +105,13 @@ export default class ParserModel extends Entity<IParserDTO> {
     if (image) comicDTO.imageUrl = image;
 
     const images = this.parseImages(result, override?.images);
-    if (images) comicDTO.imagesUrl = images;
+    if (images) {
+      comicDTO.images = images.map((from, index) => ({
+        id: index + 1,
+        url: '',
+        from,
+      }));
+    }
 
     const authors = this.parseAuthors(result, override?.authors);
     if (authors) comicDTO.authors = authors;
@@ -118,26 +123,6 @@ export default class ParserModel extends Entity<IParserDTO> {
     if (tags) comicDTO.tags = tags;
 
     return comicDTO;
-  }
-
-  parse (value: string): ComicModel {
-    const cleaned = this.cleanHTML(value);
-    const parser = new DOMParser();
-    const result = parser
-      .parseFromString(cleaned, 'text/html')
-      .body;
-
-    const comic = new ComicModel();
-
-    comic.parser = this.id;
-    comic.name = this.parseTitle(result);
-    comic.image = this.parseImage(result);
-    comic.images = this.parseImages(result);
-    comic.language = this.parseLanguage(result);
-    comic.authors = this.parseAuthors(result);
-    comic.tags = this.parseTags(result);
-
-    return comic;
   }
 
   getDTO (): IParserDTO {

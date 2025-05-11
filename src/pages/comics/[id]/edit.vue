@@ -96,32 +96,42 @@
         />
       </p>
       <template
-        v-for="(item, index) in comic.imagesUrl"
-        :key="index"
+        v-for="item in comic.images"
+        :key="item.id"
       >
         <v-divider class="my-8" />
         <v-card
-          v-if="comic.images[index]"
+          v-if="item.url"
           height="150"
         >
-          <v-img :src="Capacitor.convertFileSrc(comic.images[index])" />
+          <v-img :src="Capacitor.convertFileSrc(item.url)" />
         </v-card>
-        <v-textarea
+        <v-file-input
           class="mt-4"
+          label="Загрузить свою страницу"
+          @update:model-value="uploadImage(item, $event)"
+        />
+        <v-textarea
+          v-model.trim="item.from"
           label="Ссылка на страницу"
-          :model-value="item"
           rows="2"
-          @change="setImageUrl(index, $event)"
         />
         <p>
           <v-btn
             class="w-100"
             :loading="loading"
             text="Перезагрузить"
-            @click="onReloadImage(index)"
+            @click="onReloadImage(item)"
           />
         </p>
       </template>
+      <p>
+        <v-btn
+          class="mt-4 w-100"
+          text="Добавить страницу"
+          @click="addPage()"
+        />
+      </p>
     </v-container>
     <v-fab
       app
@@ -134,6 +144,7 @@
 </template>
 
 <script lang="ts" setup>
+import type { IComicImageDTO } from '@/core/entities/comic/ComicTypes.ts';
 import ParserController from '@/core/entities/parser/ParserController.ts';
 import { useAppStore } from '@/stores/app.ts';
 import { Capacitor } from '@capacitor/core';
@@ -177,10 +188,14 @@ const keyTags = computed({
   },
 })
 
-const setImageUrl = (index: number, event: Event) => {
+const addPage = () => {
   if (!comic.value) return;
 
-  comic.value.imagesUrl[index] = (event.target as HTMLInputElement).value.trim();
+  comic.value.images.push({
+    id: comic.value.images[comic.value.images.length - 1].id + 1,
+    url: '',
+    from: '',
+  })
 }
 
 const loading = ref(false);
@@ -191,10 +206,10 @@ const onReloadInfo = async () => {
   try {
     loading.value = true;
     const result = await ParserController.loadComic(comic.value.url);
-    const comicDTO = parser.value.parseV2(result, comic.value.override);
+    const comicDTO = parser.value.parse(result, comic.value.override);
 
     if (comic.value.imageUrl) delete comicDTO.imageUrl;
-    if (comic.value.imagesUrl.length) delete comicDTO.imagesUrl;
+    if (comic.value.images.length) delete comicDTO.images;
 
     Object.assign(comic.value, comicDTO);
     await appStore.saveComics();
@@ -213,6 +228,17 @@ const uploadCover = async (event: File|File[]) => {
     ParserController.getExtension(comic.value.imageUrl),
     event,
   );
+
+  await appStore.saveComics();
+}
+
+const uploadImage = async (item: IComicImageDTO, event: File|File[]) => {
+  if (!comic.value || Array.isArray(event)) return;
+
+  const savedUrl = item.url;
+  item.url = await ParserController.writeFSPage(comic.value.id, item, event);
+  if (item.url !== savedUrl) await ParserController.deleteFS(savedUrl);
+
   await appStore.saveComics();
 }
 
@@ -235,19 +261,17 @@ const onReloadCover = async () => {
   }
 };
 
-const onReloadImage = async (index: number) => {
+const onReloadImage = async (item: IComicImageDTO) => {
   if (!comic.value) return;
 
   try {
     loading.value = true;
-    const imageUrl = comic.value.imagesUrl[index];
-    const result = await ParserController.loadImage(imageUrl);
-    comic.value.images[index] = await ParserController.writeFSPage(
-      comic.value.id,
-      index,
-      ParserController.getExtension(imageUrl),
-      result,
-    );
+    const result = await ParserController.loadImage(item.from);
+
+    const savedUrl = item.url;
+    item.url = await ParserController.writeFSPage(comic.value.id, item, result);
+    if (item.url !== savedUrl) await ParserController.deleteFS(savedUrl);
+
     await appStore.saveComics();
   } catch (e) {
     console.error(e);

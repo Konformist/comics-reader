@@ -13,9 +13,9 @@
     <v-container v-if="comic">
       <v-img
         v-for="(image, index) in comic.images"
-        :key="image"
+        :key="image.id"
         :class="index ? 'mt-4' : ''"
-        :src="Capacitor.convertFileSrc(image)"
+        :src="Capacitor.convertFileSrc(image.url)"
       />
     </v-container>
   </v-main>

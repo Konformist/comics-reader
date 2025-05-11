@@ -1,3 +1,4 @@
+import type { IComicImageDTO } from '@/core/entities/comic/ComicTypes.ts';
 import { CapacitorHttp } from '@capacitor/core';
 import { Filesystem } from '@capacitor/filesystem';
 import { Directory } from '@capacitor/filesystem/dist/esm/definitions';
@@ -53,8 +54,9 @@ export default class ParserController {
     return ParserController.writeFS(`${id}/cover.${ext}`, blob)
   }
 
-  static writeFSPage (id: number, index: number, ext: string, blob: Blob) {
-    return ParserController.writeFS(`${id}/${index + 1}.${ext}`, blob)
+  static writeFSPage (id: number, image: IComicImageDTO, blob: Blob) {
+    const ext = ParserController.getExtension(image.from);
+    return ParserController.writeFS(`${id}/${image.id}.${ext}`, blob)
   }
 
   static deleteFS (uri: string) {

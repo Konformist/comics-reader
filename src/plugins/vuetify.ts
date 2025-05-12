@@ -15,7 +15,7 @@ import { aliases, mdi } from 'vuetify/iconsets/mdi-svg';
 import {
   mdiArrowLeft,
   mdiCog,
-  mdiContentSave,
+  mdiContentSave, mdiDownload,
   mdiFileMultiple,
   mdiPencil,
   mdiPlus,
@@ -42,6 +42,7 @@ export default createVuetify({
       'edit': mdiPencil,
       'files': mdiFileMultiple,
       'settings': mdiCog,
+      'download': mdiDownload,
     },
     sets: {
       mdi,

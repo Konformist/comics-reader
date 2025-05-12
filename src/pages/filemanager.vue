@@ -18,15 +18,8 @@ import { BACKUPS_DIRECTORY, COMICS_FILES_DIRECTORY } from '@/core/middleware/var
 const files = ref<IDirectory[]>([]);
 
 const loadComics = async () => {
-  try {
-    files.value.push(...await server.getTree(COMICS_FILES_DIRECTORY))
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (_) { /* empty */ }
-
-  try {
-    files.value.push(...await server.getTree(BACKUPS_DIRECTORY))
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (_) { /* empty */ }
+  files.value.push(...await server.getTree(COMICS_FILES_DIRECTORY))
+  files.value.push(...await server.getTree(BACKUPS_DIRECTORY))
 }
 
 loadComics();

@@ -10,6 +10,7 @@ import {
   PARSERS_VERSION,
 } from '@/core/middleware/variables.ts';
 import { fileToBase64, getFileUrl, optimizeImage } from '@/core/utils/image.ts';
+import { Capacitor } from '@capacitor/core';
 import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 import { Preferences } from '@capacitor/preferences';
 
@@ -106,28 +107,28 @@ const delFile = (path: string): Promise<void> => {
 }
 
 const getTreeRecursive = async (path: string): Promise<Array<IDirectory|IFile>> => {
-  const result = await Filesystem.readdir({
-    path,
-    directory: path.includes(Directory.Data) ? undefined : Directory.Data,
-  });
-
   const ret: Array<IDirectory|IFile> = [];
 
-  for (const file of result.files) {
-    if (file.type === 'directory') {
-      ret.push({
-        type: file.type,
-        path: file.name,
-        children: await getTreeRecursive(file.uri),
-      })
-    } else {
-      ret.push({
-        type: file.type,
-        path: file.name,
-        size: file.size,
-      })
+  try {
+    const result = await Filesystem.readdir({ path });
+
+    for (const file of result.files) {
+      if (file.type === 'directory') {
+        ret.push({
+          type: file.type,
+          path: file.name,
+          children: await getTreeRecursive(file.uri),
+        })
+      } else {
+        ret.push({
+          type: file.type,
+          path: file.name,
+          size: file.size,
+        })
+      }
     }
-  }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_) { /* empty */ }
 
   return ret;
 }
@@ -136,11 +137,18 @@ const getTreeRecursive = async (path: string): Promise<Array<IDirectory|IFile>> 
  * @param path - путь папки
  */
 const getTree = async (path: string): Promise<IDirectory[]> => {
-  return [{
-    type: 'directory',
-    path,
-    children: await getTreeRecursive(path),
-  }];
+  try {
+    const rootUri = await Filesystem.getUri({ path, directory: Directory.Data })
+
+    return [{
+      type: 'directory',
+      path,
+      children: await getTreeRecursive(rootUri.uri),
+    }];
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_) {
+    return [];
+  }
 }
 
 /// Comics

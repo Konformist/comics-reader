@@ -30,7 +30,10 @@ import { BACKUPS_DIRECTORY } from '@/core/middleware/variables.ts';
 const backups = ref<IDirectory[]>([]);
 
 const loadBackupsTree = async () => {
-  backups.value = await server.getTree(BACKUPS_DIRECTORY);
+  try {
+    backups.value = await server.getTree(BACKUPS_DIRECTORY);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_) { /* empty */ }
 };
 
 loadBackupsTree();

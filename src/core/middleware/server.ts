@@ -9,7 +9,7 @@ import {
   PARSERS_STORE,
   PARSERS_VERSION,
 } from '@/core/middleware/variables.ts';
-import { base64ToFile, fileToBase64, getFileUrl, optimizeImage } from '@/core/utils/image.ts';
+import { fileToBase64, getFileUrl, optimizeImage } from '@/core/utils/image.ts';
 import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 import { Preferences } from '@capacitor/preferences';
 

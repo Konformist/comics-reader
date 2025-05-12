@@ -1,17 +1,21 @@
 <template>
   <router-view />
   <v-bottom-navigation>
-    <v-btn :to="{ path: '/' }">
-      <v-icon>$dashboard</v-icon>
+    <v-btn :to="{ name: '/' }">
+      <v-icon icon="$dashboard" />
       Галерея
     </v-btn>
-    <v-btn :to="{ path: '/parsers/' }">
-      <v-icon>$list</v-icon>
+    <v-btn :to="{ name: '/parsers/' }">
+      <v-icon icon="$list" />
       Парсеры
     </v-btn>
-    <v-btn :to="{ path: '/filemanager/' }">
-      <v-icon>$list</v-icon>
+    <v-btn :to="{ name: '/filemanager' }">
+      <v-icon icon="$files" />
       Файлы
+    </v-btn>
+    <v-btn :to="{ name: '/settings' }">
+      <v-icon icon="$settings" />
+      Настройки
     </v-btn>
   </v-bottom-navigation>
 </template>

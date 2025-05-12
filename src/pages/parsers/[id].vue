@@ -8,7 +8,7 @@
     <v-app-bar-title text="Редактирование парсера" />
   </v-app-bar>
   <v-main>
-    <v-container v-if="parser">
+    <v-container>
       <v-text-field
         v-model.trim="parser.name"
         label="Название парсера"
@@ -51,29 +51,56 @@
         label="Страницы"
         rows="2"
       />
+      <v-btn
+        class="w-100"
+        color="error"
+        text="Удалить"
+        @click="deleteParser()"
+      />
     </v-container>
     <v-fab
       app
       class="mb-4"
       icon="$save"
-      @click="onSave()"
+      @click="saveParser()"
     />
   </v-main>
 </template>
 
 <script lang="ts" setup>
-import { useAppStore } from '@/stores/app.ts';
+import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
+import ParserController from '@/core/entities/parser/ParserController.ts';
+import ParserModel from '@/core/entities/parser/ParserModel.ts';
 
+const router = useRouter();
 const route = useRoute('/parsers/[id]');
 
-const appStore = useAppStore();
 const parserId = +(route.params?.id);
 
-const parser = computed(() => (appStore.parsers.find(e => e.id === parserId)))
+const parser = ref(new ParserModel());
 
-const onSave = async () => {
-  await appStore.saveParsers();
+const loadParser = async () => {
+  parser.value = await ParserController.load(parserId);
+}
+
+loadParser();
+
+const saveParser = async () => {
+  await ParserController.save(parser.value);
   Toast.show({ text: 'Парсер сохранён' });
+}
+
+const deleteParser = async () => {
+  const { value } = await Dialog.confirm({
+    title: 'Подтверждение удаления',
+    message: 'Удалить парсер?',
+  });
+
+  if (!value) return;
+
+  await ParserController.delete(parser.value.id);
+  Toast.show({ text: 'Парсер удалён' });
+  router.replace({ name: '/parsers/' });
 }
 </script>

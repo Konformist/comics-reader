@@ -56,31 +56,29 @@
       app
       class="mb-4"
       icon="$save"
-      :loading="loading"
-      @click="onCreate()"
+      @click="saveParser()"
     />
   </v-main>
 </template>
 
 <script lang="ts" setup>
-import ParserModel from '@/core/entities/parser/ParserModel.ts';
-import { useAppStore } from '@/stores/app.ts';
 import { Toast } from '@capacitor/toast';
+import ParserController from '@/core/entities/parser/ParserController.ts';
+import ParserModel from '@/core/entities/parser/ParserModel.ts';
 
 const router = useRouter();
-const appStore = useAppStore();
 
 const parser = ref(new ParserModel());
 
-const loading = ref(false);
-
-const onCreate = async () => {
-  loading.value = true;
-  await appStore.createParser(parser.value);
+const saveParser = async () => {
+  const result = await ParserController.save(parser.value);
   Toast.show({ text: 'Парсер создан' });
-  await router.push({
-    name: '/parsers/[id]',
-    params: { id: parser.value.id },
-  })
+
+  if (result) {
+    await router.replace({
+      name: '/parsers/[id]',
+      params: { id: result.toString() },
+    })
+  }
 };
 </script>

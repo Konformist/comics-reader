@@ -12,7 +12,16 @@ import { createVuetify } from 'vuetify'
 import { md3 } from 'vuetify/blueprints';
 import { ru } from 'vuetify/locale';
 import { aliases, mdi } from 'vuetify/iconsets/mdi-svg';
-import { mdiArrowLeft, mdiContentSaveOutline, mdiPencilOutline, mdiPlus, mdiViewDashboardOutline, mdiViewListOutline } from '@mdi/js';
+import {
+  mdiArrowLeft,
+  mdiCog,
+  mdiContentSave,
+  mdiFileMultiple,
+  mdiPencil,
+  mdiPlus,
+  mdiViewDashboard,
+  mdiViewList,
+} from '@mdi/js';
 
 // https://vuetifyjs.com/en/introduction/why-vuetify/#feature-guides
 export default createVuetify({
@@ -27,10 +36,12 @@ export default createVuetify({
       ...aliases,
       'plus': mdiPlus,
       'arrow-left': mdiArrowLeft,
-      'dashboard': mdiViewDashboardOutline,
-      'list': mdiViewListOutline,
-      'save': mdiContentSaveOutline,
-      'edit': mdiPencilOutline,
+      'dashboard': mdiViewDashboard,
+      'list': mdiViewList,
+      'save': mdiContentSave,
+      'edit': mdiPencil,
+      'files': mdiFileMultiple,
+      'settings': mdiCog,
     },
     sets: {
       mdi,

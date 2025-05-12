@@ -15,7 +15,7 @@
               params: { id: item.id }
             }"
           >
-            <ComicImage
+            <v-img
               class="h-100"
               cover
               :src="item.image"

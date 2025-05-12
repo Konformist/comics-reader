@@ -9,12 +9,12 @@
   </v-app-bar>
   <v-main>
     <v-container>
-      <ComicImage
+      <v-img
         rounded
         :src="comic.image"
       />
       <h2
-        v-if="comic.authors.length"
+        v-if="comic.name"
         class="mt-4 font-weight-medium"
       >
         {{ comic.name }}
@@ -57,6 +57,7 @@
       <p class="mt-4">
         <v-btn
           class="w-100"
+          :disabled="!comic.images.length"
           text="Читать"
           :to="{ name: '/comics/[id]/read' }"
         />

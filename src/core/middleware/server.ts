@@ -1,7 +1,19 @@
 import type { IComicDTO } from '@/core/entities/comic/ComicTypes.ts';
+import type { IDirectory, IFile } from '@/core/entities/file/FileTypes.ts';
 import type { IParserDTO } from '@/core/entities/parser/ParserTypes.ts';
-import { COMICS_STORE, COMICS_VERSION, PARSERS_STORE, PARSERS_VERSION } from '@/core/utils/variables.ts';
+import {
+  BACKUPS_DIRECTORY,
+  COMICS_FILES_DIRECTORY,
+  COMICS_STORE,
+  COMICS_VERSION,
+  PARSERS_STORE,
+  PARSERS_VERSION,
+} from '@/core/middleware/variables.ts';
+import { base64ToFile, getFileUrl, optimizeImage } from '@/core/utils/image.ts';
+import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 import { Preferences } from '@capacitor/preferences';
+
+/// Parsers
 
 let parsersRaw: IParserDTO[] = [];
 
@@ -29,26 +41,28 @@ const getParsersData = async () => {
 
   if (result.version !== PARSERS_VERSION) {
     result = migrationParsers(result)
-    parsersRaw = result.items
+  }
+
+  parsersRaw = result.items
+
+  if (result.version !== PARSERS_VERSION) {
     await setParsersData();
-  } else {
-    parsersRaw = result.items
   }
 }
 
 const addParser = async (data: IParserDTO) => {
   await getParsersData();
-  const lastId = parsersRaw[parsersRaw.length - 1]?.id || 0;
+  const parserId = Math.max(...parsersRaw.map(e => e.id), 0) + 1;
 
-  data.id = lastId;
-  parsersRaw.push(data);
+  parsersRaw.push({ ...data, id: parserId });
   await setParsersData();
 
-  return lastId
+  return parserId;
 }
 
 const setParser = async (data: IParserDTO): Promise<void> => {
-  parsersRaw.push(data);
+  const index = parsersRaw.findIndex(e => e.id === data.id);
+  parsersRaw.splice(index, 1, data);
   await setParsersData();
 }
 
@@ -71,10 +85,133 @@ const getParsersAll = async (): Promise<Array<IParserDTO>> => {
   return [...parsersRaw];
 }
 
+/// Files
+
+const addFile = async (path: string, file: File): Promise<string> => {
+  const ret = await Filesystem.writeFile({
+    path,
+    directory: Directory.Data,
+    data: file,
+    recursive: true,
+  });
+
+  return getFileUrl(ret.uri);
+}
+
+const delFile = (path: string): Promise<void> => {
+  return Filesystem.deleteFile({
+    path,
+    directory: Directory.Data,
+  });
+}
+
+const getTreeRecursive = async (path: string): Promise<Array<IDirectory|IFile>> => {
+  const result = await Filesystem.readdir({
+    path,
+    directory: path.includes(Directory.Data) ? undefined : Directory.Data,
+  });
+
+  const ret: Array<IDirectory|IFile> = [];
+
+  for (const file of result.files) {
+    if (file.type === 'directory') {
+      ret.push({
+        type: file.type,
+        path: file.name,
+        children: await getTreeRecursive(file.uri),
+      })
+    } else {
+      ret.push({
+        type: file.type,
+        path: file.name,
+        size: file.size,
+      })
+    }
+  }
+
+  return ret;
+}
+
+/**
+ * @param path - путь папки
+ */
+const getTree = async (path: string): Promise<IDirectory[]> => {
+  return [{
+    type: 'directory',
+    path,
+    children: await getTreeRecursive(path),
+  }];
+}
+
+/// Comics
+
 let comicsRaw: IComicDTO[] = [];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const migrationComics = (value: any) => {
+const migrationComics = async (value: any) => {
+  if (value.version < COMICS_VERSION) {
+    const getExtension = (str: string) => {
+      if (str.includes('.png')) return 'png';
+      else if (str.includes('.jpeg')) return 'jpeg';
+      else if (str.includes('.jpg')) return 'jpg';
+      else if (str.includes('.webp')) return 'webp';
+      else if (str.includes('.gif')) return 'gif';
+    }
+    for (const item of value.items as IComicDTO[]) {
+      if (item.image) {
+        try {
+          const path = `${item.id}/cover.${getExtension(item.image)}`;
+          const file = await Filesystem.readFile({ path, directory: Directory.Data });
+          const saved = await Filesystem.writeFile({
+            path: `${COMICS_FILES_DIRECTORY}/${path}`,
+            recursive: true,
+            directory: Directory.Data,
+            data: typeof file.data === 'string'
+              ? await optimizeImage(base64ToFile(file.data))
+              // @ts-expect-error fuck
+              : await optimizeImage(file.data),
+          })
+          item.image = await getFileUrl(saved.uri);
+          console.log(item.image);
+        } catch (e) {
+          console.warn(e);
+        }
+      }
+
+      for (const image of item.images) {
+        if (image.url) {
+          try {
+            const path = `${item.id}/${image.id}.${getExtension(image.url)}`;
+            const file = await Filesystem.readFile({ path, directory: Directory.Data });
+            const saved = await Filesystem.writeFile({
+              path: `${COMICS_FILES_DIRECTORY}/${path}`,
+              recursive: true,
+              directory: Directory.Data,
+              data: typeof file.data === 'string'
+                ? await optimizeImage(base64ToFile(file.data))
+                // @ts-expect-error fuck
+                : await optimizeImage(file.data),
+            })
+            image.url = await getFileUrl(saved.uri);
+            console.log(item.image);
+          } catch (e) {
+            console.warn(e);
+          }
+        }
+      }
+
+      try {
+        await Filesystem.rmdir({
+          path: `${item.id}`,
+          directory: Directory.Data,
+          recursive: true,
+        })
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+  }
+
   return value;
 }
 
@@ -96,27 +233,29 @@ const getComicsData = async () => {
   let result = JSON.parse(store.value);
 
   if (result.version !== COMICS_VERSION) {
-    result = migrationComics(result)
-    comicsRaw = result.items;
+    result = await migrationComics(result)
+  }
+
+  comicsRaw = result.items;
+
+  if (result.version !== COMICS_VERSION) {
     await setComicsData();
-  } else {
-    comicsRaw = result.items;
   }
 };
 
 const addComic = async (data: IComicDTO): Promise<number> => {
   await getComicsData();
-  const lastId = comicsRaw[comicsRaw.length - 1]?.id || 0;
+  const comicId = Math.max(...comicsRaw.map(e => e.id), 0) + 1;
 
-  data.id = lastId;
-  comicsRaw.push(data);
+  comicsRaw.push({ ...data, id: comicId });
   await setComicsData();
 
-  return lastId
+  return comicId
 }
 
 const setComic = async (data: IComicDTO): Promise<void> => {
-  comicsRaw.push(data);
+  const index = comicsRaw.findIndex(e => e.id === data.id);
+  comicsRaw.splice(index, 1, data);
   await setComicsData();
 }
 
@@ -139,7 +278,139 @@ const getComicAll = async (): Promise<Array<IComicDTO>> => {
   return [...comicsRaw];
 }
 
+const addComicCover = async (comicId: number, file: File): Promise<void> => {
+  const comic = await getComic(comicId);
+
+  if (!comic) return undefined;
+
+  const optimizedFile = await optimizeImage(file);
+  comic.image = await addFile(`${COMICS_FILES_DIRECTORY}/${comicId}/cover.webp`, optimizedFile);
+  await setComicsData();
+}
+
+const delComicCover = async (comicId: number): Promise<void> => {
+  const comic = await getComic(comicId);
+
+  if (!comic) return undefined;
+
+  await delFile(`${COMICS_FILES_DIRECTORY}/${comicId}/cover.webp`);
+  comic.image = '';
+  await setComicsData();
+}
+
+const addComicFile = async (comicId: number, file: File): Promise<void> => {
+  const comic = await getComic(comicId);
+
+  if (!comic) return undefined;
+
+  const fileId = Math.max(...comic.images.map(e => e.id), 0) + 1;
+  const optimizedFile = await optimizeImage(file);
+  const uri = await addFile(`${COMICS_FILES_DIRECTORY}/${comicId}/${fileId}.webp`, optimizedFile);
+
+  comic.images.push({
+    id: fileId,
+    url: uri,
+    from: '',
+  })
+
+  await setComicsData();
+};
+
+const setComicFile = async (comicId: number, fileId: number, file: File) => {
+  const comic = await getComic(comicId);
+
+  if (!comic) return undefined;
+
+  const image = comic.images.find(e => e.id === fileId);
+
+  if (!image) return undefined;
+
+  if (image.url) {
+    try {
+      await delFile(`${COMICS_FILES_DIRECTORY}/${comicId}/${fileId}.webp`);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (_) { /* empty */ }
+  }
+
+  const optimizedFile = await optimizeImage(file);
+  image.url = await addFile(`${COMICS_FILES_DIRECTORY}/${comicId}/${fileId}.webp`, optimizedFile);
+  await setComicsData();
+};
+
+const delComicFile = async (comicId: number, fileId: number): Promise<void> => {
+  const comic = await getComic(comicId);
+
+  if (!comic) return;
+
+  const file = comic.images.find(e => e.id === fileId);
+  const fileIndex = comic.images.findIndex(e => e.id === fileId);
+
+  if (!file) return;
+
+  if (file.url) await delFile(`${COMICS_FILES_DIRECTORY}/${comicId}/${fileId}.webp`);
+  comic.images.splice(fileIndex, 1);
+  await setComicsData();
+};
+
+const delComicFiles = async (comicId: number): Promise<void> => {
+  const comic = await getComic(comicId);
+
+  if (!comic) return undefined;
+
+  for (const item of comic.images) {
+    if (item.url) await delFile(`${COMICS_FILES_DIRECTORY}/${comicId}/${item.id}.webp`);
+  }
+  comic.images = [];
+  await setComicsData();
+};
+
+/// backups
+
+const setBackup = async (): Promise<void> => {
+  await getComicsData();
+  await getParsersData();
+
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = (now.getMonth() + 1).toString().padStart(2, '0');
+  const day = (now.getDate() + 1).toString().padStart(2, '0');
+
+  await Filesystem.writeFile({
+    path: `${BACKUPS_DIRECTORY}/${year}-${month}-${day}.json`,
+    directory: Directory.Data,
+    encoding: Encoding.UTF8,
+    recursive: true,
+    data: JSON.stringify({
+      parsers: {
+        version: PARSERS_VERSION,
+        items: parsersRaw,
+      },
+      comics: {
+        version: COMICS_VERSION,
+        items: comicsRaw,
+      },
+    }),
+  })
+}
+
+const getBackup = async (path: string): Promise<void> => {
+  const result = await Filesystem.readFile({
+    path,
+    directory: Directory.Data,
+  });
+
+  if (!result) return;
+
+  const parsedData = JSON.parse(result.data as string);
+
+  parsersRaw = parsedData.parsers.items;
+  await setParsersData();
+  comicsRaw = parsedData.comics.items;
+  await setComicsData();
+}
+
 export default {
+  getTree,
   addParser,
   setParser,
   delParser,
@@ -150,4 +421,12 @@ export default {
   delComic,
   getComic,
   getComicAll,
+  addComicCover,
+  delComicCover,
+  addComicFile,
+  setComicFile,
+  delComicFile,
+  delComicFiles,
+  setBackup,
+  getBackup,
 }

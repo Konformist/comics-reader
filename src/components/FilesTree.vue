@@ -6,8 +6,9 @@
     >
       <v-divider v-if="index || isChild" />
       <FilesTreeItem
+        v-model="model"
         :item="item"
-        @click="clickDirectory(item)"
+        :parent="parent || ''"
       />
     </template>
   </v-list>
@@ -15,36 +16,13 @@
 
 <script lang="ts" setup>
 import FilesTreeItem from '@/components/FilesTreeItem.vue';
-import type { IDirectory, IFile } from '@/core/utils/filemanager.ts';
-import { Directory, Filesystem } from '@capacitor/filesystem';
+import type { IDirectory, IFile } from '@/core/entities/file/FileTypes.ts';
+
+const model = defineModel<string>({ default: '' });
 
 defineProps<{
   tree: Array<IDirectory|IFile>
+  parent?: string
   isChild?: boolean
 }>()
-
-const clickDirectory = async (value: IDirectory|IFile) => {
-  if (value.type === 'file') return;
-
-  const result = await Filesystem.readdir({
-    path: value.path,
-    directory: Directory.Data,
-  })
-
-  value.children = result.files.map(file => {
-    if (file.type === 'directory') {
-      return {
-        type: file.type,
-        path: file.name,
-        children: [],
-      }
-    } else {
-      return {
-        type: file.type,
-        path: file.name,
-        size: file.size,
-      }
-    }
-  })
-};
 </script>

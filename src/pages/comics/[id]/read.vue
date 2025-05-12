@@ -12,7 +12,7 @@
   </v-app-bar>
   <v-main>
     <v-container>
-      <ComicImage
+      <v-img
         v-if="comic.images[current]"
         :src="comic.images[current].url"
       />
@@ -33,6 +33,7 @@ import ComicModel from '@/core/entities/comic/ComicModel.ts';
 
 const route = useRoute('/comics/[id]/read');
 
+const comicId = +(route.params.id || 0);
 const comic = ref(new ComicModel());
 const current = ref(0);
 
@@ -53,10 +54,7 @@ const next = () => {
 };
 
 const loadComic = async () => {
-  const comicId = +route.params.id;
-
   if (!comicId) return;
-
   comic.value = await ComicController.load(comicId);
 }
 

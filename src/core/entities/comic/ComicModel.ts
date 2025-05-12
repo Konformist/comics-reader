@@ -33,6 +33,14 @@ export default class ComicModel extends Entity<IComicDTO> {
     }
   }
 
+  addImage () {
+    this.images.push({
+      id: Math.max(...this.images.map(e => e.id), 0) + 1,
+      url: '',
+      from: '',
+    })
+  }
+
   getDTO (): IComicDTO {
     return {
       id: this.id,

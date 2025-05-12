@@ -1,5 +1,6 @@
 <template>
   <v-list-item
+    :active="model === `${parent}/${item.path}`"
     @click="onClick()"
   >
     <v-list-item-title>
@@ -16,21 +17,22 @@
   </v-list-item>
   <FilesTree
     v-if="item.type === 'directory' && opened"
+    v-model="model"
     is-child
+    :parent="`${parent}/${item.path}`"
     :tree="item.children"
   />
 </template>
 
 <script lang="ts" setup>
 import FilesTree from '@/components/FilesTree.vue';
-import type { IDirectory, IFile } from '@/core/utils/filemanager.ts';
+import type { IDirectory, IFile } from '@/core/entities/file/FileTypes.ts';
 import { formatBytes } from '@/core/utils/format.ts';
 
-const emit = defineEmits<{
-  (e: 'click'): void
-}>()
+const model = defineModel<string>({ default: '' });
 
-const { item } = defineProps<{
+const { item, parent } = defineProps<{
+  parent: string
   item: IDirectory|IFile
 }>()
 
@@ -41,7 +43,7 @@ const toggleOpened = () => {
 }
 
 const onClick = () => {
-  toggleOpened();
-  emit('click')
-};
+  if (item.type === 'directory') toggleOpened();
+  else model.value = `${parent}/${item.path}`;
+}
 </script>

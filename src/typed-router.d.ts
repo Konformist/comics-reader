@@ -23,9 +23,10 @@ declare module 'vue-router/auto-routes' {
     '/comics/[id]/edit': RouteRecordInfo<'/comics/[id]/edit', '/comics/:id/edit', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/comics/[id]/read': RouteRecordInfo<'/comics/[id]/read', '/comics/:id/read', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/comics/create': RouteRecordInfo<'/comics/create', '/comics/create', Record<never, never>, Record<never, never>>,
-    '/filemanager/': RouteRecordInfo<'/filemanager/', '/filemanager', Record<never, never>, Record<never, never>>,
+    '/filemanager': RouteRecordInfo<'/filemanager', '/filemanager', Record<never, never>, Record<never, never>>,
     '/parsers/': RouteRecordInfo<'/parsers/', '/parsers', Record<never, never>, Record<never, never>>,
     '/parsers/[id]': RouteRecordInfo<'/parsers/[id]', '/parsers/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/parsers/create': RouteRecordInfo<'/parsers/create', '/parsers/create', Record<never, never>, Record<never, never>>,
+    '/settings': RouteRecordInfo<'/settings', '/settings', Record<never, never>, Record<never, never>>,
   }
 }

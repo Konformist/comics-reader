@@ -13,7 +13,7 @@
         v-model="comic.parser"
         item-title="name"
         item-value="id"
-        :items="appStore.parsers"
+        :items="parsers"
         label="Парсер"
       />
       <v-textarea
@@ -28,7 +28,7 @@
       />
       <v-combobox
         v-model="comic.language"
-        :items="appStore.languages"
+        :items="languages"
         label="Язык"
       />
       <v-textarea
@@ -39,7 +39,7 @@
       <v-combobox
         v-model="comic.authors"
         chips
-        :items="appStore.authors"
+        :items="authors"
         label="Авторы"
         multiple
       />
@@ -51,7 +51,7 @@
       <v-combobox
         v-model="comic.tags"
         chips
-        :items="appStore.tags"
+        :items="tags"
         label="Теги"
         multiple
       />
@@ -140,7 +140,7 @@
           />
           <v-btn
             class="ml-auto"
-            color="red"
+            color="error"
             :loading="loading"
             text="Удалить"
             @click="delPage(item)"
@@ -151,7 +151,7 @@
         <v-btn
           class="mt-4 w-100"
           text="Добавить страницу"
-          @click="addPage()"
+          @click="comic.addImage()"
         />
       </p>
     </v-container>
@@ -167,16 +167,56 @@
 
 <script lang="ts" setup>
 import ComicImage from '@/components/ComicImage.vue';
+import ComicController from '@/core/entities/comic/ComicController.ts';
+import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import type { IComicImageDTO } from '@/core/entities/comic/ComicTypes.ts';
 import ParserController from '@/core/entities/parser/ParserController.ts';
-import { useAppStore } from '@/stores/app.ts';
+import ParserModel from '@/core/entities/parser/ParserModel.ts';
+import { dedupe } from '@/core/utils/array.ts';
 import { Toast } from '@capacitor/toast';
 
 const route = useRoute('/comics/[id]/edit');
-const appStore = useAppStore();
 
-const comic = computed(() => (appStore.comics.find(e => e.id === +route.params.id)))
-const parser = computed(() => (appStore.parsers.find(e => e.id === comic.value?.parser)))
+const comics = ref<ComicModel[]>([]);
+
+const languages = ref<string[]>([]);
+const tags = ref<string[]>([]);
+const authors = ref<string[]>([]);
+
+const loadComics = async () => {
+  comics.value = await ComicController.loadAll();
+  languages.value = dedupe(comics.value.map(e => e.language));
+  tags.value = dedupe(comics.value.map(e => e.tags).flat(1));
+  authors.value = dedupe(comics.value.map(e => e.authors).flat(1));
+}
+
+const comicId = +(route.params.id || 0);
+const comic = ref(new ComicModel());
+
+const loadComic = async () => {
+  if (!comicId) return;
+  comic.value = await ComicController.load(comicId);
+}
+
+const parsers = ref<ParserModel[]>([]);
+
+const loadParsers = async () => {
+  parsers.value = await ParserController.loadAll();
+}
+
+const parser = ref(new ParserModel());
+
+const loadParser = async () => {
+  if (!comic.value.parser) return;
+  parser.value = await ParserController.load(comic.value.parser);
+}
+
+onMounted(async () => {
+  loadComics();
+  loadParsers();
+  await loadComic();
+  await loadParser();
+})
 
 const imagesTemplate = ref('');
 const imagesTemplateStart = ref(1);
@@ -200,35 +240,24 @@ const keyLanguage = computed({
 
 const keyAuthors = computed({
   get () {
-    return comic.value?.override.authors || parser.value?.authors || '';
+    return comic.value.override.authors || parser.value.authors || '';
   },
   set (value) {
-    if (comic.value) {
-      comic.value.override.authors = value;
-    }
+    comic.value.override.authors = value;
   },
 })
 
 const keyTags = computed({
   get () {
-    return comic.value?.override.tags || parser.value?.tags || '';
+    return comic.value.override.tags || parser.value.tags || '';
   },
   set (value) {
-    if (comic.value) {
-      comic.value.override.tags = value;
-    }
+    comic.value.override.tags = value;
   },
 })
 
-const addPage = () => {
-  if (!comic.value) return;
-
-  const lastId = comic.value.images[comic.value.images.length - 1]?.id || 0;
-  comic.value.images.push({
-    id: lastId + 1,
-    url: '',
-    from: '',
-  })
+const saveComic = async () => {
+  await ComicController.save(comic.value);
 }
 
 const delPage = async (item: IComicImageDTO) => {
@@ -238,8 +267,8 @@ const delPage = async (item: IComicImageDTO) => {
 
   if (index !== -1) {
     const image = comic.value.images.splice(index, 1)[0];
-    if (image.url) await ParserController.deleteFS(image.url)
-    await appStore.saveComics();
+    if (image.url) await ComicController.deleteFile(comic.value.id, image.id)
+    await saveComic();
     Toast.show({ text: 'Комикс сохранён' })
   }
 };
@@ -258,7 +287,8 @@ const onReloadInfo = async () => {
     if (comic.value.images.length) delete comicDTO.images;
 
     Object.assign(comic.value, comicDTO);
-    await appStore.saveComics();
+    await saveComic();
+    await loadComic();
     Toast.show({ text: 'Комикс сохранён' })
   } catch (e) {
     Toast.show({ text: `Комикс не сохранён. Ошибка: ${e}` })
@@ -268,71 +298,51 @@ const onReloadInfo = async () => {
 };
 
 const uploadCover = async (event: File|File[]) => {
-  if (!comic.value || Array.isArray(event)) return;
+  if (!event || Array.isArray(event)) return;
 
-  comic.value.image = await ParserController.writeFSCover(
-    comic.value.id,
-    ParserController.getExtension(comic.value.imageUrl),
-    event,
-  );
-
-  await appStore.saveComics();
-  Toast.show({ text: 'Комикс сохранён' })
-}
-
-const uploadImage = async (item: IComicImageDTO, event: File|File[]) => {
-  if (!comic.value || Array.isArray(event)) return;
-
-  const savedUrl = item.url;
-  item.url = await ParserController.writeFSPage(comic.value.id, item, event);
-  if (item.url !== savedUrl) await ParserController.deleteFS(savedUrl);
-
-  await appStore.saveComics();
+  await ComicController.saveCover(comic.value.id, event);
+  await loadComic();
   Toast.show({ text: 'Комикс сохранён' })
 }
 
 const onReloadCover = async () => {
-  if (!comic.value) return;
+  if (!comic.value.imageUrl) return;
 
   try {
     loading.value = true;
-    const result = await ParserController.loadImage(comic.value.imageUrl);
-    comic.value.image = await ParserController.writeFSCover(
-      comic.value.id,
-      ParserController.getExtension(comic.value.imageUrl),
-      result,
-    );
-    await appStore.saveComics();
-    Toast.show({ text: 'Комикс сохранён' })
+    const result = await ParserController.loadImageRaw(comic.value.imageUrl);
+    await uploadCover(result);
   } catch (e) {
-    Toast.show({ text: `Комикс не сохранён. Ошибка: ${e}` })
+    Toast.show({ text: `Ошибка: ${e}` })
   } finally {
     loading.value = false;
   }
 };
 
+const uploadImage = async (item: IComicImageDTO, event: File|File[]) => {
+  if (!event || Array.isArray(event)) return;
+
+  await ComicController.saveFile(comic.value.id, item.id, event);
+  await loadComic();
+  Toast.show({ text: 'Комикс сохранён' })
+}
+
 const onReloadImage = async (item: IComicImageDTO) => {
-  if (!comic.value) return;
+  if (!item.from) return;
 
   try {
     loading.value = true;
-    const result = await ParserController.loadImage(item.from);
-
-    const savedUrl = item.url;
-    item.url = await ParserController.writeFSPage(comic.value.id, item, result);
-    if (item.url !== savedUrl) await ParserController.deleteFS(savedUrl);
-
-    await appStore.saveComics();
-    Toast.show({ text: 'Комикс сохранён' })
+    const result = await ParserController.loadImageRaw(item.from);
+    await uploadImage(item, result);
   } catch (e) {
-    Toast.show({ text: `Комикс не сохранён. Ошибка: ${e}` })
+    Toast.show({ text: `Ошибка: ${e}` })
   } finally {
     loading.value = false;
   }
 }
 
 const onSave = async () => {
-  await appStore.saveComics();
+  await saveComic();
   Toast.show({ text: 'Комикс сохранён' });
 };
 </script>

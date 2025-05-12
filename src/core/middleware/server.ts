@@ -9,7 +9,7 @@ import {
   PARSERS_STORE,
   PARSERS_VERSION,
 } from '@/core/middleware/variables.ts';
-import { base64ToFile, getFileUrl, optimizeImage } from '@/core/utils/image.ts';
+import { base64ToFile, fileToBase64, getFileUrl, optimizeImage } from '@/core/utils/image.ts';
 import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 import { Preferences } from '@capacitor/preferences';
 
@@ -91,7 +91,7 @@ const addFile = async (path: string, file: File): Promise<string> => {
   const ret = await Filesystem.writeFile({
     path,
     directory: Directory.Data,
-    data: file,
+    data: await fileToBase64(file),
     recursive: true,
   });
 
@@ -149,69 +149,6 @@ let comicsRaw: IComicDTO[] = [];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const migrationComics = async (value: any) => {
-  if (value.version < COMICS_VERSION) {
-    const getExtension = (str: string) => {
-      if (str.includes('.png')) return 'png';
-      else if (str.includes('.jpeg')) return 'jpeg';
-      else if (str.includes('.jpg')) return 'jpg';
-      else if (str.includes('.webp')) return 'webp';
-      else if (str.includes('.gif')) return 'gif';
-    }
-    for (const item of value.items as IComicDTO[]) {
-      if (item.image) {
-        try {
-          const path = `${item.id}/cover.${getExtension(item.image)}`;
-          const file = await Filesystem.readFile({ path, directory: Directory.Data });
-          const saved = await Filesystem.writeFile({
-            path: `${COMICS_FILES_DIRECTORY}/${path}`,
-            recursive: true,
-            directory: Directory.Data,
-            data: typeof file.data === 'string'
-              ? await optimizeImage(base64ToFile(file.data))
-              // @ts-expect-error fuck
-              : await optimizeImage(file.data),
-          })
-          item.image = await getFileUrl(saved.uri);
-          console.log(item.image);
-        } catch (e) {
-          console.warn(e);
-        }
-      }
-
-      for (const image of item.images) {
-        if (image.url) {
-          try {
-            const path = `${item.id}/${image.id}.${getExtension(image.url)}`;
-            const file = await Filesystem.readFile({ path, directory: Directory.Data });
-            const saved = await Filesystem.writeFile({
-              path: `${COMICS_FILES_DIRECTORY}/${path}`,
-              recursive: true,
-              directory: Directory.Data,
-              data: typeof file.data === 'string'
-                ? await optimizeImage(base64ToFile(file.data))
-                // @ts-expect-error fuck
-                : await optimizeImage(file.data),
-            })
-            image.url = await getFileUrl(saved.uri);
-            console.log(item.image);
-          } catch (e) {
-            console.warn(e);
-          }
-        }
-      }
-
-      try {
-        await Filesystem.rmdir({
-          path: `${item.id}`,
-          directory: Directory.Data,
-          recursive: true,
-        })
-      } catch (e) {
-        console.warn(e);
-      }
-    }
-  }
-
   return value;
 }
 

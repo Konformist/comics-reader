@@ -73,7 +73,7 @@
         v-if="comic.image"
         height="150"
       >
-        <ComicImage :src="comic.image" />
+        <v-img :src="comic.image" />
       </v-card>
       <v-file-input
         class="mt-4"
@@ -120,7 +120,7 @@
           v-if="item.url"
           height="150"
         >
-          <ComicImage :src="item.url" />
+          <v-img :src="item.url" />
         </v-card>
         <v-file-input
           class="mt-4"
@@ -166,7 +166,6 @@
 </template>
 
 <script lang="ts" setup>
-import ComicImage from '@/components/ComicImage.vue';
 import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import type { IComicImageDTO } from '@/core/entities/comic/ComicTypes.ts';

@@ -13,6 +13,15 @@ export const getFileUrl = async (url: string) => {
   }
 }
 
+export const fileToBase64 = async (file: File) => (
+  new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onloadend = () => resolve(reader.result as string)
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
+)
+
 export const base64ToFile = (src: string, name = '') => {
   return new File(
     [Uint8Array.from(atob(src), m => m.codePointAt(0) as number)],

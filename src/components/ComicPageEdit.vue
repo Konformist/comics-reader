@@ -61,6 +61,7 @@ import { Toast } from '@capacitor/toast';
 const from = defineModel('from', { default: '' })
 
 defineEmits<{
+  (e: 'reload', v: void): void
   (e: 'upload', v: File|File[]): void
   (e: 'download', v: void): void
   (e: 'delete', v: void): void

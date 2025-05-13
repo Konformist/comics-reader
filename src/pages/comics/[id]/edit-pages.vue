@@ -68,9 +68,13 @@
             >
               <ComicPageEdit
                 v-model:from="item.raw.from"
+                :comic-id="comic.id"
+                :file-id="item.raw.id"
+                :loading="loading"
                 :url="item.raw.url"
                 @delete="delPage(item.raw)"
                 @download="onLoadImage(item.raw)"
+                @reload="loadComic()"
                 @upload="uploadImage(item.raw, $event)"
               />
             </v-col>

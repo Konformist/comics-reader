@@ -7,6 +7,11 @@ export default defineConfig([
   },
   ...vuetifyPlugin,
   {
+    languageOptions: {
+      globals: {
+        definePage: 'readonly',
+      },
+    },
     rules: {
       'vue/script-indent': ['error', 2],
     },

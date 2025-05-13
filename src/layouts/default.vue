@@ -13,7 +13,7 @@
       slim
       @click="drawer = !drawer"
     />
-    <v-app-bar-title :text="$route.meta?.title" />
+    <v-app-bar-title :text="($route.meta?.title as string) || ''" />
   </v-app-bar>
   <v-navigation-drawer v-model="drawer">
     <v-list nav>

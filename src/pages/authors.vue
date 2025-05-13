@@ -82,8 +82,10 @@ const saveComics = async () => {
 
 const saveAuthor = async () => {
   comics.value.forEach(comic => {
-    comic.authors.push(currentAuthor.value);
-    comic.authors = comic.authors.filter(e => e !== reserveAuthor.value);
+    if (comic.authors.includes(reserveAuthor.value)) {
+      comic.authors.push(currentAuthor.value);
+      comic.authors = comic.authors.filter(e => e !== reserveAuthor.value);
+    }
   })
   await saveComics();
   await loadComics();

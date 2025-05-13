@@ -81,7 +81,9 @@ const saveComics = async () => {
 
 const saveLanguage = async () => {
   comics.value.forEach(comic => {
-    comic.language = currentLanguage.value;
+    if (comic.language === reserveLanguage.value) {
+      comic.language = currentLanguage.value;
+    }
   })
   await saveComics();
   await loadComics();

@@ -31,7 +31,7 @@
 import type { IDirectory } from '@/core/entities/file/FileTypes.ts';
 import server from '@/core/middleware/server.ts';
 import { BACKUPS_DIRECTORY } from '@/core/middleware/variables.ts';
-import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
+import { Directory, Filesystem } from '@capacitor/filesystem';
 import { Toast } from '@capacitor/toast';
 
 definePage({
@@ -56,23 +56,9 @@ const setBackup = async () => {
 const backupFile = ref('');
 
 const saveBackupToGlobal = async (path: string): Promise<void> => {
-  const result = await Filesystem.readFile({
-    path,
-    directory: Directory.Data,
-    encoding: Encoding.UTF8,
-  });
-
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = (now.getMonth() + 1).toString().padStart(2, '0');
-  const day = (now.getDate() + 1).toString().padStart(2, '0');
-
-  await Filesystem.writeFile({
-    directory: Directory.Documents,
-    path: `Comics Reader/${year}-${month}-${day}.json`,
-    recursive: true,
-    encoding: Encoding.UTF8,
-    data: result.data,
+  await Filesystem.copy({
+    from: (await Filesystem.getUri({ path, directory: Directory.Data })).uri,
+    to: (await Filesystem.getUri({ path: `Comics Reader/${path}`, directory: Directory.Documents })).uri,
   })
 
   Toast.show({ text: 'Бекап сохранён в документы' })

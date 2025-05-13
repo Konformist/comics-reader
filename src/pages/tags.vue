@@ -82,8 +82,10 @@ const saveComics = async () => {
 
 const saveTag = async () => {
   comics.value.forEach(comic => {
-    comic.tags.push(currentTag.value);
-    comic.tags = comic.tags.filter(e => e !== reserveTag.value);
+    if (comic.tags.includes(reserveTag.value)) {
+      comic.tags.push(currentTag.value);
+      comic.tags = comic.tags.filter(e => e !== reserveTag.value);
+    }
   })
   await saveComics();
   await loadComics();

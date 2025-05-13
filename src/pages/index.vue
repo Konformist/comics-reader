@@ -2,7 +2,7 @@
   <v-main>
     <v-toolbar density="compact">
       <v-toolbar-title
-        v-if="true || comics.length !== comicsFiltered.length"
+        v-if="comics.length !== comicsFiltered.length"
         class="text-subtitle-1"
       >
         Найдено: {{ comicsFiltered.length }}

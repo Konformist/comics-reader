@@ -112,12 +112,19 @@ const resizeImage = async (
     maxWidth?: number,
     maxHeight?: number,
   },
-): Promise<void> => {
-  await ImageManipulator.resize({
+): Promise<string> => {
+  const result = await ImageManipulator.resize({
     imagePath: path,
     maxWidth: options.maxWidth,
     maxHeight: options.maxHeight,
+  });
+
+  await Filesystem.rename({
+    from: result.imagePath,
+    to: path,
   })
+
+  return getFileUrl(path);
 }
 
 const getTreeRecursive = async (path: string): Promise<Array<IDirectory|IFile>> => {
@@ -235,7 +242,7 @@ const getComicAll = async (): Promise<Array<IComicDTO>> => {
 const addComicCover = async (comicId: number, file: File): Promise<void> => {
   const comic = await getComic(comicId);
 
-  if (!comic) return undefined;
+  if (!comic) return;
 
   const optimizedFile = await optimizeImage(file);
   comic.image = await addFile(`${COMICS_FILES_DIRECTORY}/${comicId}/cover.webp`, optimizedFile);
@@ -245,7 +252,7 @@ const addComicCover = async (comicId: number, file: File): Promise<void> => {
 const delComicCover = async (comicId: number): Promise<void> => {
   const comic = await getComic(comicId);
 
-  if (!comic) return undefined;
+  if (!comic) return;
 
   await delFile(`${COMICS_FILES_DIRECTORY}/${comicId}/cover.webp`);
   comic.image = '';
@@ -259,12 +266,17 @@ const resizeComicCover = async (
     maxHeight?: number,
   },
 ) => {
+  const comic = await getComic(comicId);
+
+  if (!comic) return;
+
   const result = await Filesystem.getUri({
     path: `${COMICS_FILES_DIRECTORY}/${comicId}/cover.webp`,
     directory: Directory.Data,
   });
 
-  return resizeImage(result.uri, options);
+  comic.image = await resizeImage(result.uri, options);
+  await setComicsData();
 }
 
 const addComicFile = async (comicId: number, file: File): Promise<void> => {
@@ -341,12 +353,21 @@ const resizeComicFile = async (
     maxHeight?: number,
   },
 ) => {
+  const comic = await getComic(comicId);
+
+  if (!comic) return;
+
+  const file = comic.images.find(e => e.id === fileId);
+
+  if (!file) return;
+
   const result = await Filesystem.getUri({
     path: `${COMICS_FILES_DIRECTORY}/${comicId}/${fileId}.webp`,
     directory: Directory.Data,
   });
 
-  return resizeImage(result.uri, options);
+  file.url = await resizeImage(result.uri, options);
+  await setComicsData();
 }
 
 const delComic = async (id: number): Promise<void> => {

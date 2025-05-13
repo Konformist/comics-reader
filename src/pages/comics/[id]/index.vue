@@ -132,7 +132,7 @@ const deleteComic = async () => {
     router.replace({ name: '/' })
   } catch (e) {
     alert(e)
-    Toast.show({ text: `Комикс не удалён. Ошибка: ${e}` });
+    Toast.show({ text: `Ошибка: ${e}` });
   } finally {
     loading.value = false;
   }

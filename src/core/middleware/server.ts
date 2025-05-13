@@ -414,6 +414,7 @@ const getBackup = async (path: string): Promise<void> => {
   const result = await Filesystem.readFile({
     path,
     directory: Directory.Data,
+    encoding: Encoding.UTF8,
   });
 
   if (!result) return;

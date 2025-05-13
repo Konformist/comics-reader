@@ -14,7 +14,13 @@
         label="Количество страниц"
         :min="minPages"
       />
-      <v-btn />
+      <v-btn
+        class="w-100"
+        color="error"
+        :loading="loading"
+        text="Удалить все страницы"
+        @click="delPages()"
+      />
       <v-divider class="mt-4 mb-8" />
       <v-textarea
         v-model.trim="imagesTemplate"
@@ -35,8 +41,16 @@
       <v-btn
         class="w-100"
         :disabled="!imagesTemplate"
+        :loading="loading"
         text="Заполнить"
         @click="setTemplate()"
+      />
+      <v-btn
+        class="mt-4 w-100"
+        :disabled="!canLoadImages"
+        :loading="loading"
+        text="Загрузить все страницы"
+        @click="onLoadImages()"
       />
       <v-divider class="my-8" />
       <v-data-iterator
@@ -72,8 +86,8 @@
                 <v-card-actions>
                   <v-btn
                     :loading="loading"
-                    text="Перезагрузить"
-                    @click="onReloadImage(item.raw)"
+                    text="Загрузить"
+                    @click="onLoadImage(item.raw)"
                   />
                   <v-btn
                     class="ml-auto"
@@ -102,7 +116,7 @@
     <v-fab
       icon="$save"
       :loading="loading"
-      @click="saveComic()"
+      @click="onSave()"
     />
   </v-main>
 </template>
@@ -171,6 +185,11 @@ const saveComic = async () => {
   await ComicController.save(comic.value);
 }
 
+const onSave = async () => {
+  await saveComic();
+  Toast.show({ text: 'Комикс сохранён' })
+};
+
 const uploadImage = async (item: IComicImageDTO, event: File|File[]) => {
   if (!event || Array.isArray(event)) return;
 
@@ -180,7 +199,7 @@ const uploadImage = async (item: IComicImageDTO, event: File|File[]) => {
   Toast.show({ text: 'Комикс сохранён' })
 }
 
-const onReloadImage = async (item: IComicImageDTO) => {
+const onLoadImage = async (item: IComicImageDTO) => {
   if (!item.from) return;
 
   try {
@@ -194,6 +213,25 @@ const onReloadImage = async (item: IComicImageDTO) => {
   }
 }
 
+const canLoadImages = computed(() => (
+  comic.value.images.some(e => e.from)
+))
+
+const onLoadImages = async () => {
+  try {
+    loading.value = true;
+    for (const item of comic.value.images) {
+      if (!item.from) return;
+      const result = await ParserController.loadImageRaw(item.from);
+      await uploadImage(item, result);
+    }
+  } catch (e) {
+    Toast.show({ text: `Ошибка: ${e}` })
+  } finally {
+    loading.value = false;
+  }
+};
+
 const delPage = async (item: IComicImageDTO) => {
   const index = comic.value.images.findIndex(e => e.id === item.id);
 
@@ -201,19 +239,46 @@ const delPage = async (item: IComicImageDTO) => {
 
   const image = comic.value.images.splice(index, 1)[0];
 
-  if (image.url) {
-    const { value } = await Dialog.confirm({
-      title: 'Подтверждение удаления',
-      message: 'Удалить страницу?',
-    });
+  try {
+    loading.value = true;
+    if (image.url) {
+      const { value } = await Dialog.confirm({
+        title: 'Подтверждение удаления',
+        message: 'Удалить страницу?',
+      });
 
-    if (!value) return;
+      if (!value) return;
 
-    await ComicController.deleteFile(comic.value.id, image.id)
+      await ComicController.deleteFile(comic.value.id, image.id)
+    }
+
+    await saveComic();
+    await loadComic();
+    Toast.show({ text: 'Комикс сохранён' })
+  } catch (e) {
+    Toast.show({ text: `Ошибка: ${e}` })
+  } finally {
+    loading.value = false;
   }
-
-  await saveComic();
-  await loadComic();
-  Toast.show({ text: 'Комикс сохранён' })
 };
+
+const delPages = async () => {
+  const { value } = await Dialog.confirm({
+    title: 'Подтверждение удаления',
+    message: 'Удалить все страницы?',
+  });
+
+  if (!value) return;
+
+  try {
+    loading.value = true;
+    await ComicController.deleteFiles(comic.value.id)
+    await loadComic();
+    Toast.show({ text: 'Комикс сохранён' })
+  } catch (e) {
+    Toast.show({ text: `Ошибка: ${e}` })
+  } finally {
+    loading.value = false;
+  }
+}
 </script>

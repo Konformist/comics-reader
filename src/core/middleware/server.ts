@@ -11,7 +11,6 @@ import {
 } from '@/core/middleware/variables.ts';
 import { fileToBase64, getFileUrl, optimizeImage } from '@/core/utils/image.ts';
 import { ImageManipulator } from '@capacitor-community/image-manipulator';
-import { Capacitor } from '@capacitor/core';
 import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 import { Preferences } from '@capacitor/preferences';
 

@@ -32,6 +32,16 @@ export default class ComicController {
     return server.delComicCover(comicId);
   }
 
+  static resizeComicCover (
+    comicId: number,
+    options: {
+      maxWidth?: number,
+      maxHeight?: number,
+    },
+  ) {
+    return server.resizeComicCover(comicId, options);
+  }
+
   static saveFile (comicId: number, fileId = 0, file: File): Promise<void> {
     return fileId
       ? server.setComicFile(comicId, fileId, file)
@@ -42,7 +52,18 @@ export default class ComicController {
     return server.delComicFile(comicId, fileId);
   }
 
-  static async deleteFiles (comicId: number): Promise<void> {
+  static deleteFiles (comicId: number): Promise<void> {
     return server.delComicFiles(comicId);
+  }
+
+  static resizeComicFile (
+    comicId: number,
+    fileId: number,
+    options: {
+      maxWidth?: number,
+      maxHeight?: number,
+    },
+  ) {
+    return server.resizeComicFile(comicId, fileId, options);
   }
 }

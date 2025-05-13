@@ -10,6 +10,7 @@ import {
   PARSERS_VERSION,
 } from '@/core/middleware/variables.ts';
 import { fileToBase64, getFileUrl, optimizeImage } from '@/core/utils/image.ts';
+import { ImageManipulator } from '@capacitor-community/image-manipulator';
 import { Capacitor } from '@capacitor/core';
 import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 import { Preferences } from '@capacitor/preferences';
@@ -104,6 +105,20 @@ const delFile = (path: string): Promise<void> => {
     path,
     directory: Directory.Data,
   });
+}
+
+const resizeImage = async (
+  path: string,
+  options: {
+    maxWidth?: number,
+    maxHeight?: number,
+  },
+): Promise<void> => {
+  await ImageManipulator.resize({
+    imagePath: path,
+    maxWidth: options.maxWidth,
+    maxHeight: options.maxHeight,
+  })
 }
 
 const getTreeRecursive = async (path: string): Promise<Array<IDirectory|IFile>> => {
@@ -238,6 +253,21 @@ const delComicCover = async (comicId: number): Promise<void> => {
   await setComicsData();
 }
 
+const resizeComicCover = async (
+  comicId: number,
+  options: {
+    maxWidth?: number,
+    maxHeight?: number,
+  },
+) => {
+  const result = await Filesystem.getUri({
+    path: `${COMICS_FILES_DIRECTORY}/${comicId}/cover.webp`,
+    directory: Directory.Data,
+  });
+
+  return resizeImage(result.uri, options);
+}
+
 const addComicFile = async (comicId: number, file: File): Promise<void> => {
   const comic = await getComic(comicId);
 
@@ -303,6 +333,22 @@ const delComicFiles = async (comicId: number): Promise<void> => {
   comic.images = [];
   await setComicsData();
 };
+
+const resizeComicFile = async (
+  comicId: number,
+  fileId: number,
+  options: {
+    maxWidth?: number,
+    maxHeight?: number,
+  },
+) => {
+  const result = await Filesystem.getUri({
+    path: `${COMICS_FILES_DIRECTORY}/${comicId}/${fileId}.webp`,
+    directory: Directory.Data,
+  });
+
+  return resizeImage(result.uri, options);
+}
 
 const delComic = async (id: number): Promise<void> => {
   const comic = await getComic(id);
@@ -374,10 +420,12 @@ export default {
   getComicAll,
   addComicCover,
   delComicCover,
+  resizeComicCover,
   addComicFile,
   setComicFile,
   delComicFile,
   delComicFiles,
+  resizeComicFile,
   setBackup,
   getBackup,
 }

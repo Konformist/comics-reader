@@ -66,42 +66,13 @@
               v-for="item in items"
               :key="item.raw.id"
             >
-              <v-card>
-                <v-img
-                  class="mb-4"
-                  :src="item.raw.url"
-                />
-                <v-card-item>
-                  <v-file-input
-                    label="Загрузить свою страницу"
-                    variant="solo-filled"
-                    @update:model-value="uploadImage(item.raw, $event)"
-                  />
-                  <v-textarea
-                    v-model.trim="item.raw.from"
-                    auto-grow
-                    :autocapitalize="false"
-                    :autocomplete="false"
-                    label="Ссылка на страницу"
-                    rows="2"
-                    variant="solo-filled"
-                  />
-                </v-card-item>
-                <v-card-actions>
-                  <v-btn
-                    :loading="loading"
-                    text="Загрузить"
-                    @click="onLoadImage(item.raw)"
-                  />
-                  <v-btn
-                    class="ml-auto"
-                    color="error"
-                    :loading="loading"
-                    text="Удалить"
-                    @click="delPage(item.raw)"
-                  />
-                </v-card-actions>
-              </v-card>
+              <ComicPageEdit
+                v-model:from="item.raw.from"
+                :url="item.raw.url"
+                @delete="delPage(item.raw)"
+                @download="onLoadImage(item.raw)"
+                @upload="uploadImage(item.raw, $event)"
+              />
             </v-col>
           </v-row>
         </template>

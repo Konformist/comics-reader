@@ -19,6 +19,15 @@ export default defineConfig(({ mode }) => {
   Object.assign(process.env, env);
 
   return {
+    build: {
+      cssCodeSplit: false,
+      rollupOptions: {
+        output: {
+          manualChunks: id => id.includes('node_modules') ? 'vendor' : 'index',
+        },
+      },
+    },
+    esbuild: { legalComments: 'none' },
     plugins: [
       VueRouter({
         dts: 'src/typed-router.d.ts',

@@ -15,7 +15,7 @@
         class="mt-4 w-100"
         :disabled="!backupFile"
         text="Вытащить из бекапа"
-        @click="server.getBackup(backupFile)"
+        @click="getBackup()"
       />
       <v-btn
         class="mt-4 w-100"
@@ -50,10 +50,16 @@ loadBackupsTree();
 
 const setBackup = async () => {
   await server.setBackup()
+  Toast.show({ text: 'Бекап сохранён' })
   loadBackupsTree();
 }
 
 const backupFile = ref('');
+
+const getBackup = async () => {
+  await server.getBackup(backupFile.value)
+  Toast.show({ text: 'Бекап применён' })
+}
 
 const saveBackupToGlobal = async (path: string): Promise<void> => {
   await Filesystem.mkdir({

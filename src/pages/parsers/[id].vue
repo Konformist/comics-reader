@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar>
+  <v-app-bar density="comfortable">
     <v-btn
       icon="$arrow-left"
       slim
@@ -15,39 +15,55 @@
       />
       <v-textarea
         v-model.trim="parser.title"
+        :autocapitalize="false"
+        :autocomplete="false"
         label="Название комикса"
         rows="2"
       />
       <v-textarea
         v-model.trim="parser.image"
+        :autocapitalize="false"
+        :autocomplete="false"
         label="Изображение"
         rows="2"
       />
       <v-textarea
         v-model.trim="parser.authors"
+        :autocapitalize="false"
+        :autocomplete="false"
         label="Авторы"
         rows="2"
       />
       <v-text-field
         v-model.trim="parser.authorsText"
+        :autocapitalize="false"
+        :autocomplete="false"
         label="Текст авторов"
       />
       <v-textarea
         v-model.trim="parser.language"
+        :autocapitalize="false"
+        :autocomplete="false"
         label="Язык"
         rows="2"
       />
       <v-textarea
         v-model.trim="parser.tags"
+        :autocapitalize="false"
+        :autocomplete="false"
         label="Теги"
         rows="2"
       />
       <v-text-field
         v-model.trim="parser.tagsText"
+        :autocapitalize="false"
+        :autocomplete="false"
         label="Текст тега"
       />
       <v-textarea
         v-model.trim="parser.images"
+        :autocapitalize="false"
+        :autocomplete="false"
         label="Страницы"
         rows="2"
       />

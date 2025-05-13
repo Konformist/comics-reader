@@ -1,5 +1,8 @@
 <template>
-  <v-app-bar title="Парсеры" />
+  <v-app-bar
+    density="comfortable"
+    title="Парсеры"
+  />
   <v-main>
     <v-container class="pa-0">
       <v-list v-if="parsers.length">

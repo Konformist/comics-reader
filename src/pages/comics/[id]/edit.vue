@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar>
+  <v-app-bar density="comfortable">
     <v-btn
       icon="$arrow-left"
       slim
@@ -19,6 +19,7 @@
       <v-textarea
         v-model.trim="comic.url"
         auto-grow
+        :autocapitalize="false"
         label="Ссылка на комикс"
         rows="2"
       />
@@ -36,6 +37,8 @@
       <v-textarea
         v-model.trim="keyLanguage"
         auto-grow
+        :autocapitalize="false"
+        :autocomplete="false"
         label="Парсинг языка"
         rows="2"
       />
@@ -49,6 +52,8 @@
       <v-textarea
         v-model.trim="keyAuthors"
         auto-grow
+        :autocapitalize="false"
+        :autocomplete="false"
         label="Парсинг авторов"
         rows="2"
       />
@@ -62,6 +67,8 @@
       <v-textarea
         v-model.trim="keyTags"
         auto-grow
+        :autocapitalize="false"
+        :autocomplete="false"
         label="Парсинг тегов"
         rows="2"
       />

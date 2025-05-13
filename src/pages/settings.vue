@@ -1,5 +1,8 @@
 <template>
-  <v-app-bar title="Настройки" />
+  <v-app-bar
+    density="comfortable"
+    title="Настройки"
+  />
   <v-main>
     <v-container>
       <v-btn

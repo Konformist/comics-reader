@@ -1,5 +1,8 @@
 <template>
-  <v-app-bar title="Файловый менеджер" />
+  <v-app-bar
+    density="comfortable"
+    title="Файловый менеджер"
+  />
   <v-main>
     <v-container class="pa-0">
       <FilesTree

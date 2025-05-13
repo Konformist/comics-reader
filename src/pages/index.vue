@@ -1,5 +1,8 @@
 <template>
-  <v-app-bar title="Комиксы" />
+  <v-app-bar
+    density="comfortable"
+    title="Комиксы"
+  />
   <v-main>
     <v-container>
       <v-data-iterator

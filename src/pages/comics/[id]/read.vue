@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar>
+  <v-app-bar density="comfortable">
     <v-btn
       icon="$arrow-left"
       slim

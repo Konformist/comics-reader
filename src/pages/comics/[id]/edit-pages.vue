@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar>
+  <v-app-bar density="comfortable">
     <v-btn
       icon="$arrow-left"
       slim
@@ -10,7 +10,7 @@
   <v-main>
     <v-container>
       <v-number-input
-        v-model="pages"
+        v-model.number="pages"
         label="Количество страниц"
         :min="minPages"
       />
@@ -25,13 +25,15 @@
       <v-textarea
         v-model.trim="imagesTemplate"
         auto-grow
+        :autocapitalize="false"
+        :autocomplete="false"
         clearable
         hint="Пример: https://domain.com/12/23/<ID>.jpeg"
         label="Шаблон для автозаполнения"
         persistent-hint
         rows="2"
       />
-      <v-text-field
+      <v-number-input
         v-model.number="imagesTemplateStart"
         class="mt-4"
         clearable
@@ -78,6 +80,8 @@
                   <v-textarea
                     v-model.trim="item.raw.from"
                     auto-grow
+                    :autocapitalize="false"
+                    :autocomplete="false"
                     label="Ссылка на страницу"
                     rows="2"
                     variant="solo-filled"

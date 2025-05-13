@@ -16,6 +16,8 @@
     />
     <v-textarea
       v-model.trim="from"
+      :autocapitalize="false"
+      :autocomplete="false"
       label="Ссылка на страницу"
       rows="2"
     />

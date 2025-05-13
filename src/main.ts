@@ -4,6 +4,7 @@
  * Bootstraps Vuetify and other plugins then mounts the App`
  */
 
+import server from '@/core/middleware/server.ts';
 // Plugins
 import { registerPlugins } from '@/plugins'
 
@@ -21,6 +22,8 @@ const init = async () => {
   const app = createApp(App)
 
   registerPlugins(app)
+
+  await server.autoBackup();
 
   app.mount('#app')
 }

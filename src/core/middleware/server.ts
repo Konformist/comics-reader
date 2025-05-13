@@ -383,17 +383,21 @@ const delComic = async (id: number): Promise<void> => {
 
 /// backups
 
-const setBackup = async (): Promise<void> => {
-  await getComicsData();
-  await getParsersData();
-
+const getBackupFileName = () => {
   const now = new Date();
   const year = now.getFullYear();
   const month = (now.getMonth() + 1).toString().padStart(2, '0');
   const day = (now.getDate() + 1).toString().padStart(2, '0');
 
+  return `${year}-${month}-${day}.json`;
+}
+
+const setBackup = async (): Promise<void> => {
+  await getComicsData();
+  await getParsersData();
+
   await Filesystem.writeFile({
-    path: `${BACKUPS_DIRECTORY}/${year}-${month}-${day}.json`,
+    path: `${BACKUPS_DIRECTORY}/${getBackupFileName()}`,
     directory: Directory.Data,
     encoding: Encoding.UTF8,
     recursive: true,
@@ -409,6 +413,18 @@ const setBackup = async (): Promise<void> => {
     }),
   })
 }
+
+const autoBackup = async () => {
+  try {
+    await Filesystem.readFile({
+      path: `${BACKUPS_DIRECTORY}/${getBackupFileName()}`,
+      directory: Directory.Data,
+    });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_) {
+    await setBackup();
+  }
+};
 
 const getBackup = async (path: string): Promise<void> => {
   const result = await Filesystem.readFile({
@@ -447,6 +463,7 @@ export default {
   delComicFile,
   delComicFiles,
   resizeComicFile,
+  autoBackup,
   setBackup,
   getBackup,
 }

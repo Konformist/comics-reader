@@ -56,9 +56,16 @@ const setBackup = async () => {
 const backupFile = ref('');
 
 const saveBackupToGlobal = async (path: string): Promise<void> => {
+  await Filesystem.mkdir({
+    path: 'Comics Reader/backups',
+    directory: Directory.Documents,
+    recursive: true,
+  })
   await Filesystem.copy({
-    from: (await Filesystem.getUri({ path, directory: Directory.Data })).uri,
-    to: (await Filesystem.getUri({ path: `Comics Reader/${path}`, directory: Directory.Documents })).uri,
+    from: path,
+    directory: Directory.Data,
+    to: `Comics Reader/${path}`,
+    toDirectory: Directory.Documents,
   })
 
   Toast.show({ text: 'Бекап сохранён в документы' })

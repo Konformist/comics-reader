@@ -4,7 +4,7 @@
     @click="onClick()"
   >
     <v-list-item-title>
-      {{ item.type === 'directory' ? '/' : '' }}{{ item.path }}
+      {{ item.path }}{{ item.type === 'directory' ? '/' : '' }}
     </v-list-item-title>
     <template
       v-if="item.type === 'file'"
@@ -19,7 +19,7 @@
     v-if="item.type === 'directory' && opened"
     v-model="model"
     is-child
-    :parent="`${parent}/${item.path}`"
+    :parent="parent ? `${parent}/${item.path}` : item.path"
     :tree="item.children"
   />
 </template>

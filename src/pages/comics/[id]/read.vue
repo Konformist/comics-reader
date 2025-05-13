@@ -87,9 +87,22 @@ import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import type { IComicImageDTO } from '@/core/entities/comic/ComicTypes.ts';
 import ParserController from '@/core/entities/parser/ParserController.ts';
+import { KeepAwake } from '@capacitor-community/keep-awake';
 import { Toast } from '@capacitor/toast';
 
 const route = useRoute('/comics/[id]/read');
+
+onMounted(async () => {
+  if ((await KeepAwake.isSupported()).isSupported) {
+    await KeepAwake.keepAwake()
+  }
+});
+
+onBeforeUnmount(async () => {
+  if ((await KeepAwake.isSupported()).isSupported) {
+    await KeepAwake.allowSleep()
+  }
+})
 
 const comicId = +(route.params.id || 0);
 const comic = ref(new ComicModel());

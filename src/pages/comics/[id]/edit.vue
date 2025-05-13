@@ -18,11 +18,13 @@
       />
       <v-textarea
         v-model.trim="comic.url"
+        auto-grow
         label="Ссылка на комикс"
         rows="2"
       />
       <v-textarea
         v-model.trim="comic.name"
+        auto-grow
         label="Название"
         rows="2"
       />
@@ -33,6 +35,7 @@
       />
       <v-textarea
         v-model.trim="keyLanguage"
+        auto-grow
         label="Парсинг языка"
         rows="2"
       />
@@ -45,6 +48,7 @@
       />
       <v-textarea
         v-model.trim="keyAuthors"
+        auto-grow
         label="Парсинг авторов"
         rows="2"
       />
@@ -57,24 +61,22 @@
       />
       <v-textarea
         v-model.trim="keyTags"
+        auto-grow
         label="Парсинг тегов"
         rows="2"
       />
-      <p>
-        <v-btn
-          class="w-100"
-          :loading="loading"
-          text="Перезагрузить"
-          @click="onReloadInfo()"
-        />
-      </p>
+      <v-btn
+        class="w-100"
+        :loading="loading"
+        text="Перезагрузить"
+        @click="onReloadInfo()"
+      />
       <v-divider class="my-8" />
-      <v-card
+      <v-img
         v-if="comic.image"
-        height="150"
-      >
-        <v-img :src="comic.image" />
-      </v-card>
+        rounded
+        :src="comic.image"
+      />
       <v-file-input
         class="mt-4"
         label="Загрузить свою картинку"
@@ -82,82 +84,18 @@
       />
       <v-textarea
         v-model.trim="comic.imageUrl"
+        auto-grow
         label="Ссылка на картинку"
         rows="2"
       />
-      <p>
-        <v-btn
-          class="w-100"
-          :loading="loading"
-          text="Перезагрузить"
-          @click="onReloadCover()"
-        />
-      </p>
-      <v-divider class="my-8" />
-      <v-textarea
-        v-model.trim="imagesTemplate"
-        hint="Пример: https://domain.com/12/23/<ID>.jpeg"
-        label="Шаблон для автозаполнения"
-        rows="2"
-      />
-      <v-text-field
-        v-model.number="imagesTemplateStart"
-        class="mt-4"
-        label="Начальный ID"
-        type="number"
-      />
       <v-btn
         class="w-100"
-        text="Заполнить"
-        @click="setTemplate()"
+        :loading="loading"
+        text="Перезагрузить"
+        @click="onReloadCover()"
       />
-      <template
-        v-for="item in comic.images"
-        :key="item.id"
-      >
-        <v-divider class="my-8" />
-        <v-card
-          v-if="item.url"
-          height="150"
-        >
-          <v-img :src="item.url" />
-        </v-card>
-        <v-file-input
-          class="mt-4"
-          label="Загрузить свою страницу"
-          @update:model-value="uploadImage(item, $event)"
-        />
-        <v-textarea
-          v-model.trim="item.from"
-          label="Ссылка на страницу"
-          rows="2"
-        />
-        <p class="d-flex">
-          <v-btn
-            :loading="loading"
-            text="Перезагрузить"
-            @click="onReloadImage(item)"
-          />
-          <v-btn
-            class="ml-auto"
-            color="error"
-            :loading="loading"
-            text="Удалить"
-            @click="delPage(item)"
-          />
-        </p>
-      </template>
-      <p>
-        <v-btn
-          class="mt-4 w-100"
-          text="Добавить страницу"
-          @click="comic.addImage()"
-        />
-      </p>
     </v-container>
     <v-fab
-      app
-      class="mb-4"
       icon="$save"
       :loading="loading"
       @click="onSave()"
@@ -168,7 +106,6 @@
 <script lang="ts" setup>
 import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
-import type { IComicImageDTO } from '@/core/entities/comic/ComicTypes.ts';
 import ParserController from '@/core/entities/parser/ParserController.ts';
 import ParserModel from '@/core/entities/parser/ParserModel.ts';
 import { dedupe } from '@/core/utils/array.ts';
@@ -217,15 +154,6 @@ onMounted(async () => {
   await loadParser();
 })
 
-const imagesTemplate = ref('');
-const imagesTemplateStart = ref(1);
-
-const setTemplate = () => {
-  comic.value?.images.forEach((image, index) => {
-    image.from = imagesTemplate.value.replace('<ID>', (imagesTemplateStart.value + index).toString());
-  })
-};
-
 const keyLanguage = computed({
   get () {
     return comic.value?.override.language || parser.value?.language || '';
@@ -258,19 +186,6 @@ const keyTags = computed({
 const saveComic = async () => {
   await ComicController.save(comic.value);
 }
-
-const delPage = async (item: IComicImageDTO) => {
-  if (!comic.value) return;
-
-  const index = comic.value.images.findIndex(e => e.id === item.id);
-
-  if (index !== -1) {
-    const image = comic.value.images.splice(index, 1)[0];
-    if (image.url) await ComicController.deleteFile(comic.value.id, image.id)
-    await saveComic();
-    Toast.show({ text: 'Комикс сохранён' })
-  }
-};
 
 const loading = ref(false);
 
@@ -317,28 +232,6 @@ const onReloadCover = async () => {
     loading.value = false;
   }
 };
-
-const uploadImage = async (item: IComicImageDTO, event: File|File[]) => {
-  if (!event || Array.isArray(event)) return;
-
-  await ComicController.saveFile(comic.value.id, item.id, event);
-  await loadComic();
-  Toast.show({ text: 'Комикс сохранён' })
-}
-
-const onReloadImage = async (item: IComicImageDTO) => {
-  if (!item.from) return;
-
-  try {
-    loading.value = true;
-    const result = await ParserController.loadImageRaw(item.from);
-    await uploadImage(item, result);
-  } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` })
-  } finally {
-    loading.value = false;
-  }
-}
 
 const onSave = async () => {
   await saveComic();

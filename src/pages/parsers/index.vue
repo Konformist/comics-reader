@@ -1,7 +1,7 @@
 <template>
   <v-app-bar title="Парсеры" />
   <v-main>
-    <v-container>
+    <v-container class="pa-0">
       <v-list v-if="parsers.length">
         <v-list-item
           v-for="item in parsers"
@@ -14,18 +14,19 @@
         />
       </v-list>
     </v-container>
+    <v-fab
+      icon="$plus"
+      @click="createParser()"
+    />
   </v-main>
-  <v-fab
-    app
-    class="mb-4"
-    icon="$plus"
-    :to="{ name: '/parsers/create' }"
-  />
 </template>
 
 <script lang="ts" setup>
 import ParserController from '@/core/entities/parser/ParserController.ts';
-import type ParserModel from '@/core/entities/parser/ParserModel.ts';
+import ParserModel from '@/core/entities/parser/ParserModel.ts';
+import { Toast } from '@capacitor/toast';
+
+const router = useRouter();
 
 const parsers = ref<ParserModel[]>([]);
 
@@ -34,4 +35,16 @@ const loadParsers = async (): Promise<void> => {
 }
 
 loadParsers();
+
+const createParser = async () => {
+  const parserId = await ParserController.save(new ParserModel());
+
+  if (parserId) {
+    Toast.show({ text: 'Парсер создан' })
+    await router.push({
+      name: '/parsers/[id]',
+      params: { id: parserId },
+    })
+  }
+}
 </script>

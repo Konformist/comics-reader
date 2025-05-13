@@ -14,8 +14,10 @@ import { ru } from 'vuetify/locale';
 import { aliases, mdi } from 'vuetify/iconsets/mdi-svg';
 import {
   mdiArrowLeft,
+  mdiArrowRight,
   mdiCog,
-  mdiContentSave, mdiDownload,
+  mdiContentSave,
+  mdiDownload,
   mdiFileMultiple,
   mdiPencil,
   mdiPlus,
@@ -36,6 +38,7 @@ export default createVuetify({
       ...aliases,
       'plus': mdiPlus,
       'arrow-left': mdiArrowLeft,
+      'arrow-right': mdiArrowRight,
       'dashboard': mdiViewDashboard,
       'list': mdiViewList,
       'save': mdiContentSave,
@@ -50,5 +53,64 @@ export default createVuetify({
   },
   theme: {
     defaultTheme: 'dark',
+    themes: {
+      dark: {
+        dark: true,
+        colors: {
+          background: '#122212',
+          surface: '#1D2D1D',
+          'surface-bright': '#FFFFFF',
+          'surface-light': '#122212',
+          'surface-variant': '#424242',
+          'on-surface-variant': '#EEEEEE',
+          primary: '#00A300',
+          'primary-darken-1': '#1F5592',
+          secondary: '#5e1b20',
+          'secondary-darken-1': '#870186',
+          error: '#B00020',
+          info: '#2196F3',
+          success: '#4CAF50',
+          warning: '#FB8C00',
+        },
+      },
+    },
+  },
+  defaults: {
+    VAppBar: {
+      elevation: '2',
+    },
+    VFab: {
+      app: true,
+      class: ['mb-14'],
+    },
+    VBottomNavigation: {
+      elevation: '2',
+    },
+    VFileInput: {
+      density: 'comfortable',
+      prependIcon: '',
+      prependInnerIcon: '$download',
+      variant: 'solo',
+    },
+    VTextField: {
+      density: 'comfortable',
+      variant: 'solo',
+    },
+    VTextarea: {
+      density: 'comfortable',
+      variant: 'solo',
+    },
+    VSelect: {
+      density: 'comfortable',
+      variant: 'solo',
+    },
+    VCombobox: {
+      density: 'comfortable',
+      variant: 'solo',
+    },
+    VNumberInput: {
+      density: 'comfortable',
+      variant: 'solo',
+    },
   },
 })

@@ -59,8 +59,6 @@
       />
     </v-container>
     <v-fab
-      app
-      class="mb-4"
       icon="$save"
       @click="saveParser()"
     />

@@ -1,6 +1,7 @@
 <template>
   <v-app-bar>
     <v-btn
+      :disabled="loading"
       icon="$arrow-left"
       slim
       @click="$router.back()"
@@ -13,12 +14,12 @@
         rounded
         :src="comic.image"
       />
-      <h2
+      <h3
         v-if="comic.name"
         class="mt-4 font-weight-medium"
       >
         {{ comic.name }}
-      </h2>
+      </h3>
       <p
         v-if="comic.authors.length"
         class="mt-2 d-flex flex-wrap ga-1 align-center"
@@ -54,20 +55,40 @@
         <b class="font-weight-medium">Страниц:</b>
         <v-chip :text="comic.images.length" />
       </p>
-      <p class="mt-4">
-        <v-btn
-          class="w-100"
-          :disabled="!comic.images.length"
-          text="Читать"
-          :to="{ name: '/comics/[id]/read' }"
-        />
-      </p>
+      <v-btn
+        class="mt-4 w-100"
+        :disabled="!comic.images.length"
+        :loading="loading"
+        text="Читать"
+        :to="{
+          name: '/comics/[id]/read',
+          params: { id: comic.id },
+        }"
+      />
+      <v-btn
+        class="mt-4 w-100"
+        :loading="loading"
+        text="Редактировать страницы"
+        :to="{
+          name: '/comics/[id]/edit-pages',
+          params: { id: comic.id },
+        }"
+      />
+      <v-btn
+        class="mt-4 w-100"
+        color="error"
+        :loading="loading"
+        text="Удалить"
+        @click="deleteComic()"
+      />
     </v-container>
     <v-fab
-      app
-      class="mb-4"
       icon="$edit"
-      :to="{ name: '/comics/[id]/edit' }"
+      :loading="loading"
+      :to="{
+        name: '/comics/[id]/edit',
+        params: { id: comic.id },
+      }"
     />
   </v-main>
 </template>
@@ -75,8 +96,11 @@
 <script lang="ts" setup>
 import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
+import { Dialog } from '@capacitor/dialog';
+import { Toast } from '@capacitor/toast';
 
 const route = useRoute('/comics/[id]/');
+const router = useRouter();
 
 const comic = ref(new ComicModel());
 
@@ -89,4 +113,28 @@ const loadComic = async () => {
 }
 
 loadComic();
+
+const loading = ref(false);
+
+const deleteComic = async () => {
+  const { value } = await Dialog.confirm({
+    title: 'Подтверждение удаления',
+    message: 'Удалить комикс?',
+  });
+
+  if (!value) return;
+
+  loading.value = true;
+
+  try {
+    await ComicController.delete(comic.value.id);
+    Toast.show({ text: 'Комикс удалён' })
+    router.replace({ name: '/' })
+  } catch (e) {
+    alert(e)
+    Toast.show({ text: `Комикс не удалён. Ошибка: ${e.message}` });
+  } finally {
+    loading.value = false;
+  }
+}
 </script>

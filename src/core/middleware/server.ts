@@ -204,11 +204,6 @@ const setComic = async (data: IComicDTO): Promise<void> => {
   await setComicsData();
 }
 
-const delComic = async (id: number): Promise<void> => {
-  comicsRaw = comicsRaw.filter(e => e.id !== id);
-  await setComicsData();
-}
-
 const getComic = async (id: number): Promise<IComicDTO|undefined> => {
   const ids = comicsRaw.map(e => e.id)
 
@@ -308,6 +303,17 @@ const delComicFiles = async (comicId: number): Promise<void> => {
   comic.images = [];
   await setComicsData();
 };
+
+const delComic = async (id: number): Promise<void> => {
+  const comic = await getComic(id);
+
+  if (!comic) return;
+
+  if (comic.image) await delComicCover(id);
+  await delComicFiles(id);
+  comicsRaw = comicsRaw.filter(e => e.id !== id);
+  await setComicsData();
+}
 
 /// backups
 

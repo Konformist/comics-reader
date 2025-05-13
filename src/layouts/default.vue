@@ -1,6 +1,9 @@
 <template>
   <router-view />
-  <v-bottom-navigation>
+  <v-bottom-navigation
+    grow
+    tag="footer"
+  >
     <v-btn :to="{ name: '/' }">
       <v-icon icon="$dashboard" />
       Галерея

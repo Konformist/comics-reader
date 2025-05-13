@@ -4,7 +4,7 @@
     tag="footer"
   >
     <v-btn :to="{ name: '/' }">
-      <v-icon icon="$dashboard" />
+      <v-icon icon="$home" />
       Галерея
     </v-btn>
     <v-btn :to="{ name: '/parsers/' }">

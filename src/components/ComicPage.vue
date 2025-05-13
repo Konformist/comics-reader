@@ -1,50 +1,29 @@
 <template>
   <v-alert
     v-if="error"
-    class="mb-4"
     color="error"
   >
     Ошибка загрузки изображения
   </v-alert>
-  <div
-    v-if="!url"
-    class="pa-4"
+  <v-alert
+    v-if="!url && !from"
+    color="warning"
   >
-    <v-file-input
-      label="Загрузить свою страницу"
-      @update:model-value="$emit('upload', $event)"
-    />
-    <v-textarea
-      v-model.trim="from"
-      :autocapitalize="false"
-      :autocomplete="false"
-      label="Ссылка на страницу"
-      rows="2"
-    />
-    <v-btn
-      class="w-100"
-      :loading="loading"
-      text="Загрузить"
-      @click="$emit('download')"
-    />
-    <v-btn
-      class="mt-2 w-100"
-      :loading="loading"
-      text="Сохранить"
-      @click="$emit('save')"
-    />
-  </div>
+    Нет картинки или невозможно скачать
+  </v-alert>
   <v-img
-    v-else
+    v-if="url"
     :src="url"
     @error="error = true"
     @loadstart="error = false"
   >
     <div
+      v-if="!loading"
       class="cursor-pointer w-50 position-absolute bottom-0 top-0 left-0"
       @click="$emit('prev')"
     />
     <div
+      v-if="!loading"
       class="cursor-pointer w-50 position-absolute bottom-0 top-0 right-0"
       @click="$emit('next')"
     />
@@ -52,19 +31,20 @@
 </template>
 
 <script setup lang="ts">
-const from = defineModel<string>('from', { default: '' });
-
-defineEmits<{
+const emit = defineEmits<{
   (e: 'next', v: void): void;
   (e: 'prev', v: void): void;
-  (e: 'save', v: void): void;
   (e: 'download', v: void): void;
-  (e: 'upload', v: File|File[]): void;
 }>()
-defineProps<{
-  url: string
+const { url, from } = defineProps<{
   loading: boolean
+  from: string
+  url: string
 }>()
+
+if (!url && from) {
+  emit('download');
+}
 
 const error = ref(false);
 </script>

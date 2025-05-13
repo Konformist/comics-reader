@@ -1,16 +1,9 @@
 <template>
-  <v-app-bar density="comfortable">
-    <v-btn
-      icon="$arrow-left"
-      slim
-      @click="$router.back()"
-    />
-    <v-app-bar-title text="Редактирование страниц" />
-  </v-app-bar>
   <v-main>
     <v-container>
       <v-number-input
         v-model.number="pages"
+        control-variant="split"
         label="Количество страниц"
         :min="minPages"
       />
@@ -36,7 +29,7 @@
       <v-number-input
         v-model.number="imagesTemplateStart"
         class="mt-4"
-        clearable
+        control-variant="split"
         label="Начальный ID"
         type="number"
       />
@@ -107,6 +100,13 @@ import type { IComicImageDTO } from '@/core/entities/comic/ComicTypes.ts';
 import ParserController from '@/core/entities/parser/ParserController.ts';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
+
+definePage({
+  meta: {
+    title: 'Редактирование страниц',
+    isBack: true,
+  },
+})
 
 const route = useRoute('/comics/[id]/edit-pages');
 

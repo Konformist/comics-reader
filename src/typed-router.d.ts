@@ -19,13 +19,16 @@ declare module 'vue-router/auto-routes' {
    */
   export interface RouteNamedMap {
     '/': RouteRecordInfo<'/', '/', Record<never, never>, Record<never, never>>,
+    '/authors': RouteRecordInfo<'/authors', '/authors', Record<never, never>, Record<never, never>>,
     '/comics/[id]/': RouteRecordInfo<'/comics/[id]/', '/comics/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/comics/[id]/edit': RouteRecordInfo<'/comics/[id]/edit', '/comics/:id/edit', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/comics/[id]/edit-pages': RouteRecordInfo<'/comics/[id]/edit-pages', '/comics/:id/edit-pages', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/comics/[id]/read': RouteRecordInfo<'/comics/[id]/read', '/comics/:id/read', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/filemanager': RouteRecordInfo<'/filemanager', '/filemanager', Record<never, never>, Record<never, never>>,
+    '/languages': RouteRecordInfo<'/languages', '/languages', Record<never, never>, Record<never, never>>,
     '/parsers/': RouteRecordInfo<'/parsers/', '/parsers', Record<never, never>, Record<never, never>>,
     '/parsers/[id]': RouteRecordInfo<'/parsers/[id]', '/parsers/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/settings': RouteRecordInfo<'/settings', '/settings', Record<never, never>, Record<never, never>>,
+    '/tags': RouteRecordInfo<'/tags', '/tags', Record<never, never>, Record<never, never>>,
   }
 }

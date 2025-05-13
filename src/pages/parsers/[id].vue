@@ -1,12 +1,4 @@
 <template>
-  <v-app-bar density="comfortable">
-    <v-btn
-      icon="$arrow-left"
-      slim
-      @click="$router.back()"
-    />
-    <v-app-bar-title text="Редактирование парсера" />
-  </v-app-bar>
   <v-main>
     <v-container>
       <v-text-field
@@ -86,6 +78,13 @@ import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
 import ParserController from '@/core/entities/parser/ParserController.ts';
 import ParserModel from '@/core/entities/parser/ParserModel.ts';
+
+definePage({
+  meta: {
+    title: 'Редактирование парсера',
+    isBack: true,
+  },
+})
 
 const router = useRouter();
 const route = useRoute('/parsers/[id]');

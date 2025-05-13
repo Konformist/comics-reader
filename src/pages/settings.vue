@@ -1,8 +1,4 @@
 <template>
-  <v-app-bar
-    density="comfortable"
-    title="Настройки"
-  />
   <v-main>
     <v-container>
       <v-btn
@@ -37,6 +33,12 @@ import server from '@/core/middleware/server.ts';
 import { BACKUPS_DIRECTORY } from '@/core/middleware/variables.ts';
 import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 import { Toast } from '@capacitor/toast';
+
+definePage({
+  meta: {
+    title: 'Настройки',
+  },
+})
 
 const backups = ref<IDirectory[]>([]);
 

@@ -1,8 +1,4 @@
 <template>
-  <v-app-bar
-    density="comfortable"
-    title="Парсеры"
-  />
   <v-main>
     <v-container class="pa-0">
       <v-list v-if="parsers.length">
@@ -28,6 +24,12 @@
 import ParserController from '@/core/entities/parser/ParserController.ts';
 import ParserModel from '@/core/entities/parser/ParserModel.ts';
 import { Toast } from '@capacitor/toast';
+
+definePage({
+  meta: {
+    title: 'Парсеры',
+  },
+});
 
 const router = useRouter();
 

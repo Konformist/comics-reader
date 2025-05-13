@@ -1,13 +1,24 @@
 <template>
-  <v-app-bar
-    density="comfortable"
-    title="Комиксы"
-  />
   <v-main>
+    <v-toolbar density="compact">
+      <v-toolbar-title
+        v-if="true || comics.length !== comicsFiltered.length"
+        class="text-subtitle-1"
+      >
+        Найдено: {{ comicsFiltered.length }}
+      </v-toolbar-title>
+      <v-spacer />
+      <v-btn
+        :active="filtersSheet"
+        prepend-icon="$filter"
+        text="Фильтры"
+        @click="filtersSheet = true"
+      />
+    </v-toolbar>
     <v-container>
       <v-data-iterator
         v-model:page="currentPage"
-        :items="comics"
+        :items="comicsFiltered"
         items-per-page="20"
       >
         <template #default="{ items }">
@@ -58,22 +69,89 @@
       icon="$plus"
       @click="createComic()"
     />
+    <v-bottom-sheet v-model="filtersSheet">
+      <v-card>
+        <v-card-item>
+          <v-select
+            v-model="filters.authors"
+            :items="authors"
+            label="Авторы"
+            multiple
+            variant="solo-filled"
+          />
+          <v-select
+            v-model="filters.languages"
+            :items="languages"
+            label="Языки"
+            multiple
+            variant="solo-filled"
+          />
+          <v-select
+            v-model="filters.tags"
+            :items="tags"
+            label="Теги"
+            multiple
+            variant="solo-filled"
+          />
+        </v-card-item>
+      </v-card>
+    </v-bottom-sheet>
   </v-main>
 </template>
 
 <script lang="ts" setup>
 import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
+import { dedupe } from '@/core/utils/array.ts';
 import { Toast } from '@capacitor/toast';
+
+definePage({
+  meta: {
+    title: 'Комиксы',
+  },
+})
 
 const router = useRouter();
 
+const currentPage = ref(1);
+
+const filtersSheet = ref(false)
+
+const filters = ref({
+  authors: [] as string[],
+  languages: [] as string[],
+  tags: [] as string[],
+})
+
+const languages = ref<string[]>([]);
+const tags = ref<string[]>([]);
+const authors = ref<string[]>([]);
+
 const comics = ref<ComicModel[]>([]);
 
-const currentPage = ref(1);
+const filterArrays = (f: string[], s: string[]) => (
+  !s.length
+  || f.some(e => s.includes(e))
+)
+
+const filterSingle = (f: string, s: string[]) => (
+  !s.length
+  || s.includes(f)
+)
+
+const comicsFiltered = computed(() => (
+  comics.value.filter(item => (
+    filterArrays(item.tags, filters.value.tags)
+    && filterArrays(item.authors, filters.value.authors)
+    && filterSingle(item.language, filters.value.languages)
+  ))
+))
 
 const loadComics = async () => {
   comics.value = await ComicController.loadAll();
+  languages.value = dedupe(comics.value.map(e => e.language)).sort();
+  tags.value = dedupe(comics.value.map(e => e.tags).flat(1)).sort();
+  authors.value = dedupe(comics.value.map(e => e.authors).flat(1)).sort();
 }
 
 loadComics();

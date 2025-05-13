@@ -1,12 +1,4 @@
 <template>
-  <v-app-bar density="comfortable">
-    <v-btn
-      icon="$arrow-left"
-      slim
-      @click="$router.back()"
-    />
-    <v-app-bar-title text="Редактирование комикса" />
-  </v-app-bar>
   <v-main>
     <v-container v-if="comic">
       <v-select
@@ -15,6 +7,7 @@
         item-value="id"
         :items="parsers"
         label="Парсер"
+        @update:model-value="loadParser()"
       />
       <v-textarea
         v-model.trim="comic.url"
@@ -118,6 +111,13 @@ import ParserModel from '@/core/entities/parser/ParserModel.ts';
 import { dedupe } from '@/core/utils/array.ts';
 import { Toast } from '@capacitor/toast';
 
+definePage({
+  meta: {
+    title: 'Редактирование комикса',
+    isBack: true,
+  },
+});
+
 const route = useRoute('/comics/[id]/edit');
 
 const comics = ref<ComicModel[]>([]);
@@ -128,9 +128,9 @@ const authors = ref<string[]>([]);
 
 const loadComics = async () => {
   comics.value = await ComicController.loadAll();
-  languages.value = dedupe(comics.value.map(e => e.language));
-  tags.value = dedupe(comics.value.map(e => e.tags).flat(1));
-  authors.value = dedupe(comics.value.map(e => e.authors).flat(1));
+  languages.value = dedupe(comics.value.map(e => e.language)).sort();
+  tags.value = dedupe(comics.value.map(e => e.tags).flat(1)).sort();
+  authors.value = dedupe(comics.value.map(e => e.authors).flat(1)).sort();
 }
 
 const comicId = +(route.params.id || 0);

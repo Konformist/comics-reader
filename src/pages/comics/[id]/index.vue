@@ -1,13 +1,4 @@
 <template>
-  <v-app-bar density="comfortable">
-    <v-btn
-      :disabled="loading"
-      icon="$arrow-left"
-      slim
-      @click="$router.back()"
-    />
-    <v-app-bar-title text="Комикс" />
-  </v-app-bar>
   <v-main>
     <v-container>
       <router-link
@@ -123,6 +114,13 @@ import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import { Clipboard } from '@capacitor/clipboard';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
+
+definePage({
+  meta: {
+    title: 'Комикс',
+    isBack: true,
+  },
+})
 
 const route = useRoute('/comics/[id]/');
 const router = useRouter();

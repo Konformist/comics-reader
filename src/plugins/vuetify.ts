@@ -13,14 +13,17 @@ import { md3 } from 'vuetify/blueprints';
 import { ru } from 'vuetify/locale';
 import { aliases, mdi } from 'vuetify/iconsets/mdi-svg';
 import {
+  mdiAccount,
   mdiArrowLeft,
   mdiArrowRight,
   mdiCog, mdiContentCopy,
   mdiContentSave,
   mdiDownload,
-  mdiFileMultiple,
+  mdiFileMultiple, mdiFilter, mdiHome,
+  mdiMenu,
   mdiPencil,
   mdiPlus,
+  mdiTag, mdiTranslate,
   mdiViewDashboard,
   mdiViewList,
 } from '@mdi/js';
@@ -47,6 +50,12 @@ export default createVuetify({
       'settings': mdiCog,
       'download': mdiDownload,
       'copy': mdiContentCopy,
+      'menu': mdiMenu,
+      'home': mdiHome,
+      'tag': mdiTag,
+      'author': mdiAccount,
+      'language': mdiTranslate,
+      'filter': mdiFilter,
     },
     sets: {
       mdi,

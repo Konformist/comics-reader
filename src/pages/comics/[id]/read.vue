@@ -1,15 +1,4 @@
 <template>
-  <v-app-bar density="comfortable">
-    <v-btn
-      icon="$arrow-left"
-      slim
-      @click="$router.back()"
-    />
-    <v-app-bar-title
-      class="mr-8"
-      :text="comic.name"
-    />
-  </v-app-bar>
   <v-main>
     <v-container class="pa-0">
       <v-data-iterator
@@ -24,6 +13,7 @@
               density="comfortable"
               :disabled="page === 1"
               icon="$arrow-left"
+              :loading="loading"
               rounded
               variant="tonal"
               @click="prevPage"
@@ -33,6 +23,7 @@
               density="comfortable"
               :disabled="page === pageCount"
               icon="$arrow-right"
+              :loading="loading"
               rounded
               variant="tonal"
               @click="nextPage"
@@ -44,14 +35,12 @@
           <ComicPage
             v-for="item in items"
             :key="item.raw.id"
-            v-model:from="item.raw.from"
+            :from="item.raw.from"
             :loading="loading"
             :url="item.raw.url"
-            @download="onReloadImage(item.raw)"
+            @download="onLoadImage(item.raw)"
             @next="nextPage()"
             @prev="prevPage()"
-            @save="saveComic()"
-            @upload="uploadImage(item.raw, $event)"
           />
         </template>
         <template #footer="{ page, pageCount, prevPage, nextPage }">
@@ -61,6 +50,7 @@
               density="comfortable"
               :disabled="page === 1"
               icon="$arrow-left"
+              :loading="loading"
               rounded
               variant="tonal"
               @click="prevPage"
@@ -70,6 +60,7 @@
               density="comfortable"
               :disabled="page === pageCount"
               icon="$arrow-right"
+              :loading="loading"
               rounded
               variant="tonal"
               @click="nextPage"
@@ -90,6 +81,13 @@ import type { IComicImageDTO } from '@/core/entities/comic/ComicTypes.ts';
 import ParserController from '@/core/entities/parser/ParserController.ts';
 import { KeepAwake } from '@capacitor-community/keep-awake';
 import { Toast } from '@capacitor/toast';
+
+definePage({
+  meta: {
+    title: 'Чтение',
+    isBack: true,
+  },
+})
 
 const route = useRoute('/comics/[id]/read');
 
@@ -119,26 +117,14 @@ loadComic();
 
 const loading = ref(false);
 
-const saveComic = async () => {
-  await ComicController.save(comic.value);
-}
-
-const uploadImage = async (item: IComicImageDTO, event: File|File[]) => {
-  if (!event || Array.isArray(event)) return;
-
-  await saveComic();
-  await ComicController.saveFile(comic.value.id, item.id, event);
-  await loadComic();
-  Toast.show({ text: 'Комикс сохранён' })
-}
-
-const onReloadImage = async (item: IComicImageDTO) => {
+const onLoadImage = async (item: IComicImageDTO) => {
   if (!item.from) return;
 
   try {
     loading.value = true;
     const result = await ParserController.loadImageRaw(item.from);
-    await uploadImage(item, result);
+    await ComicController.saveFile(comic.value.id, item.id, result);
+    await loadComic();
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` })
   } finally {

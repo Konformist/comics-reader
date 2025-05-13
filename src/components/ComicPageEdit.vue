@@ -23,11 +23,17 @@
         <v-number-input
           v-model.number="maxWidth"
           class="mr-4"
+          control-variant="hidden"
           label="Изменить ширину"
+          :min="0"
+          variant="solo-filled"
         />
         <v-number-input
           v-model.number="maxHeight"
+          control-variant="hidden"
           label="Изменить высоту"
+          :min="0"
+          variant="solo-filled"
         />
       </div>
     </v-card-item>

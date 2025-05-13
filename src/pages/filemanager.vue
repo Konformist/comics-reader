@@ -1,8 +1,4 @@
 <template>
-  <v-app-bar
-    density="comfortable"
-    title="Файловый менеджер"
-  />
   <v-main>
     <v-container class="pa-0">
       <FilesTree
@@ -17,6 +13,12 @@ import FilesTree from '@/components/FilesTree.vue';
 import type { IDirectory } from '@/core/entities/file/FileTypes.ts';
 import server from '@/core/middleware/server.ts';
 import { BACKUPS_DIRECTORY, COMICS_FILES_DIRECTORY } from '@/core/middleware/variables.ts';
+
+definePage({
+  meta: {
+    title: 'Файловый менеджер',
+  },
+})
 
 const files = ref<IDirectory[]>([]);
 

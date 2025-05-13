@@ -166,6 +166,7 @@ const saveComic = async () => {
 
 const onSave = async () => {
   await saveComic();
+  await loadComic();
   Toast.show({ text: 'Комикс сохранён' })
 };
 
@@ -199,11 +200,16 @@ const canLoadImages = computed(() => (
 const onLoadImages = async () => {
   try {
     loading.value = true;
+    await saveComic();
+
     for (const item of comic.value.images) {
       if (!item.from) return;
       const result = await ParserController.loadImageRaw(item.from);
-      await uploadImage(item, result);
+      await ComicController.saveFile(comic.value.id, item.id, result);
     }
+
+    await loadComic();
+    Toast.show({ text: 'Комикс сохранён' })
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` })
   } finally {

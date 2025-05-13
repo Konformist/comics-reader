@@ -60,7 +60,7 @@ import { Toast } from '@capacitor/toast';
 
 const from = defineModel('from', { default: '' })
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'reload', v: void): void
   (e: 'upload', v: File|File[]): void
   (e: 'download', v: void): void
@@ -86,6 +86,7 @@ const resizeImage = async () => {
       maxHeight: maxHeight.value || undefined,
     })
     Toast.show({ text: `Изображение сжато` })
+    emit('reload')
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` })
   } finally {

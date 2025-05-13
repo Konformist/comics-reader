@@ -1,28 +1,15 @@
 <template>
-  <router-view />
-  <v-bottom-navigation
-    grow
-    tag="footer"
-  >
-    <v-btn :to="{ name: '/' }">
-      <v-icon icon="$dashboard" />
-      Галерея
-    </v-btn>
-    <v-btn :to="{ name: '/parsers/' }">
-      <v-icon icon="$list" />
-      Парсеры
-    </v-btn>
-    <v-btn :to="{ name: '/filemanager' }">
-      <v-icon icon="$files" />
-      Файлы
-    </v-btn>
-    <v-btn :to="{ name: '/settings' }">
-      <v-icon icon="$settings" />
-      Настройки
-    </v-btn>
-  </v-bottom-navigation>
+  <router-view v-slot="{ Component, route }">
+    <keep-alive include="/">
+      <component
+        :is="Component"
+        :key="route"
+      />
+    </keep-alive>
+  </router-view>
+  <BottomNavigation />
 </template>
 
 <script lang="ts" setup>
-  //
+import BottomNavigation from '@/components/BottomNavigation.vue';
 </script>

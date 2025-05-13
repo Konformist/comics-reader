@@ -1,15 +1,15 @@
 <template>
+  <v-alert
+    v-if="error"
+    class="mb-4"
+    color="error"
+  >
+    Ошибка загрузки изображения
+  </v-alert>
   <div
-    v-if="!url || error"
+    v-if="!url"
     class="pa-4"
   >
-    <v-alert
-      v-if="error"
-      class="mb-4"
-      color="error"
-    >
-      Ошибка загрузки изображения
-    </v-alert>
     <v-file-input
       label="Загрузить свою страницу"
       @update:model-value="$emit('upload', $event)"
@@ -21,11 +21,13 @@
     />
     <v-btn
       class="w-100"
+      :loading="loading"
       text="Загрузить"
       @click="$emit('download')"
     />
     <v-btn
       class="mt-2 w-100"
+      :loading="loading"
       text="Сохранить"
       @click="$emit('save')"
     />
@@ -33,7 +35,8 @@
   <v-img
     v-else
     :src="url"
-    @error="onError()"
+    @error="error = true"
+    @loadstart="error = false"
   >
     <div
       class="cursor-pointer w-50 position-absolute bottom-0 top-0 left-0"
@@ -58,11 +61,8 @@ defineEmits<{
 }>()
 defineProps<{
   url: string
+  loading: boolean
 }>()
 
 const error = ref(false);
-
-const onError = () => {
-
-}
 </script>

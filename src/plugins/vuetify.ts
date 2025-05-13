@@ -15,7 +15,7 @@ import { aliases, mdi } from 'vuetify/iconsets/mdi-svg';
 import {
   mdiArrowLeft,
   mdiArrowRight,
-  mdiCog,
+  mdiCog, mdiContentCopy,
   mdiContentSave,
   mdiDownload,
   mdiFileMultiple,
@@ -46,6 +46,7 @@ export default createVuetify({
       'files': mdiFileMultiple,
       'settings': mdiCog,
       'download': mdiDownload,
+      'copy': mdiContentCopy,
     },
     sets: {
       mdi,

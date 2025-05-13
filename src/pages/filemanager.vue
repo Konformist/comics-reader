@@ -1,7 +1,7 @@
 <template>
   <v-app-bar title="Файловый менеджер" />
   <v-main>
-    <v-container>
+    <v-container class="pa-0">
       <FilesTree
         :tree="files"
       />

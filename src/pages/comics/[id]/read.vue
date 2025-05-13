@@ -45,6 +45,7 @@
             v-for="item in items"
             :key="item.raw.id"
             v-model:from="item.raw.from"
+            :loading="loading"
             :url="item.raw.url"
             @download="onReloadImage(item.raw)"
             @next="nextPage()"

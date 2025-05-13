@@ -10,16 +10,40 @@
   </v-app-bar>
   <v-main>
     <v-container>
-      <v-img
-        rounded
-        :src="comic.image"
-      />
+      <router-link
+        :to="{
+          name: '/comics/[id]/read',
+          params: { id: comic.id },
+        }"
+      >
+        <v-img
+          rounded
+          :src="comic.image"
+        />
+      </router-link>
       <h3
         v-if="comic.name"
         class="mt-4 font-weight-medium"
       >
         {{ comic.name }}
+        <v-icon
+          icon="$copy"
+          size="20"
+          @click="onCopy(comic.name)"
+        />
       </h3>
+      <p
+        v-if="comic.url"
+        class="mt-2"
+      >
+        <a :href="comic.url">Ссылка на комикс</a>
+        <v-icon
+          class="ml-2"
+          icon="$copy"
+          size="20"
+          @click="onCopy(comic.url)"
+        />
+      </p>
       <p
         v-if="comic.authors.length"
         class="mt-2 d-flex flex-wrap ga-1 align-center"
@@ -96,6 +120,7 @@
 <script lang="ts" setup>
 import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
+import { Clipboard } from '@capacitor/clipboard';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
 
@@ -136,5 +161,10 @@ const deleteComic = async () => {
   } finally {
     loading.value = false;
   }
+}
+
+const onCopy = async (string: string) => {
+  await Clipboard.write({ string });
+  Toast.show({ text: 'Скопировано' })
 }
 </script>

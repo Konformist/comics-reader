@@ -25,7 +25,7 @@
       <v-card>
         <v-card-item class="pb-0">
           <v-text-field
-            v-model="currentTag"
+            v-model.trim="currentTag"
             variant="solo-filled"
           />
         </v-card-item>

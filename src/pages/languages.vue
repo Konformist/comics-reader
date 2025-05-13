@@ -25,7 +25,7 @@
       <v-card>
         <v-card-item class="pb-0">
           <v-text-field
-            v-model="currentLanguage"
+            v-model.trim="currentLanguage"
             variant="solo-filled"
           />
         </v-card-item>

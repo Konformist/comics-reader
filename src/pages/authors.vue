@@ -25,7 +25,7 @@
       <v-card>
         <v-card-item class="pb-0">
           <v-text-field
-            v-model="currentAuthor"
+            v-model.trim="currentAuthor"
             variant="solo-filled"
           />
         </v-card-item>

@@ -17,7 +17,7 @@ import {
   mdiArrowLeft,
   mdiArrowRight, mdiCheckBold,
   mdiCog, mdiContentCopy,
-  mdiContentSave,
+  mdiContentSave, mdiDelete,
   mdiDownload,
   mdiFileMultiple, mdiFilter, mdiHome,
   mdiMenu,
@@ -57,6 +57,7 @@ export default createVuetify({
       'language': mdiTranslate,
       'filter': mdiFilter,
       'check': mdiCheckBold,
+      'delete': mdiDelete,
     },
     sets: {
       mdi,

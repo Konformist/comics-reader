@@ -5,16 +5,27 @@
         <v-list-item
           v-for="item in authors"
           :key="item"
-          :active="item === currentAuthor"
+          :active="item === reserveAuthor"
           :title="item"
         >
           <template #append>
+            <v-list-item-subtitle class="mr-1">
+              {{ authorsCount[item] }}
+            </v-list-item-subtitle>
             <v-list-item-action end>
               <v-btn
+                class="mr-4"
                 density="comfortable"
                 icon="$edit"
                 variant="tonal"
                 @click="clickAuthor(item)"
+              />
+              <v-btn
+                color="error"
+                density="comfortable"
+                icon="$delete"
+                variant="tonal"
+                @click="deleteAuthor(item)"
               />
             </v-list-item-action>
           </template>
@@ -45,6 +56,7 @@
 import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import { dedupe, sortString } from '@/core/utils/array.ts';
+import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
 
 definePage({
@@ -65,7 +77,18 @@ const clickAuthor = (value: string) => {
 }
 
 const comics = ref<ComicModel[]>([]);
-const authors = ref<string[]>();
+const authors = ref<string[]>([]);
+const authorsCount = computed(() => (
+  authors.value.reduce((acc, author) => {
+    acc[author] = 0;
+
+    comics.value.forEach(item => {
+      if (item.authors.includes(author)) acc[author]++;
+    })
+
+    return acc;
+  }, {} as Record<string, number>)
+))
 
 const loadComics = async () => {
   comics.value = await ComicController.loadAll();
@@ -104,4 +127,31 @@ const saveAuthor = async () => {
     loading.value = false;
   }
 };
+
+const deleteAuthor = async (item: string) => {
+  const { value } = await Dialog.confirm({
+    title: 'Подтверждение удаления',
+    message: 'Удалить автора?',
+  });
+
+  if (!value) return;
+
+  try {
+    const changed = comics.value
+      .filter(e => (e.authors.includes(item)))
+      .map(e => new ComicModel(e.getDTO()));
+
+    changed.forEach(comic => {
+      comic.authors = comic.authors.filter(e => e !== item);
+    });
+
+    await saveComics(changed);
+    await loadComics();
+    Toast.show({ text: 'Автор удалён' })
+  } catch (e) {
+    Toast.show({ text: `Ошибка: ${e}` })
+  } finally {
+    loading.value = false;
+  }
+}
 </script>

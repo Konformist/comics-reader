@@ -5,16 +5,27 @@
         <v-list-item
           v-for="item in tags"
           :key="item"
-          :active="item === currentTag"
+          :active="item === reserveTag"
           :title="item"
         >
           <template #append>
+            <v-list-item-subtitle class="mr-1">
+              {{ tagsCount[item] }}
+            </v-list-item-subtitle>
             <v-list-item-action end>
               <v-btn
+                class="mr-4"
                 density="comfortable"
                 icon="$edit"
                 variant="tonal"
                 @click="clickTag(item)"
+              />
+              <v-btn
+                color="error"
+                density="comfortable"
+                icon="$delete"
+                variant="tonal"
+                @click="deleteTag(item)"
               />
             </v-list-item-action>
           </template>
@@ -45,6 +56,7 @@
 import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import { dedupe, sortString } from '@/core/utils/array.ts';
+import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
 
 definePage({
@@ -65,7 +77,18 @@ const clickTag = (value: string) => {
 }
 
 const comics = ref<ComicModel[]>([]);
-const tags = ref<string[]>();
+const tags = ref<string[]>([]);
+const tagsCount = computed(() => (
+  tags.value.reduce((acc, tag) => {
+    acc[tag] = 0;
+
+    comics.value.forEach(item => {
+      if (item.tags.includes(tag)) acc[tag]++;
+    })
+
+    return acc;
+  }, {} as Record<string, number>)
+))
 
 const loadComics = async () => {
   comics.value = await ComicController.loadAll();
@@ -103,4 +126,31 @@ const saveTag = async () => {
     loading.value = false;
   }
 };
+
+const deleteTag = async (item: string) => {
+  const { value } = await Dialog.confirm({
+    title: 'Подтверждение удаления',
+    message: 'Удалить тег?',
+  });
+
+  if (!value) return;
+
+  try {
+    const changed = comics.value
+      .filter(e => (e.tags.includes(item)))
+      .map(e => new ComicModel(e.getDTO()));
+
+    changed.forEach(comic => {
+      comic.tags = comic.tags.filter(e => e !== item);
+    });
+
+    await saveComics(changed);
+    await loadComics();
+    Toast.show({ text: 'Тег удалён' })
+  } catch (e) {
+    Toast.show({ text: `Ошибка: ${e}` })
+  } finally {
+    loading.value = false;
+  }
+}
 </script>

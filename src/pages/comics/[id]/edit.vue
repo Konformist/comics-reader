@@ -69,6 +69,7 @@
       />
       <v-btn
         class="w-100"
+        :disabled="!comic.parser || !comic.url"
         :loading="loading"
         text="Загрузить"
         @click="onLoadInfo()"
@@ -95,6 +96,7 @@
       />
       <v-btn
         class="w-100"
+        :disabled="!comic.imageUrl"
         :loading="loading"
         text="Загрузить"
         @click="onLoadCover()"
@@ -133,7 +135,9 @@ const authors = ref<string[]>([]);
 
 const loadComics = async () => {
   comics.value = await ComicController.loadAll();
-  languages.value = dedupe(comics.value.map(e => e.language)).sort((a, b) => sortString(a, b));
+  languages.value = dedupe(comics.value.map(e => e.language))
+    .filter(Boolean)
+    .sort((a, b) => sortString(a, b));
   tags.value = dedupe(comics.value.map(e => e.tags).flat(1)).sort((a, b) => sortString(a, b));
   authors.value = dedupe(comics.value.map(e => e.authors).flat(1)).sort((a, b) => sortString(a, b));
 }

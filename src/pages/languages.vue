@@ -5,16 +5,27 @@
         <v-list-item
           v-for="item in languages"
           :key="item"
-          :active="item === currentLanguage"
+          :active="item === reserveLanguage"
           :title="item"
         >
           <template #append>
+            <v-list-item-subtitle class="mr-1">
+              {{ languagesCount[item] }}
+            </v-list-item-subtitle>
             <v-list-item-action end>
               <v-btn
+                class="mr-4"
                 density="comfortable"
                 icon="$edit"
                 variant="tonal"
                 @click="clickLanguage(item)"
+              />
+              <v-btn
+                color="error"
+                density="comfortable"
+                icon="$delete"
+                variant="tonal"
+                @click="deleteLanguage(item)"
               />
             </v-list-item-action>
           </template>
@@ -45,6 +56,7 @@
 import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import { dedupe, sortString } from '@/core/utils/array.ts';
+import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
 
 definePage({
@@ -65,11 +77,23 @@ const clickLanguage = (value: string) => {
 }
 
 const comics = ref<ComicModel[]>([]);
-const languages = ref<string[]>();
+const languages = ref<string[]>([]);
+const languagesCount = computed(() => (
+  languages.value.reduce((acc, tag) => {
+    acc[tag] = 0;
+
+    comics.value.forEach(item => {
+      if (item.language === tag) acc[tag]++;
+    })
+
+    return acc;
+  }, {} as Record<string, number>)
+))
 
 const loadComics = async () => {
   comics.value = await ComicController.loadAll();
   languages.value = dedupe(comics.value.map(e => e.language))
+    .filter(Boolean)
     .sort((a, b) => sortString(a, b));
 }
 
@@ -103,4 +127,31 @@ const saveLanguage = async () => {
     loading.value = false;
   }
 };
+
+const deleteLanguage = async (item: string) => {
+  const { value } = await Dialog.confirm({
+    title: 'Подтверждение удаления',
+    message: 'Удалить язык?',
+  });
+
+  if (!value) return;
+
+  try {
+    const changed = comics.value
+      .filter(e => (e.language === item))
+      .map(e => new ComicModel(e.getDTO()));
+
+    changed.forEach(comic => {
+      comic.language = '';
+    });
+
+    await saveComics(changed);
+    await loadComics();
+    Toast.show({ text: 'Язык удалён' })
+  } catch (e) {
+    Toast.show({ text: `Ошибка: ${e}` })
+  } finally {
+    loading.value = false;
+  }
+}
 </script>

@@ -246,7 +246,7 @@ const delPage = async (item: IComicImageDTO) => {
 
   if (index === -1) return;
 
-  const image = comic.value.images.splice(index, 1)[0];
+  const image = comic.value.images[index];
 
   try {
     loading.value = true;
@@ -261,6 +261,7 @@ const delPage = async (item: IComicImageDTO) => {
       await ComicController.deleteFile(comic.value.id, image.id)
     }
 
+    comic.value.images.splice(index, 1);
     await saveComic();
     await loadComic();
     Toast.show({ text: 'Комикс сохранён' })

@@ -31,6 +31,7 @@
         </v-card-item>
         <v-card-actions>
           <v-btn
+            :loading="loading"
             text="Сохранить"
             @click="saveAuthor()"
           />
@@ -80,18 +81,27 @@ const saveComics = async (value: ComicModel[]) => {
   }
 }
 
-const saveAuthor = async () => {
-  const changed = comics.value
-    .filter(e => (e.authors.includes(reserveAuthor.value)))
-    .map(e => new ComicModel(e.getDTO()));
+const loading = ref(false);
 
-  changed.forEach(comic => {
-    comic.authors.push(currentAuthor.value);
-    comic.authors = comic.authors.filter(e => e !== reserveAuthor.value);
-  })
-  await saveComics(changed);
-  await loadComics();
-  dialog.value = false;
-  Toast.show({ text: 'Автор сохранён' })
+const saveAuthor = async () => {
+  try {
+    loading.value = true;
+    const changed = comics.value
+      .filter(e => (e.authors.includes(reserveAuthor.value)))
+      .map(e => new ComicModel(e.getDTO()));
+
+    changed.forEach(comic => {
+      comic.authors.push(currentAuthor.value);
+      comic.authors = comic.authors.filter(e => e !== reserveAuthor.value);
+    })
+    await saveComics(changed);
+    await loadComics();
+    dialog.value = false;
+    Toast.show({ text: 'Автор сохранён' })
+  } catch (e) {
+    Toast.show({ text: `Ошибка: ${e}` })
+  } finally {
+    loading.value = false;
+  }
 };
 </script>

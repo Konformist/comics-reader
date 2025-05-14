@@ -31,6 +31,7 @@
         </v-card-item>
         <v-card-actions>
           <v-btn
+            :loading="loading"
             text="Сохранить"
             @click="saveLanguage()"
           />
@@ -79,17 +80,26 @@ const saveComics = async (value: ComicModel[]) => {
   }
 }
 
-const saveLanguage = async () => {
-  const changed = comics.value
-    .filter(e => (e.language === reserveLanguage.value))
-    .map(e => new ComicModel(e.getDTO()));
+const loading = ref(false);
 
-  changed.forEach(comic => {
-    comic.language = currentLanguage.value;
-  })
-  await saveComics(changed);
-  await loadComics();
-  dialog.value = false;
-  Toast.show({ text: 'Язык сохранён' })
+const saveLanguage = async () => {
+  try {
+    loading.value = true;
+    const changed = comics.value
+      .filter(e => (e.language === reserveLanguage.value))
+      .map(e => new ComicModel(e.getDTO()));
+
+    changed.forEach(comic => {
+      comic.language = currentLanguage.value;
+    })
+    await saveComics(changed);
+    await loadComics();
+    dialog.value = false;
+    Toast.show({ text: 'Язык сохранён' })
+  } catch (e) {
+    Toast.show({ text: `Ошибка: ${e}` })
+  } finally {
+    loading.value = false;
+  }
 };
 </script>

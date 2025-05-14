@@ -14,7 +14,7 @@
         text="Удалить все страницы"
         @click="delPages()"
       />
-      <v-divider class="mt-4 mb-8" />
+      <v-divider class="my-8" />
       <v-textarea
         v-model.trim="imagesTemplate"
         auto-grow
@@ -22,6 +22,7 @@
         :autocomplete="false"
         clearable
         hint="Пример: https://domain.com/12/23/<ID>.jpeg"
+        inputmode="url"
         label="Шаблон для автозаполнения"
         persistent-hint
         rows="2"
@@ -44,8 +45,30 @@
         class="mt-4 w-100"
         :disabled="!canLoadImages"
         :loading="loading"
-        text="Загрузить все страницы"
+        text="Загрузить страницы"
         @click="onLoadImages()"
+      />
+      <v-divider class="my-8" />
+      <v-number-input
+        v-model.number="maxWidth"
+        control-variant="hidden"
+        label="Изменить ширину"
+        :min="0"
+        variant="solo-filled"
+      />
+      <v-number-input
+        v-model.number="maxHeight"
+        control-variant="hidden"
+        label="Изменить высоту"
+        :min="0"
+        variant="solo-filled"
+      />
+      <v-btn
+        class="w-100"
+        :disabled="!maxWidth && !maxHeight"
+        :loading="loading"
+        text="Изменить размер"
+        @click="resizeImages()"
       />
       <v-divider class="my-8" />
       <v-data-iterator
@@ -67,7 +90,7 @@
                 :url="item.raw.url"
                 @delete="delPage(item.raw)"
                 @download="onLoadImage(item.raw)"
-                @reload="loadComic()"
+                @resize="resizeImage(item.raw, $event)"
                 @upload="uploadImage(item.raw, $event)"
               />
             </v-col>
@@ -203,7 +226,7 @@ const onLoadImages = async () => {
     await saveComic();
 
     for (const item of comic.value.images) {
-      if (!item.from) return;
+      if (!item.from || item.url) return;
       const result = await ParserController.loadImageRaw(item.from);
       await ComicController.saveFile(comic.value.id, item.id, result);
     }
@@ -260,6 +283,44 @@ const delPages = async () => {
     await ComicController.deleteFiles(comic.value.id)
     await loadComic();
     Toast.show({ text: 'Комикс сохранён' })
+  } catch (e) {
+    Toast.show({ text: `Ошибка: ${e}` })
+  } finally {
+    loading.value = false;
+  }
+}
+
+const maxWidth = ref(0);
+const maxHeight = ref(0);
+
+const resizeImage = async (item: IComicImageDTO, options: { maxWidth?: number, maxHeight?: number }) => {
+  try {
+    loading.value = true;
+    await ComicController.resizeComicFile(comic.value.id, item.id, {
+      maxWidth: options.maxWidth || undefined,
+      maxHeight: options.maxHeight || undefined,
+    })
+    Toast.show({ text: `Изображение сжато` })
+    await loadComic();
+  } catch (e) {
+    Toast.show({ text: `Ошибка: ${e}` })
+  } finally {
+    loading.value = false;
+  }
+};
+
+const resizeImages = async () => {
+  try {
+    loading.value = true;
+
+    for (const image of comic.value.images) {
+      await ComicController.resizeComicFile(comic.value.id, image.id, {
+        maxWidth: maxWidth.value || undefined,
+        maxHeight: maxHeight.value || undefined,
+      })
+    }
+    Toast.show({ text: `Изображения сжаты` })
+    await loadComic();
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` })
   } finally {

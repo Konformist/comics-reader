@@ -33,7 +33,22 @@ export default class ComicModel extends Entity<IComicDTO> {
     }
   }
 
-  addImage () {
+  get isFilled (): boolean {
+    return this.images.every(e => e.url)
+      && !!this.name
+      && !!this.language
+      && !!this.authors.length
+  }
+
+  get imagesFilled () {
+    return this.images.filter(e => e.url)
+  }
+
+  get imagesEmpty () {
+    return this.images.filter(e => !e.url)
+  }
+
+  addImage (): void {
     this.images.push({
       id: Math.max(...this.images.map(e => e.id), 0) + 1,
       url: '',

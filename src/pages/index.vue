@@ -29,27 +29,9 @@
               class="pa-2"
               cols="6"
             >
-              <v-card
-                height="250"
-                :to="{
-                  name: '/comics/[id]/',
-                  params: { id: item.raw.id }
-                }"
-              >
-                <v-img
-                  class="h-100"
-                  cover
-                  :src="item.raw.image"
-                />
-                <div class="position-absolute bottom-0 w-100">
-                  <div class="position-absolute w-100 h-100 bg-black opacity-40" />
-                  <v-card-text class="position-relative">
-                    <span class="text-ellipsis">
-                      {{ item.raw.name }}
-                    </span>
-                  </v-card-text>
-                </div>
-              </v-card>
+              <ComicGallery
+                :comic="item.raw"
+              />
             </v-col>
           </v-row>
         </template>
@@ -93,6 +75,17 @@
             multiple
             variant="solo-filled"
           />
+          <v-btn-toggle
+            v-model="filters.filling"
+            class="w-100"
+            density="comfortable"
+            divided
+            variant="tonal"
+          >
+            <v-btn class="flex-1-0" text="Все" :value="0" />
+            <v-btn class="flex-1-0" text="Заполненные" :value="1" />
+            <v-btn class="flex-1-0" text="Пустые" :value="2" />
+          </v-btn-toggle>
         </v-card-item>
       </v-card>
     </v-bottom-sheet>
@@ -100,6 +93,7 @@
 </template>
 
 <script lang="ts" setup>
+import ComicGallery from '@/components/ComicGallery.vue';
 import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import { dedupe } from '@/core/utils/array.ts';
@@ -121,6 +115,7 @@ const filters = ref({
   authors: [] as string[],
   languages: [] as string[],
   tags: [] as string[],
+  filling: 0 as 0|1|2,
 })
 
 const languages = ref<string[]>([]);
@@ -140,11 +135,16 @@ const filterSingle = (f: string, s: string[]) => (
 )
 
 const comicsFiltered = computed(() => (
-  comics.value.filter(item => (
-    filterArrays(item.tags, filters.value.tags)
-    && filterArrays(item.authors, filters.value.authors)
-    && filterSingle(item.language, filters.value.languages)
-  ))
+  comics.value.filter(item => {
+    if ((filters.value.filling === 1 && !item.isFilled)
+      || (filters.value.filling === 2 && item.isFilled)) {
+      return false;
+    }
+
+    return filterArrays(item.tags, filters.value.tags)
+      && filterArrays(item.authors, filters.value.authors)
+      && filterSingle(item.language, filters.value.languages)
+  })
 ))
 
 const loadComics = async () => {

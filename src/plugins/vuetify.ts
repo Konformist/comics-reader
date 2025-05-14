@@ -15,7 +15,7 @@ import { aliases, mdi } from 'vuetify/iconsets/mdi-svg';
 import {
   mdiAccount,
   mdiArrowLeft,
-  mdiArrowRight,
+  mdiArrowRight, mdiCheckBold,
   mdiCog, mdiContentCopy,
   mdiContentSave,
   mdiDownload,
@@ -56,6 +56,7 @@ export default createVuetify({
       'author': mdiAccount,
       'language': mdiTranslate,
       'filter': mdiFilter,
+      'check': mdiCheckBold,
     },
     sets: {
       mdi,

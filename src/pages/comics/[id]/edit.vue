@@ -13,6 +13,8 @@
         v-model.trim="comic.url"
         auto-grow
         :autocapitalize="false"
+        :autocomplete="false"
+        inputmode="url"
         label="Ссылка на комикс"
         rows="2"
       />
@@ -85,6 +87,9 @@
       <v-textarea
         v-model.trim="comic.imageUrl"
         auto-grow
+        :autocapitalize="false"
+        :autocomplete="false"
+        inputmode="url"
         label="Ссылка на картинку"
         rows="2"
       />

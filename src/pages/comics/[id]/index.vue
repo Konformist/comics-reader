@@ -69,6 +69,8 @@
       <p class="mt-2 d-flex flex-wrap ga-1 align-center">
         <b class="font-weight-medium">Страниц:</b>
         <v-chip :text="comic.images.length" />
+        <b class="font-weight-medium">Заполненность:</b>
+        <v-chip :text="`${comic.imagesFilled.length} / ${comic.images.length}`" />
       </p>
       <v-btn
         class="mt-4 w-100"

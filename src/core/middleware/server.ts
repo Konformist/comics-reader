@@ -79,7 +79,7 @@ const getParsersData = async () => {
     result = migrationParsers(result)
   }
 
-  parsersRaw = result.items
+  parsersRaw = result.items || [];
 
   if (result.version !== PARSERS_VERSION) {
     await setParsersData();
@@ -237,7 +237,7 @@ const getComicsData = async () => {
     result = await migrationComics(result)
   }
 
-  comicsRaw = result.items;
+  comicsRaw = result.items || [];
 
   if (result.version !== COMICS_VERSION) {
     await setComicsData();

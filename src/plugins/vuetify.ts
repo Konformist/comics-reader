@@ -115,10 +115,22 @@ export default createVuetify({
     VSelect: {
       density: 'comfortable',
       variant: 'solo',
+      chips: true,
+      closableChips: true,
+      menuProps: {
+        scrim: true,
+        locationStrategy: 'static',
+        height: '100vh',
+        width: '100vw',
+        contentProps: {
+          style: 'margin: 16px; width: calc(100vw - 32px); height: calc(100vh - 32px); max-height: inherit',
+        },
+      },
     },
     VCombobox: {
       density: 'comfortable',
       variant: 'solo',
+      closableChips: true,
     },
     VNumberInput: {
       density: 'comfortable',

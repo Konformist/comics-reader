@@ -42,7 +42,7 @@
 
 <script setup lang="ts">
 import ComicController from '@/core/entities/comic/ComicController.ts';
-import type ComicModel from '@/core/entities/comic/ComicModel.ts';
+import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import { dedupe } from '@/core/utils/array.ts';
 import { Toast } from '@capacitor/toast';
 
@@ -73,19 +73,21 @@ const loadComics = async () => {
 
 loadComics();
 
-const saveComics = async () => {
-  for (const comic of comics.value) {
+const saveComics = async (value: ComicModel[]) => {
+  for (const comic of value) {
     await ComicController.save(comic);
   }
 }
 
 const saveLanguage = async () => {
-  comics.value.forEach(comic => {
-    if (comic.language === reserveLanguage.value) {
-      comic.language = currentLanguage.value;
-    }
+  const changed = comics.value
+    .filter(e => (e.language === reserveLanguage.value))
+    .map(e => new ComicModel(e.getDTO()));
+
+  changed.forEach(comic => {
+    comic.language = currentLanguage.value;
   })
-  await saveComics();
+  await saveComics(changed);
   await loadComics();
   dialog.value = false;
   Toast.show({ text: 'Язык сохранён' })

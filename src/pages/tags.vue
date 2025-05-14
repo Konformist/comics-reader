@@ -42,7 +42,7 @@
 
 <script setup lang="ts">
 import ComicController from '@/core/entities/comic/ComicController.ts';
-import type ComicModel from '@/core/entities/comic/ComicModel.ts';
+import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import { dedupe } from '@/core/utils/array.ts';
 import { Toast } from '@capacitor/toast';
 
@@ -74,20 +74,22 @@ const loadComics = async () => {
 
 loadComics();
 
-const saveComics = async () => {
-  for (const comic of comics.value) {
+const saveComics = async (value: ComicModel[]) => {
+  for (const comic of value) {
     await ComicController.save(comic);
   }
 }
 
 const saveTag = async () => {
-  comics.value.forEach(comic => {
-    if (comic.tags.includes(reserveTag.value)) {
-      comic.tags.push(currentTag.value);
-      comic.tags = comic.tags.filter(e => e !== reserveTag.value);
-    }
+  const changed = comics.value
+    .filter(e => (e.tags.includes(reserveTag.value)))
+    .map(e => new ComicModel(e.getDTO()));
+
+  changed.forEach(comic => {
+    comic.tags.push(currentTag.value);
+    comic.tags = comic.tags.filter(e => e !== reserveTag.value);
   })
-  await saveComics();
+  await saveComics(changed);
   await loadComics();
   dialog.value = false;
   Toast.show({ text: 'Тег сохранён' })

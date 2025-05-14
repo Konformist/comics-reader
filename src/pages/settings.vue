@@ -1,8 +1,12 @@
 <template>
   <v-main>
     <v-container>
+      <p class="d-flex justify-space-between">
+        <span class="font-weight-medium">Версия frontend</span>
+        <span>v{{ appStore.frontVersion }}</span>
+      </p>
       <v-btn
-        class="w-100"
+        class="mt-4 w-100"
         text="Забекапить данные"
         @click="setBackup()"
       />
@@ -31,8 +35,11 @@
 import type { IDirectory } from '@/core/entities/file/FileTypes.ts';
 import server from '@/core/middleware/server.ts';
 import { BACKUPS_DIRECTORY } from '@/core/middleware/variables.ts';
+import { useAppStore } from '@/stores/app.ts';
 import { Directory, Filesystem } from '@capacitor/filesystem';
 import { Toast } from '@capacitor/toast';
+
+const appStore = useAppStore();
 
 definePage({
   meta: {

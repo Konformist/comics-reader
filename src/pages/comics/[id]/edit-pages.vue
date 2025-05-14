@@ -226,7 +226,7 @@ const onLoadImages = async () => {
     await saveComic();
 
     for (const item of comic.value.images) {
-      if (!item.from || item.url) return;
+      if (!item.from || item.url) continue;
       const result = await ParserController.loadImageRaw(item.from);
       await ComicController.saveFile(comic.value.id, item.id, result);
     }

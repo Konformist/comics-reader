@@ -56,8 +56,6 @@
         <v-card-item>
           <v-select
             v-model="comicsStore.filters.authors"
-            chips
-            closable-chips
             :items="authors"
             label="Авторы"
             multiple
@@ -65,8 +63,6 @@
           />
           <v-select
             v-model="comicsStore.filters.languages"
-            chips
-            closable-chips
             :items="languages"
             label="Языки"
             multiple
@@ -74,8 +70,6 @@
           />
           <v-select
             v-model="comicsStore.filters.tags"
-            chips
-            closable-chips
             :items="tags"
             label="Теги"
             multiple

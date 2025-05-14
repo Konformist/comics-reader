@@ -118,11 +118,33 @@ const loadComic = async () => {
 
 loadComic();
 
+let readTimer = 0;
+
 const startTimer = (nextPage: () => void) => {
   if (!appStore.settings.autoReading) return;
 
-  setTimeout(nextPage, appStore.settings.autoReadingTimeout * 1000);
+  readTimer = setTimeout(() => {
+    nextPage()
+    readTimer = 0;
+  }, appStore.settings.autoReadingTimeout * 1000);
 }
+
+onBeforeUnmount(() => {
+  if (readTimer) {
+    clearTimeout(readTimer);
+    readTimer = 0;
+  }
+})
+
+watch(
+  currentPage,
+  () => {
+    if (readTimer) {
+      clearTimeout(readTimer);
+      readTimer = 0;
+    }
+  }
+)
 
 const loading = ref(false);
 

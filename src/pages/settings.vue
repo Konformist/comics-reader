@@ -23,6 +23,7 @@
         control-variant="split"
         :disabled="!appStore.settings.autoReading"
         label="До перелистывания"
+        :min="0"
         suffix="с"
       />
       <v-btn

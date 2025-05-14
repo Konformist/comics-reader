@@ -1,5 +1,5 @@
 <template>
-  <v-main>
+  <v-main scrollable>
     <v-container v-if="comic">
       <v-select
         v-model="comic.parser"
@@ -70,8 +70,8 @@
       <v-btn
         class="w-100"
         :loading="loading"
-        text="Перезагрузить"
-        @click="onReloadInfo()"
+        text="Загрузить"
+        @click="onLoadInfo()"
       />
       <v-divider class="my-8" />
       <v-img
@@ -96,8 +96,8 @@
       <v-btn
         class="w-100"
         :loading="loading"
-        text="Перезагрузить"
-        @click="onReloadCover()"
+        text="Загрузить"
+        @click="onLoadCover()"
       />
     </v-container>
     <v-fab
@@ -113,7 +113,7 @@ import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import ParserController from '@/core/entities/parser/ParserController.ts';
 import ParserModel from '@/core/entities/parser/ParserModel.ts';
-import { dedupe } from '@/core/utils/array.ts';
+import { dedupe, sortString } from '@/core/utils/array.ts';
 import { Toast } from '@capacitor/toast';
 
 definePage({
@@ -133,9 +133,9 @@ const authors = ref<string[]>([]);
 
 const loadComics = async () => {
   comics.value = await ComicController.loadAll();
-  languages.value = dedupe(comics.value.map(e => e.language)).sort();
-  tags.value = dedupe(comics.value.map(e => e.tags).flat(1)).sort();
-  authors.value = dedupe(comics.value.map(e => e.authors).flat(1)).sort();
+  languages.value = dedupe(comics.value.map(e => e.language)).sort((a, b) => sortString(a, b));
+  tags.value = dedupe(comics.value.map(e => e.tags).flat(1)).sort((a, b) => sortString(a, b));
+  authors.value = dedupe(comics.value.map(e => e.authors).flat(1)).sort((a, b) => sortString(a, b));
 }
 
 const comicId = +(route.params.id || 0);
@@ -201,7 +201,7 @@ const saveComic = async () => {
 
 const loading = ref(false);
 
-const onReloadInfo = async () => {
+const onLoadInfo = async () => {
   if (!comic.value || !parser.value) return;
 
   try {
@@ -211,6 +211,25 @@ const onReloadInfo = async () => {
 
     if (comic.value.imageUrl) delete comicDTO.imageUrl;
     if (comic.value.images.length) delete comicDTO.images;
+
+    const language = languages.value.find(e => e.toLowerCase() === comicDTO.language?.toLowerCase());
+    if (language) comicDTO.language = language;
+
+    if (comicDTO.authors?.length) {
+      comicDTO.authors = comicDTO.authors.map(item => {
+        const newItem = authors.value.find(e => e.toLowerCase() === item.toLowerCase());
+
+        return newItem || item;
+      });
+    }
+
+    if (comicDTO.tags?.length) {
+      comicDTO.tags = comicDTO.tags.map(item => {
+        const newItem = tags.value.find(e => e.toLowerCase() === item.toLowerCase());
+
+        return newItem || item;
+      });
+    }
 
     Object.assign(comic.value, comicDTO);
     await saveComic();
@@ -226,12 +245,13 @@ const onReloadInfo = async () => {
 const uploadCover = async (event: File|File[]) => {
   if (!event || Array.isArray(event)) return;
 
+  await saveComic();
   await ComicController.saveCover(comic.value.id, event);
   await loadComic();
   Toast.show({ text: 'Комикс сохранён' })
 }
 
-const onReloadCover = async () => {
+const onLoadCover = async () => {
   if (!comic.value.imageUrl) return;
 
   try {

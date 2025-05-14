@@ -1,5 +1,5 @@
 <template>
-  <v-main>
+  <v-main scrollable>
     <v-toolbar density="compact">
       <v-toolbar-title
         v-if="comics.length !== comicsFiltered.length"
@@ -55,28 +55,28 @@
       <v-card>
         <v-card-item>
           <v-select
-            v-model="filters.authors"
+            v-model="comicsStore.filters.authors"
             :items="authors"
             label="Авторы"
             multiple
             variant="solo-filled"
           />
           <v-select
-            v-model="filters.languages"
+            v-model="comicsStore.filters.languages"
             :items="languages"
             label="Языки"
             multiple
             variant="solo-filled"
           />
           <v-select
-            v-model="filters.tags"
+            v-model="comicsStore.filters.tags"
             :items="tags"
             label="Теги"
             multiple
             variant="solo-filled"
           />
           <v-btn-toggle
-            v-model="filters.filling"
+            v-model="comicsStore.filters.filling"
             class="w-100"
             density="comfortable"
             divided
@@ -96,7 +96,8 @@
 import ComicGallery from '@/components/ComicGallery.vue';
 import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
-import { dedupe } from '@/core/utils/array.ts';
+import { dedupe, sortString } from '@/core/utils/array.ts';
+import { useComicsStore } from '@/stores/comics.ts';
 import { Toast } from '@capacitor/toast';
 
 definePage({
@@ -106,17 +107,11 @@ definePage({
 })
 
 const router = useRouter();
+const comicsStore = useComicsStore();
 
 const currentPage = ref(1);
 
 const filtersSheet = ref(false)
-
-const filters = ref({
-  authors: [] as string[],
-  languages: [] as string[],
-  tags: [] as string[],
-  filling: 0 as 0|1|2,
-})
 
 const languages = ref<string[]>([]);
 const tags = ref<string[]>([]);
@@ -136,22 +131,22 @@ const filterSingle = (f: string, s: string[]) => (
 
 const comicsFiltered = computed(() => (
   comics.value.filter(item => {
-    if ((filters.value.filling === 1 && !item.isFilled)
-      || (filters.value.filling === 2 && item.isFilled)) {
+    if ((comicsStore.filters.filling === 1 && !item.isFilled)
+      || (comicsStore.filters.filling === 2 && item.isFilled)) {
       return false;
     }
 
-    return filterArrays(item.tags, filters.value.tags)
-      && filterArrays(item.authors, filters.value.authors)
-      && filterSingle(item.language, filters.value.languages)
+    return filterArrays(item.tags, comicsStore.filters.tags)
+      && filterArrays(item.authors, comicsStore.filters.authors)
+      && filterSingle(item.language, comicsStore.filters.languages)
   })
 ))
 
 const loadComics = async () => {
   comics.value = await ComicController.loadAll();
-  languages.value = dedupe(comics.value.map(e => e.language)).sort();
-  tags.value = dedupe(comics.value.map(e => e.tags).flat(1)).sort();
-  authors.value = dedupe(comics.value.map(e => e.authors).flat(1)).sort();
+  languages.value = dedupe(comics.value.map(e => e.language)).sort((a ,b) => sortString(a, b));
+  tags.value = dedupe(comics.value.map(e => e.tags).flat(1)).sort((a ,b) => sortString(a, b));
+  authors.value = dedupe(comics.value.map(e => e.authors).flat(1)).sort((a ,b) => sortString(a, b));
 }
 
 loadComics();

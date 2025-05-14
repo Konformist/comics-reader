@@ -1,3 +1,6 @@
+export const SETTINGS_STORE = 'settings';
+export const SETTINGS_VERSION = 1;
+
 export const PARSERS_STORE = 'parsers';
 export const PARSERS_VERSION = 1;
 

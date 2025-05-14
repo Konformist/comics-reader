@@ -1,5 +1,5 @@
 <template>
-  <v-main>
+  <v-main scrollable>
     <v-container>
       <v-number-input
         v-model.number="pages"

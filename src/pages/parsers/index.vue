@@ -1,5 +1,5 @@
 <template>
-  <v-main>
+  <v-main scrollable>
     <v-container class="pa-0">
       <v-list v-if="parsers.length">
         <v-list-item

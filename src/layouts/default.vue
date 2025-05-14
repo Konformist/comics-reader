@@ -56,12 +56,10 @@
   </v-navigation-drawer>
   <router-view v-slot="{ Component, route }">
     <v-slide-x-transition leave-absolute>
-      <keep-alive include="/">
-        <component
-          :is="Component"
-          :key="route"
-        />
-      </keep-alive>
+      <component
+        :is="Component"
+        :key="route"
+      />
     </v-slide-x-transition>
   </router-view>
   <BottomNavigation />

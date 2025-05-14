@@ -1,5 +1,8 @@
 <template>
-  <v-list :class="isChild ? 'pl-4' : ''">
+  <v-list
+    :class="isChild ? 'pl-4' : ''"
+    :rounded="rounded"
+  >
     <template
       v-for="(item, index) in tree"
       :key="item.path"
@@ -24,5 +27,6 @@ defineProps<{
   tree: Array<IDirectory|IFile>
   parent?: string
   isChild?: boolean
+  rounded?: boolean
 }>()
 </script>

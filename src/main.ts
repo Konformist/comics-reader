@@ -7,6 +7,7 @@
 import server from '@/core/middleware/server.ts';
 // Plugins
 import { registerPlugins } from '@/plugins'
+import { useAppStore } from '@/stores/app.ts';
 
 // Components
 import App from './App.vue'
@@ -24,6 +25,7 @@ const init = async () => {
   registerPlugins(app)
 
   await server.autoBackup();
+  await useAppStore().loadSettings();
 
   app.mount('#app')
 }

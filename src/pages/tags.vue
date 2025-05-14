@@ -1,5 +1,5 @@
 <template>
-  <v-main>
+  <v-main scrollable>
     <v-container class="pa-0">
       <v-list activatable>
         <v-list-item
@@ -44,7 +44,7 @@
 <script setup lang="ts">
 import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
-import { dedupe } from '@/core/utils/array.ts';
+import { dedupe, sortString } from '@/core/utils/array.ts';
 import { Toast } from '@capacitor/toast';
 
 definePage({
@@ -70,7 +70,7 @@ const tags = ref<string[]>();
 const loadComics = async () => {
   comics.value = await ComicController.loadAll();
   tags.value = dedupe(comics.value.map(e => e.tags).flat(1))
-    .sort();
+    .sort((a, b) => sortString(a, b));
 }
 
 loadComics();

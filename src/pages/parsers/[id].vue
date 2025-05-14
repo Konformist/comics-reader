@@ -1,5 +1,5 @@
 <template>
-  <v-main>
+  <v-main scrollable>
     <v-container>
       <v-text-field
         v-model.trim="parser.name"

@@ -1,18 +1,53 @@
 import type { IComicDTO } from '@/core/entities/comic/ComicTypes.ts';
 import type { IDirectory, IFile } from '@/core/entities/file/FileTypes.ts';
 import type { IParserDTO } from '@/core/entities/parser/ParserTypes.ts';
+import type { ISettingsDTO } from '@/core/entities/settings/SettingsTypes.ts';
 import {
   BACKUPS_DIRECTORY,
   COMICS_FILES_DIRECTORY,
   COMICS_STORE,
   COMICS_VERSION,
   PARSERS_STORE,
-  PARSERS_VERSION,
+  PARSERS_VERSION, SETTINGS_STORE, SETTINGS_VERSION,
 } from '@/core/middleware/variables.ts';
 import { fileToBase64, getFileUrl, optimizeImage } from '@/core/utils/image.ts';
 import { ImageManipulator } from '@capacitor-community/image-manipulator';
 import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 import { Preferences } from '@capacitor/preferences';
+
+/// settings
+let settingsRaw: ISettingsDTO|null = null;
+
+const setSettingsData = async (): Promise<void> => {
+  await Preferences.set({
+    key: SETTINGS_STORE,
+    value: JSON.stringify({
+      version: SETTINGS_VERSION,
+      item: settingsRaw,
+    }),
+  })
+};
+
+const getSettingsData = async (): Promise<ISettingsDTO|undefined> => {
+  const store = await Preferences.get({ key: SETTINGS_STORE });
+
+  if (!store.value) return undefined;
+
+  return JSON.parse(store.value).item;
+}
+
+const setSettings = async (value: ISettingsDTO): Promise<void> => {
+  if (settingsRaw) Object.assign(settingsRaw, value);
+  else settingsRaw = value;
+
+  await setSettingsData()
+};
+
+const getSettings = async (): Promise<ISettingsDTO|undefined> => {
+  if (!settingsRaw) return await getSettingsData();
+
+  return settingsRaw ?? undefined;
+};
 
 /// Parsers
 
@@ -402,6 +437,7 @@ const setBackup = async (): Promise<void> => {
     encoding: Encoding.UTF8,
     recursive: true,
     data: JSON.stringify({
+      settings: settingsRaw,
       parsers: {
         version: PARSERS_VERSION,
         items: parsersRaw,
@@ -437,13 +473,17 @@ const getBackup = async (path: string): Promise<void> => {
 
   const parsedData = JSON.parse(result.data as string);
 
-  parsersRaw = parsedData.parsers.items;
+  parsersRaw = parsedData.parsers?.items || [];
   await setParsersData();
-  comicsRaw = parsedData.comics.items;
+  comicsRaw = parsedData.comics?.items || [];
   await setComicsData();
+  settingsRaw = parsedData.settings?.item ?? null;
+  await setSettingsData()
 }
 
 export default {
+  setSettings,
+  getSettings,
   getTree,
   addParser,
   setParser,

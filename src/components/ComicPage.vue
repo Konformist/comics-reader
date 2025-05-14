@@ -15,6 +15,7 @@
     v-if="url"
     :src="url"
     @error="error = true"
+    @load="$emit('loaded')"
     @loadstart="error = false"
   >
     <div
@@ -32,9 +33,10 @@
 
 <script setup lang="ts">
 const emit = defineEmits<{
-  (e: 'next', v: void): void;
-  (e: 'prev', v: void): void;
-  (e: 'download', v: void): void;
+  (e: 'loaded', v: void): void
+  (e: 'next', v: void): void
+  (e: 'prev', v: void): void
+  (e: 'download', v: void): void
 }>()
 const { url, from } = defineProps<{
   loading: boolean

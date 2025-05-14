@@ -1,5 +1,5 @@
 <template>
-  <v-main>
+  <v-main scrollable>
     <v-container class="pa-0">
       <v-data-iterator
         v-model:page="currentPage"
@@ -39,6 +39,7 @@
             :loading="loading"
             :url="item.raw.url"
             @download="onLoadImage(item.raw)"
+            @loaded="startTimer(nextPage)"
             @next="nextPage()"
             @prev="prevPage()"
           />
@@ -79,6 +80,7 @@ import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import type { IComicImageDTO } from '@/core/entities/comic/ComicTypes.ts';
 import ParserController from '@/core/entities/parser/ParserController.ts';
+import { useAppStore } from '@/stores/app.ts';
 import { KeepAwake } from '@capacitor-community/keep-awake';
 import { Toast } from '@capacitor/toast';
 
@@ -90,6 +92,7 @@ definePage({
 })
 
 const route = useRoute('/comics/[id]/read');
+const appStore = useAppStore();
 
 onMounted(async () => {
   if ((await KeepAwake.isSupported()).isSupported) {
@@ -114,6 +117,12 @@ const loadComic = async () => {
 }
 
 loadComic();
+
+const startTimer = (nextPage: () => void) => {
+  if (!appStore.settings.autoReading) return;
+
+  setTimeout(nextPage, appStore.settings.autoReadingTimeout * 1000);
+}
 
 const loading = ref(false);
 

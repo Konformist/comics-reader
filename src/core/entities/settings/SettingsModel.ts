@@ -1,0 +1,23 @@
+import Entity from '@/core/entities/Entity.ts';
+import type { ISettingsDTO } from '@/core/entities/settings/SettingsTypes.ts';
+
+export default class SettingsModel extends Entity<ISettingsDTO> {
+  public autoReading: boolean = false;
+  public autoReadingTimeout: number = 10;
+
+  constructor (dto?: Partial<ISettingsDTO>) {
+    super();
+
+    if (dto) {
+      this.autoReading = dto.autoReading ?? false;
+      this.autoReadingTimeout = dto.autoReadingTimeout ?? 10;
+    }
+  }
+
+  getDTO (): ISettingsDTO {
+    return {
+      autoReading: this.autoReading,
+      autoReadingTimeout: this.autoReadingTimeout,
+    };
+  }
+}

@@ -1,18 +1,45 @@
 <template>
-  <v-main>
+  <v-main scrollable>
     <v-container>
       <p class="d-flex justify-space-between">
-        <span class="font-weight-medium">Версия frontend</span>
+        <span class="font-weight-medium">Версия FrontEnd</span>
         <span>v{{ appStore.frontVersion }}</span>
       </p>
+      <v-divider class="mt-8 mb-4" />
+      <v-label class="w-100" text="Авто листание">
+        <v-switch
+          v-model="appStore.settings.autoReading"
+          class="ml-auto"
+          color="primary"
+          :false-value="false"
+          hide-details
+          inset
+          :true-value="true"
+        />
+      </v-label>
+      <v-number-input
+        v-model.number="appStore.settings.autoReadingTimeout"
+        class="mt-2"
+        control-variant="split"
+        :disabled="!appStore.settings.autoReading"
+        label="До перелистывания"
+        suffix="с"
+      />
       <v-btn
-        class="mt-4 w-100"
+        class="w-100"
+        text="Сохранить"
+        @click="appStore.saveSettings()"
+      />
+      <v-divider class="my-8" />
+      <v-btn
+        class="w-100"
         text="Забекапить данные"
         @click="setBackup()"
       />
       <FilesTree
         v-model="backupFile"
         class="mt-4"
+        rounded
         :tree="backups"
       />
       <v-btn

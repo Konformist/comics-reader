@@ -143,7 +143,7 @@ watch(
       clearTimeout(readTimer);
       readTimer = 0;
     }
-  }
+  },
 )
 
 const loading = ref(false);

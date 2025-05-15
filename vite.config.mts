@@ -110,7 +110,7 @@ export default defineConfig(({ mode }) => {
           target: process.env.VITE_TEST_SITE,
           changeOrigin: true,
           followRedirects: true,
-          rewrite (path: string) {
+          rewrite(path: string) {
             return path.replace('/test-url', '');
           },
         },
@@ -118,7 +118,7 @@ export default defineConfig(({ mode }) => {
           target: process.env.VITE_TEST_IMAGE_SITE,
           changeOrigin: true,
           followRedirects: true,
-          rewrite (path: string) {
+          rewrite(path: string) {
             return path.replace('/test-image-url', '');
           },
         },

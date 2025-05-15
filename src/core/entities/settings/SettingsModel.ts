@@ -5,7 +5,7 @@ export default class SettingsModel extends Entity<ISettingsDTO> {
   public autoReading: boolean = false;
   public autoReadingTimeout: number = 10;
 
-  constructor (dto?: Partial<ISettingsDTO>) {
+  constructor(dto?: Partial<ISettingsDTO>) {
     super();
 
     if (dto) {
@@ -14,7 +14,7 @@ export default class SettingsModel extends Entity<ISettingsDTO> {
     }
   }
 
-  getDTO (): ISettingsDTO {
+  getDTO(): ISettingsDTO {
     return {
       autoReading: this.autoReading,
       autoReadingTimeout: this.autoReadingTimeout,

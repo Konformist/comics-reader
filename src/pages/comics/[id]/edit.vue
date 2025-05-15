@@ -171,10 +171,10 @@ onMounted(async () => {
 });
 
 const keyLanguage = computed({
-  get () {
+  get() {
     return comic.value?.override.language || parser.value?.language || '';
   },
-  set (value) {
+  set(value) {
     if (comic.value) {
       comic.value.override.language = value;
     }
@@ -182,19 +182,19 @@ const keyLanguage = computed({
 });
 
 const keyAuthors = computed({
-  get () {
+  get() {
     return comic.value.override.authors || parser.value.authors || '';
   },
-  set (value) {
+  set(value) {
     comic.value.override.authors = value;
   },
 });
 
 const keyTags = computed({
-  get () {
+  get() {
     return comic.value.override.tags || parser.value.tags || '';
   },
-  set (value) {
+  set(value) {
     comic.value.override.tags = value;
   },
 });

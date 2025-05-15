@@ -10,11 +10,11 @@ export const useAppStore = defineStore('app', {
   }),
 
   actions: {
-    async saveSettings () {
+    async saveSettings() {
       await server.setSettings(this.settings.getDTO());
     },
 
-    async loadSettings () {
+    async loadSettings() {
       const result = await server.getSettings();
 
       this.settings = new SettingsModel(result);

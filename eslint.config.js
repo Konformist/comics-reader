@@ -24,6 +24,11 @@ export default defineConfig([
       '@stylistic/arrow-parens': ['error', 'always'],
       '@stylistic/no-confusing-arrow': 'error',
       '@stylistic/semi': 'error',
+      '@stylistic/space-before-function-paren': ['error', {
+        'anonymous': 'always',
+        'named': 'never',
+        'asyncArrow': 'always',
+      }],
 
       'vue/script-indent': ['error', 2],
     },

@@ -146,10 +146,10 @@ const loadComic = async () => {
 loadComic();
 
 const pages = computed({
-  get () {
+  get() {
     return comic.value.images.length;
   },
-  set (value) {
+  set(value) {
     const diff = value - comic.value.images.length;
 
     if (diff > 0) {

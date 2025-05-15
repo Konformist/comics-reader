@@ -7,29 +7,29 @@ import { Filesystem } from '@capacitor/filesystem';
 import { Directory } from '@capacitor/filesystem/dist/esm/definitions';
 
 export default class ParserController {
-  static async loadAll (): Promise<ParserModel[]> {
+  static async loadAll(): Promise<ParserModel[]> {
     const result = await server.getParsersAll();
 
     return result.map((e) => new ParserModel(e));
   }
 
-  static async load (id: number): Promise<ParserModel> {
+  static async load(id: number): Promise<ParserModel> {
     const result = await server.getParser(id);
 
     return new ParserModel(result);
   }
 
-  static save (model: ParserModel): Promise<number|void> {
+  static save(model: ParserModel): Promise<number|void> {
     return model.id
       ? server.setParser(model.getDTO())
       : server.addParser(model.getDTO());
   }
 
-  static delete (id: number): Promise<void> {
+  static delete(id: number): Promise<void> {
     return server.delParser(id);
   }
 
-  static async loadComicRaw (url: string): Promise<string> {
+  static async loadComicRaw(url: string): Promise<string> {
     const newUrl = import.meta.env.DEV
       ? url.replace(import.meta.env.VITE_TEST_SITE, '/test-url')
       : url;
@@ -40,7 +40,7 @@ export default class ParserController {
     return result.data as string;
   }
 
-  static async loadImageRaw (url: string): Promise<File> {
+  static async loadImageRaw(url: string): Promise<File> {
     const newUrl = import.meta.env.DEV
       ? url.replace(import.meta.env.VITE_TEST_IMAGE_SITE, '/test-image-url')
       : url;
@@ -56,7 +56,7 @@ export default class ParserController {
   }
 
   /// old
-  static async loadComic (url: string): Promise<string> {
+  static async loadComic(url: string): Promise<string> {
     const newUrl = import.meta.env.DEV
       ? url.replace(import.meta.env.VITE_TEST_SITE, '/test-url')
       : url;
@@ -67,7 +67,7 @@ export default class ParserController {
     return result.data as string;
   }
 
-  static async loadImage (url: string): Promise<Blob> {
+  static async loadImage(url: string): Promise<Blob> {
     const newUrl = import.meta.env.DEV
       ? url.replace(import.meta.env.VITE_TEST_IMAGE_SITE, '/test-image-url')
       : url;
@@ -82,7 +82,7 @@ export default class ParserController {
     return result.data as Blob;
   }
 
-  static async writeFS (path: string, file: Blob): Promise<string> {
+  static async writeFS(path: string, file: Blob): Promise<string> {
     const ret = await Filesystem.writeFile({
       path,
       directory: Directory.Data,
@@ -93,7 +93,7 @@ export default class ParserController {
     return ret.uri;
   }
 
-  static getExtension (v: string) {
+  static getExtension(v: string) {
     if (v.includes('.jpg')) return 'jpg';
     else if (v.includes('.jpeg')) return 'jpeg';
     else if (v.includes('.gif')) return 'gif';
@@ -102,16 +102,16 @@ export default class ParserController {
     else return '';
   }
 
-  static writeFSCover (id: number, ext: string, blob: Blob) {
+  static writeFSCover(id: number, ext: string, blob: Blob) {
     return ParserController.writeFS(`${id}/cover.${ext}`, blob);
   }
 
-  static writeFSPage (id: number, image: IComicImageDTO, blob: Blob) {
+  static writeFSPage(id: number, image: IComicImageDTO, blob: Blob) {
     const ext = ParserController.getExtension(image.from);
     return ParserController.writeFS(`${id}/${image.id}.${ext}`, blob);
   }
 
-  static deleteFS (uri: string) {
+  static deleteFS(uri: string) {
     return Filesystem.deleteFile({ path: uri });
   }
 }

@@ -1,3 +1,3 @@
 export default abstract class Entity<T> {
-  abstract getDTO (): T;
+  abstract getDTO(): T;
 }

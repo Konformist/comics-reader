@@ -14,7 +14,7 @@ export default class ParserModel extends Entity<IParserDTO> {
   public tags: string = '';
   public tagsText: string = '';
 
-  constructor (dto?: Partial<IParserDTO>) {
+  constructor(dto?: Partial<IParserDTO>) {
     super();
 
     if (dto) {
@@ -31,24 +31,24 @@ export default class ParserModel extends Entity<IParserDTO> {
     }
   }
 
-  cleanHTML (value: string): string {
+  cleanHTML(value: string): string {
     return value
       .replaceAll(/<head>(?:.|\n|\t)*?<\/head>/gm, '')
       .replaceAll(/<style.*?>(?:.|\n|\t)*?<\/style>/gm, '')
       .replaceAll(/<script.*?>(?:.|\n|\t)*?<\/script>/gm, '');
   }
 
-  cleanStr (str: string): string {
+  cleanStr(str: string): string {
     return str
       .trim()
       .replaceAll(/\s+/g, ' ');
   }
 
-  getParsedString (data: HTMLElement, item: string) {
+  getParsedString(data: HTMLElement, item: string) {
     return this.cleanStr(data.querySelector(item)?.textContent || '');
   }
 
-  getParsedArray (data: HTMLElement, item: string, text: string) {
+  getParsedArray(data: HTMLElement, item: string, text: string) {
     return [...data.querySelectorAll<HTMLElement>(item)].map((e) => {
       if (text)
         return this.getParsedString(e, text);
@@ -57,19 +57,19 @@ export default class ParserModel extends Entity<IParserDTO> {
     });
   }
 
-  parseTitle (data: HTMLElement, item?: string) {
+  parseTitle(data: HTMLElement, item?: string) {
     return item || this.title
       ? this.getParsedString(data, item || this.title)
       : '';
   }
 
-  parseImage (data: HTMLElement, item?: string) {
+  parseImage(data: HTMLElement, item?: string) {
     return item || this.image
       ? data.querySelector<HTMLImageElement>(item || this.image)?.src || ''
       : '';
   }
 
-  parseImages (data: HTMLElement, item?: string) {
+  parseImages(data: HTMLElement, item?: string) {
     return item || this.images
       ? [...data.querySelectorAll(item || this.images)].map((e) => {
         return e.querySelector<HTMLImageElement>('img')?.src || '';
@@ -77,25 +77,25 @@ export default class ParserModel extends Entity<IParserDTO> {
       : [];
   }
 
-  parseLanguage (data: HTMLElement, item?: string) {
+  parseLanguage(data: HTMLElement, item?: string) {
     return item || this.language
       ? this.getParsedString(data, item || this.language)
       : '';
   }
 
-  parseAuthors (data: HTMLElement, item?: string) {
+  parseAuthors(data: HTMLElement, item?: string) {
     return item || this.authors
       ? this.getParsedArray(data, item || this.authors, this.authorsText)
       : [];
   }
 
-  parseTags (data: HTMLElement, item?: string) {
+  parseTags(data: HTMLElement, item?: string) {
     return item || this.tags
       ? this.getParsedArray(data, item || this.tags, this.tagsText)
       : [];
   }
 
-  parse (value: string, override?: TParserOverride) {
+  parse(value: string, override?: TParserOverride) {
     const cleaned = this.cleanHTML(value);
     const parser = new DOMParser();
     const result = parser
@@ -131,7 +131,7 @@ export default class ParserModel extends Entity<IParserDTO> {
     return comicDTO;
   }
 
-  getDTO (): IParserDTO {
+  getDTO(): IParserDTO {
     return {
       id: this.id,
       name: this.name,

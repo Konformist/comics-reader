@@ -15,7 +15,7 @@ export default class ComicModel extends Entity<IComicDTO> {
   public images: IComicImageDTO[] = [];
   public override: TParserOverride = {};
 
-  constructor (dto?: Partial<IComicDTO>) {
+  constructor(dto?: Partial<IComicDTO>) {
     super();
 
     if (dto) {
@@ -33,22 +33,22 @@ export default class ComicModel extends Entity<IComicDTO> {
     }
   }
 
-  get isFilled (): boolean {
+  get isFilled(): boolean {
     return this.images.every((e) => e.url)
       && !!this.name
       && !!this.language
       && !!this.authors.length;
   }
 
-  get imagesFilled () {
+  get imagesFilled() {
     return this.images.filter((e) => e.url);
   }
 
-  get imagesEmpty () {
+  get imagesEmpty() {
     return this.images.filter((e) => !e.url);
   }
 
-  addImage (): void {
+  addImage(): void {
     this.images.push({
       id: Math.max(...this.images.map((e) => e.id), 0) + 1,
       url: '',
@@ -56,7 +56,7 @@ export default class ComicModel extends Entity<IComicDTO> {
     });
   }
 
-  getDTO (): IComicDTO {
+  getDTO(): IComicDTO {
     return {
       id: this.id,
       url: this.url,

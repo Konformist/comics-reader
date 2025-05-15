@@ -34,6 +34,7 @@ export default defineConfig([
       '@stylistic/type-annotation-spacing': 'error',
       '@stylistic/multiline-ternary': ['error', 'always-multiline'],
       '@stylistic/no-mixed-operators': 'error',
+      '@stylistic/no-multiple-empty-lines': ['error', { 'max': 1, 'maxEOF': 1 }],
 
       'vue/script-indent': ['error', 2],
     },

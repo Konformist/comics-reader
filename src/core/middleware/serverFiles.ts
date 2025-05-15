@@ -1,15 +1,15 @@
 import type { IDirectory, IFile } from '@/core/entities/file/FileTypes.ts';
 import type { IResizeOptions } from '@/core/middleware/ComicsServer.ts';
-import { fileToBase64, getFileUrl } from '@/core/utils/image.ts';
+import { getFileUrl } from '@/core/utils/image.ts';
 import { ImageManipulator } from '@capacitor-community/image-manipulator';
 import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 
-const addFile = async (path: string, file: string | File): Promise<string> => {
+const addFile = async (path: string, file: string, type: 'string' | 'binary'): Promise<string> => {
   const ret = await Filesystem.writeFile({
     path,
     directory: Directory.Data,
-    data: typeof file === 'string' ? file : await fileToBase64(file),
-    encoding: typeof file === 'string' ? Encoding.UTF8 : undefined,
+    data: file,
+    encoding: type === 'string' ? Encoding.UTF8 : undefined,
     recursive: true,
   });
 

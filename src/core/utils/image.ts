@@ -13,15 +13,6 @@ export const getFileUrl = async (url: string) => {
   }
 };
 
-export const fileToBase64 = async (file: File) => (
-  new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  })
-);
-
 export const base64ToFile = (src: string, name = '') => {
   return new File(
     [Uint8Array.from(atob(src), (m) => m.codePointAt(0) as number)],
@@ -29,41 +20,13 @@ export const base64ToFile = (src: string, name = '') => {
   );
 };
 
-// @todo доработать resize
-export const optimizeImage = async (src: File, xMax?: number, yMax?: number) => (
-  new Promise<File>((resolve, reject) => {
-    const image = new Image();
+export const optimizeImageV2 = async (file: File) => {
+  const image = await createImageBitmap(file);
+  const canvas = document.createElement('canvas');
 
-    image.src = URL.createObjectURL(src);
-    image.onload = () => {
-      const canvas = document.createElement('canvas');
+  canvas.width = image.width;
+  canvas.height = image.height;
+  canvas.getContext('2d')?.drawImage(image, 0, 0);
 
-      let coef = 1;
-
-      if ((xMax && yMax)
-        && (image.naturalWidth > xMax || image.naturalHeight > yMax)) {
-        coef = image.naturalHeight / image.naturalWidth < yMax / xMax
-          ? xMax / image.naturalWidth
-          : yMax / image.naturalHeight;
-      }
-
-      canvas.width = image.naturalWidth * coef;
-      canvas.height = image.naturalHeight * coef;
-      canvas.getContext('2d')?.drawImage(image, 0, 0, canvas.width, canvas.height);
-
-      canvas.toBlob((blob) => {
-        if (!blob) {
-          reject('Error');
-        } else {
-          const newImage = new File(
-            [blob],
-            src.name,
-            { type: blob.type },
-          );
-
-          resolve(newImage);
-        }
-      }, 'image/webp');
-    };
-  })
-);
+  return canvas.toDataURL('image/webp', 1);
+};

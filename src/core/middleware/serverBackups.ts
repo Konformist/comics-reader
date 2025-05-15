@@ -34,7 +34,7 @@ const addBackup = async (): Promise<void> => {
     languages: LanguagesServer.dataRaw,
     tags: TagsServer.dataRaw,
     comics: ComicsServer.dataRaw,
-  }));
+  }), 'string');
 };
 
 const delBackup = (path: string): Promise<void> => (serverFiles.delFile(path));

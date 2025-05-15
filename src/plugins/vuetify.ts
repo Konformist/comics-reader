@@ -5,10 +5,10 @@
  */
 
 // Styles
-import 'vuetify/styles'
+import 'vuetify/styles';
 
 // Composables
-import { createVuetify } from 'vuetify'
+import { createVuetify } from 'vuetify';
 import { md3 } from 'vuetify/blueprints';
 import { ru } from 'vuetify/locale';
 import { aliases, mdi } from 'vuetify/iconsets/mdi-svg';
@@ -137,4 +137,4 @@ export default createVuetify({
       variant: 'solo',
     },
   },
-})
+});

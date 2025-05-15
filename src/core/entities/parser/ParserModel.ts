@@ -35,7 +35,7 @@ export default class ParserModel extends Entity<IParserDTO> {
     return value
       .replaceAll(/<head>(?:.|\n|\t)*?<\/head>/gm, '')
       .replaceAll(/<style.*?>(?:.|\n|\t)*?<\/style>/gm, '')
-      .replaceAll(/<script.*?>(?:.|\n|\t)*?<\/script>/gm, '')
+      .replaceAll(/<script.*?>(?:.|\n|\t)*?<\/script>/gm, '');
   }
 
   cleanStr (str: string): string {
@@ -45,7 +45,7 @@ export default class ParserModel extends Entity<IParserDTO> {
   }
 
   getParsedString (data: HTMLElement, item: string) {
-    return this.cleanStr(data.querySelector(item)?.textContent || '')
+    return this.cleanStr(data.querySelector(item)?.textContent || '');
   }
 
   getParsedArray (data: HTMLElement, item: string, text: string) {
@@ -143,6 +143,6 @@ export default class ParserModel extends Entity<IParserDTO> {
       language: this.language,
       tags: this.tags,
       tagsText: this.tagsText,
-    }
+    };
   }
 }

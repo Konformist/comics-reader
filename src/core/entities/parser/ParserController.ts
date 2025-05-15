@@ -35,7 +35,7 @@ export default class ParserController {
       : url;
     const result = await CapacitorHttp.get({ url: newUrl });
 
-    if (result.status !== 200) throw new Error(`Error code: ${result.status}`)
+    if (result.status !== 200) throw new Error(`Error code: ${result.status}`);
 
     return result.data as string;
   }
@@ -50,7 +50,7 @@ export default class ParserController {
       responseType: 'blob',
     });
 
-    if (result.status !== 200) throw new Error(`Error code: ${result.status}`)
+    if (result.status !== 200) throw new Error(`Error code: ${result.status}`);
 
     return base64ToFile(result.data);
   }
@@ -62,7 +62,7 @@ export default class ParserController {
       : url;
     const result = await CapacitorHttp.get({ url: newUrl });
 
-    if (result.status !== 200) throw new Error(`Error code: ${result.status}`)
+    if (result.status !== 200) throw new Error(`Error code: ${result.status}`);
 
     return result.data as string;
   }
@@ -77,7 +77,7 @@ export default class ParserController {
       responseType: 'blob',
     });
 
-    if (result.status !== 200) throw new Error(`Error code: ${result.status}`)
+    if (result.status !== 200) throw new Error(`Error code: ${result.status}`);
 
     return result.data as Blob;
   }
@@ -103,15 +103,15 @@ export default class ParserController {
   }
 
   static writeFSCover (id: number, ext: string, blob: Blob) {
-    return ParserController.writeFS(`${id}/cover.${ext}`, blob)
+    return ParserController.writeFS(`${id}/cover.${ext}`, blob);
   }
 
   static writeFSPage (id: number, image: IComicImageDTO, blob: Blob) {
     const ext = ParserController.getExtension(image.from);
-    return ParserController.writeFS(`${id}/${image.id}.${ext}`, blob)
+    return ParserController.writeFS(`${id}/${image.id}.${ext}`, blob);
   }
 
   static deleteFS (uri: string) {
-    return Filesystem.deleteFile({ path: uri })
+    return Filesystem.deleteFile({ path: uri });
   }
 }

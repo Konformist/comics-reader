@@ -6,28 +6,28 @@ export const getFileUrl = async (url: string) => {
     const converted = Capacitor.convertFileSrc(url);
     const stat = await Filesystem.stat({ path: url });
 
-    return `${converted}?${stat.size}`
+    return `${converted}?${stat.size}`;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (_) {
     return url;
   }
-}
+};
 
 export const fileToBase64 = async (file: File) => (
   new Promise<string>((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onloadend = () => resolve(reader.result as string)
-    reader.onerror = reject
-    reader.readAsDataURL(file)
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
   })
-)
+);
 
 export const base64ToFile = (src: string, name = '') => {
   return new File(
     [Uint8Array.from(atob(src), (m) => m.codePointAt(0) as number)],
     name,
   );
-}
+};
 
 // @todo доработать resize
 export const optimizeImage = async (src: File, xMax?: number, yMax?: number) => (
@@ -64,6 +64,6 @@ export const optimizeImage = async (src: File, xMax?: number, yMax?: number) => 
           resolve(newImage);
         }
       }, 'image/webp');
-    }
+    };
   })
-)
+);

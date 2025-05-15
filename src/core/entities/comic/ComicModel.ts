@@ -37,15 +37,15 @@ export default class ComicModel extends Entity<IComicDTO> {
     return this.images.every((e) => e.url)
       && !!this.name
       && !!this.language
-      && !!this.authors.length
+      && !!this.authors.length;
   }
 
   get imagesFilled () {
-    return this.images.filter((e) => e.url)
+    return this.images.filter((e) => e.url);
   }
 
   get imagesEmpty () {
-    return this.images.filter((e) => !e.url)
+    return this.images.filter((e) => !e.url);
   }
 
   addImage (): void {
@@ -53,7 +53,7 @@ export default class ComicModel extends Entity<IComicDTO> {
       id: Math.max(...this.images.map((e) => e.id), 0) + 1,
       url: '',
       from: '',
-    })
+    });
   }
 
   getDTO (): IComicDTO {
@@ -69,6 +69,6 @@ export default class ComicModel extends Entity<IComicDTO> {
       language: this.language,
       images: this.images.map((e) => ({ ...e })),
       override: { ...this.override },
-    }
+    };
   }
 }

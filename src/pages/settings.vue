@@ -73,7 +73,7 @@ definePage({
   meta: {
     title: 'Настройки',
   },
-})
+});
 
 const backups = ref<IDirectory[]>([]);
 
@@ -84,31 +84,31 @@ const loadBackupsTree = async () => {
 loadBackupsTree();
 
 const setBackup = async () => {
-  await server.setBackup()
-  Toast.show({ text: 'Бекап сохранён' })
+  await server.setBackup();
+  Toast.show({ text: 'Бекап сохранён' });
   loadBackupsTree();
-}
+};
 
 const backupFile = ref('');
 
 const getBackup = async () => {
-  await server.getBackup(backupFile.value)
-  Toast.show({ text: 'Бекап применён' })
-}
+  await server.getBackup(backupFile.value);
+  Toast.show({ text: 'Бекап применён' });
+};
 
 const saveBackupToGlobal = async (path: string): Promise<void> => {
   await Filesystem.mkdir({
     path: 'Comics Reader/backups',
     directory: Directory.Documents,
     recursive: true,
-  })
+  });
   await Filesystem.copy({
     from: path,
     directory: Directory.Data,
     to: `Comics Reader/${path}`,
     toDirectory: Directory.Documents,
-  })
+  });
 
-  Toast.show({ text: 'Бекап сохранён в документы' })
-}
+  Toast.show({ text: 'Бекап сохранён в документы' });
+};
 </script>

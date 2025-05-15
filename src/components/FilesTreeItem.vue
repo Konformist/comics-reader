@@ -34,16 +34,16 @@ const model = defineModel<string>({ default: '' });
 const { item, parent } = defineProps<{
   parent: string
   item: IDirectory|IFile
-}>()
+}>();
 
 const opened = ref(false);
 
 const toggleOpened = () => {
   opened.value = !opened.value;
-}
+};
 
 const onClick = () => {
   if (item.type === 'directory') toggleOpened();
   else model.value = `${parent}/${item.path}`;
-}
+};
 </script>

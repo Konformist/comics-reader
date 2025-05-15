@@ -129,7 +129,7 @@ definePage({
     title: 'Редактирование страниц',
     isBack: true,
   },
-})
+});
 
 const route = useRoute('/comics/[id]/edit-pages');
 
@@ -141,7 +141,7 @@ const comic = ref(new ComicModel());
 const loadComic = async () => {
   if (!comicId) return;
   comic.value = await ComicController.load(comicId);
-}
+};
 
 loadComic();
 
@@ -178,19 +178,19 @@ const imagesTemplateStart = ref(1);
 const setTemplate = () => {
   comic.value?.images.forEach((image, index) => {
     image.from = imagesTemplate.value.replace('<ID>', (imagesTemplateStart.value + index).toString());
-  })
+  });
 };
 
 const loading = ref(false);
 
 const saveComic = async () => {
   await ComicController.save(comic.value);
-}
+};
 
 const onSave = async () => {
   await saveComic();
   await loadComic();
-  Toast.show({ text: 'Комикс сохранён' })
+  Toast.show({ text: 'Комикс сохранён' });
 };
 
 const uploadImage = async (item: IComicImageDTO, event: File|File[]) => {
@@ -199,8 +199,8 @@ const uploadImage = async (item: IComicImageDTO, event: File|File[]) => {
   await saveComic();
   await ComicController.saveFile(comic.value.id, item.id, event);
   await loadComic();
-  Toast.show({ text: 'Комикс сохранён' })
-}
+  Toast.show({ text: 'Комикс сохранён' });
+};
 
 const onLoadImage = async (item: IComicImageDTO) => {
   if (!item.from) return;
@@ -210,15 +210,15 @@ const onLoadImage = async (item: IComicImageDTO) => {
     const result = await ParserController.loadImageRaw(item.from);
     await uploadImage(item, result);
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` })
+    Toast.show({ text: `Ошибка: ${e}` });
   } finally {
     loading.value = false;
   }
-}
+};
 
 const canLoadImages = computed(() => (
   comic.value.images.some((e) => e.from)
-))
+));
 
 const onLoadImages = async () => {
   try {
@@ -233,9 +233,9 @@ const onLoadImages = async () => {
     }
 
     await loadComic();
-    Toast.show({ text: 'Комикс сохранён' })
+    Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` })
+    Toast.show({ text: `Ошибка: ${e}` });
   } finally {
     loading.value = false;
   }
@@ -258,15 +258,15 @@ const delPage = async (item: IComicImageDTO) => {
 
       if (!value) return;
 
-      await ComicController.deleteFile(comic.value.id, image.id)
+      await ComicController.deleteFile(comic.value.id, image.id);
     }
 
     comic.value.images.splice(index, 1);
     await saveComic();
     await loadComic();
-    Toast.show({ text: 'Комикс сохранён' })
+    Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` })
+    Toast.show({ text: `Ошибка: ${e}` });
   } finally {
     loading.value = false;
   }
@@ -282,15 +282,15 @@ const delPages = async () => {
 
   try {
     loading.value = true;
-    await ComicController.deleteFiles(comic.value.id)
+    await ComicController.deleteFiles(comic.value.id);
     await loadComic();
-    Toast.show({ text: 'Комикс сохранён' })
+    Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` })
+    Toast.show({ text: `Ошибка: ${e}` });
   } finally {
     loading.value = false;
   }
-}
+};
 
 const maxWidth = ref(0);
 const maxHeight = ref(0);
@@ -301,11 +301,11 @@ const resizeImage = async (item: IComicImageDTO, options: { maxWidth?: number, m
     await ComicController.resizeComicFile(comic.value.id, item.id, {
       maxWidth: options.maxWidth || undefined,
       maxHeight: options.maxHeight || undefined,
-    })
-    Toast.show({ text: `Изображение сжато` })
+    });
+    Toast.show({ text: `Изображение сжато` });
     await loadComic();
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` })
+    Toast.show({ text: `Ошибка: ${e}` });
   } finally {
     loading.value = false;
   }
@@ -319,14 +319,14 @@ const resizeImages = async () => {
       await ComicController.resizeComicFile(comic.value.id, image.id, {
         maxWidth: maxWidth.value || undefined,
         maxHeight: maxHeight.value || undefined,
-      })
+      });
     }
-    Toast.show({ text: `Изображения сжаты` })
+    Toast.show({ text: `Изображения сжаты` });
     await loadComic();
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` })
+    Toast.show({ text: `Ошибка: ${e}` });
   } finally {
     loading.value = false;
   }
-}
+};
 </script>

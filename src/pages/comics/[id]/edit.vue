@@ -140,7 +140,7 @@ const loadComics = async () => {
     .sort((a, b) => sortString(a, b));
   tags.value = dedupe(comics.value.map((e) => e.tags).flat(1)).sort((a, b) => sortString(a, b));
   authors.value = dedupe(comics.value.map((e) => e.authors).flat(1)).sort((a, b) => sortString(a, b));
-}
+};
 
 const comicId = +(route.params.id || 0);
 const comic = ref(new ComicModel());
@@ -148,27 +148,27 @@ const comic = ref(new ComicModel());
 const loadComic = async () => {
   if (!comicId) return;
   comic.value = await ComicController.load(comicId);
-}
+};
 
 const parsers = ref<ParserModel[]>([]);
 
 const loadParsers = async () => {
   parsers.value = await ParserController.loadAll();
-}
+};
 
 const parser = ref(new ParserModel());
 
 const loadParser = async () => {
   if (!comic.value.parser) return;
   parser.value = await ParserController.load(comic.value.parser);
-}
+};
 
 onMounted(async () => {
   loadComics();
   loadParsers();
   await loadComic();
   await loadParser();
-})
+});
 
 const keyLanguage = computed({
   get () {
@@ -179,7 +179,7 @@ const keyLanguage = computed({
       comic.value.override.language = value;
     }
   },
-})
+});
 
 const keyAuthors = computed({
   get () {
@@ -188,7 +188,7 @@ const keyAuthors = computed({
   set (value) {
     comic.value.override.authors = value;
   },
-})
+});
 
 const keyTags = computed({
   get () {
@@ -197,11 +197,11 @@ const keyTags = computed({
   set (value) {
     comic.value.override.tags = value;
   },
-})
+});
 
 const saveComic = async () => {
   await ComicController.save(comic.value);
-}
+};
 
 const loading = ref(false);
 
@@ -238,9 +238,9 @@ const onLoadInfo = async () => {
     Object.assign(comic.value, comicDTO);
     await saveComic();
     await loadComic();
-    Toast.show({ text: 'Комикс сохранён' })
+    Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
-    Toast.show({ text: `Комикс не сохранён. Ошибка: ${e}` })
+    Toast.show({ text: `Комикс не сохранён. Ошибка: ${e}` });
   } finally {
     loading.value = false;
   }
@@ -252,8 +252,8 @@ const uploadCover = async (event: File|File[]) => {
   await saveComic();
   await ComicController.saveCover(comic.value.id, event);
   await loadComic();
-  Toast.show({ text: 'Комикс сохранён' })
-}
+  Toast.show({ text: 'Комикс сохранён' });
+};
 
 const onLoadCover = async () => {
   if (!comic.value.imageUrl) return;
@@ -263,7 +263,7 @@ const onLoadCover = async () => {
     const result = await ParserController.loadImageRaw(comic.value.imageUrl);
     await uploadCover(result);
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` })
+    Toast.show({ text: `Ошибка: ${e}` });
   } finally {
     loading.value = false;
   }

@@ -6,28 +6,28 @@
 
 import server from '@/core/middleware/server.ts';
 // Plugins
-import { registerPlugins } from '@/plugins'
+import { registerPlugins } from '@/plugins';
 import { useAppStore } from '@/stores/app.ts';
 
 // Components
-import App from './App.vue'
+import App from './App.vue';
 
 // Composables
-import { createApp } from 'vue'
+import { createApp } from 'vue';
 
 // Styles
-import 'unfonts.css'
-import '@/styles/styles.scss'
+import 'unfonts.css';
+import '@/styles/styles.scss';
 
 const init = async () => {
-  const app = createApp(App)
+  const app = createApp(App);
 
-  registerPlugins(app)
+  registerPlugins(app);
 
   await server.autoBackup();
   await useAppStore().loadSettings();
 
-  app.mount('#app')
-}
+  app.mount('#app');
+};
 
 init();

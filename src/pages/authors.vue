@@ -74,7 +74,7 @@ const clickAuthor = (value: string) => {
   reserveAuthor.value = value;
   currentAuthor.value = value;
   dialog.value = true;
-}
+};
 
 const comics = ref<ComicModel[]>([]);
 const authors = ref<string[]>([]);
@@ -84,17 +84,17 @@ const authorsCount = computed(() => (
 
     comics.value.forEach((item) => {
       if (item.authors.includes(author)) acc[author]++;
-    })
+    });
 
     return acc;
   }, {} as Record<string, number>)
-))
+));
 
 const loadComics = async () => {
   comics.value = await ComicController.loadAll();
   authors.value = dedupe(comics.value.map((e) => e.authors).flat(1))
     .sort((a, b) => sortString(a, b));
-}
+};
 
 loadComics();
 
@@ -102,7 +102,7 @@ const saveComics = async (value: ComicModel[]) => {
   for (const comic of value) {
     await ComicController.save(comic);
   }
-}
+};
 
 const loading = ref(false);
 
@@ -116,13 +116,13 @@ const saveAuthor = async () => {
     changed.forEach((comic) => {
       comic.authors.push(currentAuthor.value);
       comic.authors = comic.authors.filter((e) => e !== reserveAuthor.value);
-    })
+    });
     await saveComics(changed);
     await loadComics();
     dialog.value = false;
-    Toast.show({ text: 'Автор сохранён' })
+    Toast.show({ text: 'Автор сохранён' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` })
+    Toast.show({ text: `Ошибка: ${e}` });
   } finally {
     loading.value = false;
   }
@@ -147,11 +147,11 @@ const deleteAuthor = async (item: string) => {
 
     await saveComics(changed);
     await loadComics();
-    Toast.show({ text: 'Автор удалён' })
+    Toast.show({ text: 'Автор удалён' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` })
+    Toast.show({ text: `Ошибка: ${e}` });
   } finally {
     loading.value = false;
   }
-}
+};
 </script>

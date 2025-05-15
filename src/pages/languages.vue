@@ -74,7 +74,7 @@ const clickLanguage = (value: string) => {
   reserveLanguage.value = value;
   currentLanguage.value = value;
   dialog.value = true;
-}
+};
 
 const comics = ref<ComicModel[]>([]);
 const languages = ref<string[]>([]);
@@ -84,18 +84,18 @@ const languagesCount = computed(() => (
 
     comics.value.forEach((item) => {
       if (item.language === tag) acc[tag]++;
-    })
+    });
 
     return acc;
   }, {} as Record<string, number>)
-))
+));
 
 const loadComics = async () => {
   comics.value = await ComicController.loadAll();
   languages.value = dedupe(comics.value.map((e) => e.language))
     .filter(Boolean)
     .sort((a, b) => sortString(a, b));
-}
+};
 
 loadComics();
 
@@ -103,7 +103,7 @@ const saveComics = async (value: ComicModel[]) => {
   for (const comic of value) {
     await ComicController.save(comic);
   }
-}
+};
 
 const loading = ref(false);
 
@@ -116,13 +116,13 @@ const saveLanguage = async () => {
 
     changed.forEach((comic) => {
       comic.language = currentLanguage.value;
-    })
+    });
     await saveComics(changed);
     await loadComics();
     dialog.value = false;
-    Toast.show({ text: 'Язык сохранён' })
+    Toast.show({ text: 'Язык сохранён' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` })
+    Toast.show({ text: `Ошибка: ${e}` });
   } finally {
     loading.value = false;
   }
@@ -147,11 +147,11 @@ const deleteLanguage = async (item: string) => {
 
     await saveComics(changed);
     await loadComics();
-    Toast.show({ text: 'Язык удалён' })
+    Toast.show({ text: 'Язык удалён' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` })
+    Toast.show({ text: `Ошибка: ${e}` });
   } finally {
     loading.value = false;
   }
-}
+};
 </script>

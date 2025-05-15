@@ -37,12 +37,12 @@ const emit = defineEmits<{
   (e: 'next', v: void): void
   (e: 'prev', v: void): void
   (e: 'download', v: void): void
-}>()
+}>();
 const { url, from } = defineProps<{
   loading: boolean
   from: string
   url: string
-}>()
+}>();
 
 if (!url && from) {
   emit('download');

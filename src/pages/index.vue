@@ -104,14 +104,14 @@ definePage({
   meta: {
     title: 'Комиксы',
   },
-})
+});
 
 const router = useRouter();
 const comicsStore = useComicsStore();
 
 const currentPage = ref(1);
 
-const filtersSheet = ref(false)
+const filtersSheet = ref(false);
 
 const languages = ref<string[]>([]);
 const tags = ref<string[]>([]);
@@ -122,12 +122,12 @@ const comics = ref<ComicModel[]>([]);
 const filterArrays = (f: string[], s: string[]) => (
   !s.length
   || f.some((e) => s.includes(e))
-)
+);
 
 const filterSingle = (f: string, s: string[]) => (
   !s.length
   || s.includes(f)
-)
+);
 
 const comicsFiltered = computed(() => (
   comics.value.filter((item) => {
@@ -138,16 +138,16 @@ const comicsFiltered = computed(() => (
 
     return filterArrays(item.tags, comicsStore.filters.tags)
       && filterArrays(item.authors, comicsStore.filters.authors)
-      && filterSingle(item.language, comicsStore.filters.languages)
+      && filterSingle(item.language, comicsStore.filters.languages);
   })
-))
+));
 
 const loadComics = async () => {
   comics.value = await ComicController.loadAll();
   languages.value = dedupe(comics.value.map((e) => e.language)).sort((a ,b) => sortString(a, b));
   tags.value = dedupe(comics.value.map((e) => e.tags).flat(1)).sort((a ,b) => sortString(a, b));
   authors.value = dedupe(comics.value.map((e) => e.authors).flat(1)).sort((a ,b) => sortString(a, b));
-}
+};
 
 loadComics();
 
@@ -155,11 +155,11 @@ const createComic = async () => {
   const comicId = await ComicController.save(new ComicModel());
 
   if (comicId) {
-    Toast.show({ text: 'Комикс создан' })
+    Toast.show({ text: 'Комикс создан' });
     await router.push({
       name: '/comics/[id]/',
       params: { id: comicId },
-    })
+    });
   }
-}
+};
 </script>

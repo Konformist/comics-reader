@@ -74,7 +74,7 @@ const clickTag = (value: string) => {
   reserveTag.value = value;
   currentTag.value = value;
   dialog.value = true;
-}
+};
 
 const comics = ref<ComicModel[]>([]);
 const tags = ref<string[]>([]);
@@ -84,17 +84,17 @@ const tagsCount = computed(() => (
 
     comics.value.forEach((item) => {
       if (item.tags.includes(tag)) acc[tag]++;
-    })
+    });
 
     return acc;
   }, {} as Record<string, number>)
-))
+));
 
 const loadComics = async () => {
   comics.value = await ComicController.loadAll();
   tags.value = dedupe(comics.value.map((e) => e.tags).flat(1))
     .sort((a, b) => sortString(a, b));
-}
+};
 
 loadComics();
 
@@ -102,7 +102,7 @@ const saveComics = async (value: ComicModel[]) => {
   for (const comic of value) {
     await ComicController.save(comic);
   }
-}
+};
 
 const loading = ref(false);
 
@@ -115,13 +115,13 @@ const saveTag = async () => {
     changed.forEach((comic) => {
       comic.tags.push(currentTag.value);
       comic.tags = comic.tags.filter((e) => e !== reserveTag.value);
-    })
+    });
     await saveComics(changed);
     await loadComics();
     dialog.value = false;
-    Toast.show({ text: 'Тег сохранён' })
+    Toast.show({ text: 'Тег сохранён' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` })
+    Toast.show({ text: `Ошибка: ${e}` });
   } finally {
     loading.value = false;
   }
@@ -146,11 +146,11 @@ const deleteTag = async (item: string) => {
 
     await saveComics(changed);
     await loadComics();
-    Toast.show({ text: 'Тег удалён' })
+    Toast.show({ text: 'Тег удалён' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` })
+    Toast.show({ text: `Ошибка: ${e}` });
   } finally {
     loading.value = false;
   }
-}
+};
 </script>

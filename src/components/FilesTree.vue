@@ -28,5 +28,5 @@ defineProps<{
   parent?: string
   isChild?: boolean
   rounded?: boolean
-}>()
+}>();
 </script>

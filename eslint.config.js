@@ -1,6 +1,6 @@
 import { defineConfig } from 'eslint/config';
 import stylistic from '@stylistic/eslint-plugin';
-import vuetifyPlugin from 'eslint-config-vuetify/index.ts.mjs'
+import vuetifyPlugin from 'eslint-config-vuetify/index.ts.mjs';
 
 export default defineConfig([
   {
@@ -23,8 +23,9 @@ export default defineConfig([
       '@stylistic/arrow-spacing': 'error',
       '@stylistic/arrow-parens': ['error', 'always'],
       '@stylistic/no-confusing-arrow': 'error',
+      '@stylistic/semi': 'error',
 
       'vue/script-indent': ['error', 2],
     },
   },
-])
+]);

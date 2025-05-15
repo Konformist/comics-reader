@@ -23,5 +23,5 @@ export function registerPlugins (app: App) {
   app
     .use(vuetify)
     .use(router)
-    .use(pinia)
+    .use(pinia);
 }

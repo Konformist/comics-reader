@@ -68,5 +68,5 @@
 <script lang="ts" setup>
 import BottomNavigation from '@/components/BottomNavigation.vue';
 
-const drawer = ref(false)
+const drawer = ref(false);
 </script>

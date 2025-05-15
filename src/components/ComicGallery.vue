@@ -36,5 +36,5 @@ import type ComicModel from '@/core/entities/comic/ComicModel.ts';
 
 const { comic } = defineProps<{
   comic: ComicModel
-}>()
+}>();
 </script>

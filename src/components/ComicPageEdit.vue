@@ -39,20 +39,20 @@
 </template>
 
 <script setup lang="ts">
-const from = defineModel('from', { default: '' })
+const from = defineModel('from', { default: '' });
 
 defineEmits<{
   (e: 'upload', v: File|File[]): void
   (e: 'download', v: void): void
   (e: 'resize', v: { maxWidth: number, maxHeight: number }): void
   (e: 'delete', v: void): void
-}>()
+}>();
 defineProps<{
   comicId: number
   fileId: number
   url: string
   loading: boolean
-}>()
+}>();
 
 const localLoading = ref(false);
 

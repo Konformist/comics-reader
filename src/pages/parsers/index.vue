@@ -37,7 +37,7 @@ const parsers = ref<ParserModel[]>([]);
 
 const loadParsers = async (): Promise<void> => {
   parsers.value = await ParserController.loadAll();
-}
+};
 
 loadParsers();
 
@@ -45,11 +45,11 @@ const createParser = async () => {
   const parserId = await ParserController.save(new ParserModel());
 
   if (parserId) {
-    Toast.show({ text: 'Парсер создан' })
+    Toast.show({ text: 'Парсер создан' });
     await router.push({
       name: '/parsers/[id]',
       params: { id: parserId },
-    })
+    });
   }
-}
+};
 </script>

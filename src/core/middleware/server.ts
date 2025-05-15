@@ -25,7 +25,7 @@ const setSettingsData = async (): Promise<void> => {
       version: SETTINGS_VERSION,
       item: settingsRaw,
     }),
-  })
+  });
 };
 
 const getSettingsData = async (): Promise<ISettingsDTO|undefined> => {
@@ -34,13 +34,13 @@ const getSettingsData = async (): Promise<ISettingsDTO|undefined> => {
   if (!store.value) return undefined;
 
   return JSON.parse(store.value).item;
-}
+};
 
 const setSettings = async (value: ISettingsDTO): Promise<void> => {
   if (settingsRaw) Object.assign(settingsRaw, value);
   else settingsRaw = value;
 
-  await setSettingsData()
+  await setSettingsData();
 };
 
 const getSettings = async (): Promise<ISettingsDTO|undefined> => {
@@ -56,7 +56,7 @@ let parsersRaw: IParserDTO[] = [];
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const migrationParsers = (value: any) => {
   return value;
-}
+};
 
 const setParsersData = async () => {
   await Preferences.set({
@@ -65,8 +65,8 @@ const setParsersData = async () => {
       version: PARSERS_VERSION,
       items: parsersRaw,
     }),
-  })
-}
+  });
+};
 
 const getParsersData = async () => {
   const store = await Preferences.get({ key: PARSERS_STORE });
@@ -76,7 +76,7 @@ const getParsersData = async () => {
   let result = JSON.parse(store.value);
 
   if (result.version !== PARSERS_VERSION) {
-    result = migrationParsers(result)
+    result = migrationParsers(result);
   }
 
   parsersRaw = result.items || [];
@@ -84,7 +84,7 @@ const getParsersData = async () => {
   if (result.version !== PARSERS_VERSION) {
     await setParsersData();
   }
-}
+};
 
 const addParser = async (data: IParserDTO) => {
   await getParsersData();
@@ -94,32 +94,32 @@ const addParser = async (data: IParserDTO) => {
   await setParsersData();
 
   return parserId;
-}
+};
 
 const setParser = async (data: IParserDTO): Promise<void> => {
   const index = parsersRaw.findIndex((e) => e.id === data.id);
   parsersRaw.splice(index, 1, data);
   await setParsersData();
-}
+};
 
 const delParser = async (id: number): Promise<void> => {
   parsersRaw = parsersRaw.filter((e) => e.id !== id);
   await setParsersData();
-}
+};
 
 const getParser = async (id: number): Promise<IParserDTO|undefined> => {
-  const ids = parsersRaw.map((e) => e.id)
+  const ids = parsersRaw.map((e) => e.id);
 
   if (!ids.includes(id)) await getParsersData();
 
   return parsersRaw.find((e) => e.id === id);
-}
+};
 
 const getParsersAll = async (): Promise<Array<IParserDTO>> => {
   await getParsersData();
 
   return [...parsersRaw];
-}
+};
 
 /// Files
 
@@ -132,14 +132,14 @@ const addFile = async (path: string, file: File): Promise<string> => {
   });
 
   return getFileUrl(ret.uri);
-}
+};
 
 const delFile = (path: string): Promise<void> => {
   return Filesystem.deleteFile({
     path,
     directory: Directory.Data,
   });
-}
+};
 
 const resizeImage = async (
   path: string,
@@ -158,10 +158,10 @@ const resizeImage = async (
   await Filesystem.rename({
     from: result.imagePath,
     to: path,
-  })
+  });
 
   return getFileUrl(path);
-}
+};
 
 const getTreeRecursive = async (path: string): Promise<Array<IDirectory|IFile>> => {
   const ret: Array<IDirectory|IFile> = [];
@@ -175,27 +175,27 @@ const getTreeRecursive = async (path: string): Promise<Array<IDirectory|IFile>> 
           type: file.type,
           path: file.name,
           children: await getTreeRecursive(file.uri),
-        })
+        });
       } else {
         ret.push({
           type: file.type,
           path: file.name,
           size: file.size,
-        })
+        });
       }
     }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (_) { /* empty */ }
 
   return ret;
-}
+};
 
 /**
  * @param path - путь папки
  */
 const getTree = async (path: string): Promise<IDirectory[]> => {
   try {
-    const rootUri = await Filesystem.getUri({ path, directory: Directory.Data })
+    const rootUri = await Filesystem.getUri({ path, directory: Directory.Data });
 
     return [{
       type: 'directory',
@@ -206,7 +206,7 @@ const getTree = async (path: string): Promise<IDirectory[]> => {
   } catch (_) {
     return [];
   }
-}
+};
 
 /// Comics
 
@@ -215,7 +215,7 @@ let comicsRaw: IComicDTO[] = [];
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const migrationComics = async (value: any) => {
   return value;
-}
+};
 
 const setComicsData = async () => {
   await Preferences.set({
@@ -224,18 +224,18 @@ const setComicsData = async () => {
       version: COMICS_VERSION,
       items: comicsRaw,
     }),
-  })
-}
+  });
+};
 
 const getComicsData = async () => {
   const store = await Preferences.get({ key: COMICS_STORE });
 
-  if (!store.value) return
+  if (!store.value) return;
 
   let result = JSON.parse(store.value);
 
   if (result.version !== COMICS_VERSION) {
-    result = await migrationComics(result)
+    result = await migrationComics(result);
   }
 
   comicsRaw = result.items || [];
@@ -252,28 +252,28 @@ const addComic = async (data: IComicDTO): Promise<number> => {
   comicsRaw.push({ ...data, id: comicId });
   await setComicsData();
 
-  return comicId
-}
+  return comicId;
+};
 
 const setComic = async (data: IComicDTO): Promise<void> => {
   const index = comicsRaw.findIndex((e) => e.id === data.id);
   comicsRaw.splice(index, 1, data);
   await setComicsData();
-}
+};
 
 const getComic = async (id: number): Promise<IComicDTO|undefined> => {
-  const ids = comicsRaw.map((e) => e.id)
+  const ids = comicsRaw.map((e) => e.id);
 
   if (!ids.includes(id)) await getComicsData();
 
   return comicsRaw.find((e) => e.id === id);
-}
+};
 
 const getComicAll = async (): Promise<Array<IComicDTO>> => {
   await getComicsData();
 
   return [...comicsRaw];
-}
+};
 
 const addComicCover = async (comicId: number, file: File): Promise<void> => {
   const comic = await getComic(comicId);
@@ -283,7 +283,7 @@ const addComicCover = async (comicId: number, file: File): Promise<void> => {
   const optimizedFile = await optimizeImage(file);
   comic.image = await addFile(`${COMICS_FILES_DIRECTORY}/${comicId}/cover.webp`, optimizedFile);
   await setComicsData();
-}
+};
 
 const delComicCover = async (comicId: number): Promise<void> => {
   const comic = await getComic(comicId);
@@ -293,7 +293,7 @@ const delComicCover = async (comicId: number): Promise<void> => {
   await delFile(`${COMICS_FILES_DIRECTORY}/${comicId}/cover.webp`);
   comic.image = '';
   await setComicsData();
-}
+};
 
 const resizeComicCover = async (
   comicId: number,
@@ -313,7 +313,7 @@ const resizeComicCover = async (
 
   comic.image = await resizeImage(result.uri, options);
   await setComicsData();
-}
+};
 
 const addComicFile = async (comicId: number, file: File): Promise<void> => {
   const comic = await getComic(comicId);
@@ -328,7 +328,7 @@ const addComicFile = async (comicId: number, file: File): Promise<void> => {
     id: fileId,
     url: uri,
     from: '',
-  })
+  });
 
   await setComicsData();
 };
@@ -404,7 +404,7 @@ const resizeComicFile = async (
 
   file.url = await resizeImage(result.uri, options);
   await setComicsData();
-}
+};
 
 const delComic = async (id: number): Promise<void> => {
   const comic = await getComic(id);
@@ -415,7 +415,7 @@ const delComic = async (id: number): Promise<void> => {
   await delComicFiles(id);
   comicsRaw = comicsRaw.filter((e) => e.id !== id);
   await setComicsData();
-}
+};
 
 /// backups
 
@@ -426,7 +426,7 @@ const getBackupFileName = () => {
   const day = (now.getDate() + 1).toString().padStart(2, '0');
 
   return `${year}-${month}-${day}.json`;
-}
+};
 
 const setBackup = async (): Promise<void> => {
   await getComicsData();
@@ -448,8 +448,8 @@ const setBackup = async (): Promise<void> => {
         items: comicsRaw,
       },
     }),
-  })
-}
+  });
+};
 
 const autoBackup = async () => {
   try {
@@ -479,8 +479,8 @@ const getBackup = async (path: string): Promise<void> => {
   comicsRaw = parsedData.comics?.items || [];
   await setComicsData();
   settingsRaw = parsedData.settings?.item ?? null;
-  await setSettingsData()
-}
+  await setSettingsData();
+};
 
 export default {
   setSettings,
@@ -507,4 +507,4 @@ export default {
   autoBackup,
   setBackup,
   getBackup,
-}
+};

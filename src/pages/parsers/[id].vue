@@ -84,7 +84,7 @@ definePage({
     title: 'Редактирование парсера',
     isBack: true,
   },
-})
+});
 
 const router = useRouter();
 const route = useRoute('/parsers/[id]');
@@ -95,14 +95,14 @@ const parser = ref(new ParserModel());
 
 const loadParser = async () => {
   parser.value = await ParserController.load(parserId);
-}
+};
 
 loadParser();
 
 const saveParser = async () => {
   await ParserController.save(parser.value);
   Toast.show({ text: 'Парсер сохранён' });
-}
+};
 
 const deleteParser = async () => {
   const { value } = await Dialog.confirm({
@@ -115,5 +115,5 @@ const deleteParser = async () => {
   await ParserController.delete(parser.value.id);
   Toast.show({ text: 'Парсер удалён' });
   router.replace({ name: '/parsers/' });
-}
+};
 </script>

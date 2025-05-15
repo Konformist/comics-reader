@@ -122,7 +122,7 @@ definePage({
     title: 'Комикс',
     isBack: true,
   },
-})
+});
 
 const route = useRoute('/comics/[id]/');
 const router = useRouter();
@@ -135,7 +135,7 @@ const loadComic = async () => {
   if (!comicId) return;
 
   comic.value = await ComicController.load(comicId);
-}
+};
 
 loadComic();
 
@@ -153,18 +153,18 @@ const deleteComic = async () => {
 
   try {
     await ComicController.delete(comic.value.id);
-    Toast.show({ text: 'Комикс удалён' })
-    router.replace({ name: '/' })
+    Toast.show({ text: 'Комикс удалён' });
+    router.replace({ name: '/' });
   } catch (e) {
-    alert(e)
+    alert(e);
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {
     loading.value = false;
   }
-}
+};
 
 const onCopy = async (string: string) => {
   await Clipboard.write({ string });
-  Toast.show({ text: 'Скопировано' })
-}
+  Toast.show({ text: 'Скопировано' });
+};
 </script>

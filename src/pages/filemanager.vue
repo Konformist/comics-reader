@@ -18,14 +18,14 @@ definePage({
   meta: {
     title: 'Файловый менеджер',
   },
-})
+});
 
 const files = ref<IDirectory[]>([]);
 
 const loadComics = async () => {
-  files.value.push(...await server.getTree(COMICS_FILES_DIRECTORY))
-  files.value.push(...await server.getTree(BACKUPS_DIRECTORY))
-}
+  files.value.push(...await server.getTree(COMICS_FILES_DIRECTORY));
+  files.value.push(...await server.getTree(BACKUPS_DIRECTORY));
+};
 
 loadComics();
 </script>

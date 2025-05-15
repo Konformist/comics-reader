@@ -89,22 +89,22 @@ definePage({
     title: 'Чтение',
     isBack: true,
   },
-})
+});
 
 const route = useRoute('/comics/[id]/read');
 const appStore = useAppStore();
 
 onMounted(async () => {
   if ((await KeepAwake.isSupported()).isSupported) {
-    await KeepAwake.keepAwake()
+    await KeepAwake.keepAwake();
   }
 });
 
 onBeforeUnmount(async () => {
   if ((await KeepAwake.isSupported()).isSupported) {
-    await KeepAwake.allowSleep()
+    await KeepAwake.allowSleep();
   }
-})
+});
 
 const comicId = +(route.params.id || 0);
 const comic = ref(new ComicModel());
@@ -114,7 +114,7 @@ const currentPage = ref(1);
 const loadComic = async () => {
   if (!comicId) return;
   comic.value = await ComicController.load(comicId);
-}
+};
 
 loadComic();
 
@@ -124,17 +124,17 @@ const startTimer = (nextPage: () => void) => {
   if (!appStore.settings.autoReading) return;
 
   readTimer = setTimeout(() => {
-    nextPage()
+    nextPage();
     readTimer = 0;
   }, appStore.settings.autoReadingTimeout * 1000);
-}
+};
 
 onBeforeUnmount(() => {
   if (readTimer) {
     clearTimeout(readTimer);
     readTimer = 0;
   }
-})
+});
 
 watch(
   currentPage,
@@ -144,7 +144,7 @@ watch(
       readTimer = 0;
     }
   },
-)
+);
 
 const loading = ref(false);
 
@@ -157,9 +157,9 @@ const onLoadImage = async (item: IComicImageDTO) => {
     await ComicController.saveFile(comic.value.id, item.id, result);
     await loadComic();
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` })
+    Toast.show({ text: `Ошибка: ${e}` });
   } finally {
     loading.value = false;
   }
-}
+};
 </script>

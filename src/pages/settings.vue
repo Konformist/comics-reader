@@ -97,11 +97,14 @@ const getBackup = async () => {
 };
 
 const saveBackupToGlobal = async (path: string): Promise<void> => {
-  await Filesystem.mkdir({
-    path: 'Comics Reader/backups',
-    directory: Directory.Documents,
-    recursive: true,
-  });
+  try {
+    await Filesystem.mkdir({
+      path: 'Comics Reader/backups',
+      directory: Directory.Documents,
+      recursive: true,
+    });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_) { /* empty */ }
   await Filesystem.copy({
     from: path,
     directory: Directory.Data,

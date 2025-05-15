@@ -82,7 +82,7 @@ const authorsCount = computed(() => (
   authors.value.reduce((acc, author) => {
     acc[author] = 0;
 
-    comics.value.forEach(item => {
+    comics.value.forEach((item) => {
       if (item.authors.includes(author)) acc[author]++;
     })
 
@@ -92,7 +92,7 @@ const authorsCount = computed(() => (
 
 const loadComics = async () => {
   comics.value = await ComicController.loadAll();
-  authors.value = dedupe(comics.value.map(e => e.authors).flat(1))
+  authors.value = dedupe(comics.value.map((e) => e.authors).flat(1))
     .sort((a, b) => sortString(a, b));
 }
 
@@ -110,12 +110,12 @@ const saveAuthor = async () => {
   try {
     loading.value = true;
     const changed = comics.value
-      .filter(e => (e.authors.includes(reserveAuthor.value)))
-      .map(e => new ComicModel(e.getDTO()));
+      .filter((e) => (e.authors.includes(reserveAuthor.value)))
+      .map((e) => new ComicModel(e.getDTO()));
 
-    changed.forEach(comic => {
+    changed.forEach((comic) => {
       comic.authors.push(currentAuthor.value);
-      comic.authors = comic.authors.filter(e => e !== reserveAuthor.value);
+      comic.authors = comic.authors.filter((e) => e !== reserveAuthor.value);
     })
     await saveComics(changed);
     await loadComics();
@@ -138,11 +138,11 @@ const deleteAuthor = async (item: string) => {
 
   try {
     const changed = comics.value
-      .filter(e => (e.authors.includes(item)))
-      .map(e => new ComicModel(e.getDTO()));
+      .filter((e) => (e.authors.includes(item)))
+      .map((e) => new ComicModel(e.getDTO()));
 
-    changed.forEach(comic => {
-      comic.authors = comic.authors.filter(e => e !== item);
+    changed.forEach((comic) => {
+      comic.authors = comic.authors.filter((e) => e !== item);
     });
 
     await saveComics(changed);

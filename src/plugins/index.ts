@@ -13,7 +13,7 @@ import pinia from '../stores';
 // Plugins
 import vuetify from './vuetify';
 
-AppPlugin.addListener('backButton', event => {
+AppPlugin.addListener('backButton', (event) => {
   if (event.canGoBack) {
     router.back();
   }

@@ -24,7 +24,7 @@ export const fileToBase64 = async (file: File) => (
 
 export const base64ToFile = (src: string, name = '') => {
   return new File(
-    [Uint8Array.from(atob(src), m => m.codePointAt(0) as number)],
+    [Uint8Array.from(atob(src), (m) => m.codePointAt(0) as number)],
     name,
   );
 }
@@ -51,7 +51,7 @@ export const optimizeImage = async (src: File, xMax?: number, yMax?: number) => 
       canvas.height = image.naturalHeight * coef;
       canvas.getContext('2d')?.drawImage(image, 0, 0, canvas.width, canvas.height);
 
-      canvas.toBlob(blob => {
+      canvas.toBlob((blob) => {
         if (!blob) {
           reject('Error');
         } else {

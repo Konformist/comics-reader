@@ -121,7 +121,7 @@ const comics = ref<ComicModel[]>([]);
 
 const filterArrays = (f: string[], s: string[]) => (
   !s.length
-  || f.some(e => s.includes(e))
+  || f.some((e) => s.includes(e))
 )
 
 const filterSingle = (f: string, s: string[]) => (
@@ -130,7 +130,7 @@ const filterSingle = (f: string, s: string[]) => (
 )
 
 const comicsFiltered = computed(() => (
-  comics.value.filter(item => {
+  comics.value.filter((item) => {
     if ((comicsStore.filters.filling === 1 && !item.isFilled)
       || (comicsStore.filters.filling === 2 && item.isFilled)) {
       return false;
@@ -144,9 +144,9 @@ const comicsFiltered = computed(() => (
 
 const loadComics = async () => {
   comics.value = await ComicController.loadAll();
-  languages.value = dedupe(comics.value.map(e => e.language)).sort((a ,b) => sortString(a, b));
-  tags.value = dedupe(comics.value.map(e => e.tags).flat(1)).sort((a ,b) => sortString(a, b));
-  authors.value = dedupe(comics.value.map(e => e.authors).flat(1)).sort((a ,b) => sortString(a, b));
+  languages.value = dedupe(comics.value.map((e) => e.language)).sort((a ,b) => sortString(a, b));
+  tags.value = dedupe(comics.value.map((e) => e.tags).flat(1)).sort((a ,b) => sortString(a, b));
+  authors.value = dedupe(comics.value.map((e) => e.authors).flat(1)).sort((a ,b) => sortString(a, b));
 }
 
 loadComics();

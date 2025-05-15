@@ -21,6 +21,7 @@ export default defineConfig([
       '@stylistic/comma-style': ['error', 'last'],
       '@stylistic/dot-location': ['error', 'property'],
       '@stylistic/arrow-spacing': 'error',
+      '@stylistic/arrow-parens': ['error', 'always'],
 
       'vue/script-indent': ['error', 2],
     },

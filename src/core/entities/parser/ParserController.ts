@@ -10,7 +10,7 @@ export default class ParserController {
   static async loadAll (): Promise<ParserModel[]> {
     const result = await server.getParsersAll();
 
-    return result.map(e => new ParserModel(e));
+    return result.map((e) => new ParserModel(e));
   }
 
   static async load (id: number): Promise<ParserModel> {

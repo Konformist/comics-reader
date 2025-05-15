@@ -49,7 +49,7 @@ export default class ParserModel extends Entity<IParserDTO> {
   }
 
   getParsedArray (data: HTMLElement, item: string, text: string) {
-    return [...data.querySelectorAll<HTMLElement>(item)].map(e => {
+    return [...data.querySelectorAll<HTMLElement>(item)].map((e) => {
       if (text)
         return this.getParsedString(e, text);
 
@@ -71,7 +71,7 @@ export default class ParserModel extends Entity<IParserDTO> {
 
   parseImages (data: HTMLElement, item?: string) {
     return item || this.images
-      ? [...data.querySelectorAll(item || this.images)].map(e => {
+      ? [...data.querySelectorAll(item || this.images)].map((e) => {
         return e.querySelector<HTMLImageElement>('img')?.src || '';
       })
       : [];

@@ -217,7 +217,7 @@ const onLoadImage = async (item: IComicImageDTO) => {
 }
 
 const canLoadImages = computed(() => (
-  comic.value.images.some(e => e.from)
+  comic.value.images.some((e) => e.from)
 ))
 
 const onLoadImages = async () => {
@@ -242,7 +242,7 @@ const onLoadImages = async () => {
 };
 
 const delPage = async (item: IComicImageDTO) => {
-  const index = comic.value.images.findIndex(e => e.id === item.id);
+  const index = comic.value.images.findIndex((e) => e.id === item.id);
 
   if (index === -1) return;
 

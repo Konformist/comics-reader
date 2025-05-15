@@ -82,7 +82,7 @@ const tagsCount = computed(() => (
   tags.value.reduce((acc, tag) => {
     acc[tag] = 0;
 
-    comics.value.forEach(item => {
+    comics.value.forEach((item) => {
       if (item.tags.includes(tag)) acc[tag]++;
     })
 
@@ -92,7 +92,7 @@ const tagsCount = computed(() => (
 
 const loadComics = async () => {
   comics.value = await ComicController.loadAll();
-  tags.value = dedupe(comics.value.map(e => e.tags).flat(1))
+  tags.value = dedupe(comics.value.map((e) => e.tags).flat(1))
     .sort((a, b) => sortString(a, b));
 }
 
@@ -109,12 +109,12 @@ const loading = ref(false);
 const saveTag = async () => {
   try {
     const changed = comics.value
-      .filter(e => (e.tags.includes(reserveTag.value)))
-      .map(e => new ComicModel(e.getDTO()));
+      .filter((e) => (e.tags.includes(reserveTag.value)))
+      .map((e) => new ComicModel(e.getDTO()));
 
-    changed.forEach(comic => {
+    changed.forEach((comic) => {
       comic.tags.push(currentTag.value);
-      comic.tags = comic.tags.filter(e => e !== reserveTag.value);
+      comic.tags = comic.tags.filter((e) => e !== reserveTag.value);
     })
     await saveComics(changed);
     await loadComics();
@@ -137,11 +137,11 @@ const deleteTag = async (item: string) => {
 
   try {
     const changed = comics.value
-      .filter(e => (e.tags.includes(item)))
-      .map(e => new ComicModel(e.getDTO()));
+      .filter((e) => (e.tags.includes(item)))
+      .map((e) => new ComicModel(e.getDTO()));
 
-    changed.forEach(comic => {
-      comic.tags = comic.tags.filter(e => e !== item);
+    changed.forEach((comic) => {
+      comic.tags = comic.tags.filter((e) => e !== item);
     });
 
     await saveComics(changed);

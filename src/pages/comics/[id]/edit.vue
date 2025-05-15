@@ -135,11 +135,11 @@ const authors = ref<string[]>([]);
 
 const loadComics = async () => {
   comics.value = await ComicController.loadAll();
-  languages.value = dedupe(comics.value.map(e => e.language))
+  languages.value = dedupe(comics.value.map((e) => e.language))
     .filter(Boolean)
     .sort((a, b) => sortString(a, b));
-  tags.value = dedupe(comics.value.map(e => e.tags).flat(1)).sort((a, b) => sortString(a, b));
-  authors.value = dedupe(comics.value.map(e => e.authors).flat(1)).sort((a, b) => sortString(a, b));
+  tags.value = dedupe(comics.value.map((e) => e.tags).flat(1)).sort((a, b) => sortString(a, b));
+  authors.value = dedupe(comics.value.map((e) => e.authors).flat(1)).sort((a, b) => sortString(a, b));
 }
 
 const comicId = +(route.params.id || 0);
@@ -216,20 +216,20 @@ const onLoadInfo = async () => {
     if (comic.value.imageUrl) delete comicDTO.imageUrl;
     if (comic.value.images.length) delete comicDTO.images;
 
-    const language = languages.value.find(e => e.toLowerCase() === comicDTO.language?.toLowerCase());
+    const language = languages.value.find((e) => e.toLowerCase() === comicDTO.language?.toLowerCase());
     if (language) comicDTO.language = language;
 
     if (comicDTO.authors?.length) {
-      comicDTO.authors = comicDTO.authors.map(item => {
-        const newItem = authors.value.find(e => e.toLowerCase() === item.toLowerCase());
+      comicDTO.authors = comicDTO.authors.map((item) => {
+        const newItem = authors.value.find((e) => e.toLowerCase() === item.toLowerCase());
 
         return newItem || item;
       });
     }
 
     if (comicDTO.tags?.length) {
-      comicDTO.tags = comicDTO.tags.map(item => {
-        const newItem = tags.value.find(e => e.toLowerCase() === item.toLowerCase());
+      comicDTO.tags = comicDTO.tags.map((item) => {
+        const newItem = tags.value.find((e) => e.toLowerCase() === item.toLowerCase());
 
         return newItem || item;
       });

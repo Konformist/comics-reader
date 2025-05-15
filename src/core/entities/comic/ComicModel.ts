@@ -28,29 +28,29 @@ export default class ComicModel extends Entity<IComicDTO> {
       this.tags = dto.tags ? [...dto.tags] : [];
       this.authors = dto.authors ? [...dto.authors] : [];
       this.language = dto.language ?? '';
-      this.images = (dto.images ?? []).map(e => ({ ...e }));
+      this.images = (dto.images ?? []).map((e) => ({ ...e }));
       this.override = dto.override ? { ...dto.override } : {};
     }
   }
 
   get isFilled (): boolean {
-    return this.images.every(e => e.url)
+    return this.images.every((e) => e.url)
       && !!this.name
       && !!this.language
       && !!this.authors.length
   }
 
   get imagesFilled () {
-    return this.images.filter(e => e.url)
+    return this.images.filter((e) => e.url)
   }
 
   get imagesEmpty () {
-    return this.images.filter(e => !e.url)
+    return this.images.filter((e) => !e.url)
   }
 
   addImage (): void {
     this.images.push({
-      id: Math.max(...this.images.map(e => e.id), 0) + 1,
+      id: Math.max(...this.images.map((e) => e.id), 0) + 1,
       url: '',
       from: '',
     })
@@ -67,7 +67,7 @@ export default class ComicModel extends Entity<IComicDTO> {
       tags: [...this.tags],
       authors: [...this.authors],
       language: this.language,
-      images: this.images.map(e => ({ ...e })),
+      images: this.images.map((e) => ({ ...e })),
       override: { ...this.override },
     }
   }

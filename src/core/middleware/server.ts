@@ -88,7 +88,7 @@ const getParsersData = async () => {
 
 const addParser = async (data: IParserDTO) => {
   await getParsersData();
-  const parserId = Math.max(...parsersRaw.map(e => e.id), 0) + 1;
+  const parserId = Math.max(...parsersRaw.map((e) => e.id), 0) + 1;
 
   parsersRaw.push({ ...data, id: parserId });
   await setParsersData();
@@ -97,22 +97,22 @@ const addParser = async (data: IParserDTO) => {
 }
 
 const setParser = async (data: IParserDTO): Promise<void> => {
-  const index = parsersRaw.findIndex(e => e.id === data.id);
+  const index = parsersRaw.findIndex((e) => e.id === data.id);
   parsersRaw.splice(index, 1, data);
   await setParsersData();
 }
 
 const delParser = async (id: number): Promise<void> => {
-  parsersRaw = parsersRaw.filter(e => e.id !== id);
+  parsersRaw = parsersRaw.filter((e) => e.id !== id);
   await setParsersData();
 }
 
 const getParser = async (id: number): Promise<IParserDTO|undefined> => {
-  const ids = parsersRaw.map(e => e.id)
+  const ids = parsersRaw.map((e) => e.id)
 
   if (!ids.includes(id)) await getParsersData();
 
-  return parsersRaw.find(e => e.id === id);
+  return parsersRaw.find((e) => e.id === id);
 }
 
 const getParsersAll = async (): Promise<Array<IParserDTO>> => {
@@ -247,7 +247,7 @@ const getComicsData = async () => {
 
 const addComic = async (data: IComicDTO): Promise<number> => {
   await getComicsData();
-  const comicId = Math.max(...comicsRaw.map(e => e.id), 0) + 1;
+  const comicId = Math.max(...comicsRaw.map((e) => e.id), 0) + 1;
 
   comicsRaw.push({ ...data, id: comicId });
   await setComicsData();
@@ -256,17 +256,17 @@ const addComic = async (data: IComicDTO): Promise<number> => {
 }
 
 const setComic = async (data: IComicDTO): Promise<void> => {
-  const index = comicsRaw.findIndex(e => e.id === data.id);
+  const index = comicsRaw.findIndex((e) => e.id === data.id);
   comicsRaw.splice(index, 1, data);
   await setComicsData();
 }
 
 const getComic = async (id: number): Promise<IComicDTO|undefined> => {
-  const ids = comicsRaw.map(e => e.id)
+  const ids = comicsRaw.map((e) => e.id)
 
   if (!ids.includes(id)) await getComicsData();
 
-  return comicsRaw.find(e => e.id === id);
+  return comicsRaw.find((e) => e.id === id);
 }
 
 const getComicAll = async (): Promise<Array<IComicDTO>> => {
@@ -320,7 +320,7 @@ const addComicFile = async (comicId: number, file: File): Promise<void> => {
 
   if (!comic) return undefined;
 
-  const fileId = Math.max(...comic.images.map(e => e.id), 0) + 1;
+  const fileId = Math.max(...comic.images.map((e) => e.id), 0) + 1;
   const optimizedFile = await optimizeImage(file);
   const uri = await addFile(`${COMICS_FILES_DIRECTORY}/${comicId}/${fileId}.webp`, optimizedFile);
 
@@ -338,7 +338,7 @@ const setComicFile = async (comicId: number, fileId: number, file: File) => {
 
   if (!comic) return undefined;
 
-  const image = comic.images.find(e => e.id === fileId);
+  const image = comic.images.find((e) => e.id === fileId);
 
   if (!image) return undefined;
 
@@ -359,8 +359,8 @@ const delComicFile = async (comicId: number, fileId: number): Promise<void> => {
 
   if (!comic) return;
 
-  const file = comic.images.find(e => e.id === fileId);
-  const fileIndex = comic.images.findIndex(e => e.id === fileId);
+  const file = comic.images.find((e) => e.id === fileId);
+  const fileIndex = comic.images.findIndex((e) => e.id === fileId);
 
   if (!file) return;
 
@@ -393,7 +393,7 @@ const resizeComicFile = async (
 
   if (!comic) return;
 
-  const file = comic.images.find(e => e.id === fileId);
+  const file = comic.images.find((e) => e.id === fileId);
 
   if (!file) return;
 
@@ -413,7 +413,7 @@ const delComic = async (id: number): Promise<void> => {
 
   if (comic.image) await delComicCover(id);
   await delComicFiles(id);
-  comicsRaw = comicsRaw.filter(e => e.id !== id);
+  comicsRaw = comicsRaw.filter((e) => e.id !== id);
   await setComicsData();
 }
 

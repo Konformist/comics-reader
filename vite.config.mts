@@ -23,7 +23,7 @@ export default defineConfig(({ mode }) => {
       cssCodeSplit: false,
       rollupOptions: {
         output: {
-          manualChunks: id => id.includes('node_modules') ? 'vendor' : 'index',
+          manualChunks: (id) => id.includes('node_modules') ? 'vendor' : 'index',
         },
       },
     },

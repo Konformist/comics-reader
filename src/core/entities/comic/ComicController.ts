@@ -5,7 +5,7 @@ export default class ComicController {
   static async loadAll (): Promise<ComicModel[]> {
     const result = await server.getComicAll();
 
-    return result.map(e => new ComicModel(e));
+    return result.map((e) => new ComicModel(e));
   }
 
   static async load (id: number): Promise<ComicModel> {

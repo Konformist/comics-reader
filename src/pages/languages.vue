@@ -82,7 +82,7 @@ const languagesCount = computed(() => (
   languages.value.reduce((acc, tag) => {
     acc[tag] = 0;
 
-    comics.value.forEach(item => {
+    comics.value.forEach((item) => {
       if (item.language === tag) acc[tag]++;
     })
 
@@ -92,7 +92,7 @@ const languagesCount = computed(() => (
 
 const loadComics = async () => {
   comics.value = await ComicController.loadAll();
-  languages.value = dedupe(comics.value.map(e => e.language))
+  languages.value = dedupe(comics.value.map((e) => e.language))
     .filter(Boolean)
     .sort((a, b) => sortString(a, b));
 }
@@ -111,10 +111,10 @@ const saveLanguage = async () => {
   try {
     loading.value = true;
     const changed = comics.value
-      .filter(e => (e.language === reserveLanguage.value))
-      .map(e => new ComicModel(e.getDTO()));
+      .filter((e) => (e.language === reserveLanguage.value))
+      .map((e) => new ComicModel(e.getDTO()));
 
-    changed.forEach(comic => {
+    changed.forEach((comic) => {
       comic.language = currentLanguage.value;
     })
     await saveComics(changed);
@@ -138,10 +138,10 @@ const deleteLanguage = async (item: string) => {
 
   try {
     const changed = comics.value
-      .filter(e => (e.language === item))
-      .map(e => new ComicModel(e.getDTO()));
+      .filter((e) => (e.language === item))
+      .map((e) => new ComicModel(e.getDTO()));
 
-    changed.forEach(comic => {
+    changed.forEach((comic) => {
       comic.language = '';
     });
 

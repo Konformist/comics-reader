@@ -38,7 +38,6 @@ const resizeImage = async (
   options: Partial<IResizeOptions>,
 ): Promise<string> => {
   const result = await ImageManipulator.resize({
-    quality: 100,
     imagePath: path,
     maxWidth: options.maxWidth,
     maxHeight: options.maxHeight,

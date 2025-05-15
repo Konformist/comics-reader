@@ -9,9 +9,9 @@ export default class ComicModel extends Entity<IComicDTO> {
   public name: string = '';
   public image: string = '';
   public imageUrl: string = '';
-  public authors: string[] = [];
-  public tags: string[] = [];
-  public language: string = '';
+  public authors: number[] = [];
+  public tags: number[] = [];
+  public language: number = 0;
   public images: IComicImageDTO[] = [];
   public override: TParserOverride = {};
 
@@ -27,7 +27,7 @@ export default class ComicModel extends Entity<IComicDTO> {
       this.imageUrl = dto.imageUrl ?? '';
       this.tags = dto.tags ? [...dto.tags] : [];
       this.authors = dto.authors ? [...dto.authors] : [];
-      this.language = dto.language ?? '';
+      this.language = dto.language ?? 0;
       this.images = (dto.images ?? []).map((e) => ({ ...e }));
       this.override = dto.override ? { ...dto.override } : {};
     }

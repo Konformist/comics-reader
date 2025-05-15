@@ -1,0 +1,23 @@
+import ObjectValue from '@/core/object-value/ObjectValue.ts';
+import type { IAuthorDTO } from '@/core/object-value/author/AuthorTypes.ts';
+
+export default class AuthorObject extends ObjectValue<IAuthorDTO> {
+  public id: number = 0;
+  public name: string = '';
+
+  constructor(dto?: Partial<IAuthorDTO>) {
+    super();
+
+    if (dto) {
+      this.id = dto?.id ?? 0;
+      this.name = dto?.name ?? '';
+    }
+  }
+
+  public getDTO(): IAuthorDTO {
+    return {
+      id: this.id,
+      name: this.name,
+    };
+  }
+}

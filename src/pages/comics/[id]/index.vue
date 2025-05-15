@@ -36,34 +36,36 @@
         />
       </p>
       <p
-        v-if="comic.authors.length"
+        v-if="authorsChips.length"
         class="mt-2 d-flex flex-wrap ga-1 align-center"
       >
         <b class="font-weight-medium">Авторы:</b>
         <v-chip
-          v-for="author in comic.authors"
-          :key="author"
-          :text="author"
+          v-for="item in authorsChips"
+          :key="item.id"
+          :text="item.name"
         />
       </p>
       <p
-        v-if="comic.language"
+        v-if="languagesChips.length"
         class="mt-2 d-flex flex-wrap ga-1 align-center"
       >
         <b class="font-weight-medium">Язык:</b>
         <v-chip
-          :text="comic.language"
+          v-for="item in languagesChips"
+          :key="item.id"
+          :text="item.name"
         />
       </p>
       <p
-        v-if="comic.tags.length"
+        v-if="tagsChips.length"
         class="mt-2 d-flex flex-wrap ga-1 align-center"
       >
         <b class="font-weight-medium">Теги:</b>
         <v-chip
-          v-for="tag in comic.tags"
-          :key="tag"
-          :text="tag"
+          v-for="item in tagsChips"
+          :key="item.id"
+          :text="item.name"
         />
       </p>
       <p class="mt-2 d-flex flex-wrap ga-1 align-center">
@@ -111,11 +113,17 @@
 </template>
 
 <script lang="ts" setup>
-import ComicController from '@/core/entities/comic/ComicController.ts';
-import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import { Clipboard } from '@capacitor/clipboard';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
+import ComicController from '@/core/entities/comic/ComicController.ts';
+import ComicModel from '@/core/entities/comic/ComicModel.ts';
+import AuthorController from '@/core/object-value/author/AuthorController.ts';
+import type AuthorObject from '@/core/object-value/author/AuthorObject.ts';
+import LanguageController from '@/core/object-value/language/LanguageController.ts';
+import type LanguageObject from '@/core/object-value/language/LanguageObject.ts';
+import TagController from '@/core/object-value/tag/TagController.ts';
+import type TagObject from '@/core/object-value/tag/TagObject.ts';
 
 definePage({
   meta: {
@@ -138,6 +146,39 @@ const loadComic = async () => {
 };
 
 loadComic();
+
+const languages = ref<LanguageObject[]>([]);
+const languagesChips = computed(() => (
+  languages.value.filter((e) => comic.value.language === e.id)
+));
+
+const loadLanguages = async () => {
+  languages.value = await LanguageController.loadAll();
+};
+
+loadLanguages();
+
+const authors = ref<AuthorObject[]>([]);
+const authorsChips = computed(() => (
+  authors.value.filter((e) => comic.value.authors.includes(e.id))
+));
+
+const loadAuthors = async () => {
+  authors.value = await AuthorController.loadAll();
+};
+
+loadAuthors();
+
+const tags = ref<TagObject[]>([]);
+const tagsChips = computed(() => (
+  tags.value.filter((e) => comic.value.tags.includes(e.id))
+));
+
+const loadTags = async () => {
+  tags.value = await TagController.loadAll();
+};
+
+loadTags();
 
 const loading = ref(false);
 

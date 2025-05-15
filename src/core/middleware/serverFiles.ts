@@ -1,17 +1,28 @@
 import type { IDirectory, IFile } from '@/core/entities/file/FileTypes.ts';
 import { fileToBase64, getFileUrl } from '@/core/utils/image.ts';
 import { ImageManipulator } from '@capacitor-community/image-manipulator';
-import { Directory, Filesystem } from '@capacitor/filesystem';
+import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 
-const addFile = async (path: string, file: File): Promise<string> => {
+const addFile = async (path: string, file: string | File): Promise<string> => {
   const ret = await Filesystem.writeFile({
     path,
     directory: Directory.Data,
-    data: await fileToBase64(file),
+    data: typeof file === 'string' ? file : await fileToBase64(file),
+    encoding: typeof file === 'string' ? Encoding.UTF8 : undefined,
     recursive: true,
   });
 
   return getFileUrl(ret.uri);
+};
+
+const getFile = async (path: string, type: 'string' | 'binary'): Promise<string> => {
+  const result = await Filesystem.readFile({
+    path,
+    directory: Directory.Data,
+    encoding: type === 'string' ? Encoding.UTF8 : undefined,
+  });
+
+  return result.data as string;
 };
 
 const delFile = (path: string): Promise<void> => {
@@ -91,6 +102,7 @@ const getTree = async (path: string): Promise<IDirectory[]> => {
 export default {
   addFile,
   delFile,
+  getFile,
   resizeImage,
   getTree,
 };

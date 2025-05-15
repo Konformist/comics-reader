@@ -17,7 +17,7 @@
     </v-toolbar>
     <v-container>
       <v-data-iterator
-        v-model:page="currentPage"
+        v-model:page="comicsStore.filters.page"
         :items="comicsFiltered"
         items-per-page="20"
       >
@@ -37,7 +37,7 @@
         </template>
         <template #footer="{ pageCount, prevPage, nextPage }">
           <v-pagination
-            v-model="currentPage"
+            v-model="comicsStore.filters.page"
             class="mt-4"
             density="comfortable"
             :length="pageCount"
@@ -56,6 +56,8 @@
         <v-card-item>
           <v-select
             v-model="comicsStore.filters.authors"
+            item-text="name"
+            item-value="id"
             :items="authors"
             label="Авторы"
             multiple
@@ -63,6 +65,8 @@
           />
           <v-select
             v-model="comicsStore.filters.languages"
+            item-text="name"
+            item-value="id"
             :items="languages"
             label="Языки"
             multiple
@@ -70,6 +74,8 @@
           />
           <v-select
             v-model="comicsStore.filters.tags"
+            item-title="name"
+            item-value="id"
             :items="tags"
             label="Теги"
             multiple
@@ -96,7 +102,12 @@
 import ComicGallery from '@/components/ComicGallery.vue';
 import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
-import { dedupe, sortString } from '@/core/utils/array.ts';
+import AuthorController from '@/core/object-value/author/AuthorController.ts';
+import type AuthorObject from '@/core/object-value/author/AuthorObject.ts';
+import LanguageController from '@/core/object-value/language/LanguageController.ts';
+import type LanguageObject from '@/core/object-value/language/LanguageObject.ts';
+import TagController from '@/core/object-value/tag/TagController.ts';
+import type TagObject from '@/core/object-value/tag/TagObject.ts';
 import { useComicsStore } from '@/stores/comics.ts';
 import { Toast } from '@capacitor/toast';
 
@@ -109,24 +120,34 @@ definePage({
 const router = useRouter();
 const comicsStore = useComicsStore();
 
-const currentPage = ref(1);
-
 const filtersSheet = ref(false);
 
-const languages = ref<string[]>([]);
-const tags = ref<string[]>([]);
-const authors = ref<string[]>([]);
+const languages = ref<LanguageObject[]>([]);
+const loadLanguages = async () => {
+  languages.value = await LanguageController.loadAll();
+};
+
+loadLanguages();
+
+const authors = ref<AuthorObject[]>([]);
+const loadAuthors = async () => {
+  authors.value = await AuthorController.loadAll();
+};
+
+loadAuthors();
+
+const tags = ref<TagObject[]>([]);
+const loadTags = async () => {
+  tags.value = await TagController.loadAll();
+};
+
+loadTags();
 
 const comics = ref<ComicModel[]>([]);
 
-const filterArrays = (f: string[], s: string[]) => (
+const filterArrays = <T>(f: T[], s: T[]): boolean => (
   !s.length
   || f.some((e) => s.includes(e))
-);
-
-const filterSingle = (f: string, s: string[]) => (
-  !s.length
-  || s.includes(f)
 );
 
 const comicsFiltered = computed(() => (
@@ -138,15 +159,12 @@ const comicsFiltered = computed(() => (
 
     return filterArrays(item.tags, comicsStore.filters.tags)
       && filterArrays(item.authors, comicsStore.filters.authors)
-      && filterSingle(item.language, comicsStore.filters.languages);
+      && filterArrays([item.language], comicsStore.filters.languages);
   })
 ));
 
 const loadComics = async () => {
   comics.value = await ComicController.loadAll();
-  languages.value = dedupe(comics.value.map((e) => e.language)).sort((a ,b) => sortString(a, b));
-  tags.value = dedupe(comics.value.map((e) => e.tags).flat(1)).sort((a ,b) => sortString(a, b));
-  authors.value = dedupe(comics.value.map((e) => e.authors).flat(1)).sort((a ,b) => sortString(a, b));
 };
 
 loadComics();

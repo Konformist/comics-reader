@@ -24,6 +24,7 @@ const init = async () => {
 
   registerPlugins(app);
 
+  await server.migrate();
   await server.autoBackup();
   await useAppStore().loadSettings();
 

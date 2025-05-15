@@ -24,8 +24,10 @@
         label="Название"
         rows="2"
       />
-      <v-combobox
+      <v-select
         v-model="comic.language"
+        item-title="name"
+        item-value="id"
         :items="languages"
         label="Язык"
       />
@@ -37,9 +39,11 @@
         label="Парсинг языка"
         rows="2"
       />
-      <v-combobox
+      <v-select
         v-model="comic.authors"
         chips
+        item-title="name"
+        item-value="id"
         :items="authors"
         label="Авторы"
         multiple
@@ -52,9 +56,11 @@
         label="Парсинг авторов"
         rows="2"
       />
-      <v-combobox
+      <v-select
         v-model="comic.tags"
         chips
+        item-title="name"
+        item-value="id"
         :items="tags"
         label="Теги"
         multiple
@@ -115,7 +121,12 @@ import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import ParserController from '@/core/entities/parser/ParserController.ts';
 import ParserModel from '@/core/entities/parser/ParserModel.ts';
-import { dedupe, sortString } from '@/core/utils/array.ts';
+import AuthorController from '@/core/object-value/author/AuthorController.ts';
+import AuthorObject from '@/core/object-value/author/AuthorObject.ts';
+import LanguageController from '@/core/object-value/language/LanguageController.ts';
+import LanguageObject from '@/core/object-value/language/LanguageObject.ts';
+import TagController from '@/core/object-value/tag/TagController.ts';
+import TagObject from '@/core/object-value/tag/TagObject.ts';
 import { Toast } from '@capacitor/toast';
 
 definePage({
@@ -129,17 +140,23 @@ const route = useRoute('/comics/[id]/edit');
 
 const comics = ref<ComicModel[]>([]);
 
-const languages = ref<string[]>([]);
-const tags = ref<string[]>([]);
-const authors = ref<string[]>([]);
+const languages = ref<LanguageObject[]>([]);
+const loadLanguages = async () => {
+  languages.value = await LanguageController.loadAll();
+};
+
+const authors = ref<AuthorObject[]>([]);
+const loadAuthors = async () => {
+  authors.value = await AuthorController.loadAll();
+};
+
+const tags = ref<TagObject[]>([]);
+const loadTags = async () => {
+  tags.value = await TagController.loadAll();
+};
 
 const loadComics = async () => {
   comics.value = await ComicController.loadAll();
-  languages.value = dedupe(comics.value.map((e) => e.language))
-    .filter(Boolean)
-    .sort((a, b) => sortString(a, b));
-  tags.value = dedupe(comics.value.map((e) => e.tags).flat(1)).sort((a, b) => sortString(a, b));
-  authors.value = dedupe(comics.value.map((e) => e.authors).flat(1)).sort((a, b) => sortString(a, b));
 };
 
 const comicId = +(route.params.id || 0);
@@ -164,8 +181,13 @@ const loadParser = async () => {
 };
 
 onMounted(async () => {
-  loadComics();
-  loadParsers();
+  await Promise.all([
+    loadParsers(),
+    loadTags(),
+    loadAuthors(),
+    loadLanguages(),
+    loadComics(),
+  ]);
   await loadComic();
   await loadParser();
 });
@@ -211,33 +233,64 @@ const onLoadInfo = async () => {
   try {
     loading.value = true;
     const result = await ParserController.loadComic(comic.value.url);
-    const comicDTO = parser.value.parse(result, comic.value.override);
+    const parsedComic = parser.value.parse(result, comic.value.override);
 
-    if (comic.value.imageUrl) delete comicDTO.imageUrl;
-    if (comic.value.images.length) delete comicDTO.images;
-
-    const language = languages.value.find((e) => e.toLowerCase() === comicDTO.language?.toLowerCase());
-    if (language) comicDTO.language = language;
-
-    if (comicDTO.authors?.length) {
-      comicDTO.authors = comicDTO.authors.map((item) => {
-        const newItem = authors.value.find((e) => e.toLowerCase() === item.toLowerCase());
-
-        return newItem || item;
-      });
+    if (!comic.value.imageUrl && parsedComic.image) {
+      comic.value.imageUrl = parsedComic.image;
     }
 
-    if (comicDTO.tags?.length) {
-      comicDTO.tags = comicDTO.tags.map((item) => {
-        const newItem = tags.value.find((e) => e.toLowerCase() === item.toLowerCase());
-
-        return newItem || item;
-      });
+    if (!comic.value.images.length && parsedComic.images) {
+      comic.value.images = parsedComic.images.map((e, i) => ({
+        id: i + 1,
+        url: '',
+        from: e,
+      }));
     }
 
-    Object.assign(comic.value, comicDTO);
+    if (parsedComic.name) {
+      comic.value.name = parsedComic.name;
+    }
+
+    if (parsedComic.language) {
+      const language = languages.value.find((e) => e.name.toLowerCase() === parsedComic.language?.toLowerCase());
+
+      if (!language) {
+        const itemId = await LanguageController.save(new LanguageObject({ id: 0, name: parsedComic.language }));
+        if (itemId) comic.value.language = itemId;
+      } else {
+        comic.value.language = language.id;
+      }
+    }
+
+    for (const item of parsedComic.authors || []) {
+      const newItem = authors.value.find((e) => e.name.toLowerCase() === item.toLowerCase());
+
+      if (!newItem) {
+        const itemId = await AuthorController.save(new AuthorObject({ id: 0, name: item }));
+        if (itemId) comic.value.authors.push(itemId);
+      } else {
+        comic.value.authors.push(newItem.id);
+      }
+    }
+
+    for (const item of parsedComic.tags || []) {
+      const newItem = tags.value.find((e) => e.name.toLowerCase() === item.toLowerCase());
+
+      if (!newItem) {
+        const itemId = await TagController.save(new TagObject({ id: 0, name: item }));
+        if (itemId) comic.value.tags.push(itemId);
+      } else {
+        comic.value.tags.push(newItem.id);
+      }
+    }
+
     await saveComic();
-    await loadComic();
+    await Promise.all([
+      loadTags(),
+      loadAuthors(),
+      loadLanguages(),
+      loadComic(),
+    ]);
     Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
     Toast.show({ text: `Комикс не сохранён. Ошибка: ${e}` });

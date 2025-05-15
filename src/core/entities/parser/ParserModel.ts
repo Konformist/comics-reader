@@ -1,6 +1,5 @@
-import type { IComicDTO } from '@/core/entities/comic/ComicTypes.ts';
 import Entity from '@/core/entities/Entity.ts';
-import type { IParserDTO, TParserOverride } from '@/core/entities/parser/ParserTypes.ts';
+import type { IParsedComic, IParserDTO, TParserOverride } from '@/core/entities/parser/ParserTypes.ts';
 
 export default class ParserModel extends Entity<IParserDTO> {
   public id: number = 0;
@@ -95,40 +94,36 @@ export default class ParserModel extends Entity<IParserDTO> {
       : [];
   }
 
-  parse(value: string, override?: TParserOverride) {
+  parse(value: string, override?: TParserOverride): Partial<IParsedComic> {
     const cleaned = this.cleanHTML(value);
     const parser = new DOMParser();
     const result = parser
       .parseFromString(cleaned, 'text/html')
       .body;
 
-    const comicDTO: Partial<Omit<IComicDTO, 'id' | 'image'>> = {};
+    const parsedComic: Partial<IParsedComic> = {};
 
     const name = this.parseTitle(result, override?.title);
-    if (name) comicDTO.name = name;
+    if (name) parsedComic.name = name;
 
     const image = this.parseImage(result, override?.image);
-    if (image) comicDTO.imageUrl = image;
+    if (image) parsedComic.image = image;
 
     const images = this.parseImages(result, override?.images);
     if (images) {
-      comicDTO.images = images.map((from, index) => ({
-        id: index + 1,
-        url: '',
-        from,
-      }));
+      parsedComic.images = images;
     }
 
     const authors = this.parseAuthors(result, override?.authors);
-    if (authors) comicDTO.authors = authors;
+    if (authors) parsedComic.authors = authors;
 
     const language = this.parseLanguage(result, override?.language);
-    if (language) comicDTO.language = language;
+    if (language) parsedComic.language = language;
 
     const tags = this.parseTags(result, override?.tags);
-    if (tags) comicDTO.tags = tags;
+    if (tags) parsedComic.tags = tags;
 
-    return comicDTO;
+    return parsedComic;
   }
 
   getDTO(): IParserDTO {

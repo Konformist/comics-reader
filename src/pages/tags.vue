@@ -4,13 +4,13 @@
       <v-list activatable>
         <v-list-item
           v-for="item in tags"
-          :key="item"
-          :active="item === reserveTag"
-          :title="item"
+          :key="item.id"
+          :active="item.id === selectedTag.id"
+          :title="item.name"
         >
           <template #append>
             <v-list-item-subtitle class="mr-1">
-              {{ tagsCount[item] }}
+              {{ tagsCount[item.id] }}
             </v-list-item-subtitle>
             <v-list-item-action end>
               <v-btn
@@ -18,14 +18,14 @@
                 density="comfortable"
                 icon="$edit"
                 variant="tonal"
-                @click="clickTag(item)"
+                @click="clickTag(item.id)"
               />
               <v-btn
                 color="error"
                 density="comfortable"
                 icon="$delete"
                 variant="tonal"
-                @click="deleteTag(item)"
+                @click="deleteTag(item.id)"
               />
             </v-list-item-action>
           </template>
@@ -34,9 +34,12 @@
     </v-container>
     <v-dialog v-model="dialog">
       <v-card>
+        <v-card-title>
+          {{ selectedTag.id ? 'Редактирование' : 'Создание' }}
+        </v-card-title>
         <v-card-item class="pb-0">
           <v-text-field
-            v-model.trim="currentTag"
+            v-model.trim="selectedTag.name"
             variant="solo-filled"
           />
         </v-card-item>
@@ -49,15 +52,20 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-fab
+      icon="$plus"
+      @click="clickTag(0)"
+    />
   </v-main>
 </template>
 
 <script setup lang="ts">
-import ComicController from '@/core/entities/comic/ComicController.ts';
-import ComicModel from '@/core/entities/comic/ComicModel.ts';
-import { dedupe, sortString } from '@/core/utils/array.ts';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
+import ComicController from '@/core/entities/comic/ComicController.ts';
+import ComicModel from '@/core/entities/comic/ComicModel.ts';
+import TagController from '@/core/object-value/tag/TagController.ts';
+import TagObject from '@/core/object-value/tag/TagObject.ts';
 
 definePage({
   meta: {
@@ -67,57 +75,48 @@ definePage({
 
 const dialog = ref(false);
 
-const reserveTag = ref('');
-const currentTag = ref('');
-
-const clickTag = (value: string) => {
-  reserveTag.value = value;
-  currentTag.value = value;
-  dialog.value = true;
-};
-
 const comics = ref<ComicModel[]>([]);
-const tags = ref<string[]>([]);
-const tagsCount = computed(() => (
-  tags.value.reduce((acc, tag) => {
-    acc[tag] = 0;
-
-    comics.value.forEach((item) => {
-      if (item.tags.includes(tag)) acc[tag]++;
-    });
-
-    return acc;
-  }, {} as Record<string, number>)
-));
 
 const loadComics = async () => {
   comics.value = await ComicController.loadAll();
-  tags.value = dedupe(comics.value.map((e) => e.tags).flat(1))
-    .sort((a, b) => sortString(a, b));
 };
 
 loadComics();
 
-const saveComics = async (value: ComicModel[]) => {
-  for (const comic of value) {
-    await ComicController.save(comic);
-  }
+const tags = ref<TagObject[]>([]);
+
+const loadTags = async () => {
+  tags.value = await TagController.loadAll();
 };
+
+loadTags();
+
+const selectedTag = ref(new TagObject());
+
+const clickTag = (value: number) => {
+  selectedTag.value = tags.value.find((e) => e.id === value) || new TagObject();
+  dialog.value = true;
+};
+
+const tagsCount = computed(() => (
+  tags.value.reduce((acc, tag) => {
+    acc[tag.id] = 0;
+
+    comics.value.forEach((item) => {
+      if (item.tags.includes(tag.id)) acc[tag.id]++;
+    });
+
+    return acc;
+  }, {} as Record<number, number>)
+));
 
 const loading = ref(false);
 
 const saveTag = async () => {
   try {
-    const changed = comics.value
-      .filter((e) => (e.tags.includes(reserveTag.value)))
-      .map((e) => new ComicModel(e.getDTO()));
-
-    changed.forEach((comic) => {
-      comic.tags.push(currentTag.value);
-      comic.tags = comic.tags.filter((e) => e !== reserveTag.value);
-    });
-    await saveComics(changed);
-    await loadComics();
+    loading.value = true;
+    await TagController.save(selectedTag.value);
+    await loadTags();
     dialog.value = false;
     Toast.show({ text: 'Тег сохранён' });
   } catch (e) {
@@ -127,7 +126,7 @@ const saveTag = async () => {
   }
 };
 
-const deleteTag = async (item: string) => {
+const deleteTag = async (id: number) => {
   const { value } = await Dialog.confirm({
     title: 'Подтверждение удаления',
     message: 'Удалить тег?',
@@ -136,16 +135,9 @@ const deleteTag = async (item: string) => {
   if (!value) return;
 
   try {
-    const changed = comics.value
-      .filter((e) => (e.tags.includes(item)))
-      .map((e) => new ComicModel(e.getDTO()));
-
-    changed.forEach((comic) => {
-      comic.tags = comic.tags.filter((e) => e !== item);
-    });
-
-    await saveComics(changed);
-    await loadComics();
+    loading.value = true;
+    await TagController.delete(id);
+    await loadTags();
     Toast.show({ text: 'Тег удалён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });

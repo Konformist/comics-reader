@@ -13,9 +13,9 @@ export interface IComicDTO {
   name: string
   image: string
   imageUrl: string
-  tags: string[]
-  authors: string[]
-  language: string
+  tags: number[]
+  authors: number[]
+  language: number
   images: IComicImageDTO[]
   override: Partial<Omit<IParserDTO, 'id' | 'name'>>
 }

@@ -1,14 +1,13 @@
-import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
-import serverComics from '@/core/middleware/serverComics.ts';
-import serverParsers from '@/core/middleware/serverParsers.ts';
+import AuthorsServer from '@/core/middleware/AuthorsServer.ts';
+import LanguagesServer from '@/core/middleware/LanguagesServer.ts';
+import migrator from '@/core/middleware/migrator.ts';
+import serverFiles from '@/core/middleware/serverFiles.ts';
+import { Directory, Filesystem } from '@capacitor/filesystem';
 import serverSettings from '@/core/middleware/serverSettings.ts';
-// import serverTags from '@/core/middleware/serverTags.ts';
-import {
-  BACKUPS_DIRECTORY,
-  COMICS_VERSION,
-  PARSERS_VERSION,
-  // TAGS_VERSION,
-} from '@/core/middleware/variables.ts';
+import ComicsServer from '@/core/middleware/ComicsServer.ts';
+import ParsersServer from '@/core/middleware/ParsersServer.ts';
+import TagsServer from '@/core/middleware/TagsServer.ts';
+import { BACKUPS_DIRECTORY } from '@/core/middleware/variables.ts';
 
 const getBackupFileName = () => {
   const now = new Date();
@@ -19,33 +18,75 @@ const getBackupFileName = () => {
   return `${year}-${month}-${day}.json`;
 };
 
-const setBackup = async (): Promise<void> => {
+const addBackup = async (): Promise<void> => {
   await serverSettings.getSettingsData();
-  // await serverTags.getTagsData();
-  await serverComics.getComicsData();
-  await serverParsers.getParsersData();
+  await AuthorsServer.getDatabase();
+  await LanguagesServer.getDatabase();
+  await TagsServer.getDatabase();
+  await ComicsServer.getDatabase();
+  await ParsersServer.getDatabase();
 
-  await Filesystem.writeFile({
-    path: `${BACKUPS_DIRECTORY}/${getBackupFileName()}`,
-    directory: Directory.Data,
-    encoding: Encoding.UTF8,
-    recursive: true,
-    data: JSON.stringify({
-      settings: serverSettings.settingsRaw,
-      parsers: {
-        version: PARSERS_VERSION,
-        items: serverParsers.parsersRaw,
-      },
-      // tags: {
-      //   version: TAGS_VERSION,
-      //   items: serverTags.tagsRaw,
-      // },
-      comics: {
-        version: COMICS_VERSION,
-        items: serverComics.comicsRaw,
-      },
-    }),
-  });
+  await serverFiles.addFile(`${BACKUPS_DIRECTORY}/${getBackupFileName()}`, JSON.stringify({
+    version: migrator.dataRaw.item,
+    settings: serverSettings.dataRaw.item,
+    parsers: ParsersServer.dataRaw,
+    authors: AuthorsServer.dataRaw,
+    languages: LanguagesServer.dataRaw,
+    tags: TagsServer.dataRaw,
+    comics: ComicsServer.dataRaw,
+  }));
+};
+
+const delBackup = (path: string): Promise<void> => (serverFiles.delFile(path));
+
+const getBackup = async (path: string): Promise<void> => {
+  const result = await serverFiles.getFile(path, 'string');
+
+  if (!result) return;
+
+  const parsedData = JSON.parse(result);
+
+  // @todo for old backups
+  if (!parsedData.version) {
+    parsedData.settings = parsedData.settings?.item;
+    parsedData.parsers = parsedData.parsers?.items;
+    parsedData.comics = parsedData.comics?.items;
+  }
+
+  if (parsedData.version) {
+    migrator.dataRaw.item = parsedData.version;
+    await migrator.setVersionData();
+  }
+
+  if (parsedData.settings) {
+    serverSettings.dataRaw.item = parsedData.settings;
+    await serverSettings.setSettingsData();
+  }
+
+  if (parsedData.parsers) {
+    ParsersServer.dataRaw = parsedData.parsers;
+    await ParsersServer.setDatabase();
+  }
+
+  if (parsedData.languages) {
+    LanguagesServer.dataRaw = parsedData.languages;
+    await LanguagesServer.setDatabase();
+  }
+
+  if (parsedData.authors) {
+    AuthorsServer.dataRaw = parsedData.authors;
+    await AuthorsServer.setDatabase();
+  }
+
+  if (parsedData.tags) {
+    TagsServer.dataRaw = parsedData.tags;
+    await TagsServer.setDatabase();
+  }
+
+  if (parsedData.comics) {
+    ComicsServer.dataRaw = parsedData.comics;
+    await ComicsServer.setDatabase();
+  }
 };
 
 const autoBackup = async () => {
@@ -56,36 +97,13 @@ const autoBackup = async () => {
     });
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (_) {
-    await setBackup();
+    await addBackup();
   }
-};
-
-const getBackup = async (path: string): Promise<void> => {
-  const result = await Filesystem.readFile({
-    path,
-    directory: Directory.Data,
-    encoding: Encoding.UTF8,
-  });
-
-  if (!result) return;
-
-  const parsedData = JSON.parse(result.data as string);
-
-  serverSettings.settingsRaw = parsedData.settings?.item ?? null;
-  await serverSettings.setSettingsData();
-
-  serverParsers.parsersRaw = parsedData.parsers?.items || [];
-  await serverParsers.setParsersData();
-
-  // serverTags.tagsRaw = parsedData.tags?.items || [];
-  // await serverTags.setTagsData();
-
-  serverComics.comicsRaw = parsedData.comics?.items || [];
-  await serverComics.setComicsData();
 };
 
 export default {
   autoBackup,
-  setBackup,
+  addBackup,
+  delBackup,
   getBackup,
 };

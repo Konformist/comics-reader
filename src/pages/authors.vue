@@ -4,13 +4,13 @@
       <v-list activatable>
         <v-list-item
           v-for="item in authors"
-          :key="item"
-          :active="item === reserveAuthor"
-          :title="item"
+          :key="item.id"
+          :active="item.id === selectedAuthor.id"
+          :title="item.name"
         >
           <template #append>
             <v-list-item-subtitle class="mr-1">
-              {{ authorsCount[item] }}
+              {{ authorsCount[item.id] }}
             </v-list-item-subtitle>
             <v-list-item-action end>
               <v-btn
@@ -18,14 +18,14 @@
                 density="comfortable"
                 icon="$edit"
                 variant="tonal"
-                @click="clickAuthor(item)"
+                @click="clickAuthor(item.id)"
               />
               <v-btn
                 color="error"
                 density="comfortable"
                 icon="$delete"
                 variant="tonal"
-                @click="deleteAuthor(item)"
+                @click="deleteAuthor(item.id)"
               />
             </v-list-item-action>
           </template>
@@ -34,9 +34,12 @@
     </v-container>
     <v-dialog v-model="dialog">
       <v-card>
+        <v-card-title>
+          {{ selectedAuthor.id ? 'Редактирование' : 'Создание' }}
+        </v-card-title>
         <v-card-item class="pb-0">
           <v-text-field
-            v-model.trim="currentAuthor"
+            v-model.trim="selectedAuthor.name"
             variant="solo-filled"
           />
         </v-card-item>
@@ -49,15 +52,20 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-fab
+      icon="$plus"
+      @click="clickAuthor(0)"
+    />
   </v-main>
 </template>
 
 <script setup lang="ts">
-import ComicController from '@/core/entities/comic/ComicController.ts';
-import ComicModel from '@/core/entities/comic/ComicModel.ts';
-import { dedupe, sortString } from '@/core/utils/array.ts';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
+import ComicController from '@/core/entities/comic/ComicController.ts';
+import ComicModel from '@/core/entities/comic/ComicModel.ts';
+import AuthorController from '@/core/object-value/author/AuthorController.ts';
+import AuthorObject from '@/core/object-value/author/AuthorObject.ts';
 
 definePage({
   meta: {
@@ -67,58 +75,48 @@ definePage({
 
 const dialog = ref(false);
 
-const reserveAuthor = ref('');
-const currentAuthor = ref('');
-
-const clickAuthor = (value: string) => {
-  reserveAuthor.value = value;
-  currentAuthor.value = value;
-  dialog.value = true;
-};
-
 const comics = ref<ComicModel[]>([]);
-const authors = ref<string[]>([]);
-const authorsCount = computed(() => (
-  authors.value.reduce((acc, author) => {
-    acc[author] = 0;
-
-    comics.value.forEach((item) => {
-      if (item.authors.includes(author)) acc[author]++;
-    });
-
-    return acc;
-  }, {} as Record<string, number>)
-));
 
 const loadComics = async () => {
   comics.value = await ComicController.loadAll();
-  authors.value = dedupe(comics.value.map((e) => e.authors).flat(1))
-    .sort((a, b) => sortString(a, b));
 };
 
 loadComics();
 
-const saveComics = async (value: ComicModel[]) => {
-  for (const comic of value) {
-    await ComicController.save(comic);
-  }
+const authors = ref<AuthorObject[]>([]);
+
+const loadAuthors = async () => {
+  authors.value = await AuthorController.loadAll();
 };
+
+loadAuthors();
+
+const selectedAuthor = ref(new AuthorObject());
+
+const clickAuthor = (value: number) => {
+  selectedAuthor.value = authors.value.find((e) => e.id === value) || new AuthorObject();
+  dialog.value = true;
+};
+
+const authorsCount = computed(() => (
+  authors.value.reduce((acc, author) => {
+    acc[author.id] = 0;
+
+    comics.value.forEach((item) => {
+      if (item.authors.includes(author.id)) acc[author.id]++;
+    });
+
+    return acc;
+  }, {} as Record<number, number>)
+));
 
 const loading = ref(false);
 
 const saveAuthor = async () => {
   try {
     loading.value = true;
-    const changed = comics.value
-      .filter((e) => (e.authors.includes(reserveAuthor.value)))
-      .map((e) => new ComicModel(e.getDTO()));
-
-    changed.forEach((comic) => {
-      comic.authors.push(currentAuthor.value);
-      comic.authors = comic.authors.filter((e) => e !== reserveAuthor.value);
-    });
-    await saveComics(changed);
-    await loadComics();
+    await AuthorController.save(selectedAuthor.value);
+    await loadAuthors();
     dialog.value = false;
     Toast.show({ text: 'Автор сохранён' });
   } catch (e) {
@@ -128,7 +126,7 @@ const saveAuthor = async () => {
   }
 };
 
-const deleteAuthor = async (item: string) => {
+const deleteAuthor = async (id: number) => {
   const { value } = await Dialog.confirm({
     title: 'Подтверждение удаления',
     message: 'Удалить автора?',
@@ -137,16 +135,9 @@ const deleteAuthor = async (item: string) => {
   if (!value) return;
 
   try {
-    const changed = comics.value
-      .filter((e) => (e.authors.includes(item)))
-      .map((e) => new ComicModel(e.getDTO()));
-
-    changed.forEach((comic) => {
-      comic.authors = comic.authors.filter((e) => e !== item);
-    });
-
-    await saveComics(changed);
-    await loadComics();
+    loading.value = true;
+    await AuthorController.delete(id);
+    await loadAuthors();
     Toast.show({ text: 'Автор удалён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });

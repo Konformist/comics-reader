@@ -11,4 +11,13 @@ export interface IParserDTO {
   tagsText: string
 }
 
+export interface IParsedComic {
+  name: string
+  image: string
+  tags: string[]
+  authors: string[]
+  language: string
+  images: string[]
+}
+
 export type TParserOverride = Partial<Omit<IParserDTO, 'id' | 'name'>>;

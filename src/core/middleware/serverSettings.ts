@@ -1,42 +1,41 @@
 import type { ISettingsDTO } from '@/core/entities/settings/SettingsTypes.ts';
-import { SETTINGS_STORE, SETTINGS_VERSION } from '@/core/middleware/variables.ts';
+import { SETTINGS_STORE } from '@/core/middleware/variables.ts';
 import { Preferences } from '@capacitor/preferences';
 
-let settingsRaw: ISettingsDTO | null = null;
+const dataRaw: { item: ISettingsDTO } = {
+  item: {
+    autoReading: false,
+    autoReadingTimeout: 10,
+  },
+};
 
 const setSettingsData = async (): Promise<void> => {
   await Preferences.set({
     key: SETTINGS_STORE,
-    value: JSON.stringify({
-      version: SETTINGS_VERSION,
-      item: settingsRaw,
-    }),
+    value: JSON.stringify(dataRaw.item),
   });
 };
 
-const getSettingsData = async (): Promise<ISettingsDTO | undefined> => {
-  const store = await Preferences.get({ key: SETTINGS_STORE });
+const getSettingsData = async (): Promise<void> => {
+  const result = await Preferences.get({ key: SETTINGS_STORE });
 
-  if (!store.value) return undefined;
-
-  return JSON.parse(store.value).item;
+  if (!result.value) await setSettingsData();
+  else dataRaw.item = JSON.parse(result.value);
 };
 
 const setSettings = async (value: ISettingsDTO): Promise<void> => {
-  if (settingsRaw) Object.assign(settingsRaw, value);
-  else settingsRaw = value;
-
+  Object.assign(dataRaw.item, value);
   await setSettingsData();
 };
 
-const getSettings = async (): Promise<ISettingsDTO | undefined> => {
-  if (!settingsRaw) return await getSettingsData();
+const getSettings = async (): Promise<ISettingsDTO> => {
+  if (!dataRaw.item) await getSettingsData();
 
-  return settingsRaw ?? undefined;
+  return dataRaw.item;
 };
 
 export default {
-  settingsRaw,
+  dataRaw,
   setSettingsData,
   getSettingsData,
   setSettings,

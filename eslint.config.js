@@ -22,6 +22,7 @@ export default defineConfig([
       '@stylistic/dot-location': ['error', 'property'],
       '@stylistic/arrow-spacing': 'error',
       '@stylistic/arrow-parens': ['error', 'always'],
+      '@stylistic/no-confusing-arrow': 'error',
 
       'vue/script-indent': ['error', 2],
     },

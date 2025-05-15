@@ -18,6 +18,7 @@ export default defineConfig([
     },
     rules: {
       '@stylistic/comma-dangle': ['error', 'always-multiline'],
+      '@stylistic/comma-style': ['error', 'last'],
 
       'vue/script-indent': ['error', 2],
     },

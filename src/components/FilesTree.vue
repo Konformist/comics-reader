@@ -24,7 +24,7 @@ import type { IDirectory, IFile } from '@/core/entities/file/FileTypes.ts';
 const model = defineModel<string>({ default: '' });
 
 defineProps<{
-  tree: Array<IDirectory|IFile>
+  tree: Array<IDirectory | IFile>
   parent?: string
   isChild?: boolean
   rounded?: boolean

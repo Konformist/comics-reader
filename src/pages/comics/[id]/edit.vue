@@ -246,7 +246,7 @@ const onLoadInfo = async () => {
   }
 };
 
-const uploadCover = async (event: File|File[]) => {
+const uploadCover = async (event: File | File[]) => {
   if (!event || Array.isArray(event)) return;
 
   await saveComic();

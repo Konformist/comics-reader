@@ -193,7 +193,7 @@ const onSave = async () => {
   Toast.show({ text: 'Комикс сохранён' });
 };
 
-const uploadImage = async (item: IComicImageDTO, event: File|File[]) => {
+const uploadImage = async (item: IComicImageDTO, event: File | File[]) => {
   if (!event || Array.isArray(event)) return;
 
   await saveComic();

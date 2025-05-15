@@ -33,7 +33,7 @@ const model = defineModel<string>({ default: '' });
 
 const { item, parent } = defineProps<{
   parent: string
-  item: IDirectory|IFile
+  item: IDirectory | IFile
 }>();
 
 const opened = ref(false);

@@ -19,7 +19,7 @@ export default class ParserController {
     return new ParserModel(result);
   }
 
-  static save(model: ParserModel): Promise<number|void> {
+  static save(model: ParserModel): Promise<number | void> {
     return model.id
       ? server.setParser(model.getDTO())
       : server.addParser(model.getDTO());

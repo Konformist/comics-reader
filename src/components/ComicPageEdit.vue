@@ -42,7 +42,7 @@
 const from = defineModel('from', { default: '' });
 
 defineEmits<{
-  (e: 'upload', v: File|File[]): void
+  (e: 'upload', v: File | File[]): void
   (e: 'download', v: void): void
   (e: 'resize', v: { maxWidth: number, maxHeight: number }): void
   (e: 'delete', v: void): void

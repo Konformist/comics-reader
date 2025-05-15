@@ -29,6 +29,7 @@ export default defineConfig([
         'named': 'never',
         'asyncArrow': 'always',
       }],
+      '@stylistic/space-infix-ops': 'error',
 
       'vue/script-indent': ['error', 2],
     },

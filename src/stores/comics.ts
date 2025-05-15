@@ -4,7 +4,7 @@ export const useComicsStore = defineStore('comics', {
       authors: [] as string[],
       languages: [] as string[],
       tags: [] as string[],
-      filling: 0 as 0|1|2,
+      filling: 0 as 0 | 1 | 2,
     },
   }),
 });

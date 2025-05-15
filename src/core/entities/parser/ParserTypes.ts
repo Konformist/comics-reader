@@ -11,4 +11,4 @@ export interface IParserDTO {
   tagsText: string
 }
 
-export type TParserOverride = Partial<Omit<IParserDTO, 'id'|'name'>>;
+export type TParserOverride = Partial<Omit<IParserDTO, 'id' | 'name'>>;

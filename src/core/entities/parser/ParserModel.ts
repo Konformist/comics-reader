@@ -102,7 +102,7 @@ export default class ParserModel extends Entity<IParserDTO> {
       .parseFromString(cleaned, 'text/html')
       .body;
 
-    const comicDTO: Partial<Omit<IComicDTO, 'id'|'image'>> = {};
+    const comicDTO: Partial<Omit<IComicDTO, 'id' | 'image'>> = {};
 
     const name = this.parseTitle(result, override?.title);
     if (name) comicDTO.name = name;

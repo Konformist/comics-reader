@@ -16,7 +16,7 @@ import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 import { Preferences } from '@capacitor/preferences';
 
 /// settings
-let settingsRaw: ISettingsDTO|null = null;
+let settingsRaw: ISettingsDTO | null = null;
 
 const setSettingsData = async (): Promise<void> => {
   await Preferences.set({
@@ -28,7 +28,7 @@ const setSettingsData = async (): Promise<void> => {
   });
 };
 
-const getSettingsData = async (): Promise<ISettingsDTO|undefined> => {
+const getSettingsData = async (): Promise<ISettingsDTO | undefined> => {
   const store = await Preferences.get({ key: SETTINGS_STORE });
 
   if (!store.value) return undefined;
@@ -43,7 +43,7 @@ const setSettings = async (value: ISettingsDTO): Promise<void> => {
   await setSettingsData();
 };
 
-const getSettings = async (): Promise<ISettingsDTO|undefined> => {
+const getSettings = async (): Promise<ISettingsDTO | undefined> => {
   if (!settingsRaw) return await getSettingsData();
 
   return settingsRaw ?? undefined;
@@ -107,7 +107,7 @@ const delParser = async (id: number): Promise<void> => {
   await setParsersData();
 };
 
-const getParser = async (id: number): Promise<IParserDTO|undefined> => {
+const getParser = async (id: number): Promise<IParserDTO | undefined> => {
   const ids = parsersRaw.map((e) => e.id);
 
   if (!ids.includes(id)) await getParsersData();
@@ -163,8 +163,8 @@ const resizeImage = async (
   return getFileUrl(path);
 };
 
-const getTreeRecursive = async (path: string): Promise<Array<IDirectory|IFile>> => {
-  const ret: Array<IDirectory|IFile> = [];
+const getTreeRecursive = async (path: string): Promise<Array<IDirectory | IFile>> => {
+  const ret: Array<IDirectory | IFile> = [];
 
   try {
     const result = await Filesystem.readdir({ path });
@@ -261,7 +261,7 @@ const setComic = async (data: IComicDTO): Promise<void> => {
   await setComicsData();
 };
 
-const getComic = async (id: number): Promise<IComicDTO|undefined> => {
+const getComic = async (id: number): Promise<IComicDTO | undefined> => {
   const ids = comicsRaw.map((e) => e.id);
 
   if (!ids.includes(id)) await getComicsData();

@@ -30,6 +30,7 @@ export default defineConfig([
         'asyncArrow': 'always',
       }],
       '@stylistic/space-infix-ops': 'error',
+      '@stylistic/template-curly-spacing': 'error',
 
       'vue/script-indent': ['error', 2],
     },

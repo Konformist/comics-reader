@@ -29,7 +29,7 @@ const setSettings = async (value: ISettingsDTO): Promise<void> => {
 };
 
 const getSettings = async (): Promise<ISettingsDTO> => {
-  if (!dataRaw.item) await getSettingsData();
+  await getSettingsData();
 
   return dataRaw.item;
 };

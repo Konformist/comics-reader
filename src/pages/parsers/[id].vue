@@ -5,6 +5,10 @@
         v-model.trim="parser.name"
         label="Название парсера"
       />
+      <v-text-field
+        v-model.trim="parser.site"
+        label="Ссылка на сайт"
+      />
       <v-textarea
         v-model.trim="parser.title"
         :autocapitalize="false"

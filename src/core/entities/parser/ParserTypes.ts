@@ -1,6 +1,8 @@
 export interface IParserDTO {
   id: number
   name: string
+  /** Ссылка на сайт */
+  site: string
   title: string
   image: string
   images: string

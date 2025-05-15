@@ -113,7 +113,7 @@ import { Toast } from '@capacitor/toast';
 
 definePage({
   meta: {
-    title: 'Комиксы',
+    title: 'Галерея',
   },
 });
 

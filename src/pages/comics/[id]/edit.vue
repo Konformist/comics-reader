@@ -17,6 +17,7 @@
         inputmode="url"
         label="Ссылка на комикс"
         rows="2"
+        @change="updateParser()"
       />
       <v-textarea
         v-model.trim="comic.name"
@@ -168,7 +169,6 @@ const loadComic = async () => {
 };
 
 const parsers = ref<ParserModel[]>([]);
-
 const loadParsers = async () => {
   parsers.value = await ParserController.loadAll();
 };
@@ -178,6 +178,17 @@ const parser = ref(new ParserModel());
 const loadParser = async () => {
   if (!comic.value.parser) return;
   parser.value = await ParserController.load(comic.value.parser);
+};
+
+const updateParser = () => {
+  if (!comic.value.url) return;
+
+  const item = parsers.value.find((e) => e.site && comic.value.url.includes(e.site));
+
+  if (!item) return;
+
+  comic.value.parser = item.id;
+  loadParser();
 };
 
 onMounted(async () => {

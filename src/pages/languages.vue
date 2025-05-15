@@ -1,16 +1,25 @@
 <template>
   <v-main scrollable>
     <v-container class="pa-0">
+      <v-toolbar class="pt-2" density="comfortable">
+        <v-select
+          v-model="sortValue"
+          item-title="name"
+          item-value="id"
+          :items="sortItems"
+          label="Сортировать"
+        />
+      </v-toolbar>
       <v-list activatable>
         <v-list-item
-          v-for="item in languages"
+          v-for="item in sortedLanguages"
           :key="item.id"
           :active="item.id === selectedLanguage.id"
           :title="item.name"
         >
           <template #append>
             <v-list-item-subtitle class="mr-1">
-              {{ languagesCount[item.id] }}
+              {{ item.count }}
             </v-list-item-subtitle>
             <v-list-item-action end>
               <v-btn
@@ -60,6 +69,7 @@
 </template>
 
 <script setup lang="ts">
+import { sortString } from '@/core/utils/array.ts';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
 import ComicController from '@/core/entities/comic/ComicController.ts';
@@ -69,9 +79,17 @@ import LanguageObject from '@/core/object-value/language/LanguageObject.ts';
 
 definePage({
   meta: {
-    title: 'Теги',
+    title: 'Языки',
   },
 });
+
+const sortValue = ref(0);
+const sortItems = [
+  { id: 0, name: 'По имени' },
+  { id: 1, name: 'По имени (обратная)' },
+  { id: 2, name: 'По использованию' },
+  { id: 3, name: 'По использованию (обратная)' },
+];
 
 const dialog = ref(false);
 
@@ -108,6 +126,22 @@ const languagesCount = computed(() => (
 
     return acc;
   }, {} as Record<number, number>)
+));
+
+const fullLanguages = computed(() => (
+  languages.value.map((item) => ({
+    ...item.getDTO(),
+    count: languagesCount.value[item.id] || 0,
+  }))
+));
+
+const sortedLanguages = computed(() => (
+  [...fullLanguages.value].sort((a, b) => {
+    if (sortValue.value === 1) return sortString(b.name, a.name);
+    else if (sortValue.value === 2) return a.count - b.count;
+    else if (sortValue.value === 3) return b.count - a.count;
+    else return sortString(a.name, b.name);
+  })
 ));
 
 const loading = ref(false);

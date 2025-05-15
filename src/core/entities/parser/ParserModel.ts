@@ -4,6 +4,7 @@ import type { IParsedComic, IParserDTO, TParserOverride } from '@/core/entities/
 export default class ParserModel extends Entity<IParserDTO> {
   public id: number = 0;
   public name: string = '';
+  public site: string = '';
   public title: string = '';
   public image: string = '';
   public images: string = '';
@@ -19,6 +20,7 @@ export default class ParserModel extends Entity<IParserDTO> {
     if (dto) {
       this.id = dto.id ?? 0;
       this.name = dto.name ?? '';
+      this.site = dto.site ?? '';
       this.title = dto.title ?? '';
       this.image = dto.image ?? '';
       this.images = dto.images ?? '';
@@ -130,6 +132,7 @@ export default class ParserModel extends Entity<IParserDTO> {
     return {
       id: this.id,
       name: this.name,
+      site: this.site,
       title: this.title,
       image: this.image,
       images: this.images,

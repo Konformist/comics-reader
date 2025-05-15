@@ -1,4 +1,5 @@
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
+import type { IResizeOptions } from '@/core/middleware/ComicsServer.ts';
 import server from '@/core/middleware/server.ts';
 
 export default class ComicController {
@@ -32,13 +33,7 @@ export default class ComicController {
     return server.delComicCover(comicId);
   }
 
-  static resizeComicCover(
-    comicId: number,
-    options: {
-      maxWidth?: number,
-      maxHeight?: number,
-    },
-  ) {
+  static resizeComicCover(comicId: number, options: Partial<IResizeOptions>) {
     return server.resizeComicCover(comicId, options);
   }
 
@@ -56,14 +51,7 @@ export default class ComicController {
     return server.delComicFiles(comicId);
   }
 
-  static resizeComicFile(
-    comicId: number,
-    fileId: number,
-    options: {
-      maxWidth?: number,
-      maxHeight?: number,
-    },
-  ) {
+  static resizeComicFile(comicId: number, fileId: number, options: Partial<IResizeOptions>) {
     return server.resizeComicFile(comicId, fileId, options);
   }
 }

@@ -1,16 +1,21 @@
 <template>
   <v-main scrollable>
     <v-container class="pa-0">
-      <v-toolbar class="pt-2" density="comfortable">
+      <v-toolbar density="comfortable">
         <v-select
           v-model="sortValue"
+          :chips="false"
+          class="mt-3"
           item-title="name"
           item-value="id"
           :items="sortItems"
           label="Сортировать"
         />
       </v-toolbar>
-      <v-list activatable>
+      <v-list
+        v-if="authors.length"
+        activatable
+      >
         <v-list-item
           v-for="item in sortedAuthors"
           :key="item.id"

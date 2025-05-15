@@ -1,3 +1,5 @@
+export const APP_NAME = 'Comics Reader';
+
 export const DATABASE_STORE = 'version';
 export const DATABASE_VERSION = 1;
 

@@ -23,11 +23,6 @@
         :to="{ name: '/' }"
       />
       <v-list-item
-        prepend-icon="$list"
-        title="Парсеры"
-        :to="{ name: '/parsers/' }"
-      />
-      <v-list-item
         prepend-icon="$author"
         title="Авторы"
         :to="{ name: '/authors' }"
@@ -46,6 +41,11 @@
         prepend-icon="$files"
         title="Файлы"
         :to="{ name: '/filemanager' }"
+      />
+      <v-list-item
+        prepend-icon="$list"
+        title="Парсеры"
+        :to="{ name: '/parsers/' }"
       />
       <v-list-item
         prepend-icon="$settings"

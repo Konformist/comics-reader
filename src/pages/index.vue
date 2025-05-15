@@ -56,7 +56,7 @@
         <v-card-item>
           <v-select
             v-model="comicsStore.filters.authors"
-            item-text="name"
+            item-title="name"
             item-value="id"
             :items="authors"
             label="Авторы"
@@ -65,7 +65,7 @@
           />
           <v-select
             v-model="comicsStore.filters.languages"
-            item-text="name"
+            item-title="name"
             item-value="id"
             :items="languages"
             label="Языки"

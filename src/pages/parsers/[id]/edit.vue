@@ -7,67 +7,86 @@
       />
       <v-text-field
         v-model.trim="parser.site"
+        :autocapitalize="false"
+        :autocomplete="false"
+        inputmode="url"
         label="Ссылка на сайт"
       />
+      <v-divider class="mb-8 mt-4" />
       <v-textarea
         v-model.trim="parser.title"
         :autocapitalize="false"
         :autocomplete="false"
-        label="Название комикса"
+        inputmode="url"
+        label="CSS указатель на название"
         rows="2"
       />
       <v-textarea
         v-model.trim="parser.image"
         :autocapitalize="false"
         :autocomplete="false"
-        label="Изображение"
+        inputmode="url"
+        label="CSS указатель на изображение"
         rows="2"
       />
       <v-textarea
         v-model.trim="parser.authors"
         :autocapitalize="false"
         :autocomplete="false"
-        label="Авторы"
+        inputmode="url"
+        label="CSS указатель на авторов"
         rows="2"
       />
       <v-text-field
         v-model.trim="parser.authorsText"
         :autocapitalize="false"
         :autocomplete="false"
-        label="Текст авторов"
+        inputmode="url"
+        label="CSS указатель на текст авторов"
       />
       <v-textarea
         v-model.trim="parser.language"
         :autocapitalize="false"
         :autocomplete="false"
-        label="Язык"
+        inputmode="url"
+        label="CSS указатель на текст язык"
         rows="2"
       />
       <v-textarea
         v-model.trim="parser.tags"
         :autocapitalize="false"
         :autocomplete="false"
-        label="Теги"
+        inputmode="url"
+        label="CSS указатель на теги"
         rows="2"
       />
       <v-text-field
         v-model.trim="parser.tagsText"
         :autocapitalize="false"
         :autocomplete="false"
-        label="Текст тега"
+        inputmode="url"
+        label="CSS указатель на текст тегов"
       />
       <v-textarea
         v-model.trim="parser.images"
         :autocapitalize="false"
         :autocomplete="false"
-        label="Страницы"
+        inputmode="url"
+        label="CSS указатель на страницы"
         rows="2"
       />
+      <v-divider class="mb-8 mt-4" />
+      <v-file-input
+        v-model="file"
+        accept="application/json"
+        hide-details
+        label="Добавить файл"
+      />
       <v-btn
-        class="w-100"
-        color="error"
-        text="Удалить"
-        @click="deleteParser()"
+        class="mt-4 w-100"
+        :disabled="!file"
+        text="Загрузить из файла"
+        @click="setParser()"
       />
     </v-container>
     <v-fab
@@ -78,7 +97,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Dialog } from '@capacitor/dialog';
+import type { IParserDTO } from '@/core/entities/parser/ParserTypes.ts';
 import { Toast } from '@capacitor/toast';
 import ParserController from '@/core/entities/parser/ParserController.ts';
 import ParserModel from '@/core/entities/parser/ParserModel.ts';
@@ -90,8 +109,7 @@ definePage({
   },
 });
 
-const router = useRouter();
-const route = useRoute('/parsers/[id]');
+const route = useRoute('/parsers/[id]/edit');
 
 const parserId = +(route.params?.id);
 
@@ -108,16 +126,19 @@ const saveParser = async () => {
   Toast.show({ text: 'Парсер сохранён' });
 };
 
-const deleteParser = async () => {
-  const { value } = await Dialog.confirm({
-    title: 'Подтверждение удаления',
-    message: 'Удалить парсер?',
-  });
+const file = ref<File | null>(null);
 
-  if (!value) return;
+const setParser = async () => {
+  if (!file.value) return;
 
-  await ParserController.delete(parser.value.id);
-  Toast.show({ text: 'Парсер удалён' });
-  router.replace({ name: '/parsers/' });
+  try {
+    const result = await file.value.text();
+    const parsed = JSON.parse(result) as Partial<IParserDTO>;
+    parsed.id = parser.value.id;
+    parser.value = new ParserModel(parsed);
+    Toast.show({ text: 'Данные получены' });
+  } catch (e) {
+    Toast.show({ text: `Ошибка: ${e}` });
+  }
 };
 </script>

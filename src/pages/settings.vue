@@ -1,60 +1,74 @@
 <template>
   <v-main scrollable>
-    <v-container>
-      <p class="d-flex justify-space-between">
-        <span class="font-weight-medium">Версия FrontEnd</span>
-        <span>v{{ appStore.frontVersion }}</span>
-      </p>
-      <v-divider class="mt-8 mb-4" />
-      <v-label class="w-100" text="Авто листание">
-        <v-switch
-          v-model="appStore.settings.autoReading"
-          class="ml-auto"
-          color="primary"
-          :false-value="false"
-          hide-details
-          inset
-          :true-value="true"
+    <v-container class="pa-0">
+      <div class="pa-4">
+        <p class="d-flex justify-space-between">
+          <span class="font-weight-medium">Версия FrontEnd</span>
+          <span>v{{ appStore.frontVersion }}</span>
+        </p>
+      </div>
+      <v-divider />
+      <div class="pa-4">
+        <v-label class="w-100" text="Авто перелистывание">
+          <v-switch
+            v-model="appStore.settings.autoReading"
+            class="ml-auto"
+            color="primary"
+            :false-value="false"
+            hide-details
+            inset
+            :true-value="true"
+          />
+        </v-label>
+        <v-number-input
+          v-model.number="appStore.settings.autoReadingTimeout"
+          class="mt-2"
+          control-variant="split"
+          :disabled="!appStore.settings.autoReading"
+          label="До перелистывания"
+          :min="0"
+          suffix="с"
         />
-      </v-label>
-      <v-number-input
-        v-model.number="appStore.settings.autoReadingTimeout"
-        class="mt-2"
-        control-variant="split"
-        :disabled="!appStore.settings.autoReading"
-        label="До перелистывания"
-        :min="0"
-        suffix="с"
-      />
-      <v-btn
-        class="w-100"
-        text="Сохранить"
-        @click="appStore.saveSettings()"
-      />
-      <v-divider class="my-8" />
-      <v-btn
-        class="w-100"
-        text="Забекапить данные"
-        @click="setBackup()"
-      />
-      <FilesTree
-        v-model="backupFile"
-        class="mt-4"
-        rounded
-        :tree="backups"
-      />
-      <v-btn
-        class="mt-4 w-100"
-        :disabled="!backupFile"
-        text="Вытащить из бекапа"
-        @click="getBackup()"
-      />
-      <v-btn
-        class="mt-4 w-100"
-        :disabled="!backupFile"
-        text="Вытащить бекап наружу"
-        @click="saveBackupToGlobal(backupFile)"
-      />
+        <v-btn
+          class="w-100"
+          text="Сохранить"
+          @click="appStore.saveSettings()"
+        />
+      </div>
+      <v-divider />
+      <div class="pa-4">
+        <v-btn
+          class="w-100"
+          text="Создать бекап"
+          @click="addBackup()"
+        />
+        <FilesTree
+          v-if="backups.length"
+          v-model="backupFile"
+          class="mt-4"
+          rounded
+          :tree="backups"
+        />
+        <v-btn
+          class="mt-4 w-100"
+          :disabled="!backupFile"
+          text="Применить бекап"
+          @click="getBackup()"
+        />
+        <v-btn
+          class="mt-4 w-100"
+          :disabled="!backupFile"
+          text="Сохранить в Документы"
+          @click="saveBackupToGlobal()"
+        />
+        <v-btn
+          class="mt-4 w-100"
+          color="error"
+          :disabled="!backupFile"
+          text="Удалить"
+          @click="delBackup()"
+        />
+      </div>
     </v-container>
   </v-main>
 </template>
@@ -62,8 +76,9 @@
 <script setup lang="ts">
 import type { IDirectory } from '@/core/entities/file/FileTypes.ts';
 import server from '@/core/middleware/server.ts';
-import { BACKUPS_DIRECTORY } from '@/core/middleware/variables.ts';
+import { APP_NAME, BACKUPS_DIRECTORY } from '@/core/middleware/variables.ts';
 import { useAppStore } from '@/stores/app.ts';
+import { Dialog } from '@capacitor/dialog';
 import { Directory, Filesystem } from '@capacitor/filesystem';
 import { Toast } from '@capacitor/toast';
 
@@ -83,11 +98,11 @@ const loadBackupsTree = async () => {
 
 loadBackupsTree();
 
-const setBackup = async () => {
+const addBackup = async () => {
   try {
-    await server.setBackup();
-    Toast.show({ text: 'Бекап сохранён' });
-    loadBackupsTree();
+    await server.addBackup();
+    await loadBackupsTree();
+    Toast.show({ text: 'Бекап создан' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   }
@@ -104,10 +119,27 @@ const getBackup = async () => {
   }
 };
 
-const saveBackupToGlobal = async (path: string): Promise<void> => {
+const delBackup = async () => {
+  const { value } = await Dialog.confirm({
+    title: 'Подтверждение удаления',
+    message: 'Удалить бекап?',
+  });
+
+  if (!value) return;
+
+  try {
+    await server.delBackup(backupFile.value);
+    await loadBackupsTree();
+    Toast.show({ text: 'Бекап удалён' });
+  } catch (e) {
+    Toast.show({ text: `Ошибка: ${e}` });
+  }
+};
+
+const saveBackupToGlobal = async (): Promise<void> => {
   try {
     await Filesystem.mkdir({
-      path: 'Comics Reader/backups',
+      path: `${APP_NAME}/backups`,
       directory: Directory.Documents,
       recursive: true,
     });
@@ -116,9 +148,9 @@ const saveBackupToGlobal = async (path: string): Promise<void> => {
 
   try {
     await Filesystem.copy({
-      from: path,
+      from: backupFile.value,
       directory: Directory.Data,
-      to: `Comics Reader/${path}`,
+      to: `${APP_NAME}/${backupFile.value}`,
       toDirectory: Directory.Documents,
     });
 

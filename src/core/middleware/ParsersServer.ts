@@ -1,4 +1,5 @@
 import type { IParserDTO } from '@/core/entities/parser/ParserTypes.ts';
+import ComicsServer from '@/core/middleware/ComicsServer.ts';
 import ServerAbstract from '@/core/middleware/ServerAbstract.ts';
 import { PARSERS_STORE } from '@/core/middleware/variables.ts';
 
@@ -32,14 +33,26 @@ class ParsersServer extends ServerAbstract<IParserDTO> {
   }
 
   public async setItem(value: IParserDTO): Promise<void> {
-    const index = this.dataRaw.findIndex((e) => e.id === value.id);
-    this.dataRaw.splice(index, 1, value);
+    const item = await this.getItem(value.id);
+
+    if (!item) return;
+
+    Object.assign(item, value);
     await this.setDatabase();
   }
 
   public async delItem(id: number): Promise<void> {
+    const item = await this.getItem(id);
+
+    if (!item) return;
+
     this.dataRaw = this.dataRaw.filter((e) => e.id !== id);
+    await ComicsServer.getDatabase();
+    ComicsServer.dataRaw.forEach((comic) => {
+      if (comic.parser === id) comic.parser = 0;
+    });
     await this.setDatabase();
+    await ComicsServer.setDatabase();
   }
 }
 

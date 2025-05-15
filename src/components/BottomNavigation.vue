@@ -7,10 +7,6 @@
       <v-icon icon="$home" />
       Галерея
     </v-btn>
-    <v-btn :to="{ name: '/parsers/' }">
-      <v-icon icon="$list" />
-      Парсеры
-    </v-btn>
     <v-btn :to="{ name: '/filemanager' }">
       <v-icon icon="$files" />
       Файлы

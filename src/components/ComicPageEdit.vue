@@ -6,31 +6,37 @@
     />
     <v-card-item class="pb-0">
       <v-file-input
-        label="Загрузить свою страницу"
+        v-model="image"
+        accept="image/*"
+        hide-details
+        label="Загрузить картинку"
         variant="solo-filled"
-        @update:model-value="$emit('upload', $event)"
       />
+      <p class="my-4">
+        Или
+      </p>
       <v-textarea
         v-model.trim="from"
         auto-grow
         :autocapitalize="false"
         :autocomplete="false"
         inputmode="url"
-        label="Ссылка на страницу"
+        label="Ссылка на картинку"
         rows="2"
         variant="solo-filled"
       />
     </v-card-item>
     <v-card-actions>
       <v-btn
-        :loading="loading || localLoading"
+        :disabled="!image && !from"
+        :loading="loading"
         text="Загрузить"
-        @click="$emit('download')"
+        @click="onLoad()"
       />
       <v-btn
         class="ml-auto"
         color="error"
-        :loading="loading || localLoading"
+        :loading="loading"
         text="Удалить"
         @click="$emit('delete')"
       />
@@ -41,21 +47,21 @@
 <script setup lang="ts">
 const from = defineModel('from', { default: '' });
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'upload', v: File | File[]): void
   (e: 'download', v: void): void
-  (e: 'resize', v: { maxWidth: number, maxHeight: number }): void
   (e: 'delete', v: void): void
 }>();
+
 defineProps<{
-  comicId: number
-  fileId: number
   url: string
   loading: boolean
 }>();
 
-const localLoading = ref(false);
+const image = ref<File | null>(null);
 
-const maxWidth = ref(0);
-const maxHeight = ref(0);
+const onLoad = () => {
+  if (image.value) emit('upload', image.value);
+  else if (from.value) emit('download');
+};
 </script>

@@ -1,4 +1,5 @@
 import type { IDirectory, IFile } from '@/core/entities/file/FileTypes.ts';
+import type { IResizeOptions } from '@/core/middleware/ComicsServer.ts';
 import { fileToBase64, getFileUrl } from '@/core/utils/image.ts';
 import { ImageManipulator } from '@capacitor-community/image-manipulator';
 import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
@@ -34,10 +35,7 @@ const delFile = (path: string): Promise<void> => {
 
 const resizeImage = async (
   path: string,
-  options: {
-    maxWidth?: number,
-    maxHeight?: number,
-  },
+  options: Partial<IResizeOptions>,
 ): Promise<string> => {
   const result = await ImageManipulator.resize({
     quality: 100,

@@ -1,9 +1,11 @@
 <template>
   <v-main scrollable>
     <v-container class="pa-0">
-      <v-toolbar class="pt-2" density="comfortable">
+      <v-toolbar density="comfortable">
         <v-select
           v-model="sortValue"
+          :chips="false"
+          class="mt-3"
           item-title="name"
           item-value="id"
           :items="sortItems"

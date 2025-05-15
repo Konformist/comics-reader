@@ -2,6 +2,7 @@
   <v-main scrollable>
     <v-container v-if="comic">
       <v-select
+        v-if="parsers.length"
         v-model="comic.parser"
         item-title="name"
         item-value="id"
@@ -32,14 +33,6 @@
         :items="languages"
         label="Язык"
       />
-      <v-textarea
-        v-model.trim="keyLanguage"
-        auto-grow
-        :autocapitalize="false"
-        :autocomplete="false"
-        label="Парсинг языка"
-        rows="2"
-      />
       <v-select
         v-model="comic.authors"
         chips
@@ -48,14 +41,6 @@
         :items="authors"
         label="Авторы"
         multiple
-      />
-      <v-textarea
-        v-model.trim="keyAuthors"
-        auto-grow
-        :autocapitalize="false"
-        :autocomplete="false"
-        label="Парсинг авторов"
-        rows="2"
       />
       <v-select
         v-model="comic.tags"
@@ -66,32 +51,104 @@
         label="Теги"
         multiple
       />
-      <v-textarea
-        v-model.trim="keyTags"
-        auto-grow
-        :autocapitalize="false"
-        :autocomplete="false"
-        label="Парсинг тегов"
-        rows="2"
-      />
+      <v-expansion-panels>
+        <v-expansion-panel static title="Расширенные настройки">
+          <v-expansion-panel-text>
+            <v-textarea
+              v-model.trim="keyTitle"
+              auto-grow
+              :autocapitalize="false"
+              :autocomplete="false"
+              class="mt-4"
+              :disabled="!comic.parser"
+              inputmode="url"
+              label="CSS указатель на название"
+              rows="2"
+              variant="solo-filled"
+            />
+            <v-textarea
+              v-model.trim="keyLanguage"
+              auto-grow
+              :autocapitalize="false"
+              :autocomplete="false"
+              :disabled="!comic.parser"
+              inputmode="url"
+              label="CSS указатель на язык"
+              rows="2"
+              variant="solo-filled"
+            />
+            <v-textarea
+              v-model.trim="keyAuthors"
+              auto-grow
+              :autocapitalize="false"
+              :autocomplete="false"
+              :disabled="!comic.parser"
+              inputmode="url"
+              label="CSS указатель на авторов"
+              rows="2"
+              variant="solo-filled"
+            />
+            <v-textarea
+              v-model.trim="keyAuthorsText"
+              auto-grow
+              :autocapitalize="false"
+              :autocomplete="false"
+              :disabled="!comic.parser"
+              inputmode="url"
+              label="CSS указатель на текст авторов"
+              rows="2"
+              variant="solo-filled"
+            />
+            <v-textarea
+              v-model.trim="keyTags"
+              auto-grow
+              :autocapitalize="false"
+              :autocomplete="false"
+              class="mb-4"
+              :disabled="!comic.parser"
+              inputmode="url"
+              label="CSS указатель на теги"
+              rows="2"
+              variant="solo-filled"
+            />
+            <v-textarea
+              v-model.trim="keyAuthorsText"
+              auto-grow
+              :autocapitalize="false"
+              :autocomplete="false"
+              :disabled="!comic.parser"
+              hide-details
+              inputmode="url"
+              label="CSS указатель на текст тегов"
+              rows="2"
+              variant="solo-filled"
+            />
+          </v-expansion-panel-text>
+        </v-expansion-panel>
+      </v-expansion-panels>
       <v-btn
-        class="w-100"
+        class="mt-4 w-100"
         :disabled="!comic.parser || !comic.url"
         :loading="loading"
         text="Загрузить"
         @click="onLoadInfo()"
       />
-      <v-divider class="my-8" />
+      <v-divider class="mt-8 mb-4" />
       <v-img
         v-if="comic.image"
         rounded
         :src="comic.image"
       />
       <v-file-input
+        v-model="image"
+        accept="image/*"
         class="mt-4"
-        label="Загрузить свою картинку"
-        @update:model-value="uploadCover($event)"
+        hide-details
+        label="Загрузить картинку"
       />
+      <p class="my-2">
+        Или
+      </p>
       <v-textarea
         v-model.trim="comic.imageUrl"
         auto-grow
@@ -103,7 +160,7 @@
       />
       <v-btn
         class="w-100"
-        :disabled="!comic.imageUrl"
+        :disabled="!image && !comic.imageUrl"
         :loading="loading"
         text="Загрузить"
         @click="onLoadCover()"
@@ -118,6 +175,7 @@
 </template>
 
 <script lang="ts" setup>
+import { Toast } from '@capacitor/toast';
 import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import ParserController from '@/core/entities/parser/ParserController.ts';
@@ -128,7 +186,6 @@ import LanguageController from '@/core/object-value/language/LanguageController.
 import LanguageObject from '@/core/object-value/language/LanguageObject.ts';
 import TagController from '@/core/object-value/tag/TagController.ts';
 import TagObject from '@/core/object-value/tag/TagObject.ts';
-import { Toast } from '@capacitor/toast';
 
 definePage({
   meta: {
@@ -138,8 +195,6 @@ definePage({
 });
 
 const route = useRoute('/comics/[id]/edit');
-
-const comics = ref<ComicModel[]>([]);
 
 const languages = ref<LanguageObject[]>([]);
 const loadLanguages = async () => {
@@ -156,13 +211,8 @@ const loadTags = async () => {
   tags.value = await TagController.loadAll();
 };
 
-const loadComics = async () => {
-  comics.value = await ComicController.loadAll();
-};
-
 const comicId = +(route.params.id || 0);
 const comic = ref(new ComicModel());
-
 const loadComic = async () => {
   if (!comicId) return;
   comic.value = await ComicController.load(comicId);
@@ -174,7 +224,6 @@ const loadParsers = async () => {
 };
 
 const parser = ref(new ParserModel());
-
 const loadParser = async () => {
   if (!comic.value.parser) return;
   parser.value = await ParserController.load(comic.value.parser);
@@ -197,35 +246,50 @@ onMounted(async () => {
     loadTags(),
     loadAuthors(),
     loadLanguages(),
-    loadComics(),
   ]);
   await loadComic();
   await loadParser();
 });
 
-const keyLanguage = computed({
+const keyTitle = computed({
   get() {
-    return comic.value?.override.language || parser.value?.language || '';
+    return comic.value.override.title || parser.value.language;
   },
   set(value) {
-    if (comic.value) {
-      comic.value.override.language = value;
-    }
+    comic.value.override.language = value;
+  },
+});
+
+const keyLanguage = computed({
+  get() {
+    return comic.value.override.language || parser.value.language;
+  },
+  set(value) {
+    comic.value.override.language = value;
   },
 });
 
 const keyAuthors = computed({
   get() {
-    return comic.value.override.authors || parser.value.authors || '';
+    return comic.value.override.authors || parser.value.authors;
   },
   set(value) {
     comic.value.override.authors = value;
   },
 });
 
+const keyAuthorsText = computed({
+  get() {
+    return comic.value.override.authorsText || parser.value.authorsText;
+  },
+  set(value) {
+    comic.value.override.authorsText = value;
+  },
+});
+
 const keyTags = computed({
   get() {
-    return comic.value.override.tags || parser.value.tags || '';
+    return comic.value.override.tags || parser.value.tags;
   },
   set(value) {
     comic.value.override.tags = value;
@@ -310,27 +374,44 @@ const onLoadInfo = async () => {
   }
 };
 
-const uploadCover = async (event: File | File[]) => {
-  if (!event || Array.isArray(event)) return;
+const image = ref<File | null>(null);
 
-  await saveComic();
-  await ComicController.saveCover(comic.value.id, event);
-  await loadComic();
-  Toast.show({ text: 'Комикс сохранён' });
-};
-
-const onLoadCover = async () => {
-  if (!comic.value.imageUrl) return;
+const uploadCover = async () => {
+  if (!image.value) return;
 
   try {
     loading.value = true;
-    const result = await ParserController.loadImageRaw(comic.value.imageUrl);
-    await uploadCover(result);
+    await saveComic();
+    await ComicController.saveCover(comic.value.id, image.value);
+    await loadComic();
+    Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {
     loading.value = false;
   }
+};
+
+const loadByLink = async () => {
+  if (!comic.value.imageUrl) return;
+
+  try {
+    loading.value = true;
+    const result = await ParserController.loadImageRaw(comic.value.imageUrl);
+    await saveComic();
+    await ComicController.saveCover(comic.value.id, result);
+    await loadComic();
+    Toast.show({ text: 'Комикс сохранён' });
+  } catch (e) {
+    Toast.show({ text: `Ошибка: ${e}` });
+  } finally {
+    loading.value = false;
+  }
+};
+
+const onLoadCover = () => {
+  if (image.value) uploadCover();
+  else if (comic.value.imageUrl) loadByLink();
 };
 
 const onSave = async () => {

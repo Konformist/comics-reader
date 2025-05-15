@@ -52,6 +52,7 @@ export default {
   delComicFiles: (id: number) => ComicsServer.delImages(id),
   resizeComicFile: (id: number, f: number, o: Partial<IResizeOptions>) => ComicsServer.resizeImage(id, f, o),
   autoBackup: serverBackups.autoBackup,
-  setBackup: serverBackups.addBackup,
+  delBackup: serverBackups.delBackup,
+  addBackup: serverBackups.addBackup,
   getBackup: serverBackups.getBackup,
 };

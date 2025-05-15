@@ -1,105 +1,107 @@
 <template>
   <v-main scrollable>
-    <v-container>
+    <v-container class="pa-0">
       <router-link
         :to="{
           name: '/comics/[id]/read',
           params: { id: comic.id },
         }"
       >
-        <v-img
-          rounded
-          :src="comic.image"
-        />
+        <v-img :src="comic.image" />
       </router-link>
-      <h3
-        v-if="comic.name"
-        class="mt-4 font-weight-medium"
-      >
-        {{ comic.name }}
-        <v-icon
-          icon="$copy"
-          size="20"
-          @click="onCopy(comic.name)"
+      <div class="pa-4">
+        <h3 class="font-weight-medium">
+          {{ comic.name || '—' }}
+          <v-icon
+            v-if="comic.name"
+            icon="$copy"
+            size="20"
+            @click="onCopy(comic.name)"
+          />
+        </h3>
+        <p
+          v-if="comic.url"
+          class="mt-2"
+        >
+          <a :href="comic.url">Ссылка на комикс</a>
+          <v-icon
+            class="ml-2"
+            icon="$copy"
+            size="20"
+            @click="onCopy(comic.url)"
+          />
+        </p>
+        <p
+          v-if="authorsChips.length"
+          class="mt-2 d-flex flex-wrap ga-1 align-center"
+        >
+          <b class="font-weight-medium">Авторы:</b>
+          <v-chip
+            v-for="item in authorsChips"
+            :key="item.id"
+            :text="item.name"
+          />
+        </p>
+        <p
+          v-if="languagesChips.length"
+          class="mt-2 d-flex flex-wrap ga-1 align-center"
+        >
+          <b class="font-weight-medium">Язык:</b>
+          <v-chip
+            v-for="item in languagesChips"
+            :key="item.id"
+            :text="item.name"
+          />
+        </p>
+        <p
+          v-if="tagsChips.length"
+          class="mt-2 d-flex flex-wrap ga-1 align-center"
+        >
+          <b class="font-weight-medium">Теги:</b>
+          <v-chip
+            v-for="item in tagsChips"
+            :key="item.id"
+            :text="item.name"
+          />
+        </p>
+        <p class="mt-2 d-flex flex-wrap ga-1 align-center">
+          <b class="font-weight-medium">Страниц:</b>
+          <v-chip :text="comic.images.length" />
+        </p>
+        <p class="mt-2 d-flex flex-wrap ga-1 align-center">
+          <b class="font-weight-medium">Загружено:</b>
+          <v-chip :text="`${comic.imagesFilled.length} / ${comic.images.length}`" />
+        </p>
+      </div>
+      <v-divider />
+      <div class="pa-4">
+        <v-btn
+          class="w-100"
+          :disabled="!comic.images.length"
+          :loading="loading"
+          text="Читать"
+          :to="{
+            name: '/comics/[id]/read',
+            params: { id: comic.id },
+          }"
         />
-      </h3>
-      <p
-        v-if="comic.url"
-        class="mt-2"
-      >
-        <a :href="comic.url">Ссылка на комикс</a>
-        <v-icon
-          class="ml-2"
-          icon="$copy"
-          size="20"
-          @click="onCopy(comic.url)"
+        <v-btn
+          class="mt-4 w-100"
+          :loading="loading"
+          text="Редактировать страницы"
+          :to="{
+            name: '/comics/[id]/edit-pages',
+            params: { id: comic.id },
+          }"
         />
-      </p>
-      <p
-        v-if="authorsChips.length"
-        class="mt-2 d-flex flex-wrap ga-1 align-center"
-      >
-        <b class="font-weight-medium">Авторы:</b>
-        <v-chip
-          v-for="item in authorsChips"
-          :key="item.id"
-          :text="item.name"
+        <v-btn
+          class="mt-4 w-100"
+          color="error"
+          :loading="loading"
+          text="Удалить"
+          @click="deleteComic()"
         />
-      </p>
-      <p
-        v-if="languagesChips.length"
-        class="mt-2 d-flex flex-wrap ga-1 align-center"
-      >
-        <b class="font-weight-medium">Язык:</b>
-        <v-chip
-          v-for="item in languagesChips"
-          :key="item.id"
-          :text="item.name"
-        />
-      </p>
-      <p
-        v-if="tagsChips.length"
-        class="mt-2 d-flex flex-wrap ga-1 align-center"
-      >
-        <b class="font-weight-medium">Теги:</b>
-        <v-chip
-          v-for="item in tagsChips"
-          :key="item.id"
-          :text="item.name"
-        />
-      </p>
-      <p class="mt-2 d-flex flex-wrap ga-1 align-center">
-        <b class="font-weight-medium">Страниц:</b>
-        <v-chip :text="comic.images.length" />
-        <b class="font-weight-medium">Заполненность:</b>
-        <v-chip :text="`${comic.imagesFilled.length} / ${comic.images.length}`" />
-      </p>
-      <v-btn
-        class="mt-4 w-100"
-        :disabled="!comic.images.length"
-        :loading="loading"
-        text="Читать"
-        :to="{
-          name: '/comics/[id]/read',
-          params: { id: comic.id },
-        }"
-      />
-      <v-btn
-        class="mt-4 w-100"
-        :loading="loading"
-        text="Редактировать страницы"
-        :to="{
-          name: '/comics/[id]/edit-pages',
-          params: { id: comic.id },
-        }"
-      />
-      <v-btn
-        class="mt-4 w-100"
-        color="error"
-        :loading="loading"
-        text="Удалить"
-        @click="deleteComic()"
-      />
+      </div>
     </v-container>
     <v-fab
       icon="$edit"
@@ -190,9 +192,8 @@ const deleteComic = async () => {
 
   if (!value) return;
 
-  loading.value = true;
-
   try {
+    loading.value = true;
     await ComicController.delete(comic.value.id);
     Toast.show({ text: 'Комикс удалён' });
     router.replace({ name: '/' });

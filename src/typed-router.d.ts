@@ -27,7 +27,8 @@ declare module 'vue-router/auto-routes' {
     '/filemanager': RouteRecordInfo<'/filemanager', '/filemanager', Record<never, never>, Record<never, never>>,
     '/languages': RouteRecordInfo<'/languages', '/languages', Record<never, never>, Record<never, never>>,
     '/parsers/': RouteRecordInfo<'/parsers/', '/parsers', Record<never, never>, Record<never, never>>,
-    '/parsers/[id]': RouteRecordInfo<'/parsers/[id]', '/parsers/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
+    '/parsers/[id]/': RouteRecordInfo<'/parsers/[id]/', '/parsers/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
+    '/parsers/[id]/edit': RouteRecordInfo<'/parsers/[id]/edit', '/parsers/:id/edit', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/settings': RouteRecordInfo<'/settings', '/settings', Record<never, never>, Record<never, never>>,
     '/tags': RouteRecordInfo<'/tags', '/tags', Record<never, never>, Record<never, never>>,
   }

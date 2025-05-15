@@ -22,4 +22,4 @@ export interface IParsedComic {
   images: string[]
 }
 
-export type TParserOverride = Partial<Omit<IParserDTO, 'id' | 'name'>>;
+export type TParserOverride = Partial<Omit<IParserDTO, 'id' | 'name' | 'site'>>;

@@ -3,15 +3,17 @@
     <v-container>
       <v-number-input
         v-model.number="pages"
-        control-variant="split"
+        control-variant="hidden"
         label="Количество страниц"
         :min="minPages"
+        @change="setPages()"
       />
       <v-btn
         class="w-100"
         color="error"
+        :disabled="!comic.images.length"
         :loading="loading"
-        text="Удалить все страницы"
+        text="Удалить все картинки"
         @click="delPages()"
       />
       <v-divider class="my-8" />
@@ -32,36 +34,35 @@
         class="mt-4"
         control-variant="split"
         label="Начальный ID"
+        :min="0"
         type="number"
       />
       <v-btn
         class="w-100"
         :disabled="!imagesTemplate"
         :loading="loading"
-        text="Заполнить"
+        text="Заполнить ссылки"
         @click="setTemplate()"
       />
       <v-btn
         class="mt-4 w-100"
         :disabled="!canLoadImages"
         :loading="loading"
-        text="Загрузить страницы"
+        text="Загрузить картинки"
         @click="onLoadImages()"
       />
       <v-divider class="my-8" />
       <v-number-input
         v-model.number="maxWidth"
-        control-variant="hidden"
-        label="Изменить ширину"
+        control-variant="split"
+        label="Задать ширину"
         :min="0"
-        variant="solo-filled"
       />
       <v-number-input
         v-model.number="maxHeight"
-        control-variant="hidden"
-        label="Изменить высоту"
+        control-variant="split"
+        label="Задать высоту"
         :min="0"
-        variant="solo-filled"
       />
       <v-btn
         class="w-100"
@@ -76,6 +77,16 @@
         :items="comic.images"
         items-per-page="20"
       >
+        <template #header="{ pageCount, prevPage, nextPage }">
+          <v-pagination
+            v-model="currentPage"
+            class="mb-4"
+            density="comfortable"
+            :length="pageCount"
+            @next="nextPage()"
+            @prev="prevPage()"
+          />
+        </template>
         <template #default="{ items }">
           <v-row>
             <v-col
@@ -84,13 +95,10 @@
             >
               <ComicPageEdit
                 v-model:from="item.raw.from"
-                :comic-id="comic.id"
-                :file-id="item.raw.id"
                 :loading="loading"
                 :url="item.raw.url"
                 @delete="delPage(item.raw)"
                 @download="onLoadImage(item.raw)"
-                @resize="resizeImage(item.raw, $event)"
                 @upload="uploadImage(item.raw, $event)"
               />
             </v-col>
@@ -135,32 +143,30 @@ const route = useRoute('/comics/[id]/edit-pages');
 
 const currentPage = ref(1);
 
+const pages = ref(0);
+
 const comicId = +(route.params.id || 0);
 const comic = ref(new ComicModel());
 
 const loadComic = async () => {
   if (!comicId) return;
   comic.value = await ComicController.load(comicId);
+  pages.value = comic.value.images.length;
 };
 
 loadComic();
 
-const pages = computed({
-  get() {
-    return comic.value.images.length;
-  },
-  set(value) {
-    const diff = value - comic.value.images.length;
+const setPages = () => {
+  const diff = pages.value - comic.value.images.length;
 
-    if (diff > 0) {
-      for (let i = 0; i < diff; i++) {
-        comic.value.addImage();
-      }
-    } else if (diff < 0) {
-      comic.value.images.splice(-1, Math.abs(diff));
+  if (diff > 0) {
+    for (let i = 0; i < diff; i++) {
+      comic.value.addImage();
     }
-  },
-});
+  } else if (diff < 0) {
+    comic.value.images.splice(diff, Math.abs(diff));
+  }
+};
 
 const minPages = computed(() => (
   comic.value.images.reduce((acc, cur, index) => {
@@ -295,32 +301,19 @@ const delPages = async () => {
 const maxWidth = ref(0);
 const maxHeight = ref(0);
 
-const resizeImage = async (item: IComicImageDTO, options: { maxWidth?: number, maxHeight?: number }) => {
-  try {
-    loading.value = true;
-    await ComicController.resizeComicFile(comic.value.id, item.id, {
-      maxWidth: options.maxWidth || undefined,
-      maxHeight: options.maxHeight || undefined,
-    });
-    Toast.show({ text: `Изображение сжато` });
-    await loadComic();
-  } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
-  } finally {
-    loading.value = false;
-  }
-};
-
 const resizeImages = async () => {
   try {
     loading.value = true;
 
     for (const image of comic.value.images) {
+      if (!image.url) continue;
+
       await ComicController.resizeComicFile(comic.value.id, image.id, {
         maxWidth: maxWidth.value || undefined,
         maxHeight: maxHeight.value || undefined,
       });
     }
+
     Toast.show({ text: `Изображения сжаты` });
     await loadComic();
   } catch (e) {

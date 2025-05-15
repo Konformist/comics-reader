@@ -82,6 +82,8 @@ import type { IComicImageDTO } from '@/core/entities/comic/ComicTypes.ts';
 import ParserController from '@/core/entities/parser/ParserController.ts';
 import { useAppStore } from '@/stores/app.ts';
 import { KeepAwake } from '@capacitor-community/keep-awake';
+import { Capacitor } from '@capacitor/core';
+import { StatusBar } from '@capacitor/status-bar';
 import { Toast } from '@capacitor/toast';
 
 definePage({
@@ -98,11 +100,19 @@ onMounted(async () => {
   if ((await KeepAwake.isSupported()).isSupported) {
     await KeepAwake.keepAwake();
   }
+
+  if (Capacitor.isNativePlatform()) {
+    await StatusBar.hide();
+  }
 });
 
 onBeforeUnmount(async () => {
   if ((await KeepAwake.isSupported()).isSupported) {
     await KeepAwake.allowSleep();
+  }
+
+  if (Capacitor.isNativePlatform()) {
+    await StatusBar.show();
   }
 });
 

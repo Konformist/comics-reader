@@ -2,6 +2,7 @@
   <v-main scrollable>
     <v-container class="pa-0">
       <FilesTree
+        v-if="files.length"
         :tree="files"
       />
     </v-container>

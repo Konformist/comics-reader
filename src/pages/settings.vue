@@ -84,16 +84,24 @@ const loadBackupsTree = async () => {
 loadBackupsTree();
 
 const setBackup = async () => {
-  await server.setBackup();
-  Toast.show({ text: 'Бекап сохранён' });
-  loadBackupsTree();
+  try {
+    await server.setBackup();
+    Toast.show({ text: 'Бекап сохранён' });
+    loadBackupsTree();
+  } catch (e) {
+    Toast.show({ text: `Ошибка: ${e}` });
+  }
 };
 
 const backupFile = ref('');
 
 const getBackup = async () => {
-  await server.getBackup(backupFile.value);
-  Toast.show({ text: 'Бекап применён' });
+  try {
+    await server.getBackup(backupFile.value);
+    Toast.show({ text: 'Бекап применён' });
+  } catch (e) {
+    Toast.show({ text: `Ошибка: ${e}` });
+  }
 };
 
 const saveBackupToGlobal = async (path: string): Promise<void> => {
@@ -105,13 +113,18 @@ const saveBackupToGlobal = async (path: string): Promise<void> => {
     });
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (_) { /* empty */ }
-  await Filesystem.copy({
-    from: path,
-    directory: Directory.Data,
-    to: `Comics Reader/${path}`,
-    toDirectory: Directory.Documents,
-  });
 
-  Toast.show({ text: 'Бекап сохранён в документы' });
+  try {
+    await Filesystem.copy({
+      from: path,
+      directory: Directory.Data,
+      to: `Comics Reader/${path}`,
+      toDirectory: Directory.Documents,
+    });
+
+    Toast.show({ text: 'Бекап сохранён в документы' });
+  } catch (e) {
+    Toast.show({ text: `Ошибка: ${e}` });
+  }
 };
 </script>

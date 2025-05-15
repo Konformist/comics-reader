@@ -1,7 +1,5 @@
 import type { IDirectory, IFile } from '@/core/entities/file/FileTypes.ts';
-import type { IResizeOptions } from '@/core/middleware/ComicsServer.ts';
 import { getFileUrl } from '@/core/utils/image.ts';
-import { ImageManipulator } from '@capacitor-community/image-manipulator';
 import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 
 const addFile = async (path: string, file: string, type: 'string' | 'binary'): Promise<string> => {
@@ -31,24 +29,6 @@ const delFile = (path: string): Promise<void> => {
     path,
     directory: Directory.Data,
   });
-};
-
-const resizeImage = async (
-  path: string,
-  options: Partial<IResizeOptions>,
-): Promise<string> => {
-  const result = await ImageManipulator.resize({
-    imagePath: path,
-    maxWidth: options.maxWidth,
-    maxHeight: options.maxHeight,
-  });
-
-  await Filesystem.rename({
-    from: result.imagePath,
-    to: path,
-  });
-
-  return getFileUrl(path);
 };
 
 const getTreeRecursive = async (path: string): Promise<Array<IDirectory | IFile>> => {
@@ -100,6 +80,5 @@ export default {
   addFile,
   delFile,
   getFile,
-  resizeImage,
   getTree,
 };

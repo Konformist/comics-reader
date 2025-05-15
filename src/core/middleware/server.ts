@@ -6,7 +6,7 @@ import migrator from '@/core/middleware/migrator.ts';
 import serverBackups from '@/core/middleware/serverBackups.ts';
 import serverFiles from '@/core/middleware/serverFiles.ts';
 import serverSettings from '@/core/middleware/serverSettings.ts';
-import ComicsServer, { type IResizeOptions } from '@/core/middleware/ComicsServer.ts';
+import ComicsServer from '@/core/middleware/ComicsServer.ts';
 import ParsersServer from '@/core/middleware/ParsersServer.ts';
 import TagsServer from '@/core/middleware/TagsServer.ts';
 import type { IAuthorDTO } from '@/core/object-value/author/AuthorTypes.ts';
@@ -45,12 +45,10 @@ export default {
   getComicAll: () => ComicsServer.getItems(),
   addComicCover: (id: number, f: File) => ComicsServer.addCover(id, f),
   delComicCover: (id: number) => ComicsServer.delCover(id),
-  resizeComicCover: (id: number, o: Partial<IResizeOptions>) => ComicsServer.resizeCover(id, o),
   addComicFile: (id: number, f: File) => ComicsServer.addImage(id, f),
   setComicFile: (id: number, fId: number, f: File) => ComicsServer.setImage(id, fId, f),
   delComicFile: (id: number, f: number) => ComicsServer.delImage(id, f),
   delComicFiles: (id: number) => ComicsServer.delImages(id),
-  resizeComicFile: (id: number, f: number, o: Partial<IResizeOptions>) => ComicsServer.resizeImage(id, f, o),
   autoBackup: serverBackups.autoBackup,
   delBackup: serverBackups.delBackup,
   addBackup: serverBackups.addBackup,

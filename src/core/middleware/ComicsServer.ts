@@ -3,12 +3,6 @@ import ServerAbstract from '@/core/middleware/ServerAbstract.ts';
 import serverFiles from '@/core/middleware/serverFiles.ts';
 import { COMICS_FILES_DIRECTORY, COMICS_STORE } from '@/core/middleware/variables.ts';
 import { optimizeImage } from '@/core/utils/image.ts';
-import { Directory, Filesystem } from '@capacitor/filesystem';
-
-export interface IResizeOptions {
-  maxWidth: number,
-  maxHeight: number,
-}
 
 class ComicsServer extends ServerAbstract<IComicDTO> {
   constructor() {
@@ -80,20 +74,6 @@ class ComicsServer extends ServerAbstract<IComicDTO> {
     await this.setDatabase();
   }
 
-  public async resizeCover(comicId: number, options: Partial<IResizeOptions>) {
-    const comic = await this.getItem(comicId);
-
-    if (!comic) return;
-
-    const result = await Filesystem.getUri({
-      path: this.#getCoverPath(comicId),
-      directory: Directory.Data,
-    });
-
-    comic.image = await serverFiles.resizeImage(result.uri, options);
-    await this.setDatabase();
-  }
-
   #getImagePath(comicId: number, fileId: number): string {
     return `${COMICS_FILES_DIRECTORY}/${comicId}/${fileId}.webp`;
   }
@@ -149,24 +129,6 @@ class ComicsServer extends ServerAbstract<IComicDTO> {
 
     if (file.url) await serverFiles.delFile(this.#getImagePath(comicId, fileId));
     comic.images.splice(fileIndex, 1);
-    await this.setDatabase();
-  }
-
-  public async resizeImage(comicId: number, fileId: number, options: Partial<IResizeOptions>) {
-    const comic = await this.getItem(comicId);
-
-    if (!comic) return;
-
-    const file = comic.images.find((e) => e.id === fileId);
-
-    if (!file) return;
-
-    const result = await Filesystem.getUri({
-      path: this.#getImagePath(comicId, fileId),
-      directory: Directory.Data,
-    });
-
-    file.url = await serverFiles.resizeImage(result.uri, options);
     await this.setDatabase();
   }
 

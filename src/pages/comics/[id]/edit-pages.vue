@@ -52,26 +52,6 @@
         @click="onLoadImages()"
       />
       <v-divider class="my-8" />
-      <v-number-input
-        v-model.number="maxWidth"
-        control-variant="split"
-        label="Задать ширину"
-        :min="0"
-      />
-      <v-number-input
-        v-model.number="maxHeight"
-        control-variant="split"
-        label="Задать высоту"
-        :min="0"
-      />
-      <v-btn
-        class="w-100"
-        :disabled="!maxWidth && !maxHeight"
-        :loading="loading"
-        text="Изменить размер"
-        @click="resizeImages()"
-      />
-      <v-divider class="my-8" />
       <v-data-iterator
         v-model:page="currentPage"
         :items="comic.images"
@@ -291,31 +271,6 @@ const delPages = async () => {
     await ComicController.deleteFiles(comic.value.id);
     await loadComic();
     Toast.show({ text: 'Комикс сохранён' });
-  } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
-  } finally {
-    loading.value = false;
-  }
-};
-
-const maxWidth = ref(0);
-const maxHeight = ref(0);
-
-const resizeImages = async () => {
-  try {
-    loading.value = true;
-
-    for (const image of comic.value.images) {
-      if (!image.url) continue;
-
-      await ComicController.resizeComicFile(comic.value.id, image.id, {
-        maxWidth: maxWidth.value || undefined,
-        maxHeight: maxHeight.value || undefined,
-      });
-    }
-
-    Toast.show({ text: `Изображения сжаты` });
-    await loadComic();
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {

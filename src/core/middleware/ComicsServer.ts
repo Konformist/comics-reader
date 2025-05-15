@@ -2,7 +2,7 @@ import type { IComicDTO } from '@/core/entities/comic/ComicTypes.ts';
 import ServerAbstract from '@/core/middleware/ServerAbstract.ts';
 import serverFiles from '@/core/middleware/serverFiles.ts';
 import { COMICS_FILES_DIRECTORY, COMICS_STORE } from '@/core/middleware/variables.ts';
-import { optimizeImageV2 } from '@/core/utils/image.ts';
+import { optimizeImage } from '@/core/utils/image.ts';
 import { Directory, Filesystem } from '@capacitor/filesystem';
 
 export interface IResizeOptions {
@@ -65,7 +65,7 @@ class ComicsServer extends ServerAbstract<IComicDTO> {
 
     if (!comic) return;
 
-    const optimizedFile = await optimizeImageV2(file);
+    const optimizedFile = await optimizeImage(file);
     comic.image = await serverFiles.addFile(this.#getCoverPath(comicId), optimizedFile, 'binary');
     await this.setDatabase();
   }
@@ -104,7 +104,7 @@ class ComicsServer extends ServerAbstract<IComicDTO> {
     if (!comic) return;
 
     const fileId = Math.max(...comic.images.map((e) => e.id), 0) + 1;
-    const optimizedFile = await optimizeImageV2(file);
+    const optimizedFile = await optimizeImage(file);
     const uri = await serverFiles.addFile(this.#getImagePath(comicId, fileId), optimizedFile, 'binary');
 
     comic.images.push({
@@ -132,7 +132,7 @@ class ComicsServer extends ServerAbstract<IComicDTO> {
       } catch (_) { /* empty */ }
     }
 
-    const optimizedFile = await optimizeImageV2(file);
+    const optimizedFile = await optimizeImage(file);
     image.url = await serverFiles.addFile(this.#getImagePath(comicId, fileId), optimizedFile, 'binary');
     await this.setDatabase();
   }

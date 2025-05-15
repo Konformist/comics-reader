@@ -20,7 +20,7 @@ export const base64ToFile = (src: string, name = '') => {
   );
 };
 
-export const optimizeImageV2 = async (file: File) => {
+export const optimizeImage = async (file: File) => {
   const image = await createImageBitmap(file);
   const canvas = document.createElement('canvas');
 
@@ -28,5 +28,5 @@ export const optimizeImageV2 = async (file: File) => {
   canvas.height = image.height;
   canvas.getContext('2d')?.drawImage(image, 0, 0);
 
-  return canvas.toDataURL('image/webp', 1);
+  return canvas.toDataURL('image/webp');
 };

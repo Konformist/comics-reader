@@ -33,6 +33,7 @@ export default defineConfig([
       '@stylistic/template-curly-spacing': 'error',
       '@stylistic/type-annotation-spacing': 'error',
       '@stylistic/multiline-ternary': ['error', 'always-multiline'],
+      '@stylistic/no-mixed-operators': 'error',
 
       'vue/script-indent': ['error', 2],
     },

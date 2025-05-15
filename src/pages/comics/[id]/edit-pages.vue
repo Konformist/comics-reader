@@ -207,24 +207,23 @@ const canLoadImages = computed(() => (
 ));
 
 const onLoadImages = async () => {
-  try {
-    loading.value = true;
-    await saveComic();
+  loading.value = true;
+  await saveComic();
 
+  try {
     for (const item of comic.value.images) {
       if (item.from && !item.url) {
         const result = await ParserController.loadImageRaw(item.from);
         await ComicController.saveFile(comic.value.id, item.id, result);
       }
     }
-
-    await loadComic();
-    Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
-  } finally {
-    loading.value = false;
   }
+
+  await loadComic();
+  Toast.show({ text: 'Комикс сохранён' });
+  loading.value = false;
 };
 
 const delPage = async (item: IComicImageDTO) => {
@@ -236,6 +235,7 @@ const delPage = async (item: IComicImageDTO) => {
 
   try {
     loading.value = true;
+
     if (image.url) {
       const { value } = await Dialog.confirm({
         title: 'Подтверждение удаления',

@@ -48,7 +48,7 @@ const migrate = async () => {
 
   for (const comic of ComicsServer.dataRaw) {
     const isCoverFile = !!comic.image;
-    comic.image = {
+    const newCover = {
       id: 0,
       fileId: 0,
       // @ts-expect-error fuck
@@ -71,6 +71,8 @@ const migrate = async () => {
       comic.image.fileId = newCover.id;
     }
 
+    comic.image = newCover;
+
     const newImages: IComicImageUrl[] = [];
 
     for (const image of comic.images) {
@@ -82,23 +84,23 @@ const migrate = async () => {
         fileId: 0,
       };
 
+      if (isImageFile) {
+        const imagePath = `${COMICS_FILES_DIRECTORY}/${comic.id}/${image.id}.webp`;
+        const imageStat = await FilesServer.getFileStat(imagePath);
+        const newImageFile: IFileDTO = {
+          id: FilesServer.getNewId(),
+          name: `${image.id}.webp`,
+          mime: 'image/webp',
+          size: imageStat.size,
+          cdate: imageStat.cdate,
+          mdate: imageStat.mdate,
+          path: imagePath,
+        };
+        FilesServer.dataRaw.push(newImageFile);
+        newImage.fileId = newImageFile.id;
+      }
+
       newImages.push(newImage);
-
-      if (!isImageFile) continue;
-
-      const imagePath = `${COMICS_FILES_DIRECTORY}/${comic.id}/${image.id}.webp`;
-      const imageStat = await FilesServer.getFileStat(imagePath);
-      const newImageFile: IFileDTO = {
-        id: FilesServer.getNewId(),
-        name: `${image.id}.webp`,
-        mime: 'image/webp',
-        size: imageStat.size,
-        cdate: imageStat.cdate,
-        mdate: imageStat.mdate,
-        path: imagePath,
-      };
-      FilesServer.dataRaw.push(newImageFile);
-      newImage.fileId = newImageFile.id;
     }
 
     comic.images = newImages;

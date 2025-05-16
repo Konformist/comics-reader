@@ -18,6 +18,10 @@ const getBackupFileName = () => {
   return `${year}-${month}-${day}.json`;
 };
 
+const setBackup = (data: string, name: string) => {
+  return serverFiles.addFile(`${BACKUPS_DIRECTORY}/${name}`, data, 'string');
+};
+
 const addBackup = async (): Promise<void> => {
   await serverSettings.getSettingsData();
   await AuthorsServer.getDatabase();
@@ -45,13 +49,6 @@ const getBackup = async (path: string): Promise<void> => {
   if (!result) return;
 
   const parsedData = JSON.parse(result);
-
-  // @todo for old backups
-  if (!parsedData.version) {
-    parsedData.settings = parsedData.settings?.item;
-    parsedData.parsers = parsedData.parsers?.items;
-    parsedData.comics = parsedData.comics?.items;
-  }
 
   if (parsedData.version) {
     migrator.dataRaw.item = parsedData.version;
@@ -104,6 +101,7 @@ const autoBackup = async () => {
 export default {
   autoBackup,
   addBackup,
+  setBackup,
   delBackup,
   getBackup,
 };

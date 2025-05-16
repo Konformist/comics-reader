@@ -11,9 +11,9 @@
 
 <script lang="ts" setup>
 import FilesTree from '@/components/FilesTree.vue';
-import type { IDirectory } from '@/core/entities/file/FileTypes.ts';
 import server from '@/core/middleware/server.ts';
 import { BACKUPS_DIRECTORY, COMICS_FILES_DIRECTORY } from '@/core/middleware/variables.ts';
+import type { ITreeDirectory } from '@/core/object-value/file/FileTypes.ts';
 
 definePage({
   meta: {
@@ -21,7 +21,7 @@ definePage({
   },
 });
 
-const files = ref<IDirectory[]>([]);
+const files = ref<ITreeDirectory[]>([]);
 
 const loadComics = async () => {
   files.value.push(...await server.getTree(COMICS_FILES_DIRECTORY));

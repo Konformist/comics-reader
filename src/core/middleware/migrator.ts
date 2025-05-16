@@ -15,8 +15,12 @@ const setVersionData = () => (
 const getVersionData = async () => {
   const result = await Preferences.get({ key: DATABASE_STORE });
 
-  if (!result.value) await setVersionData();
-  else dataRaw.item = +result.value;
+  if (!result.value) {
+    dataRaw.item = DATABASE_VERSION;
+    await setVersionData();
+  } else {
+    dataRaw.item = +result.value;
+  }
 };
 
 const setVersion = async (value: number) => {

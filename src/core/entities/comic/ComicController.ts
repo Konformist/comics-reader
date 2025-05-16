@@ -1,5 +1,7 @@
-import ComicModel from '@/core/entities/comic/ComicModel.ts';
+import type { IComicImageUrl } from '@/core/entities/comic/ComicTypes.ts';
 import server from '@/core/middleware/server.ts';
+import FileModel from '@/core/object-value/file/FileModel.ts';
+import ComicModel from '@/core/entities/comic/ComicModel.ts';
 
 export default class ComicController {
   static async loadAll(): Promise<ComicModel[]> {
@@ -24,6 +26,12 @@ export default class ComicController {
     return server.delComic(id);
   }
 
+  static async loadCover(comicId: number): Promise<FileModel> {
+    const result = await server.getComicCover(comicId);
+
+    return new FileModel(result);
+  }
+
   static saveCover(comicId: number, file: File): Promise<void> {
     return server.addComicCover(comicId, file);
   }
@@ -32,14 +40,26 @@ export default class ComicController {
     return server.delComicCover(comicId);
   }
 
-  static saveFile(comicId: number, fileId = 0, file: File): Promise<void> {
-    return fileId
-      ? server.setComicFile(comicId, fileId, file)
-      : server.addComicFile(comicId, file);
+  static async loadFiles(comicId: number): Promise<FileModel[]> {
+    const result = await server.getComicFiles(comicId);
+
+    return result.map((e) => new FileModel(e));
   }
 
-  static deleteFile(comicId: number, fileId: number): Promise<void> {
-    return server.delComicFile(comicId, fileId);
+  static async loadFile(comicId: number, imageId: number): Promise<FileModel> {
+    const result = await server.getComicFile(comicId, imageId);
+
+    return new FileModel(result);
+  }
+
+  static saveFile(comicId: number, image: IComicImageUrl, file: File): Promise<void> {
+    return image.fileId
+      ? server.setComicFile(comicId, image.id, file)
+      : server.addComicFile(comicId, image.id, file);
+  }
+
+  static deleteFile(comicId: number, imageId: number): Promise<void> {
+    return server.delComicFile(comicId, imageId);
   }
 
   static deleteFiles(comicId: number): Promise<void> {

@@ -74,9 +74,9 @@
 </template>
 
 <script setup lang="ts">
-import type { IDirectory } from '@/core/entities/file/FileTypes.ts';
 import server from '@/core/middleware/server.ts';
 import { APP_NAME, BACKUPS_DIRECTORY } from '@/core/middleware/variables.ts';
+import type { ITreeDirectory } from '@/core/object-value/file/FileTypes.ts';
 import { useAppStore } from '@/stores/app.ts';
 import { Dialog } from '@capacitor/dialog';
 import { Directory, Filesystem } from '@capacitor/filesystem';
@@ -90,7 +90,7 @@ definePage({
   },
 });
 
-const backups = ref<IDirectory[]>([]);
+const backups = ref<ITreeDirectory[]>([]);
 
 const loadBackupsTree = async () => {
   backups.value = await server.getTree(BACKUPS_DIRECTORY);

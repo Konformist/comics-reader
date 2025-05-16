@@ -11,7 +11,6 @@
       <FilesTreeItem
         v-model="model"
         :item="item"
-        :parent="parent || ''"
       />
     </template>
   </v-list>
@@ -19,13 +18,12 @@
 
 <script lang="ts" setup>
 import FilesTreeItem from '@/components/FilesTreeItem.vue';
-import type { IDirectory, IFile } from '@/core/entities/file/FileTypes.ts';
+import type { ITreeDirectory, ITreeFile } from '@/core/object-value/file/FileTypes.ts';
 
 const model = defineModel<string>({ default: '' });
 
 defineProps<{
-  tree: Array<IDirectory | IFile>
-  parent?: string
+  tree: Array<ITreeDirectory | ITreeFile>
   isChild?: boolean
   rounded?: boolean
 }>();

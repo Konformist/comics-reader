@@ -8,6 +8,7 @@ export const PARSERS_STORE = 'parsers';
 export const TAGS_STORE = 'tags';
 export const AUTHORS_STORE = 'authors';
 export const LANGUAGES_STORE = 'languages';
+export const FILES_STORE = 'files';
 export const COMICS_STORE = 'comics';
 
 export const COMICS_FILES_DIRECTORY = 'comics';

@@ -35,9 +35,9 @@
           <ComicPage
             v-for="item in items"
             :key="item.raw.id"
-            :from="item.raw.from"
+            :comic-id="comic.id"
+            :item="item.raw"
             :loading="loading"
-            :url="item.raw.url"
             @download="onLoadImage(item.raw)"
             @loaded="startTimer(nextPage)"
             @next="nextPage()"
@@ -78,8 +78,9 @@
 import ComicPage from '@/components/ComicPage.vue';
 import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
-import type { IComicImageDTO } from '@/core/entities/comic/ComicTypes.ts';
+import type { IComicImageUrl } from '@/core/entities/comic/ComicTypes.ts';
 import ParserController from '@/core/entities/parser/ParserController.ts';
+import FileModel from '@/core/object-value/file/FileModel.ts';
 import { useAppStore } from '@/stores/app.ts';
 import { KeepAwake } from '@capacitor-community/keep-awake';
 import { Capacitor } from '@capacitor/core';
@@ -117,6 +118,14 @@ onBeforeUnmount(async () => {
 });
 
 const comicId = +(route.params.id || 0);
+
+const images = ref<FileModel[]>([]);
+const loadImages = async () => {
+  images.value = await ComicController.loadFiles(comicId);
+};
+
+loadImages();
+
 const comic = ref(new ComicModel());
 
 const currentPage = ref(1);
@@ -158,14 +167,15 @@ watch(
 
 const loading = ref(false);
 
-const onLoadImage = async (item: IComicImageDTO) => {
-  if (!item.from) return;
+const onLoadImage = async (item: IComicImageUrl) => {
+  if (!item.url) return;
 
   try {
     loading.value = true;
-    const result = await ParserController.loadImageRaw(item.from);
-    await ComicController.saveFile(comic.value.id, item.id, result);
+    const result = await ParserController.loadImageRaw(item.url);
+    await ComicController.saveFile(comic.value.id, item, result);
     await loadComic();
+    await loadImages();
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {

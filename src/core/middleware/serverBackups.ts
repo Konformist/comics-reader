@@ -1,8 +1,7 @@
 import AuthorsServer from '@/core/middleware/AuthorsServer.ts';
+import FilesServer from '@/core/middleware/FilesServer.ts';
 import LanguagesServer from '@/core/middleware/LanguagesServer.ts';
 import migrator from '@/core/middleware/migrator.ts';
-import serverFiles from '@/core/middleware/serverFiles.ts';
-import { Directory, Filesystem } from '@capacitor/filesystem';
 import serverSettings from '@/core/middleware/serverSettings.ts';
 import ComicsServer from '@/core/middleware/ComicsServer.ts';
 import ParsersServer from '@/core/middleware/ParsersServer.ts';
@@ -26,7 +25,7 @@ const addBackup = async (): Promise<void> => {
   await ComicsServer.getDatabase();
   await ParsersServer.getDatabase();
 
-  await serverFiles.addFile(`${BACKUPS_DIRECTORY}/${getBackupFileName()}`, JSON.stringify({
+  await FilesServer.setFile(`${BACKUPS_DIRECTORY}/${getBackupFileName()}`, JSON.stringify({
     version: migrator.dataRaw.item,
     settings: serverSettings.dataRaw.item,
     parsers: ParsersServer.dataRaw,
@@ -37,10 +36,10 @@ const addBackup = async (): Promise<void> => {
   }), 'string');
 };
 
-const delBackup = (path: string): Promise<void> => (serverFiles.delFile(path));
+const delBackup = (path: string): Promise<void> => (FilesServer.delFile(path));
 
 const getBackup = async (path: string): Promise<void> => {
-  const result = await serverFiles.getFile(path, 'string');
+  const result = await FilesServer.getFile(path, 'string');
 
   if (!result) return;
 
@@ -91,10 +90,7 @@ const getBackup = async (path: string): Promise<void> => {
 
 const autoBackup = async () => {
   try {
-    await Filesystem.readFile({
-      path: `${BACKUPS_DIRECTORY}/${getBackupFileName()}`,
-      directory: Directory.Data,
-    });
+    await FilesServer.getFile(`${BACKUPS_DIRECTORY}/${getBackupFileName()}`);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (_) {
     await addBackup();

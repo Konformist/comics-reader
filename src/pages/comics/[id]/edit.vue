@@ -135,9 +135,9 @@
       />
       <v-divider class="mt-8 mb-4" />
       <v-img
-        v-if="comic.image"
+        v-if="cover.url"
         rounded
-        :src="comic.image"
+        :src="cover.url"
       />
       <v-file-input
         v-model="image"
@@ -150,7 +150,7 @@
         Или
       </p>
       <v-textarea
-        v-model.trim="comic.imageUrl"
+        v-model.trim="comic.image.url"
         auto-grow
         :autocapitalize="false"
         :autocomplete="false"
@@ -160,7 +160,7 @@
       />
       <v-btn
         class="w-100"
-        :disabled="!image && !comic.imageUrl"
+        :disabled="!image && !comic.image.url"
         :loading="loading"
         text="Загрузить"
         @click="onLoadCover()"
@@ -176,6 +176,7 @@
 
 <script lang="ts" setup>
 import { Toast } from '@capacitor/toast';
+import FileModel from '@/core/object-value/file/FileModel.ts';
 import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import ParserController from '@/core/entities/parser/ParserController.ts';
@@ -212,6 +213,12 @@ const loadTags = async () => {
 };
 
 const comicId = +(route.params.id || 0);
+
+const cover = ref(new FileModel());
+const loadCover = async () => {
+  cover.value = await ComicController.loadCover(comicId);
+};
+
 const comic = ref(new ComicModel());
 const loadComic = async () => {
   if (!comicId) return;
@@ -246,8 +253,9 @@ onMounted(async () => {
     loadTags(),
     loadAuthors(),
     loadLanguages(),
+    loadCover(),
+    loadComic(),
   ]);
-  await loadComic();
   await loadParser();
 });
 
@@ -310,15 +318,15 @@ const onLoadInfo = async () => {
     const result = await ParserController.loadComic(comic.value.url);
     const parsedComic = parser.value.parse(result, comic.value.override);
 
-    if (!comic.value.imageUrl && parsedComic.image) {
-      comic.value.imageUrl = parsedComic.image;
+    if (!comic.value.image.url && parsedComic.image) {
+      comic.value.image.url = parsedComic.image;
     }
 
     if (!comic.value.images.length && parsedComic.images) {
       comic.value.images = parsedComic.images.map((e, i) => ({
         id: i + 1,
-        url: '',
-        from: e,
+        url: e,
+        fileId: 0,
       }));
     }
 
@@ -384,6 +392,7 @@ const uploadCover = async () => {
     await saveComic();
     await ComicController.saveCover(comic.value.id, image.value);
     await loadComic();
+    await loadCover();
     Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
@@ -393,14 +402,15 @@ const uploadCover = async () => {
 };
 
 const loadByLink = async () => {
-  if (!comic.value.imageUrl) return;
+  if (!comic.value.image.url) return;
 
   try {
     loading.value = true;
-    const result = await ParserController.loadImageRaw(comic.value.imageUrl);
+    const result = await ParserController.loadImageRaw(comic.value.image.url);
     await saveComic();
     await ComicController.saveCover(comic.value.id, result);
     await loadComic();
+    await loadCover();
     Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
@@ -411,7 +421,7 @@ const loadByLink = async () => {
 
 const onLoadCover = () => {
   if (image.value) uploadCover();
-  else if (comic.value.imageUrl) loadByLink();
+  else if (comic.value.image.url) loadByLink();
 };
 
 const onSave = async () => {

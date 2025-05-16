@@ -6,14 +6,14 @@
     Ошибка загрузки изображения
   </v-alert>
   <v-alert
-    v-if="!url && !from"
+    v-if="!item.url && !item.fileId"
     color="warning"
   >
     Нет картинки или невозможно скачать
   </v-alert>
   <v-img
-    v-if="url"
-    :src="url"
+    v-if="image.url"
+    :src="image.url"
     @error="error = true"
     @load="$emit('loaded')"
     @loadstart="error = false"
@@ -32,21 +32,37 @@
 </template>
 
 <script setup lang="ts">
+import ComicController from '@/core/entities/comic/ComicController.ts';
+import type { IComicImageUrl } from '@/core/entities/comic/ComicTypes.ts';
+import FileModel from '@/core/object-value/file/FileModel.ts';
+
 const emit = defineEmits<{
   (e: 'loaded', v: void): void
   (e: 'next', v: void): void
   (e: 'prev', v: void): void
   (e: 'download', v: void): void
 }>();
-const { url, from } = defineProps<{
+const { item, comicId } = defineProps<{
   loading: boolean
-  from: string
-  url: string
+  comicId: number
+  item: IComicImageUrl
 }>();
 
-if (!url && from) {
-  emit('download');
-}
-
 const error = ref(false);
+
+const image = ref(new FileModel());
+
+const loadImage = async () => {
+  if (item.fileId) {
+    image.value = await ComicController.loadFile(comicId, item.fileId);
+  } else if (item.url) {
+    emit('download');
+  }
+};
+
+watch(
+  () => item.fileId,
+  () => loadImage(),
+  { immediate: true },
+);
 </script>

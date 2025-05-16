@@ -6,16 +6,34 @@ export interface IComicImageDTO {
   from: string
 }
 
-export interface IComicDTO {
+export interface IComicImageUrl {
+  /** ID */
   id: number
+  /** ID файла */
+  fileId: number
+  /** Ссылка на источник */
   url: string
-  parser: number
+}
+
+export interface IComicDTO {
+  /** ID комикса */
+  id: number
+  /** Ссылка на комикс */
+  url: string
+  /** Название комикса */
   name: string
-  image: string
-  imageUrl: string
+  /** Файла картинки */
+  image: IComicImageUrl
+  /** ID тегов */
   tags: number[]
+  /** ID авторов */
   authors: number[]
+  /** ID языков */
   language: number
-  images: IComicImageDTO[]
+  /** Файлы картинок */
+  images: Array<IComicImageUrl>
+  /** ID парсера */
+  parser: number
+  /** Перезапись значений парсера */
   override: Partial<Omit<IParserDTO, 'id' | 'name'>>
 }

@@ -2,12 +2,13 @@
   <v-main scrollable>
     <v-container class="pa-0">
       <router-link
+        v-if="cover.url"
         :to="{
           name: '/comics/[id]/read',
           params: { id: comic.id },
         }"
       >
-        <v-img :src="comic.image" />
+        <v-img :src="cover.url" />
       </router-link>
       <div class="pa-4">
         <h3 class="font-weight-medium">
@@ -102,6 +103,19 @@
           @click="deleteComic()"
         />
       </div>
+      <v-row v-if="images.length">
+        <v-col
+          v-for="image in images"
+          :key="image.id"
+          cols="6"
+        >
+          <v-img
+            height="250"
+            rounded
+            :src="image.url"
+          />
+        </v-col>
+      </v-row>
     </v-container>
     <v-fab
       icon="$edit"
@@ -118,6 +132,7 @@
 import { Clipboard } from '@capacitor/clipboard';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
+import FileModel from '@/core/object-value/file/FileModel.ts';
 import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import AuthorController from '@/core/object-value/author/AuthorController.ts';
@@ -137,14 +152,26 @@ definePage({
 const route = useRoute('/comics/[id]/');
 const router = useRouter();
 
+const comicId = +route.params.id;
+
+const cover = ref(new FileModel());
+const loadCover = async () => {
+  cover.value = await ComicController.loadCover(comicId);
+};
+
+const images = ref<FileModel[]>([]);
+const loadImages = async () => {
+  images.value = await ComicController.loadFiles(comicId);
+};
+
 const comic = ref(new ComicModel());
 
 const loadComic = async () => {
-  const comicId = +route.params.id;
-
   if (!comicId) return;
 
   comic.value = await ComicController.load(comicId);
+  loadCover();
+  loadImages();
 };
 
 loadComic();

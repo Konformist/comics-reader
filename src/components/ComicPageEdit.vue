@@ -1,12 +1,13 @@
 <template>
   <v-card>
     <v-img
+      v-if="image.url"
       class="mb-4"
-      :src="url"
+      :src="image.url"
     />
     <v-card-item class="pb-0">
       <v-file-input
-        v-model="image"
+        v-model="imageFile"
         accept="image/*"
         hide-details
         label="Загрузить картинку"
@@ -28,7 +29,7 @@
     </v-card-item>
     <v-card-actions>
       <v-btn
-        :disabled="!image && !from"
+        :disabled="!imageFile && !from"
         :loading="loading"
         text="Загрузить"
         @click="onLoad()"
@@ -45,6 +46,10 @@
 </template>
 
 <script setup lang="ts">
+import ComicController from '@/core/entities/comic/ComicController.ts';
+import type { IComicImageUrl } from '@/core/entities/comic/ComicTypes.ts';
+import FileModel from '@/core/object-value/file/FileModel.ts';
+
 const from = defineModel('from', { default: '' });
 
 const emit = defineEmits<{
@@ -53,15 +58,32 @@ const emit = defineEmits<{
   (e: 'delete', v: void): void
 }>();
 
-defineProps<{
-  url: string
+const { item, comicId } = defineProps<{
+  comicId: number
+  item: IComicImageUrl
   loading: boolean
 }>();
 
-const image = ref<File | null>(null);
+const image = ref(new FileModel());
+
+const loadImage = async () => {
+  if (item.fileId) {
+    image.value = await ComicController.loadFile(comicId, item.fileId);
+  } else if (item.url) {
+    emit('download');
+  }
+};
+
+watch(
+  () => item.fileId,
+  () => loadImage(),
+  { immediate: true },
+);
+
+const imageFile = ref<File | null>(null);
 
 const onLoad = () => {
-  if (image.value) emit('upload', image.value);
+  if (imageFile.value) emit('upload', imageFile.value);
   else if (from.value) emit('download');
 };
 </script>

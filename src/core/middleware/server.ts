@@ -1,11 +1,11 @@
 import type { IComicDTO } from '@/core/entities/comic/ComicTypes.ts';
 import type { IParserDTO } from '@/core/entities/parser/ParserTypes.ts';
-import AuthorsServer from '@/core/middleware/AuthorsServer.ts';
-import LanguagesServer from '@/core/middleware/LanguagesServer.ts';
 import migrator from '@/core/middleware/migrator.ts';
 import serverBackups from '@/core/middleware/serverBackups.ts';
-import serverFiles from '@/core/middleware/serverFiles.ts';
 import serverSettings from '@/core/middleware/serverSettings.ts';
+import AuthorsServer from '@/core/middleware/AuthorsServer.ts';
+import FilesServer from '@/core/middleware/FilesServer.ts';
+import LanguagesServer from '@/core/middleware/LanguagesServer.ts';
 import ComicsServer from '@/core/middleware/ComicsServer.ts';
 import ParsersServer from '@/core/middleware/ParsersServer.ts';
 import TagsServer from '@/core/middleware/TagsServer.ts';
@@ -15,7 +15,7 @@ import type { ITagDTO } from '@/core/object-value/tag/TagTypes.ts';
 
 export default {
   migrate: migrator.migrate,
-  getTree: serverFiles.getTree,
+  getTree: (p: string) => FilesServer.getTree(p),
   setSettings: serverSettings.setSettings,
   getSettings: serverSettings.getSettings,
   addParser: (v: IParserDTO) => ParsersServer.addItem(v),
@@ -43,11 +43,14 @@ export default {
   delComic: (id: number) => ComicsServer.delItem(id),
   getComic: (id: number) => ComicsServer.getItem(id),
   getComicAll: () => ComicsServer.getItems(),
+  getComicCover: (id: number) => ComicsServer.getCover(id),
   addComicCover: (id: number, f: File) => ComicsServer.addCover(id, f),
   delComicCover: (id: number) => ComicsServer.delCover(id),
-  addComicFile: (id: number, f: File) => ComicsServer.addImage(id, f),
-  setComicFile: (id: number, fId: number, f: File) => ComicsServer.setImage(id, fId, f),
-  delComicFile: (id: number, f: number) => ComicsServer.delImage(id, f),
+  getComicFile: (id: number, img: number) => ComicsServer.getImage(id, img),
+  getComicFiles: (id: number) => ComicsServer.getImages(id),
+  addComicFile: (id: number, img: number, f: File) => ComicsServer.addImage(id, img, f),
+  setComicFile: (id: number, img: number, f: File) => ComicsServer.setImage(id, img, f),
+  delComicFile: (id: number, img: number) => ComicsServer.delImage(id, img),
   delComicFiles: (id: number) => ComicsServer.delImages(id),
   autoBackup: serverBackups.autoBackup,
   delBackup: serverBackups.delBackup,

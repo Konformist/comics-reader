@@ -6,7 +6,7 @@ import serverSettings from '@/core/middleware/serverSettings.ts';
 import ComicsServer from '@/core/middleware/ComicsServer.ts';
 import ParsersServer from '@/core/middleware/ParsersServer.ts';
 import TagsServer from '@/core/middleware/TagsServer.ts';
-import { BACKUPS_DIRECTORY } from '@/core/middleware/variables.ts';
+import { BACKUPS_DIRECTORY, DATABASE_VERSION } from '@/core/middleware/variables.ts';
 
 const getBackupFileName = () => {
   const now = new Date();
@@ -28,6 +28,7 @@ const addBackup = async (): Promise<void> => {
   await TagsServer.getDatabase();
   await ComicsServer.getDatabase();
   await ParsersServer.getDatabase();
+  await FilesServer.getDatabase();
 
   await FilesServer.setFile(`${BACKUPS_DIRECTORY}/${getBackupFileName()}`, JSON.stringify({
     version: migrator.dataRaw.item,
@@ -37,6 +38,7 @@ const addBackup = async (): Promise<void> => {
     languages: LanguagesServer.dataRaw,
     tags: TagsServer.dataRaw,
     comics: ComicsServer.dataRaw,
+    files: FilesServer.dataRaw,
   }), 'string');
 };
 
@@ -49,40 +51,29 @@ const getBackup = async (path: string): Promise<void> => {
 
   const parsedData = JSON.parse(result);
 
-  if (parsedData.version) {
-    migrator.dataRaw.item = parsedData.version;
-    await migrator.setVersionData();
-  }
+  migrator.dataRaw.item = parsedData.version || DATABASE_VERSION;
+  await migrator.setVersionData();
 
-  if (parsedData.settings) {
-    serverSettings.dataRaw.item = parsedData.settings;
-    await serverSettings.setSettingsData();
-  }
+  serverSettings.dataRaw.item = parsedData.settings || [];
+  await serverSettings.setSettingsData();
 
-  if (parsedData.parsers) {
-    ParsersServer.dataRaw = parsedData.parsers;
-    await ParsersServer.setDatabase();
-  }
+  ParsersServer.dataRaw = parsedData.parsers || [];
+  await ParsersServer.setDatabase();
 
-  if (parsedData.languages) {
-    LanguagesServer.dataRaw = parsedData.languages;
-    await LanguagesServer.setDatabase();
-  }
+  LanguagesServer.dataRaw = parsedData.languages || [];
+  await LanguagesServer.setDatabase();
 
-  if (parsedData.authors) {
-    AuthorsServer.dataRaw = parsedData.authors;
-    await AuthorsServer.setDatabase();
-  }
+  AuthorsServer.dataRaw = parsedData.authors || [];
+  await AuthorsServer.setDatabase();
 
-  if (parsedData.tags) {
-    TagsServer.dataRaw = parsedData.tags;
-    await TagsServer.setDatabase();
-  }
+  TagsServer.dataRaw = parsedData.tags || [];
+  await TagsServer.setDatabase();
 
-  if (parsedData.comics) {
-    ComicsServer.dataRaw = parsedData.comics;
-    await ComicsServer.setDatabase();
-  }
+  FilesServer.dataRaw = parsedData.files || [];
+  await FilesServer.setDatabase();
+
+  ComicsServer.dataRaw = parsedData.comics || [];
+  await ComicsServer.setDatabase();
 };
 
 const autoBackup = async () => {

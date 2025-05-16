@@ -2,6 +2,7 @@
   <v-card
     height="250"
     :image="cover.url"
+    :loading="loading"
     :to="{
       name: '/comics/[id]/',
       params: { id: comic.id }
@@ -41,8 +42,11 @@ const { comic } = defineProps<{
 }>();
 
 const cover = ref(new FileModel());
+const loading = ref(false);
 const loadCover = async () => {
+  loading.value = true;
   cover.value = await ComicController.loadCover(comic.id);
+  loading.value = false;
 };
 
 loadCover();

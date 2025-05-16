@@ -107,13 +107,12 @@
 </template>
 
 <script lang="ts" setup>
+import { Dialog } from '@capacitor/dialog';
+import { Toast } from '@capacitor/toast';
 import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import type { IComicImageUrl } from '@/core/entities/comic/ComicTypes.ts';
 import ParserController from '@/core/entities/parser/ParserController.ts';
-import FileModel from '@/core/object-value/file/FileModel.ts';
-import { Dialog } from '@capacitor/dialog';
-import { Toast } from '@capacitor/toast';
 
 definePage({
   meta: {
@@ -129,13 +128,6 @@ const currentPage = ref(1);
 const pages = ref(0);
 
 const comicId = +(route.params.id || 0);
-
-const images = ref<FileModel[]>([]);
-const loadImages = async () => {
-  images.value = await ComicController.loadFiles(comicId);
-};
-
-loadImages();
 
 const comic = ref(new ComicModel());
 
@@ -198,7 +190,6 @@ const uploadImage = async (item: IComicImageUrl, event: File | File[]) => {
     await saveComic();
     await ComicController.saveFile(comic.value.id, item, event);
     await loadComic();
-    await loadImages();
     Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
@@ -216,7 +207,6 @@ const onLoadImage = async (item: IComicImageUrl) => {
     await saveComic();
     await ComicController.saveFile(comic.value.id, item, result);
     await loadComic();
-    await loadImages();
     Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });

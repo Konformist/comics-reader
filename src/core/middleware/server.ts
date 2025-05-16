@@ -55,5 +55,6 @@ export default {
   autoBackup: serverBackups.autoBackup,
   delBackup: serverBackups.delBackup,
   addBackup: serverBackups.addBackup,
+  setBackup: serverBackups.setBackup,
   getBackup: serverBackups.getBackup,
 };

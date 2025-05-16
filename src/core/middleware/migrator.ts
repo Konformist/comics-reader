@@ -1,9 +1,5 @@
-import type { IComicImageUrl } from '@/core/entities/comic/ComicTypes.ts';
-import ComicsServer from '@/core/middleware/ComicsServer.ts';
-import FilesServer from '@/core/middleware/FilesServer.ts';
-import type { IFileDTO } from '@/core/object-value/file/FileTypes.ts';
 import { Preferences } from '@capacitor/preferences';
-import { COMICS_FILES_DIRECTORY, DATABASE_STORE, DATABASE_VERSION } from '@/core/middleware/variables.ts';
+import { DATABASE_STORE, DATABASE_VERSION } from '@/core/middleware/variables.ts';
 
 const dataRaw: { item: number } = {
   item: 0,
@@ -42,73 +38,6 @@ const migrate = async () => {
   await getVersionData();
 
   if (dataRaw.item === DATABASE_VERSION) return;
-
-  dataRaw.item = DATABASE_VERSION;
-  await ComicsServer.getDatabase();
-
-  for (const comic of ComicsServer.dataRaw) {
-    const isCoverFile = !!comic.image;
-    const newCover = {
-      id: 0,
-      fileId: 0,
-      // @ts-expect-error fuck
-      url: comic.imageUrl,
-    };
-
-    if (isCoverFile) {
-      const coverPath = `${COMICS_FILES_DIRECTORY}/${comic.id}/cover.webp`;
-      const coverStat = await FilesServer.getFileStat(coverPath);
-      const newCoverFile: IFileDTO = {
-        id: FilesServer.getNewId(),
-        name: 'cover.webp',
-        mime: 'image/webp',
-        size: coverStat.size,
-        cdate: coverStat.cdate,
-        mdate: coverStat.mdate,
-        path: coverPath,
-      };
-      FilesServer.dataRaw.push(newCoverFile);
-      newCover.fileId = newCoverFile.id;
-    }
-
-    comic.image = newCover;
-
-    const newImages: IComicImageUrl[] = [];
-
-    for (const image of comic.images) {
-      const isImageFile = !!image.url;
-      const newImage = {
-        id: image.id,
-        // @ts-expect-error fuck
-        url: image.from,
-        fileId: 0,
-      };
-
-      if (isImageFile) {
-        const imagePath = `${COMICS_FILES_DIRECTORY}/${comic.id}/${image.id}.webp`;
-        const imageStat = await FilesServer.getFileStat(imagePath);
-        const newImageFile: IFileDTO = {
-          id: FilesServer.getNewId(),
-          name: `${image.id}.webp`,
-          mime: 'image/webp',
-          size: imageStat.size,
-          cdate: imageStat.cdate,
-          mdate: imageStat.mdate,
-          path: imagePath,
-        };
-        FilesServer.dataRaw.push(newImageFile);
-        newImage.fileId = newImageFile.id;
-      }
-
-      newImages.push(newImage);
-    }
-
-    comic.images = newImages;
-  }
-
-  await ComicsServer.setDatabase();
-  await FilesServer.setDatabase();
-  await setVersionData();
 };
 
 export default {

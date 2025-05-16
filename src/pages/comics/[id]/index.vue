@@ -103,20 +103,23 @@
           @click="deleteComic()"
         />
       </div>
-      <template v-if="images.length">
+      <template v-if="comic.images.length">
         <v-divider />
         <div class="px-4 py-8">
           <v-row>
             <v-col
-              v-for="image in images"
+              v-for="(image, index) in comic.images"
               :key="image.id"
               cols="6"
             >
-              <v-img
-                cover
+              <v-card
                 height="250"
-                rounded
-                :src="image.url"
+                :image="getImage(image.fileId)?.url"
+                :to="{
+                  name: '/comics/[id]/read',
+                  params: { id: comic.id },
+                  query: { page: index + 1 },
+                }"
               />
             </v-col>
           </v-row>
@@ -214,6 +217,8 @@ const loadTags = async () => {
 };
 
 loadTags();
+
+const getImage = (id: number) => (images.value.find((e) => e.id === id));
 
 const loading = ref(false);
 

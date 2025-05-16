@@ -128,7 +128,7 @@ loadImages();
 
 const comic = ref(new ComicModel());
 
-const currentPage = ref(1);
+const currentPage = ref<number>(+(route.query.page ?? 1));
 
 const loadComic = async () => {
   if (!comicId) return;

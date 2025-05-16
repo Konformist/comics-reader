@@ -40,7 +40,9 @@ export default class ComicModel extends Entity<IComicDTO> {
   }
 
   get isFilled(): boolean {
-    return !!this.imagesFilled.length
+    return !!this.images.length
+      && this.images.every((e) => e.fileId)
+      && !!this.image.fileId
       && !!this.name
       && !!this.language
       && !!this.authors.length;

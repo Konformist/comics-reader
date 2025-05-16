@@ -77,6 +77,13 @@ class FilesServer extends ServerAbstract<IFileDTO> {
     return result.data as string;
   }
 
+  public async getFileUri(path: string) {
+    return (await Filesystem.getUri({
+      path,
+      directory: Directory.Data,
+    })).uri;
+  }
+
   public async getFileStat(path: string): Promise<{ size: number, cdate: number, mdate: number }> {
     const result = await Filesystem.stat({
       path,

@@ -103,19 +103,25 @@
           @click="deleteComic()"
         />
       </div>
-      <v-row v-if="images.length">
-        <v-col
-          v-for="image in images"
-          :key="image.id"
-          cols="6"
-        >
-          <v-img
-            height="250"
-            rounded
-            :src="image.url"
-          />
-        </v-col>
-      </v-row>
+      <template v-if="images.length">
+        <v-divider />
+        <div class="px-4 py-8">
+          <v-row>
+            <v-col
+              v-for="image in images"
+              :key="image.id"
+              cols="6"
+            >
+              <v-img
+                cover
+                height="250"
+                rounded
+                :src="image.url"
+              />
+            </v-col>
+          </v-row>
+        </div>
+      </template>
     </v-container>
     <v-fab
       icon="$edit"

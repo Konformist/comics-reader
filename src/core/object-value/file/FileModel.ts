@@ -1,6 +1,5 @@
 import type { IFileDTO } from '@/core/object-value/file/FileTypes.ts';
 import ObjectValue from '@/core/object-value/ObjectValue.ts';
-import { Capacitor } from '@capacitor/core';
 
 export default class FileModel extends ObjectValue<IFileDTO> {
   public id: number = 0;
@@ -27,7 +26,7 @@ export default class FileModel extends ObjectValue<IFileDTO> {
 
   get url(): string {
     if (!this.path) return '';
-    else return `${Capacitor.convertFileSrc(this.path)}?${this.mdate}`;
+    else return `${this.path}?${this.mdate}`;
   }
 
   public getDTO(): IFileDTO {

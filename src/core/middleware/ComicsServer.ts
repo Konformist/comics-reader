@@ -4,6 +4,7 @@ import { optimizeImage } from '@/core/utils/image.ts';
 import { COMICS_FILES_DIRECTORY, COMICS_STORE } from '@/core/middleware/variables.ts';
 import ServerAbstract from '@/core/middleware/ServerAbstract.ts';
 import FilesServer from '@/core/middleware/FilesServer.ts';
+import { Capacitor } from '@capacitor/core';
 
 class ComicsServer extends ServerAbstract<IComicDTO> {
   constructor() {
@@ -13,7 +14,7 @@ class ComicsServer extends ServerAbstract<IComicDTO> {
   public async getItems(): Promise<IComicDTO[]> {
     await this.getDatabase();
 
-    return [...this.dataRaw];
+    return this.dataRaw.map((e) => ({ ...e }));
   }
 
   public async getItem(id: number): Promise<IComicDTO | undefined> {
@@ -21,7 +22,11 @@ class ComicsServer extends ServerAbstract<IComicDTO> {
 
     if (!ids.includes(id)) await this.getDatabase();
 
-    return this.dataRaw.find((e) => e.id === id);
+    const result = this.dataRaw.find((e) => e.id === id);
+
+    if (!result) return;
+
+    return { ...result };
   }
 
   public async addItem(value: IComicDTO): Promise<number> {
@@ -78,7 +83,13 @@ class ComicsServer extends ServerAbstract<IComicDTO> {
 
     if (!comic || !comic.image.fileId) return;
 
-    return await FilesServer.getItem(comic.image.fileId);
+    const result = await FilesServer.getItem(comic.image.fileId);
+
+    if (!result) return;
+
+    const pathUri = await FilesServer.getFileUri(result.path);
+
+    return { ...result, path: Capacitor.convertFileSrc(pathUri) };
   }
 
   public async addCover(comicId: number, file: File): Promise<void> {
@@ -145,7 +156,13 @@ class ComicsServer extends ServerAbstract<IComicDTO> {
 
     if (!image?.fileId) return;
 
-    return await FilesServer.getItem(image.fileId);
+    const result = await FilesServer.getItem(image.fileId);
+
+    if (!result) return;
+
+    const pathUri = await FilesServer.getFileUri(result.path);
+
+    return { ...result, path: Capacitor.convertFileSrc(pathUri) };
   }
 
   public async getImages(comicId: number): Promise<IFileDTO[]> {
@@ -158,7 +175,11 @@ class ComicsServer extends ServerAbstract<IComicDTO> {
     for (const image of comic.images) {
       if (image.fileId) {
         const result = await FilesServer.getItem(image.fileId);
-        if (result) ret.push(result);
+
+        if (!result) continue;
+
+        const pathUri = await FilesServer.getFileUri(result.path);
+        ret.push({ ...result, path: Capacitor.convertFileSrc(pathUri) });
       }
     }
 

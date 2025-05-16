@@ -11,7 +11,7 @@ class ParsersServer extends ServerAbstract<IParserDTO> {
   async getItems(): Promise<IParserDTO[]> {
     await this.getDatabase();
 
-    return [...this.dataRaw];
+    return this.dataRaw.map((e) => ({ ...e }));
   }
 
   public async getItem(id: number): Promise<IParserDTO | undefined> {
@@ -19,7 +19,11 @@ class ParsersServer extends ServerAbstract<IParserDTO> {
 
     if (!ids.includes(id)) await this.getDatabase();
 
-    return this.dataRaw.find((e) => e.id === id);
+    const result = this.dataRaw.find((e) => e.id === id);
+
+    if (!result) return;
+
+    return { ...result };
   }
 
   public async addItem(value: IParserDTO): Promise<number> {

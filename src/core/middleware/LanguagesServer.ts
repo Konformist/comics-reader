@@ -11,7 +11,7 @@ class LanguagesServer extends ServerAbstract<ILanguageDTO> {
   public async getItems(): Promise<ILanguageDTO[]> {
     await this.getDatabase();
 
-    return [...this.dataRaw];
+    return this.dataRaw.map((e) => ({ ...e }));
   }
 
   public async getItem(id: number): Promise<ILanguageDTO | undefined> {
@@ -19,7 +19,11 @@ class LanguagesServer extends ServerAbstract<ILanguageDTO> {
 
     if (!ids.includes(id)) await this.getDatabase();
 
-    return this.dataRaw.find((e) => e.id === id);
+    const result = this.dataRaw.find((e) => e.id === id);
+
+    if (!result) return;
+
+    return { ...result };
   }
 
   public async addItem(value: ILanguageDTO): Promise<number> {

@@ -11,7 +11,7 @@ class AuthorsServer extends ServerAbstract<IAuthorDTO> {
   public async getItems(): Promise<IAuthorDTO[]> {
     await this.getDatabase();
 
-    return [...this.dataRaw];
+    return this.dataRaw.map((e) => ({ ...e }));
   }
 
   public async getItem(id: number): Promise<IAuthorDTO | undefined> {
@@ -19,7 +19,11 @@ class AuthorsServer extends ServerAbstract<IAuthorDTO> {
 
     if (!ids.includes(id)) await this.getDatabase();
 
-    return this.dataRaw.find((e) => e.id === id);
+    const result = this.dataRaw.find((e) => e.id === id);
+
+    if (!result) return;
+
+    return { ...result };
   }
 
   public async addItem(value: IAuthorDTO): Promise<number> {

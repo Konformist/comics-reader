@@ -10,7 +10,8 @@
     "build-only": "vite build",
     "type-check": "vue-tsc --build --force",
     "lint": "eslint . --fix",
-    "cap:sync": "npm run build && npx cap sync"
+    "cap:sync": "npm run build && npx cap sync",
+    "cap:assets": "npx capacitor-assets generate --android --splashBackgroundColor=#122212"
   },
   "dependencies": {
     "@capacitor-community/keep-awake": "^7.0.0",

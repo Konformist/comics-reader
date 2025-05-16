@@ -2,8 +2,8 @@
   <v-main scrollable>
     <v-container class="pa-0">
       <FilesTree
-        v-if="files.length"
-        :tree="files"
+        v-if="treeFiles.length"
+        :tree="treeFiles"
       />
     </v-container>
   </v-main>
@@ -21,12 +21,12 @@ definePage({
   },
 });
 
-const files = ref<ITreeDirectory[]>([]);
+const treeFiles = ref<ITreeDirectory[]>([]);
 
-const loadComics = async () => {
-  files.value.push(...await server.getTree(COMICS_FILES_DIRECTORY));
-  files.value.push(...await server.getTree(BACKUPS_DIRECTORY));
+const loadTreeFiles = async () => {
+  treeFiles.value.push(...await server.getTree(COMICS_FILES_DIRECTORY));
+  treeFiles.value.push(...await server.getTree(BACKUPS_DIRECTORY));
 };
 
-loadComics();
+loadTreeFiles();
 </script>

@@ -90,7 +90,7 @@ class ComicsServer extends ServerAbstract<IComicDTO> {
       ? comic.image.fileId
       : await FilesServer.addItem({
         id: 0,
-        name: `cover.webp`,
+        name: 'cover.webp',
         mime: 'image/webp',
         size: 0,
         mdate: 0,
@@ -193,7 +193,7 @@ class ComicsServer extends ServerAbstract<IComicDTO> {
       const fileStat = await FilesServer.getFileStat(pathFile);
       await FilesServer.setItem({
         id: fileId,
-        name: `${fileId}.webp`,
+        name: `${image.id}.webp`,
         mime: 'image/webp',
         size: fileStat.size,
         cdate: fileStat.cdate,

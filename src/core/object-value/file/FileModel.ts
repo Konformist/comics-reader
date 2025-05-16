@@ -1,7 +1,6 @@
 import type { IFileDTO } from '@/core/object-value/file/FileTypes.ts';
 import ObjectValue from '@/core/object-value/ObjectValue.ts';
 import { Capacitor } from '@capacitor/core';
-import { Filesystem } from '@capacitor/filesystem';
 
 export default class FileModel extends ObjectValue<IFileDTO> {
   public id: number = 0;

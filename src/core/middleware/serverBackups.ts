@@ -18,7 +18,7 @@ const getBackupFileName = () => {
 };
 
 const setBackup = (data: string, name: string) => {
-  return serverFiles.addFile(`${BACKUPS_DIRECTORY}/${name}`, data, 'string');
+  return FilesServer.setFile(`${BACKUPS_DIRECTORY}/${name}`, data, 'string');
 };
 
 const addBackup = async (): Promise<void> => {

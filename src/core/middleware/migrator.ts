@@ -47,6 +47,7 @@ const migrate = async () => {
   await ComicsServer.getDatabase();
 
   for (const comic of ComicsServer.dataRaw) {
+    const isCoverFile = !!comic.image;
     comic.image = {
       id: 0,
       fileId: 0,
@@ -54,7 +55,7 @@ const migrate = async () => {
       url: comic.imageUrl,
     };
 
-    if (comic.image) {
+    if (isCoverFile) {
       const coverPath = `${COMICS_FILES_DIRECTORY}/${comic.id}/cover.webp`;
       const coverStat = await FilesServer.getFileStat(coverPath);
       const newCover: IFileDTO = {
@@ -73,6 +74,7 @@ const migrate = async () => {
     const newImages: IComicImageUrl[] = [];
 
     for (const image of comic.images) {
+      const isImageFile = !!image.url;
       const newImage = {
         id: image.id,
         // @ts-expect-error fuck
@@ -82,7 +84,7 @@ const migrate = async () => {
 
       newImages.push(newImage);
 
-      if (!image.url) continue;
+      if (!isImageFile) continue;
 
       const imagePath = `${COMICS_FILES_DIRECTORY}/${comic.id}/${image.id}.webp`;
       const imageStat = await FilesServer.getFileStat(imagePath);

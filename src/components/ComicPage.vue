@@ -54,7 +54,7 @@ const image = ref(new FileModel());
 
 const loadImage = async () => {
   if (item.fileId) {
-    image.value = await ComicController.loadFile(comicId, item.fileId);
+    image.value = await ComicController.loadFile(comicId, item.id);
   } else if (item.url) {
     emit('download');
   }

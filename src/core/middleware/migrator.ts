@@ -56,17 +56,14 @@ const migrate = async () => {
 
     if (comic.image) {
       const coverPath = `${COMICS_FILES_DIRECTORY}/${comic.id}/cover.webp`;
-      // const coverStat = await FilesServer.getFileStat(coverPath);
+      const coverStat = await FilesServer.getFileStat(coverPath);
       const newCover: IFileDTO = {
         id: FilesServer.getNewId(),
         name: 'cover.webp',
         mime: 'image/webp',
-        // size: coverStat.size,
-        // cdate: coverStat.cdate,
-        // mdate: coverStat.mdate,
-        size: 0,
-        cdate: 0,
-        mdate: 0,
+        size: coverStat.size,
+        cdate: coverStat.cdate,
+        mdate: coverStat.mdate,
         path: coverPath,
       };
       FilesServer.dataRaw.push(newCover);
@@ -88,17 +85,14 @@ const migrate = async () => {
       if (!image.url) continue;
 
       const imagePath = `${COMICS_FILES_DIRECTORY}/${comic.id}/${image.id}.webp`;
-      // const imageStat = await FilesServer.getFileStat(imagePath);
+      const imageStat = await FilesServer.getFileStat(imagePath);
       const newImageFile: IFileDTO = {
         id: FilesServer.getNewId(),
         name: `${image.id}.webp`,
         mime: 'image/webp',
-        // size: imageStat.size,
-        // cdate: imageStat.cdate,
-        // mdate: imageStat.mdate,
-        size: 0,
-        cdate: 0,
-        mdate: 0,
+        size: imageStat.size,
+        cdate: imageStat.cdate,
+        mdate: imageStat.mdate,
         path: imagePath,
       };
       FilesServer.dataRaw.push(newImageFile);

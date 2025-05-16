@@ -58,7 +58,7 @@ const migrate = async () => {
     if (isCoverFile) {
       const coverPath = `${COMICS_FILES_DIRECTORY}/${comic.id}/cover.webp`;
       const coverStat = await FilesServer.getFileStat(coverPath);
-      const newCover: IFileDTO = {
+      const newCoverFile: IFileDTO = {
         id: FilesServer.getNewId(),
         name: 'cover.webp',
         mime: 'image/webp',
@@ -67,8 +67,8 @@ const migrate = async () => {
         mdate: coverStat.mdate,
         path: coverPath,
       };
-      FilesServer.dataRaw.push(newCover);
-      comic.image.fileId = newCover.id;
+      FilesServer.dataRaw.push(newCoverFile);
+      newCover.fileId = newCoverFile.id;
     }
 
     comic.image = newCover;

@@ -2,7 +2,7 @@
   "name": "comics-reader",
   "private": true,
   "type": "module",
-  "version": "1.2.6",
+  "version": "1.2.7",
   "scripts": {
     "dev": "vite",
     "build": "run-p type-check \"build-only {@}\" --",

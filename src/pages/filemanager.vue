@@ -2,7 +2,7 @@
   <v-main scrollable>
     <v-container class="pa-0">
       <FilesTree
-        :loading="loading || true"
+        :loading="loading"
         :tree="treeFiles"
       />
     </v-container>

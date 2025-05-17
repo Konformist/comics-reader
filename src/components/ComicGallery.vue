@@ -33,6 +33,7 @@
 </template>
 
 <script lang="ts" setup>
+import useLoading from '@/composables/useLoading.ts';
 import ComicController from '@/core/entities/comic/ComicController.ts';
 import type ComicModel from '@/core/entities/comic/ComicModel.ts';
 import FileModel from '@/core/object-value/file/FileModel.ts';
@@ -41,12 +42,17 @@ const { comic } = defineProps<{
   comic: ComicModel
 }>();
 
+const {
+  loading,
+  loadingStart,
+  loadingEnd,
+} = useLoading();
+
 const cover = ref(new FileModel());
-const loading = ref(false);
 const loadCover = async () => {
-  loading.value = true;
+  loadingStart();
   cover.value = await ComicController.loadCover(comic.id);
-  loading.value = false;
+  loadingEnd();
 };
 
 loadCover();

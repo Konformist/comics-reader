@@ -110,6 +110,7 @@
             <v-col
               v-for="(image, index) in comic.images"
               :key="image.id"
+              class="pa-2"
               cols="6"
             >
               <v-card

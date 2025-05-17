@@ -1,19 +1,28 @@
 <template>
   <v-main scrollable>
     <v-container class="pa-0">
-      <v-toolbar density="comfortable">
+      <v-toolbar
+        class="px-2 pt-2"
+        density="comfortable"
+      >
         <v-select
           v-model="sortValue"
           :chips="false"
           class="mt-3"
+          :disabled="!authors.length"
           item-title="name"
           item-value="id"
           :items="sortItems"
           label="Сортировать"
         />
       </v-toolbar>
+      <v-list v-if="loading">
+        <v-skeleton-loader
+          type="list-item"
+        />
+      </v-list>
       <v-list
-        v-if="authors.length"
+        v-else-if="authors.length"
         activatable
       >
         <v-list-item
@@ -67,6 +76,7 @@
       </v-card>
     </v-dialog>
     <v-fab
+      :disabled="loading"
       icon="$plus"
       @click="clickAuthor(0)"
     />
@@ -74,6 +84,7 @@
 </template>
 
 <script setup lang="ts">
+import useLoading from '@/composables/useLoading.ts';
 import { sortString } from '@/core/utils/array.ts';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
@@ -87,6 +98,8 @@ definePage({
     title: 'Авторы',
   },
 });
+
+const { loading,loadingStart,loadingEnd } = useLoading();
 
 const sortValue = ref(0);
 const sortItems = [
@@ -149,11 +162,9 @@ const sortedAuthors = computed(() => (
   })
 ));
 
-const loading = ref(false);
-
 const saveAuthor = async () => {
   try {
-    loading.value = true;
+    loadingStart();
     await AuthorController.save(selectedAuthor.value);
     await loadAuthors();
     dialog.value = false;
@@ -161,7 +172,7 @@ const saveAuthor = async () => {
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {
-    loading.value = false;
+    loadingEnd();
   }
 };
 
@@ -174,14 +185,14 @@ const deleteAuthor = async (id: number) => {
   if (!value) return;
 
   try {
-    loading.value = true;
+    loadingStart();
     await AuthorController.delete(id);
     await loadAuthors();
     Toast.show({ text: 'Автор удалён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {
-    loading.value = false;
+    loadingEnd();
   }
 };
 </script>

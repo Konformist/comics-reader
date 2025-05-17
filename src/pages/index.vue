@@ -16,7 +16,22 @@
       />
     </v-toolbar>
     <v-container>
+      <v-row v-if="loading">
+        <v-col class="pa-2">
+          <v-skeleton-loader
+            height="250"
+            type="card"
+          />
+        </v-col>
+        <v-col class="pa-2">
+          <v-skeleton-loader
+            height="250"
+            type="card"
+          />
+        </v-col>
+      </v-row>
       <v-data-iterator
+        v-else
         v-model:page="comicsStore.filters.page"
         :items="comicsFiltered"
         items-per-page="20"
@@ -100,6 +115,7 @@
 
 <script lang="ts" setup>
 import ComicGallery from '@/components/ComicGallery.vue';
+import useLoading from '@/composables/useLoading.ts';
 import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import AuthorController from '@/core/object-value/author/AuthorController.ts';
@@ -119,6 +135,7 @@ definePage({
 
 const router = useRouter();
 const comicsStore = useComicsStore();
+const { loading,loadingStart,loadingEnd } = useLoading();
 
 const filtersSheet = ref(false);
 
@@ -127,21 +144,15 @@ const loadLanguages = async () => {
   languages.value = await LanguageController.loadAll();
 };
 
-loadLanguages();
-
 const authors = ref<AuthorObject[]>([]);
 const loadAuthors = async () => {
   authors.value = await AuthorController.loadAll();
 };
 
-loadAuthors();
-
 const tags = ref<TagObject[]>([]);
 const loadTags = async () => {
   tags.value = await TagController.loadAll();
 };
-
-loadTags();
 
 const comics = ref<ComicModel[]>([]);
 
@@ -167,8 +178,6 @@ const loadComics = async () => {
   comics.value = await ComicController.loadAll();
 };
 
-loadComics();
-
 const createComic = async () => {
   const comicId = await ComicController.save(new ComicModel());
 
@@ -180,4 +189,17 @@ const createComic = async () => {
     });
   }
 };
+
+const init = async () => {
+  loadingStart();
+  await Promise.all([
+    loadLanguages(),
+    loadAuthors(),
+    loadTags(),
+    loadComics(),
+  ]);
+  loadingEnd();
+};
+
+init();
 </script>

@@ -1,18 +1,30 @@
 <template>
   <v-main scrollable>
     <v-container class="pa-0">
-      <v-toolbar density="comfortable">
+      <v-toolbar
+        class="px-2 pt-2"
+        density="comfortable"
+      >
         <v-select
           v-model="sortValue"
           :chips="false"
           class="mt-3"
+          :disabled="!tags.length"
           item-title="name"
           item-value="id"
           :items="sortItems"
           label="Сортировать"
         />
       </v-toolbar>
-      <v-list activatable>
+      <v-list v-if="loading">
+        <v-skeleton-loader
+          type="list-item"
+        />
+      </v-list>
+      <v-list
+        v-else-if="tags.length"
+        activatable
+      >
         <v-list-item
           v-for="item in sortedTags"
           :key="item.id"
@@ -64,6 +76,7 @@
       </v-card>
     </v-dialog>
     <v-fab
+      :disabled="loading"
       icon="$plus"
       @click="clickTag(0)"
     />
@@ -71,6 +84,7 @@
 </template>
 
 <script setup lang="ts">
+import useLoading from '@/composables/useLoading.ts';
 import { sortString } from '@/core/utils/array.ts';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
@@ -84,6 +98,8 @@ definePage({
     title: 'Теги',
   },
 });
+
+const { loading, loadingStart, loadingEnd } = useLoading();
 
 const sortValue = ref(0);
 const sortItems = [
@@ -146,11 +162,9 @@ const sortedTags = computed(() => (
   })
 ));
 
-const loading = ref(false);
-
 const saveTag = async () => {
   try {
-    loading.value = true;
+    loadingStart();
     await TagController.save(selectedTag.value);
     await loadTags();
     dialog.value = false;
@@ -158,7 +172,7 @@ const saveTag = async () => {
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {
-    loading.value = false;
+    loadingEnd();
   }
 };
 
@@ -171,14 +185,14 @@ const deleteTag = async (id: number) => {
   if (!value) return;
 
   try {
-    loading.value = true;
+    loadingStart();
     await TagController.delete(id);
     await loadTags();
     Toast.show({ text: 'Тег удалён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {
-    loading.value = false;
+    loadingEnd();
   }
 };
 </script>

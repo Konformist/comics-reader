@@ -175,6 +175,7 @@
 </template>
 
 <script lang="ts" setup>
+import useLoading from '@/composables/useLoading.ts';
 import { Toast } from '@capacitor/toast';
 import FileModel from '@/core/object-value/file/FileModel.ts';
 import ComicController from '@/core/entities/comic/ComicController.ts';
@@ -196,6 +197,7 @@ definePage({
 });
 
 const route = useRoute('/comics/[id]/edit');
+const { loading, loadingStart,loadingEnd } = useLoading();
 
 const languages = ref<LanguageObject[]>([]);
 const loadLanguages = async () => {
@@ -308,13 +310,11 @@ const saveComic = async () => {
   await ComicController.save(comic.value);
 };
 
-const loading = ref(false);
-
 const onLoadInfo = async () => {
   if (!comic.value || !parser.value) return;
 
   try {
-    loading.value = true;
+    loadingStart();
     const result = await ParserController.loadComic(comic.value.url);
     const parsedComic = parser.value.parse(result, comic.value.override);
 
@@ -378,7 +378,7 @@ const onLoadInfo = async () => {
   } catch (e) {
     Toast.show({ text: `Комикс не сохранён. Ошибка: ${e}` });
   } finally {
-    loading.value = false;
+    loadingEnd();
   }
 };
 
@@ -388,7 +388,7 @@ const uploadCover = async () => {
   if (!image.value) return;
 
   try {
-    loading.value = true;
+    loadingStart();
     await saveComic();
     await ComicController.saveCover(comic.value.id, image.value);
     await loadComic();
@@ -397,7 +397,7 @@ const uploadCover = async () => {
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {
-    loading.value = false;
+    loadingEnd();
   }
 };
 

@@ -37,7 +37,7 @@
             :key="item.raw.id"
             :comic-id="comic.id"
             :item="item.raw"
-            :loading="loading"
+            :loading-parent="loading"
             @download="onLoadImage(item.raw)"
             @loaded="startTimer(nextPage)"
             @next="nextPage()"

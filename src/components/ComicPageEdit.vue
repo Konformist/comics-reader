@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card :loading="loading || loadingParent">
     <v-img
       v-if="image.url"
       class="mb-4"
@@ -9,6 +9,7 @@
       <v-file-input
         v-model="imageFile"
         accept="image/*"
+        :disabled="loadingParent"
         hide-details
         label="Загрузить картинку"
         variant="solo-filled"
@@ -21,6 +22,7 @@
         auto-grow
         :autocapitalize="false"
         :autocomplete="false"
+        :disabled="loadingParent"
         inputmode="url"
         label="Ссылка на картинку"
         rows="2"
@@ -29,15 +31,14 @@
     </v-card-item>
     <v-card-actions>
       <v-btn
-        :disabled="!imageFile && !from"
-        :loading="loading"
+        :disabled="(!imageFile && !from) || loadingParent"
         text="Загрузить"
         @click="onLoad()"
       />
       <v-btn
         class="ml-auto"
         color="error"
-        :loading="loading"
+        :disabled="loadingParent"
         text="Удалить"
         @click="$emit('delete')"
       />
@@ -46,6 +47,7 @@
 </template>
 
 <script setup lang="ts">
+import useLoading from '@/composables/useLoading.ts';
 import ComicController from '@/core/entities/comic/ComicController.ts';
 import type { IComicImageUrl } from '@/core/entities/comic/ComicTypes.ts';
 import FileModel from '@/core/object-value/file/FileModel.ts';
@@ -61,14 +63,22 @@ const emit = defineEmits<{
 const { item, comicId } = defineProps<{
   comicId: number
   item: IComicImageUrl
-  loading: boolean
+  loadingParent: boolean
 }>();
+
+const {
+  loading,
+  loadingStart,
+  loadingEnd,
+} = useLoading();
 
 const image = ref(new FileModel());
 
 const loadImage = async () => {
   if (item.fileId) {
+    loadingStart();
     image.value = await ComicController.loadFile(comicId, item.id);
+    loadingEnd();
   }
 };
 

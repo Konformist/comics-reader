@@ -405,7 +405,7 @@ const loadByLink = async () => {
   if (!comic.value.image.url) return;
 
   try {
-    loading.value = true;
+    loadingStart();
     const result = await ParserController.loadImageRaw(comic.value.image.url);
     await saveComic();
     await ComicController.saveCover(comic.value.id, result);
@@ -415,7 +415,7 @@ const loadByLink = async () => {
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {
-    loading.value = false;
+    loadingEnd();
   }
 };
 

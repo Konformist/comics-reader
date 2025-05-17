@@ -1,102 +1,122 @@
 <template>
   <v-main scrollable>
-    <v-container>
-      <v-number-input
-        v-model.number="pages"
-        control-variant="hidden"
-        label="Количество страниц"
-        :min="minPages"
-        @change="setPages()"
-      />
-      <v-btn
-        class="w-100"
-        color="error"
-        :disabled="!comic.images.length"
-        :loading="loading"
-        text="Удалить все картинки"
-        @click="delPages()"
-      />
-      <v-divider class="my-8" />
-      <v-textarea
-        v-model.trim="imagesTemplate"
-        auto-grow
-        :autocapitalize="false"
-        :autocomplete="false"
-        clearable
-        hint="Пример: https://domain.com/12/23/<ID>.jpeg"
-        inputmode="url"
-        label="Шаблон для автозаполнения"
-        persistent-hint
-        rows="2"
-      />
-      <v-number-input
-        v-model.number="imagesTemplateStart"
-        class="mt-4"
-        control-variant="split"
-        label="Начальный ID"
-        :min="0"
-        type="number"
-      />
-      <v-btn
-        class="w-100"
-        :disabled="!imagesTemplate"
-        :loading="loading"
-        text="Заполнить ссылки"
-        @click="setTemplate()"
-      />
-      <v-btn
-        class="mt-4 w-100"
-        :disabled="!canLoadImages"
-        :loading="loading"
-        text="Загрузить картинки"
-        @click="onLoadImages()"
-      />
-      <v-divider class="my-8" />
-      <v-data-iterator
-        v-model:page="currentPage"
-        :items="comic.images"
-        items-per-page="20"
-      >
-        <template #header="{ pageCount, prevPage, nextPage }">
-          <v-pagination
-            v-model="currentPage"
-            class="mb-4"
-            density="comfortable"
-            :length="pageCount"
-            @next="nextPage()"
-            @prev="prevPage()"
-          />
-        </template>
-        <template #default="{ items }">
-          <v-row>
-            <v-col
-              v-for="item in items"
-              :key="item.raw.id"
-              cols="12"
-            >
-              <ComicPageEdit
-                v-model:from="item.raw.url"
-                :comic-id="comic.id"
-                :item="item.raw"
-                :loading-parent="loading"
-                @delete="delPage(item.raw)"
-                @download="onLoadImage(item.raw)"
-                @upload="uploadImage(item.raw, $event)"
-              />
-            </v-col>
-          </v-row>
-        </template>
-        <template #footer="{ pageCount, prevPage, nextPage }">
-          <v-pagination
-            v-model="currentPage"
-            class="mt-4"
-            density="comfortable"
-            :length="pageCount"
-            @next="nextPage()"
-            @prev="prevPage()"
-          />
-        </template>
-      </v-data-iterator>
+    <v-progress-linear
+      v-if="loading"
+      indeterminate
+    />
+    <v-container class="pa-0">
+      <div class="px-4 py-8">
+        <v-number-input
+          v-model.number="pages"
+          control-variant="hidden"
+          label="Количество страниц"
+          :min="minPages"
+          @change="setPages()"
+        />
+        <v-btn
+          class="w-100"
+          color="error"
+          :disabled="!comic.images.length"
+          :loading="loading"
+          text="Удалить все картинки"
+          @click="delPages()"
+        />
+      </div>
+      <v-divider />
+      <div class="px-4 py-8">
+        <v-textarea
+          v-model.trim="imagesTemplate"
+          auto-grow
+          :autocapitalize="false"
+          :autocomplete="false"
+          clearable
+          hint="Пример: https://domain.com/12/23/<ID>.jpeg"
+          inputmode="url"
+          label="Шаблон для автозаполнения"
+          persistent-hint
+          rows="2"
+        />
+        <v-number-input
+          v-model.number="imagesTemplateStart"
+          class="mt-4"
+          control-variant="split"
+          label="Начальный ID"
+          :min="0"
+          type="number"
+        />
+        <v-btn
+          class="w-100"
+          :disabled="!imagesTemplate"
+          :loading="loading"
+          text="Заполнить ссылки"
+          @click="setTemplate()"
+        />
+      </div>
+      <v-divider />
+      <div class="px-4 py-8">
+        <v-btn
+          class="w-100"
+          :disabled="!canLoadImages"
+          :loading="loading"
+          text="Загрузить только пустые"
+          @click="onLoadImages()"
+        />
+        <v-btn
+          class="mt-4 w-100"
+          :disabled="!canLoadImages"
+          :loading="loading"
+          text="Загрузить все"
+          @click="onLoadImages(true)"
+        />
+      </div>
+      <v-divider />
+      <div class="pa-4">
+        <v-data-iterator
+          v-model:page="currentPage"
+          :items="comic.images"
+          items-per-page="20"
+        >
+          <template #header="{ pageCount, prevPage, nextPage }">
+            <v-pagination
+              v-model="currentPage"
+              class="mb-4"
+              density="comfortable"
+              :length="pageCount"
+              @next="nextPage()"
+              @prev="prevPage()"
+            />
+          </template>
+          <template #default="{ items }">
+            <v-row>
+              <v-col
+                v-for="item in items"
+                :key="item.raw.id"
+                cols="12"
+              >
+                <ComicPageEdit
+                  v-model:from="item.raw.url"
+                  :comic-id="comic.id"
+                  :item="item.raw"
+                  :loading-parent="loading"
+                  @delete="delPage(item.raw)"
+                  @download="onLoadImage(item.raw)"
+                  @upload="uploadImage(item.raw, $event)"
+                />
+              </v-col>
+            </v-row>
+          </template>
+          <template #footer="{ pageCount, prevPage, nextPage }">
+            <v-pagination
+              v-model="currentPage"
+              class="mt-4"
+              density="comfortable"
+              :length="pageCount"
+              @next="nextPage()"
+              @prev="prevPage()"
+            />
+          </template>
+        </v-data-iterator>
+      </div>
     </v-container>
     <v-fab
       :disabled="loading"
@@ -123,6 +143,7 @@ definePage({
 });
 
 const route = useRoute('/comics/[id]/edit-pages');
+const router = useRouter();
 const { loading, loadingStart,loadingEnd } = useLoading();
 
 const currentPage = ref(1);
@@ -134,9 +155,9 @@ const comicId = +(route.params.id || 0);
 const comic = ref(new ComicModel());
 
 const loadComic = async () => {
-  if (!comicId) return;
   comic.value = await ComicController.load(comicId);
-  pages.value = comic.value.images.length;
+  if (!comic.value.id) router.replace({ name: '/' });
+  else pages.value = comic.value.images.length;
 };
 
 loadComic();
@@ -219,13 +240,13 @@ const canLoadImages = computed(() => (
   comic.value.images.some((e) => e.url)
 ));
 
-const onLoadImages = async () => {
+const onLoadImages = async (force: boolean = false) => {
   loadingStart();
   await saveComic();
 
   try {
     for (const item of comic.value.images) {
-      if (item.url && !item.fileId) {
+      if (item.url && (!item.fileId || force)) {
         const result = await ParserController.loadImageRaw(item.url);
         await ComicController.saveFile(comic.value.id, item, result);
       }

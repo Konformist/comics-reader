@@ -1,170 +1,141 @@
 <template>
   <v-main scrollable>
-    <v-container v-if="comic">
-      <v-select
-        v-if="parsers.length"
-        v-model="comic.parser"
-        item-title="name"
-        item-value="id"
-        :items="parsers"
-        label="Парсер"
-        @update:model-value="loadParser()"
-      />
-      <v-textarea
-        v-model.trim="comic.url"
-        auto-grow
-        :autocapitalize="false"
-        :autocomplete="false"
-        inputmode="url"
-        label="Ссылка на комикс"
-        rows="2"
-        @change="updateParser()"
-      />
-      <v-textarea
-        v-model.trim="comic.name"
-        auto-grow
-        label="Название"
-        rows="2"
-      />
-      <v-select
-        v-model="comic.language"
-        item-title="name"
-        item-value="id"
-        :items="languages"
-        label="Язык"
-      />
-      <v-select
-        v-model="comic.authors"
-        chips
-        item-title="name"
-        item-value="id"
-        :items="authors"
-        label="Авторы"
-        multiple
-      />
-      <v-select
-        v-model="comic.tags"
-        chips
-        item-title="name"
-        item-value="id"
-        :items="tags"
-        label="Теги"
-        multiple
-      />
-      <v-expansion-panels>
-        <v-expansion-panel static title="Расширенные настройки">
-          <v-expansion-panel-text>
-            <v-textarea
-              v-model.trim="keyTitle"
-              auto-grow
-              :autocapitalize="false"
-              :autocomplete="false"
-              class="mt-4"
-              :disabled="!comic.parser"
-              inputmode="url"
-              label="CSS указатель на название"
-              rows="2"
-              variant="solo-filled"
-            />
-            <v-textarea
-              v-model.trim="keyLanguage"
-              auto-grow
-              :autocapitalize="false"
-              :autocomplete="false"
-              :disabled="!comic.parser"
-              inputmode="url"
-              label="CSS указатель на язык"
-              rows="2"
-              variant="solo-filled"
-            />
-            <v-textarea
-              v-model.trim="keyAuthors"
-              auto-grow
-              :autocapitalize="false"
-              :autocomplete="false"
-              :disabled="!comic.parser"
-              inputmode="url"
-              label="CSS указатель на авторов"
-              rows="2"
-              variant="solo-filled"
-            />
-            <v-textarea
-              v-model.trim="keyAuthorsText"
-              auto-grow
-              :autocapitalize="false"
-              :autocomplete="false"
-              :disabled="!comic.parser"
-              inputmode="url"
-              label="CSS указатель на текст авторов"
-              rows="2"
-              variant="solo-filled"
-            />
-            <v-textarea
-              v-model.trim="keyTags"
-              auto-grow
-              :autocapitalize="false"
-              :autocomplete="false"
-              class="mb-4"
-              :disabled="!comic.parser"
-              inputmode="url"
-              label="CSS указатель на теги"
-              rows="2"
-              variant="solo-filled"
-            />
-            <v-textarea
-              v-model.trim="keyAuthorsText"
-              auto-grow
-              :autocapitalize="false"
-              :autocomplete="false"
-              :disabled="!comic.parser"
-              hide-details
-              inputmode="url"
-              label="CSS указатель на текст тегов"
-              rows="2"
-              variant="solo-filled"
-            />
-          </v-expansion-panel-text>
-        </v-expansion-panel>
-      </v-expansion-panels>
-      <v-btn
-        class="mt-4 w-100"
-        :disabled="!comic.parser || !comic.url"
-        :loading="loading"
-        text="Загрузить"
-        @click="onLoadInfo()"
-      />
-      <v-divider class="mt-8 mb-4" />
-      <v-img
-        v-if="cover.url"
-        rounded
-        :src="cover.url"
-      />
-      <v-file-input
-        v-model="image"
-        accept="image/*"
-        class="mt-4"
-        hide-details
-        label="Загрузить картинку"
-      />
-      <p class="my-2">
-        Или
-      </p>
-      <v-textarea
-        v-model.trim="comic.image.url"
-        auto-grow
-        :autocapitalize="false"
-        :autocomplete="false"
-        inputmode="url"
-        label="Ссылка на картинку"
-        rows="2"
-      />
-      <v-btn
-        class="w-100"
-        :disabled="!image && !comic.image.url"
-        :loading="loading"
-        text="Загрузить"
-        @click="onLoadCover()"
-      />
+    <v-progress-linear
+      v-if="loading"
+      indeterminate
+    />
+    <v-container class="pa-0">
+      <div class="px-4 py-8">
+        <v-select
+          v-if="parsers.length"
+          v-model="comic.parser"
+          item-title="name"
+          item-value="id"
+          :items="parsers"
+          label="Парсер"
+          @update:model-value="loadParser()"
+        />
+        <v-textarea
+          v-model.trim="comic.url"
+          auto-grow
+          :autocapitalize="false"
+          :autocomplete="false"
+          inputmode="url"
+          label="Ссылка на комикс"
+          rows="2"
+          @change="updateParser()"
+        />
+        <v-textarea
+          v-model.trim="comic.name"
+          auto-grow
+          label="Название"
+          rows="2"
+        />
+        <v-select
+          v-model="comic.language"
+          item-title="name"
+          item-value="id"
+          :items="languages"
+          label="Язык"
+        />
+        <v-select
+          v-model="comic.authors"
+          chips
+          item-title="name"
+          item-value="id"
+          :items="authors"
+          label="Авторы"
+          multiple
+        />
+        <v-select
+          v-model="comic.tags"
+          chips
+          item-title="name"
+          item-value="id"
+          :items="tags"
+          label="Теги"
+          multiple
+        />
+        <v-btn
+          class="mt-4 w-100"
+          :disabled="!comic.parser || !comic.url || loading"
+          text="Загрузить"
+          @click="onLoadInfo()"
+        />
+      </div>
+      <v-divider />
+      <div class="px-4 py-8">
+        <template v-if="cover.url">
+          <v-card
+            class="mb-4"
+            :image="cover.url"
+            :loading="loading"
+            min-height="200"
+            rounded
+          />
+          <p class="mb-8 text-body-1">
+            Размер: {{ formatBytes(cover.size) }}
+          </p>
+        </template>
+        <v-file-input
+          v-model="image"
+          accept="image/*"
+          hide-details
+          label="Загрузить картинку"
+        />
+        <p class="my-2">
+          Или
+        </p>
+        <v-textarea
+          v-model.trim="comic.image.url"
+          auto-grow
+          :autocapitalize="false"
+          :autocomplete="false"
+          inputmode="url"
+          label="Ссылка на картинку"
+          rows="2"
+        />
+        <v-btn
+          class="w-100"
+          :disabled="(!image && !comic.image.url) || loading"
+          text="Загрузить"
+          @click="onLoadCover()"
+        />
+      </div>
+      <v-divider />
+      <div class="px-4 py-8">
+        <v-btn
+          v-if="comic.parser"
+          class="mb-4 w-100"
+          :disabled="loading"
+          text="Расширенные настройки"
+          :to="{
+            name: '/comics/[id]/edit-external',
+            params: { id: comic.id },
+          }"
+          @click="onSave()"
+        />
+        <v-btn
+          class="w-100"
+          :disabled="loading"
+          text="Редактировать страницы"
+          :to="{
+            name: '/comics/[id]/edit-pages',
+            params: { id: comic.id },
+          }"
+          @click="onSave()"
+        />
+      </div>
+      <v-divider />
+      <div class="px-4 py-8">
+        <v-btn
+          class="w-100"
+          color="error"
+          :disabled="loading"
+          text="Удалить"
+          @click="deleteComic()"
+        />
+      </div>
     </v-container>
     <v-fab
       icon="$save"
@@ -176,6 +147,8 @@
 
 <script lang="ts" setup>
 import useLoading from '@/composables/useLoading.ts';
+import { formatBytes } from '@/core/utils/format.ts';
+import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
 import FileModel from '@/core/object-value/file/FileModel.ts';
 import ComicController from '@/core/entities/comic/ComicController.ts';
@@ -197,6 +170,7 @@ definePage({
 });
 
 const route = useRoute('/comics/[id]/edit');
+const router = useRouter();
 const { loading, loadingStart,loadingEnd } = useLoading();
 
 const languages = ref<LanguageObject[]>([]);
@@ -223,8 +197,8 @@ const loadCover = async () => {
 
 const comic = ref(new ComicModel());
 const loadComic = async () => {
-  if (!comicId) return;
   comic.value = await ComicController.load(comicId);
+  if (!comic.value.id) router.replace({ name: '/' });
 };
 
 const parsers = ref<ParserModel[]>([]);
@@ -259,51 +233,6 @@ onMounted(async () => {
     loadComic(),
   ]);
   await loadParser();
-});
-
-const keyTitle = computed({
-  get() {
-    return comic.value.override.title || parser.value.language;
-  },
-  set(value) {
-    comic.value.override.language = value;
-  },
-});
-
-const keyLanguage = computed({
-  get() {
-    return comic.value.override.language || parser.value.language;
-  },
-  set(value) {
-    comic.value.override.language = value;
-  },
-});
-
-const keyAuthors = computed({
-  get() {
-    return comic.value.override.authors || parser.value.authors;
-  },
-  set(value) {
-    comic.value.override.authors = value;
-  },
-});
-
-const keyAuthorsText = computed({
-  get() {
-    return comic.value.override.authorsText || parser.value.authorsText;
-  },
-  set(value) {
-    comic.value.override.authorsText = value;
-  },
-});
-
-const keyTags = computed({
-  get() {
-    return comic.value.override.tags || parser.value.tags;
-  },
-  set(value) {
-    comic.value.override.tags = value;
-  },
 });
 
 const saveComic = async () => {
@@ -427,5 +356,26 @@ const onLoadCover = () => {
 const onSave = async () => {
   await saveComic();
   Toast.show({ text: 'Комикс сохранён' });
+};
+
+const deleteComic = async () => {
+  const { value } = await Dialog.confirm({
+    title: 'Подтверждение удаления',
+    message: 'Удалить комикс?',
+  });
+
+  if (!value) return;
+
+  try {
+    loadingStart();
+    await ComicController.delete(comic.value.id);
+    Toast.show({ text: 'Комикс удалён' });
+    router.replace({ name: '/' });
+  } catch (e) {
+    alert(e);
+    Toast.show({ text: `Ошибка: ${e}` });
+  } finally {
+    loadingEnd();
+  }
 };
 </script>

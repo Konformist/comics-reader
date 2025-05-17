@@ -52,6 +52,11 @@
         title="Настройки"
         :to="{ name: '/settings' }"
       />
+      <v-list-item
+        prepend-icon="$info"
+        title="О приложении"
+        :to="{ name: '/about' }"
+      />
     </v-list>
   </v-navigation-drawer>
   <router-view v-slot="{ Component, route }">

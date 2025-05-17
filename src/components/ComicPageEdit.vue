@@ -1,10 +1,13 @@
 <template>
   <v-card :loading="loading || loadingParent">
-    <v-img
-      v-if="image.url"
-      class="mb-4"
-      :src="image.url"
-    />
+    <template v-if="image.url">
+      <v-img
+        :src="image.url"
+      />
+      <v-card-text class="text-body-1">
+        Размер: {{ formatBytes(image.size) }}
+      </v-card-text>
+    </template>
     <v-card-item class="pb-0">
       <v-file-input
         v-model="imageFile"
@@ -51,6 +54,7 @@ import useLoading from '@/composables/useLoading.ts';
 import ComicController from '@/core/entities/comic/ComicController.ts';
 import type { IComicImageUrl } from '@/core/entities/comic/ComicTypes.ts';
 import FileModel from '@/core/object-value/file/FileModel.ts';
+import { formatBytes } from '@/core/utils/format.ts';
 
 const from = defineModel('from', { default: '' });
 

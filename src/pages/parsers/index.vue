@@ -9,25 +9,19 @@
           v-for="item in parsers"
           :key="item.id"
           :title="item.name"
+          :to="{
+            name: '/parsers/[id]/',
+            params: { id: item.id }
+          }"
         >
           <template #append>
             <v-list-item-action end>
-              <v-btn
-                class="mr-4"
-                density="comfortable"
-                icon="$edit"
-                :to="{
-                  name: '/parsers/[id]/',
-                  params: { id: item.id }
-                }"
-                variant="tonal"
-              />
               <v-btn
                 color="error"
                 density="comfortable"
                 icon="$delete"
                 variant="tonal"
-                @click="deleteParser(item.id)"
+                @click.prevent="deleteParser(item.id)"
               />
             </v-list-item-action>
           </template>

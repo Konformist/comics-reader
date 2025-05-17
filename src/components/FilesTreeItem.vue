@@ -1,26 +1,28 @@
 <template>
   <v-list-item
     :active="model === item.path"
+    :prepend-icon="icon"
+    slim
+    :title="`${ item.name }${ item.type === 'directory' ? '/' : '' }`"
     @click="onClick()"
   >
-    <v-list-item-title>
-      {{ item.name }}{{ item.type === 'directory' ? '/' : '' }}
-    </v-list-item-title>
-    <template
-      v-if="item.type === 'file'"
-      #append
-    >
-      <v-list-item-subtitle>
+    <template #append>
+      <v-list-item-subtitle v-if="item.type === 'file'">
         {{ formatBytes(item.size) }}
+      </v-list-item-subtitle>
+      <v-list-item-subtitle v-else>
+        Элементов: {{ item.children.length }}
       </v-list-item-subtitle>
     </template>
   </v-list-item>
-  <FilesTree
-    v-if="item.type === 'directory' && opened"
-    v-model="model"
-    is-child
-    :tree="item.children"
-  />
+  <template v-if="item.type === 'directory' && opened">
+    <v-divider />
+    <FilesTree
+      v-model="model"
+      is-child
+      :tree="item.children"
+    />
+  </template>
 </template>
 
 <script lang="ts" setup>
@@ -39,6 +41,15 @@ const opened = ref(false);
 const toggleOpened = () => {
   opened.value = !opened.value;
 };
+
+const icon = computed(() => {
+  if (item.type === 'directory') {
+    return opened.value ? '$folder-open' : '$folder';
+  }
+
+  if (item.name.includes('.json')) return '$file-code';
+  else return '$file-image';
+});
 
 const onClick = () => {
   if (item.type === 'directory') toggleOpened();

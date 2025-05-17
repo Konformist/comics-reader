@@ -1,6 +1,6 @@
 <template>
   <v-list
-    :class="isChild ? 'pl-4' : ''"
+    :class="isChild ? 'pl-4 pa-0' : 'pa-0'"
     :rounded="rounded"
   >
     <v-skeleton-loader
@@ -12,11 +12,11 @@
         v-for="(item, index) in tree"
         :key="item.path"
       >
-        <v-divider v-if="index || isChild" />
         <FilesTreeItem
           v-model="model"
           :item="item"
         />
+        <v-divider v-if="index < tree.length - 1" />
       </template>
     </template>
   </v-list>

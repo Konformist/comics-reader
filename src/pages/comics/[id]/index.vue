@@ -1,5 +1,9 @@
 <template>
   <v-main scrollable>
+    <v-progress-linear
+      v-if="loading"
+      indeterminate
+    />
     <v-container class="pa-0">
       <router-link
         v-if="cover.url"
@@ -75,35 +79,18 @@
         </p>
       </div>
       <v-divider />
-      <div class="pa-4">
+      <div class="px-4 py-8">
         <v-btn
           class="w-100"
-          :disabled="!comic.images.length"
-          :loading="loading"
+          :disabled="!comic.images.length || loading"
           text="Читать"
           :to="{
             name: '/comics/[id]/read',
             params: { id: comic.id },
           }"
         />
-        <v-btn
-          class="mt-4 w-100"
-          :loading="loading"
-          text="Редактировать страницы"
-          :to="{
-            name: '/comics/[id]/edit-pages',
-            params: { id: comic.id },
-          }"
-        />
-        <v-btn
-          class="mt-4 w-100"
-          color="error"
-          :loading="loading"
-          text="Удалить"
-          @click="deleteComic()"
-        />
       </div>
-      <template v-if="comic.images.length">
+      <template v-if="comic.images.length && !loading">
         <v-divider />
         <div class="px-4 py-8">
           <v-row>
@@ -128,8 +115,8 @@
       </template>
     </v-container>
     <v-fab
+      :disabled="loading"
       icon="$edit"
-      :loading="loading"
       :to="{
         name: '/comics/[id]/edit',
         params: { id: comic.id },
@@ -139,8 +126,8 @@
 </template>
 
 <script lang="ts" setup>
+import useLoading from '@/composables/useLoading.ts';
 import { Clipboard } from '@capacitor/clipboard';
-import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
 import FileModel from '@/core/object-value/file/FileModel.ts';
 import ComicController from '@/core/entities/comic/ComicController.ts';
@@ -161,6 +148,7 @@ definePage({
 
 const route = useRoute('/comics/[id]/');
 const router = useRouter();
+const { loading, loadingStart,loadingEnd } = useLoading();
 
 const comicId = +route.params.id;
 
@@ -177,14 +165,9 @@ const loadImages = async () => {
 const comic = ref(new ComicModel());
 
 const loadComic = async () => {
-  if (!comicId) return;
-
   comic.value = await ComicController.load(comicId);
-  loadCover();
-  loadImages();
+  if (!comic.value.id) router.replace({ name: '/' });
 };
-
-loadComic();
 
 const languages = ref<LanguageObject[]>([]);
 const languagesChips = computed(() => (
@@ -195,8 +178,6 @@ const loadLanguages = async () => {
   languages.value = await LanguageController.loadAll();
 };
 
-loadLanguages();
-
 const authors = ref<AuthorObject[]>([]);
 const authorsChips = computed(() => (
   authors.value.filter((e) => comic.value.authors.includes(e.id))
@@ -205,8 +186,6 @@ const authorsChips = computed(() => (
 const loadAuthors = async () => {
   authors.value = await AuthorController.loadAll();
 };
-
-loadAuthors();
 
 const tags = ref<TagObject[]>([]);
 const tagsChips = computed(() => (
@@ -217,35 +196,24 @@ const loadTags = async () => {
   tags.value = await TagController.loadAll();
 };
 
-loadTags();
-
 const getImage = (id: number) => (images.value.find((e) => e.id === id));
-
-const loading = ref(false);
-
-const deleteComic = async () => {
-  const { value } = await Dialog.confirm({
-    title: 'Подтверждение удаления',
-    message: 'Удалить комикс?',
-  });
-
-  if (!value) return;
-
-  try {
-    loading.value = true;
-    await ComicController.delete(comic.value.id);
-    Toast.show({ text: 'Комикс удалён' });
-    router.replace({ name: '/' });
-  } catch (e) {
-    alert(e);
-    Toast.show({ text: `Ошибка: ${e}` });
-  } finally {
-    loading.value = false;
-  }
-};
 
 const onCopy = async (string: string) => {
   await Clipboard.write({ string });
   Toast.show({ text: 'Скопировано' });
 };
+
+const init = async () => {
+  loadingStart();
+  await Promise.all([
+    loadLanguages(),
+    loadAuthors(),
+    loadTags(),
+    loadCover(),
+    loadImages(),
+    loadComic(),
+  ]);
+  loadingEnd();
+};
+init();
 </script>

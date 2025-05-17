@@ -41,7 +41,8 @@ class AuthorsServer extends ServerAbstract<IAuthorDTO> {
 
     if (!item) return;
 
-    Object.assign(item, value);
+    const index = this.dataRaw.findIndex((e) => e.id === value.id);
+    this.dataRaw.splice(index, 1, value);
     await this.setDatabase();
   }
 

@@ -77,20 +77,6 @@
           {{ parser.images || '—' }}
         </p>
       </div>
-      <v-divider />
-      <div class="pa-4">
-        <v-btn
-          class="w-100"
-          text="Сохранить в Документы"
-          @click="toDownloads()"
-        />
-        <v-btn
-          class="mt-4 w-100"
-          color="error"
-          text="Удалить"
-          @click="deleteParser()"
-        />
-      </div>
     </v-container>
     <v-fab
       icon="$edit"
@@ -103,13 +89,10 @@
 </template>
 
 <script lang="ts" setup>
+import { Clipboard } from '@capacitor/clipboard';
+import { Toast } from '@capacitor/toast';
 import ParserController from '@/core/entities/parser/ParserController.ts';
 import ParserModel from '@/core/entities/parser/ParserModel.ts';
-import { APP_NAME } from '@/core/middleware/variables.ts';
-import { Clipboard } from '@capacitor/clipboard';
-import { Dialog } from '@capacitor/dialog';
-import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
-import { Toast } from '@capacitor/toast';
 
 definePage({
   meta: {
@@ -127,47 +110,13 @@ const parser = ref(new ParserModel());
 
 const loadParser = async () => {
   parser.value = await ParserController.load(parserId);
+  if (!parser.value.id) router.replace({ name: '/parsers/' });
 };
 
 loadParser();
 
-const deleteParser = async () => {
-  const { value } = await Dialog.confirm({
-    title: 'Подтверждение удаления',
-    message: 'Удалить парсер?',
-  });
-
-  if (!value) return;
-
-  try {
-    await ParserController.delete(parser.value.id);
-    Toast.show({ text: 'Парсер удалён' });
-    router.replace({ name: '/parsers/' });
-  } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
-  }
-};
-
 const onCopy = async (string: string) => {
   await Clipboard.write({ string });
   Toast.show({ text: 'Скопировано' });
-};
-
-const toDownloads = async () => {
-  try {
-    const parserDTO = parser.value.getDTO();
-    parserDTO.id = 0;
-
-    await Filesystem.writeFile({
-      path: `${APP_NAME}/parsers/${parser.value.name}.json`,
-      directory: Directory.Documents,
-      data: JSON.stringify(parserDTO),
-      encoding: Encoding.UTF8,
-      recursive: true,
-    });
-    Toast.show({ text: 'Парсер сохранён в документы' });
-  } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
-  }
 };
 </script>

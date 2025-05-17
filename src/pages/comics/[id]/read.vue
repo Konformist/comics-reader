@@ -94,6 +94,7 @@ definePage({
 });
 
 const route = useRoute('/comics/[id]/read');
+const router = useRouter();
 const appStore = useAppStore();
 
 onMounted(async () => {
@@ -123,8 +124,8 @@ const comic = ref(new ComicModel());
 const currentPage = ref<number>(+(route.query.page ?? 1));
 
 const loadComic = async () => {
-  if (!comicId) return;
   comic.value = await ComicController.load(comicId);
+  if (!comic.value.id) router.replace({ name: '/' });
 };
 
 loadComic();

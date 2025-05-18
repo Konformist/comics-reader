@@ -96,6 +96,7 @@
                 <ComicPageEdit
                   v-model:from="item.raw.url"
                   :disabled="loading || loadingGlobal"
+                  :files="files"
                   :image="getImage(item.raw.fileId)"
                   :item="item.raw"
                   @delete="delPage(item.raw)"

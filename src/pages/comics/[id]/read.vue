@@ -4,7 +4,7 @@
     scrollable
   >
     <v-container
-      v-if="appStore.settings.direction === 'none'"
+      v-if="appStore.settings.direction === 'webtoon'"
       class="pa-0"
       min-height="100%"
     >

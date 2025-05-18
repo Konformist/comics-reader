@@ -19,8 +19,8 @@
           />
           <v-btn
             class="flex-1-0"
-            text="Список"
-            value="none"
+            text="Webtoon"
+            value="webtoon"
           />
         </v-btn-toggle>
         <v-label class="w-100" text="Авто перелистывание">

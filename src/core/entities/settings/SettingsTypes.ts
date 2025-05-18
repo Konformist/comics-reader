@@ -1,4 +1,4 @@
-export type TReaderDirection = 'vertical' | 'horizontal' | 'none';
+export type TReaderDirection = 'vertical' | 'horizontal' | 'webtoon';
 
 export interface ISettingsDTO {
   /** Авто перелистывание */

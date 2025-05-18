@@ -1,3 +1,5 @@
+export type TReaderDirection = 'vertical' | 'horizontal' | 'none';
+
 export interface ISettingsDTO {
   /** Авто перелистывание */
   autoReading: boolean
@@ -5,4 +7,6 @@ export interface ISettingsDTO {
   autoReadingTimeout: number
   /** Сжимать картинки при загрузке */
   isCompress: boolean
+  /** Направление прокрутки */
+  direction: TReaderDirection
 }

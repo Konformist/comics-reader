@@ -27,6 +27,7 @@
     "@capacitor/toast": "^7.0.1",
     "@fontsource/roboto": "5.2.5",
     "@mdi/font": "7.4.47",
+    "swiper": "^11.2.6",
     "vue": "^3.5.13",
     "vuetify": "^3.8.1"
   },

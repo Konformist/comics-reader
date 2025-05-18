@@ -51,7 +51,12 @@ export default defineConfig(({ mode }) => {
         dts: 'src/components.d.ts',
       }),
       Vue({
-        template: { transformAssetUrls },
+        template: {
+          transformAssetUrls,
+          compilerOptions: {
+            isCustomElement: (tag) => ['swiper-container', 'swiper-slide'].includes(tag),
+          },
+        },
       }),
       // https://github.com/vuetifyjs/vuetify-loader/tree/master/packages/vite-plugin#readme
       Vuetify({

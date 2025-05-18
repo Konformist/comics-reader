@@ -7,6 +7,7 @@ const dataRaw: { item: ISettingsDTO } = {
     autoReading: false,
     autoReadingTimeout: 10,
     isCompress: false,
+    direction: 'horizontal',
   },
 };
 

@@ -1,90 +1,63 @@
 <template>
-  <v-main scrollable>
-    <v-container class="pa-0">
-      <v-data-iterator
-        v-model:page="currentPage"
-        :items="comic.images"
-        items-per-page="1"
+  <v-main
+    v-if="mounted"
+    scrollable
+  >
+    <v-container
+      v-if="appStore.settings.direction === 'none'"
+      class="pa-0"
+      min-height="100%"
+    >
+      <v-img
+        v-for="item in comic.images"
+        :key="item.id"
+        max-width="100%"
+        :src="item.url"
+      />
+    </v-container>
+    <v-container
+      v-else
+      class="pa-0"
+      height="100%"
+    >
+      <swiper-container
+        :autoplay="isCycle ? {
+          delay: appStore.settings.autoReadingTimeout * 1000,
+          stopOnLastSlide: true,
+        } : false"
+        class="h-100"
+        :direction="appStore.settings.direction"
+        :initial-slide="currentPage"
+        lazy
+        :modules="[Autoplay, Pagination]"
+        :pagination="{ el: '.swiper-pagination' }"
       >
-        <template #header="{ page, pageCount, prevPage, nextPage }">
-          <v-footer tag="header">
-            <v-spacer />
-            <v-btn
-              density="comfortable"
-              :disabled="page === 1"
-              icon="$arrow-left"
-              :loading="loading"
-              rounded
-              variant="tonal"
-              @click="prevPage"
-            />
-            <span class="d-inline-block px-4">{{ page }} / {{ pageCount }}</span>
-            <v-btn
-              density="comfortable"
-              :disabled="page === pageCount"
-              icon="$arrow-right"
-              :loading="loading"
-              rounded
-              variant="tonal"
-              @click="nextPage"
-            />
-            <v-spacer />
-          </v-footer>
-        </template>
-        <template #default="{ items, prevPage, nextPage }">
-          <ComicPage
-            v-for="item in items"
-            :key="item.raw.id"
-            :comic-id="comic.id"
-            :item="item.raw"
-            :loading-parent="loading"
-            @download="onLoadImage(item.raw)"
-            @loaded="startTimer(nextPage)"
-            @next="nextPage()"
-            @prev="prevPage()"
+        <swiper-slide
+          v-for="item in comic.images"
+          :key="item.id"
+          class="d-flex align-center justify-center"
+        >
+          <v-img
+            max-height="100%"
+            max-width="100%"
+            :src="item.url"
           />
-        </template>
-        <template #footer="{ page, pageCount, prevPage, nextPage }">
-          <v-footer>
-            <v-spacer />
-            <v-btn
-              density="comfortable"
-              :disabled="page === 1"
-              icon="$arrow-left"
-              :loading="loading"
-              rounded
-              variant="tonal"
-              @click="prevPage"
-            />
-            <span class="d-inline-block px-4">{{ page }} / {{ pageCount }}</span>
-            <v-btn
-              density="comfortable"
-              :disabled="page === pageCount"
-              icon="$arrow-right"
-              :loading="loading"
-              rounded
-              variant="tonal"
-              @click="nextPage"
-            />
-            <v-spacer />
-          </v-footer>
-        </template>
-      </v-data-iterator>
+        </swiper-slide>
+      </swiper-container>
+      <div class="swiper-pagination" />
     </v-container>
   </v-main>
 </template>
 
 <script lang="ts" setup>
-import ComicPage from '@/components/ComicPage.vue';
+import { register, type SwiperContainer, type SwiperSlide } from 'swiper/element';
 import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
-import type { IComicImageUrl } from '@/core/entities/comic/ComicTypes.ts';
-import ParserController from '@/core/entities/parser/ParserController.ts';
 import { useAppStore } from '@/stores/app.ts';
 import { KeepAwake } from '@capacitor-community/keep-awake';
 import { Capacitor } from '@capacitor/core';
 import { StatusBar } from '@capacitor/status-bar';
-import { Toast } from '@capacitor/toast';
+import { Autoplay, Pagination } from 'swiper/modules';
 
 definePage({
   meta: {
@@ -97,6 +70,10 @@ const route = useRoute('/comics/[id]/read');
 const router = useRouter();
 const appStore = useAppStore();
 
+register();
+
+const mounted = ref(false);
+
 onMounted(async () => {
   if ((await KeepAwake.isSupported()).isSupported) {
     await KeepAwake.keepAwake();
@@ -105,6 +82,8 @@ onMounted(async () => {
   if (Capacitor.isNativePlatform()) {
     await StatusBar.hide();
   }
+
+  mounted.value = true;
 });
 
 onBeforeUnmount(async () => {
@@ -121,57 +100,46 @@ const comicId = +(route.params.id || 0);
 
 const comic = ref(new ComicModel());
 
-const currentPage = ref<number>(+(route.query.page ?? 1));
+const currentPage = ref<number>(+(route.query.page ?? 0));
+
+const isCycle = computed(() => (
+  appStore.settings.autoReading
+  && currentPage.value !== comic.value.images.length - 1
+));
 
 const loadComic = async () => {
   comic.value = await ComicController.load(comicId);
+  comic.value.images.forEach((e, i) => {
+    if (i % 2 === 0) {
+      e.url = 'https://cs11.pikabu.ru/post_img/2020/08/13/11/159734810613621269.webp';
+    } else {
+      e.url = 'https://cdn.fishki.net/upload/post/2021/02/16/3613245/tn/bled-1899264-1280.jpg';
+    }
+  });
   if (!comic.value.id) router.replace({ name: '/' });
 };
 
 loadComic();
-
-let readTimer = 0;
-
-const startTimer = (nextPage: () => void) => {
-  if (!appStore.settings.autoReading) return;
-
-  readTimer = setTimeout(() => {
-    nextPage();
-    readTimer = 0;
-  }, appStore.settings.autoReadingTimeout * 1000);
-};
-
-onBeforeUnmount(() => {
-  if (readTimer) {
-    clearTimeout(readTimer);
-    readTimer = 0;
-  }
-});
-
-watch(
-  currentPage,
-  () => {
-    if (readTimer) {
-      clearTimeout(readTimer);
-      readTimer = 0;
-    }
-  },
-);
-
-const loading = ref(false);
-
-const onLoadImage = async (item: IComicImageUrl) => {
-  if (!item.url) return;
-
-  try {
-    loading.value = true;
-    const result = await ParserController.loadImageRaw(item.url);
-    await ComicController.saveFile(comic.value.id, item, result);
-    await loadComic();
-  } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
-  } finally {
-    loading.value = false;
-  }
-};
 </script>
+
+<style lang="scss">
+.swiper-pagination {
+  height: 8px;
+  display: flex;
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 1;
+  background-color: rgba(255, 255, 255, 0.4);
+
+  &-bullet {
+    height: 100%;
+    flex-grow: 1;
+    background-color: rgba(255, 255, 255, 0.6);
+    transition: 0.3s;
+  }
+
+  &-bullet-active ~ .swiper-pagination-bullet {
+    background-color: transparent;
+  }
+}
+</style>

@@ -15,14 +15,35 @@
         </v-label>
         <v-number-input
           v-model.number="appStore.settings.autoReadingTimeout"
-          class="mt-2"
           control-variant="split"
           :disabled="!appStore.settings.autoReading"
           label="До перелистывания"
           :min="0"
           suffix="с"
         />
-        <v-label class="w-100" text="Сжатие">
+        <v-label class="w-100" text="Направление прокрутки" />
+        <v-btn-toggle
+          v-model="appStore.settings.direction"
+          class="mt-2 w-100"
+        >
+          <v-btn
+            class="flex-1-0"
+            text="Горизонт."
+            value="horizontal"
+          />
+          <v-btn
+            class="flex-1-0"
+            text="Вертик."
+            value="vertical"
+          />
+          <v-btn
+            class="flex-1-0"
+            text="Список"
+            value="none"
+          />
+        </v-btn-toggle>
+        <v-divider class="mt-6 mb-2" />
+        <v-label class="w-100" text="Сжатие изображений при загрузке">
           <v-switch
             v-model="appStore.settings.isCompress"
             class="ml-auto"

@@ -118,11 +118,8 @@ class ComicsServer extends ServerAbstract<IComicDTO> {
 
     if (!fileData) return;
 
-    let isFileSet = false;
-
     try {
       await this.#setFile(fileData.path, file);
-      isFileSet = true;
       const fileStat = await FilesServer.getFileStat(fileData.path);
       await FilesServer.setItem({
         ...fileData,
@@ -132,7 +129,7 @@ class ComicsServer extends ServerAbstract<IComicDTO> {
       });
       comic.image.fileId = fileId;
     } catch (e) {
-      if (isFileSet) await FilesServer.delFile(fileData.path);
+      await FilesServer.delItem(fileData.id);
       throw e;
     }
 
@@ -214,11 +211,8 @@ class ComicsServer extends ServerAbstract<IComicDTO> {
 
     if (!fileData) return;
 
-    let isFileSet = false;
-
     try {
       await this.#setFile(fileData.path, file);
-      isFileSet = true;
       const fileStat = await FilesServer.getFileStat(fileData.path);
       await FilesServer.setItem({
         ...fileData,
@@ -229,7 +223,6 @@ class ComicsServer extends ServerAbstract<IComicDTO> {
       image.fileId = fileId;
     } catch (e) {
       await FilesServer.delItem(fileId);
-      if (isFileSet) await FilesServer.delFile(fileData.path);
       throw e;
     }
 
@@ -286,6 +279,19 @@ class ComicsServer extends ServerAbstract<IComicDTO> {
 
     comic.images = [];
     await this.setDatabase();
+  }
+
+  public async loadAllImages() {
+    const result = await FilesServer.getItems();
+
+    const ret: IFileDTO[] = [];
+
+    for (const item of result) {
+      const pathUri = await FilesServer.getFileUri(item.path);
+      ret.push({ ...item, path: Capacitor.convertFileSrc(pathUri) });
+    }
+
+    return ret;
   }
 }
 

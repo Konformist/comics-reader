@@ -29,6 +29,17 @@
         rows="2"
         variant="solo-filled"
       />
+      <v-alert color="error">
+        Только для исправления багов загрузки
+      </v-alert>
+      <v-select
+        v-model="item.fileId"
+        class="mt-2"
+        item-title="path"
+        item-value="id"
+        :items="files || []"
+        variant="solo-filled"
+      />
     </v-card-item>
     <v-card-actions>
       <v-btn
@@ -48,6 +59,8 @@
 </template>
 
 <script setup lang="ts">
+import type { IComicImageUrl } from '@/core/entities/comic/ComicTypes.ts';
+import type { IFileDTO } from '@/core/object-value/file/FileTypes.ts';
 import { formatBytes } from '@/core/utils/format.ts';
 import FileModel from '@/core/object-value/file/FileModel.ts';
 
@@ -60,6 +73,8 @@ const emit = defineEmits<{
 }>();
 
 defineProps<{
+  files?: IFileDTO[]
+  item: IComicImageUrl
   image?: FileModel
   disabled: boolean
 }>();

@@ -52,6 +52,7 @@ export default {
   setComicFile: (id: number, img: number, f: string) => ComicsServer.setImage(id, img, f),
   delComicFile: (id: number, img: number) => ComicsServer.delImage(id, img),
   delComicFiles: (id: number) => ComicsServer.delImages(id),
+  getImagesAll: () => ComicsServer.loadAllImages(),
   autoBackup: serverBackups.autoBackup,
   delBackup: serverBackups.delBackup,
   addBackup: serverBackups.addBackup,

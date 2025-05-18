@@ -97,6 +97,7 @@
                   v-model:from="item.raw.url"
                   :disabled="loading || loadingGlobal"
                   :image="getImage(item.raw.fileId)"
+                  :item="item.raw"
                   @delete="delPage(item.raw)"
                   @download="onLoadImage(item.raw)"
                   @upload="uploadImage(item.raw, $event)"
@@ -127,7 +128,9 @@
 
 <script lang="ts" setup>
 import useLoading from '@/composables/useLoading.ts';
+import server from '@/core/middleware/server.ts';
 import FileModel from '@/core/object-value/file/FileModel.ts';
+import type { IFileDTO } from '@/core/object-value/file/FileTypes.ts';
 import { fileToBase64 } from '@/core/utils/image.ts';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
@@ -160,10 +163,17 @@ const pages = ref(0);
 
 const comicId = +(route.params.id || 0);
 
+const files = ref<IFileDTO[]>([]);
+const loadFiles = async () => {
+  loadingStart();
+  files.value = await server.getImagesAll();
+  loadingEnd();
+};
+
+loadFiles();
+
 const images = ref<FileModel[]>([]);
-
 const getImage = (id: number) => (images.value.find((e) => e.id === id));
-
 const loadImages = async () => {
   images.value = await ComicController.loadFiles(comicId);
 };

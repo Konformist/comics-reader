@@ -19,6 +19,7 @@
               <v-btn
                 color="error"
                 density="comfortable"
+                :disabled="loadingGlobal"
                 icon="$delete"
                 variant="tonal"
                 @click.prevent="deleteParser(item.id)"
@@ -29,6 +30,7 @@
       </v-list>
     </v-container>
     <v-fab
+      :disabled="loadingGlobal"
       icon="$plus"
       @click="createParser()"
     />
@@ -36,10 +38,11 @@
 </template>
 
 <script lang="ts" setup>
-import ParserController from '@/core/entities/parser/ParserController.ts';
-import ParserModel from '@/core/entities/parser/ParserModel.ts';
+import useLoading from '@/composables/useLoading.ts';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
+import ParserController from '@/core/entities/parser/ParserController.ts';
+import ParserModel from '@/core/entities/parser/ParserModel.ts';
 
 definePage({
   meta: {
@@ -48,6 +51,11 @@ definePage({
 });
 
 const router = useRouter();
+const {
+  loadingGlobal,
+  loadingGlobalStart,
+  loadingGlobalEnd,
+} = useLoading();
 
 const parsers = ref<ParserModel[]>([]);
 
@@ -58,14 +66,21 @@ const loadParsers = async (): Promise<void> => {
 loadParsers();
 
 const createParser = async () => {
-  const parserId = await ParserController.save(new ParserModel());
+  try {
+    loadingGlobalStart();
+    const parserId = await ParserController.save(new ParserModel());
 
-  if (parserId) {
-    Toast.show({ text: 'Парсер создан' });
-    await router.push({
-      name: '/parsers/[id]/',
-      params: { id: parserId },
-    });
+    if (parserId) {
+      Toast.show({ text: 'Парсер создан' });
+      router.push({
+        name: '/parsers/[id]/',
+        params: { id: parserId },
+      });
+    }
+  } catch (e) {
+    Toast.show({ text: `Ошибка: ${e}` });
+  } finally {
+    loadingGlobalEnd();
   }
 };
 
@@ -78,11 +93,14 @@ const deleteParser = async (id: number) => {
   if (!value) return;
 
   try {
+    loadingGlobalStart();
     await ParserController.delete(id);
     await loadParsers();
     Toast.show({ text: 'Парсер удалён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
+  } finally {
+    loadingGlobalEnd();
   }
 };
 </script>

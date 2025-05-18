@@ -63,6 +63,7 @@
       </v-data-iterator>
     </v-container>
     <v-fab
+      :disabled="loading || loadingGlobal"
       icon="$plus"
       @click="createComic()"
     />
@@ -135,7 +136,12 @@ definePage({
 
 const router = useRouter();
 const comicsStore = useComicsStore();
-const { loading,loadingStart,loadingEnd } = useLoading();
+const {
+  loading,
+  loadingStart,
+  loadingEnd,
+  loadingGlobal,
+} = useLoading();
 
 const filtersSheet = ref(false);
 

@@ -95,8 +95,8 @@
               >
                 <ComicPageEdit
                   v-model:from="item.raw.url"
+                  :disabled="loading || loadingGlobal"
                   :image="getImage(item.raw.fileId)"
-                  :loading="loading"
                   @delete="delPage(item.raw)"
                   @download="onLoadImage(item.raw)"
                   @upload="uploadImage(item.raw, $event)"
@@ -118,7 +118,7 @@
       </div>
     </v-container>
     <v-fab
-      :disabled="loading"
+      :disabled="loading || loadingGlobal"
       icon="$save"
       @click="onSave()"
     />
@@ -145,7 +145,14 @@ definePage({
 
 const route = useRoute('/comics/[id]/edit-pages');
 const router = useRouter();
-const { loading, loadingStart,loadingEnd } = useLoading();
+const {
+  loading,
+  loadingStart,
+  loadingEnd,
+  loadingGlobal,
+  loadingGlobalStart,
+  loadingGlobalEnd,
+} = useLoading();
 
 const currentPage = ref(1);
 
@@ -219,17 +226,24 @@ const saveComic = async () => {
 };
 
 const onSave = async () => {
-  await saveComic();
-  await loadComic();
-  await loadImages();
-  Toast.show({ text: 'Комикс сохранён' });
+  try {
+    loadingGlobalStart();
+    await saveComic();
+    await loadComic();
+    await loadImages();
+    Toast.show({ text: 'Комикс сохранён' });
+  } catch (e) {
+    Toast.show({ text: `Ошибка: ${e}` });
+  } finally {
+    loadingGlobalEnd();
+  }
 };
 
 const uploadImage = async (item: IComicImageUrl, event: File | File[]) => {
   if (!event || Array.isArray(event)) return;
 
   try {
-    loadingStart();
+    loadingGlobalStart();
     await saveComic();
     const base64 = await fileToBase64(event);
     await ComicController.saveFile(comic.value.id, item, base64);
@@ -239,7 +253,7 @@ const uploadImage = async (item: IComicImageUrl, event: File | File[]) => {
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {
-    loadingEnd();
+    loadingGlobalEnd();
   }
 };
 
@@ -247,7 +261,7 @@ const onLoadImage = async (item: IComicImageUrl) => {
   if (!item.url) return;
 
   try {
-    loadingStart();
+    loadingGlobalStart();
     const result = await ParserController.loadImageRaw(item.url);
     await saveComic();
     await ComicController.saveFile(comic.value.id, item, result);
@@ -257,7 +271,7 @@ const onLoadImage = async (item: IComicImageUrl) => {
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {
-    loadingEnd();
+    loadingGlobalEnd();
   }
 };
 
@@ -266,8 +280,10 @@ const canLoadImages = computed(() => (
 ));
 
 const onLoadImages = async (force: boolean = false) => {
-  loadingStart();
+  loadingGlobalStart();
   await saveComic();
+
+  let isError = false;
 
   try {
     for (const item of comic.value.images) {
@@ -277,13 +293,18 @@ const onLoadImages = async (force: boolean = false) => {
       }
     }
   } catch (e) {
+    isError = true;
     Toast.show({ text: `Ошибка: ${e}` });
   }
 
   await loadComic();
   await loadImages();
-  Toast.show({ text: 'Комикс сохранён' });
-  loadingEnd();
+  if (isError) {
+    Toast.show({ text: 'Некоторые изображения не загружены' });
+  } else {
+    Toast.show({ text: 'Изображения загружены' });
+  }
+  loadingGlobalEnd();
 };
 
 const delPage = async (item: IComicImageUrl) => {
@@ -297,7 +318,7 @@ const delPage = async (item: IComicImageUrl) => {
   }
 
   try {
-    loadingStart();
+    loadingGlobalStart();
     comic.value.images = comic.value.images.filter((e) => e.id !== item.id);
     await saveComic();
     await loadComic();
@@ -306,7 +327,7 @@ const delPage = async (item: IComicImageUrl) => {
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {
-    loadingEnd();
+    loadingGlobalEnd();
   }
 };
 
@@ -319,7 +340,7 @@ const delPages = async () => {
   if (!value) return;
 
   try {
-    loadingStart();
+    loadingGlobalStart();
     comic.value.images = [];
     await saveComic();
     await loadComic();
@@ -328,7 +349,7 @@ const delPages = async () => {
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {
-    loadingEnd();
+    loadingGlobalEnd();
   }
 };
 </script>

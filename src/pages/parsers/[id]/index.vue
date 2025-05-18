@@ -79,6 +79,7 @@
       </div>
     </v-container>
     <v-fab
+      :disabled="loadingGlobal"
       icon="$edit"
       :to="{
         name: '/parsers/[id]/edit',
@@ -89,6 +90,7 @@
 </template>
 
 <script lang="ts" setup>
+import useLoading from '@/composables/useLoading.ts';
 import { Clipboard } from '@capacitor/clipboard';
 import { Toast } from '@capacitor/toast';
 import ParserController from '@/core/entities/parser/ParserController.ts';
@@ -103,6 +105,7 @@ definePage({
 
 const router = useRouter();
 const route = useRoute('/parsers/[id]/');
+const { loadingGlobal } = useLoading();
 
 const parserId = +(route.params?.id);
 
@@ -110,10 +113,12 @@ const parser = ref(new ParserModel());
 
 const loadParser = async () => {
   parser.value = await ParserController.load(parserId);
-  if (!parser.value.id) router.replace({ name: '/parsers/' });
 };
 
-loadParser();
+onMounted(async () => {
+  await loadParser();
+  if (!parser.value.id) router.replace({ name: '/parsers/' });
+});
 
 const onCopy = async (string: string) => {
   await Clipboard.write({ string });

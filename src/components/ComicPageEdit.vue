@@ -1,5 +1,5 @@
 <template>
-  <v-card :loading="loading">
+  <v-card>
     <template v-if="image?.url">
       <v-img :src="image.url" />
       <v-card-text class="text-body-1">
@@ -10,7 +10,7 @@
       <v-file-input
         v-model="imageFile"
         accept="image/*"
-        :disabled="loading"
+        :disabled="disabled"
         hide-details
         label="Загрузить картинку"
         variant="solo-filled"
@@ -23,7 +23,7 @@
         auto-grow
         :autocapitalize="false"
         :autocomplete="false"
-        :disabled="loading"
+        :disabled="disabled"
         inputmode="url"
         label="Ссылка на картинку"
         rows="2"
@@ -32,14 +32,14 @@
     </v-card-item>
     <v-card-actions>
       <v-btn
-        :disabled="(!imageFile && !from) || loading"
+        :disabled="(!imageFile && !from) || disabled"
         text="Загрузить"
         @click="onLoad()"
       />
       <v-btn
         class="ml-auto"
         color="error"
-        :disabled="loading"
+        :disabled="disabled"
         text="Удалить"
         @click="$emit('delete')"
       />
@@ -61,7 +61,7 @@ const emit = defineEmits<{
 
 defineProps<{
   image?: FileModel
-  loading: boolean
+  disabled: boolean
 }>();
 
 const imageFile = ref<File | null>(null);

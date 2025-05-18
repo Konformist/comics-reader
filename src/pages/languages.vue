@@ -39,6 +39,7 @@
               <v-btn
                 class="mr-4"
                 density="comfortable"
+                :disabled="loadingGlobal"
                 icon="$edit"
                 variant="tonal"
                 @click="clickLanguage(item.id)"
@@ -46,6 +47,7 @@
               <v-btn
                 color="error"
                 density="comfortable"
+                :disabled="loadingGlobal"
                 icon="$delete"
                 variant="tonal"
                 @click="deleteLanguage(item.id)"
@@ -68,7 +70,7 @@
         </v-card-item>
         <v-card-actions>
           <v-btn
-            :loading="loading"
+            :disabled="loadingGlobal"
             text="Сохранить"
             @click="saveLanguage()"
           />
@@ -99,7 +101,14 @@ definePage({
   },
 });
 
-const { loading,loadingStart,loadingEnd } = useLoading();
+const {
+  loading,
+  loadingStart,
+  loadingEnd,
+  loadingGlobal,
+  loadingGlobalStart,
+  loadingGlobalEnd,
+} = useLoading();
 
 const sortValue = ref(0);
 const sortItems = [
@@ -126,6 +135,15 @@ const loadLanguages = async () => {
 };
 
 loadLanguages();
+
+onMounted(async () => {
+  loadingStart();
+  await Promise.all([
+    loadComics(),
+    loadLanguages(),
+  ]);
+  loadingEnd();
+});
 
 const selectedLanguage = ref(new LanguageObject());
 
@@ -164,7 +182,7 @@ const sortedLanguages = computed(() => (
 
 const saveLanguage = async () => {
   try {
-    loadingStart();
+    loadingGlobalStart();
     await LanguageController.save(selectedLanguage.value);
     await loadLanguages();
     dialog.value = false;
@@ -172,7 +190,7 @@ const saveLanguage = async () => {
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {
-    loadingEnd();
+    loadingGlobalEnd();
   }
 };
 
@@ -185,14 +203,14 @@ const deleteLanguage = async (id: number) => {
   if (!value) return;
 
   try {
-    loadingStart();
+    loadingGlobalStart();
     await LanguageController.delete(id);
     await loadLanguages();
     Toast.show({ text: 'Язык удалён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {
-    loadingEnd();
+    loadingGlobalEnd();
   }
 };
 </script>

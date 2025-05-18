@@ -39,6 +39,7 @@
               <v-btn
                 class="mr-4"
                 density="comfortable"
+                :disabled="loadingGlobal"
                 icon="$edit"
                 variant="tonal"
                 @click="clickAuthor(item.id)"
@@ -46,6 +47,7 @@
               <v-btn
                 color="error"
                 density="comfortable"
+                :disabled="loadingGlobal"
                 icon="$delete"
                 variant="tonal"
                 @click="deleteAuthor(item.id)"
@@ -68,7 +70,7 @@
         </v-card-item>
         <v-card-actions>
           <v-btn
-            :loading="loading"
+            :disabled="loadingGlobal"
             text="Сохранить"
             @click="saveAuthor()"
           />
@@ -99,7 +101,14 @@ definePage({
   },
 });
 
-const { loading,loadingStart,loadingEnd } = useLoading();
+const {
+  loading,
+  loadingStart,
+  loadingEnd,
+  loadingGlobal,
+  loadingGlobalStart,
+  loadingGlobalEnd,
+} = useLoading();
 
 const sortValue = ref(0);
 const sortItems = [
@@ -126,6 +135,15 @@ const loadAuthors = async () => {
 };
 
 loadAuthors();
+
+onMounted(async () => {
+  loadingStart();
+  await Promise.all([
+    loadComics(),
+    loadAuthors(),
+  ]);
+  loadingEnd();
+});
 
 const selectedAuthor = ref(new AuthorObject());
 
@@ -164,7 +182,7 @@ const sortedAuthors = computed(() => (
 
 const saveAuthor = async () => {
   try {
-    loadingStart();
+    loadingGlobalStart();
     await AuthorController.save(selectedAuthor.value);
     await loadAuthors();
     dialog.value = false;
@@ -172,7 +190,7 @@ const saveAuthor = async () => {
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {
-    loadingEnd();
+    loadingGlobalEnd();
   }
 };
 
@@ -185,14 +203,14 @@ const deleteAuthor = async (id: number) => {
   if (!value) return;
 
   try {
-    loadingStart();
+    loadingGlobalStart();
     await AuthorController.delete(id);
     await loadAuthors();
     Toast.show({ text: 'Автор удалён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {
-    loadingEnd();
+    loadingGlobalEnd();
   }
 };
 </script>

@@ -1,9 +1,5 @@
 <template>
   <v-main>
-    <v-progress-linear
-      v-if="loading"
-      indeterminate
-    />
     <v-container>
       <h2 class="text-h6">
         Переопределение настроек парсера
@@ -73,6 +69,11 @@
         variant="solo-filled"
       />
     </v-container>
+    <v-fab
+      :disabled="loading || loadingGlobal"
+      icon="$save"
+      @click="saveComic()"
+    />
   </v-main>
 </template>
 
@@ -82,10 +83,18 @@ import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import ParserController from '@/core/entities/parser/ParserController.ts';
 import ParserModel from '@/core/entities/parser/ParserModel.ts';
+import { Toast } from '@capacitor/toast';
 
 const route = useRoute('/comics/[id]/edit');
 const router = useRouter();
-const { loading, loadingStart, loadingEnd } = useLoading();
+const {
+  loading,
+  loadingStart,
+  loadingEnd,
+  loadingGlobal,
+  loadingGlobalStart,
+  loadingGlobalEnd,
+} = useLoading();
 
 const comicId = +(route.params.id || 0);
 
@@ -97,6 +106,18 @@ const loadParser = async () => {
 const comic = ref(new ComicModel());
 const loadComic = async () => {
   comic.value = await ComicController.load(comicId);
+};
+
+const saveComic = async () => {
+  try {
+    loadingGlobalStart();
+    await ComicController.save(comic.value);
+    Toast.show({ text: 'Комикс сохранён' });
+  } catch (e) {
+    Toast.show({ text: `Ошибка: ${e}` });
+  } finally {
+    loadingGlobalEnd();
+  }
 };
 
 const keyTitle = computed({

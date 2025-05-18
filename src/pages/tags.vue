@@ -39,6 +39,7 @@
               <v-btn
                 class="mr-4"
                 density="comfortable"
+                :disabled="loadingGlobal"
                 icon="$edit"
                 variant="tonal"
                 @click="clickTag(item.id)"
@@ -46,6 +47,7 @@
               <v-btn
                 color="error"
                 density="comfortable"
+                :disabled="loadingGlobal"
                 icon="$delete"
                 variant="tonal"
                 @click="deleteTag(item.id)"
@@ -68,7 +70,7 @@
         </v-card-item>
         <v-card-actions>
           <v-btn
-            :loading="loading"
+            :disabled="loadingGlobal"
             text="Сохранить"
             @click="saveTag()"
           />
@@ -84,14 +86,14 @@
 </template>
 
 <script setup lang="ts">
-import useLoading from '@/composables/useLoading.ts';
-import { sortString } from '@/core/utils/array.ts';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
+import { sortString } from '@/core/utils/array.ts';
 import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import TagController from '@/core/object-value/tag/TagController.ts';
 import TagObject from '@/core/object-value/tag/TagObject.ts';
+import useLoading from '@/composables/useLoading.ts';
 
 definePage({
   meta: {
@@ -99,7 +101,14 @@ definePage({
   },
 });
 
-const { loading, loadingStart, loadingEnd } = useLoading();
+const {
+  loadingGlobal,
+  loadingGlobalStart,
+  loadingGlobalEnd,
+  loading,
+  loadingStart,
+  loadingEnd,
+} = useLoading();
 
 const sortValue = ref(0);
 const sortItems = [
@@ -117,15 +126,20 @@ const loadComics = async () => {
   comics.value = await ComicController.loadAll();
 };
 
-loadComics();
-
 const tags = ref<TagObject[]>([]);
 
 const loadTags = async () => {
   tags.value = await TagController.loadAll();
 };
 
-loadTags();
+onMounted(async () => {
+  loadingStart();
+  await Promise.all([
+    loadComics(),
+    loadTags(),
+  ]);
+  loadingEnd();
+});
 
 const selectedTag = ref(new TagObject());
 
@@ -164,7 +178,7 @@ const sortedTags = computed(() => (
 
 const saveTag = async () => {
   try {
-    loadingStart();
+    loadingGlobalStart();
     await TagController.save(selectedTag.value);
     await loadTags();
     dialog.value = false;
@@ -172,7 +186,7 @@ const saveTag = async () => {
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {
-    loadingEnd();
+    loadingGlobalEnd();
   }
 };
 
@@ -185,14 +199,14 @@ const deleteTag = async (id: number) => {
   if (!value) return;
 
   try {
-    loadingStart();
+    loadingGlobalStart();
     await TagController.delete(id);
     await loadTags();
     Toast.show({ text: 'Тег удалён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {
-    loadingEnd();
+    loadingGlobalEnd();
   }
 };
 </script>

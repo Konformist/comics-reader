@@ -1,9 +1,5 @@
 <template>
   <v-main scrollable>
-    <v-progress-linear
-      v-if="loading"
-      indeterminate
-    />
     <v-container class="pa-0">
       <div class="px-4 py-8">
         <v-select
@@ -58,7 +54,7 @@
         />
         <v-btn
           class="mt-4 w-100"
-          :disabled="!comic.parser || !comic.url || loading"
+          :disabled="!comic.parser || !comic.url || loading || loadingGlobal"
           text="Загрузить"
           @click="onLoadInfo()"
         />
@@ -68,7 +64,6 @@
         <v-card
           v-if="cover.url"
           class="mb-8"
-          :loading="loading"
           rounded
         >
           <v-img
@@ -99,7 +94,7 @@
         />
         <v-btn
           class="w-100"
-          :disabled="(!image && !comic.image.url) || loading"
+          :disabled="(!image && !comic.image.url) || loading || loadingGlobal"
           text="Загрузить"
           @click="onLoadCover()"
         />
@@ -109,7 +104,7 @@
         <v-btn
           v-if="comic.parser"
           class="mb-4 w-100"
-          :disabled="loading"
+          :disabled="loading || loadingGlobal"
           text="Расширенные настройки"
           :to="{
             name: '/comics/[id]/edit-external',
@@ -118,7 +113,7 @@
         />
         <v-btn
           class="w-100"
-          :disabled="loading"
+          :disabled="loading || loadingGlobal"
           text="Редактировать страницы"
           :to="{
             name: '/comics/[id]/edit-pages',
@@ -131,15 +126,15 @@
         <v-btn
           class="w-100"
           color="error"
-          :disabled="loading"
+          :disabled="loading || loadingGlobal"
           text="Удалить"
           @click="deleteComic()"
         />
       </div>
     </v-container>
     <v-fab
+      :disabled="loading || loadingGlobal"
       icon="$save"
-      :loading="loading"
       @click="onSave()"
     />
   </v-main>
@@ -172,7 +167,14 @@ definePage({
 
 const route = useRoute('/comics/[id]/edit');
 const router = useRouter();
-const { loading, loadingStart,loadingEnd } = useLoading();
+const {
+  loading,
+  loadingStart,
+  loadingEnd,
+  loadingGlobal,
+  loadingGlobalStart,
+  loadingGlobalEnd,
+} = useLoading();
 
 const languages = ref<LanguageObject[]>([]);
 const loadLanguages = async () => {
@@ -251,7 +253,7 @@ const onLoadInfo = async () => {
   if (!comic.value || !parser.value) return;
 
   try {
-    loadingStart();
+    loadingGlobalStart();
     const result = await ParserController.loadComicRaw(comic.value.url);
     const parsedComic = parser.value.parse(result, comic.value.override);
 
@@ -315,7 +317,7 @@ const onLoadInfo = async () => {
   } catch (e) {
     Toast.show({ text: `Комикс не сохранён. Ошибка: ${e}` });
   } finally {
-    loadingEnd();
+    loadingGlobalEnd();
   }
 };
 
@@ -325,7 +327,7 @@ const uploadCover = async () => {
   if (!image.value) return;
 
   try {
-    loadingStart();
+    loadingGlobalStart();
     await saveComic();
     const base64 = await fileToBase64(image.value);
     await ComicController.saveCover(comic.value.id, base64);
@@ -335,7 +337,7 @@ const uploadCover = async () => {
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {
-    loadingEnd();
+    loadingGlobalEnd();
   }
 };
 
@@ -343,7 +345,7 @@ const loadByLink = async () => {
   if (!comic.value.image.url) return;
 
   try {
-    loadingStart();
+    loadingGlobalStart();
     const result = await ParserController.loadImageRaw(comic.value.image.url);
     await saveComic();
     await ComicController.saveCover(comic.value.id, result);
@@ -353,7 +355,7 @@ const loadByLink = async () => {
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {
-    loadingEnd();
+    loadingGlobalEnd();
   }
 };
 
@@ -363,8 +365,15 @@ const onLoadCover = () => {
 };
 
 const onSave = async () => {
-  await saveComic();
-  Toast.show({ text: 'Комикс сохранён' });
+  try {
+    loadingGlobalStart();
+    await saveComic();
+    Toast.show({ text: 'Комикс сохранён' });
+  } catch (e) {
+    Toast.show({ text: `Ошибка: ${e}` });
+  } finally {
+    loadingGlobalEnd();
+  }
 };
 
 const deleteComic = async () => {
@@ -376,7 +385,7 @@ const deleteComic = async () => {
   if (!value) return;
 
   try {
-    loadingStart();
+    loadingGlobalStart();
     await ComicController.delete(comic.value.id);
     Toast.show({ text: 'Комикс удалён' });
     router.replace({ name: '/' });
@@ -384,7 +393,7 @@ const deleteComic = async () => {
     alert(e);
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {
-    loadingEnd();
+    loadingGlobalEnd();
   }
 };
 </script>

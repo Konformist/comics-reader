@@ -10,8 +10,8 @@ declare module 'vue' {
   export interface GlobalComponents {
     BottomNavigation: typeof import('./components/BottomNavigation.vue')['default']
     ComicGallery: typeof import('./components/ComicGallery.vue')['default']
-    ComicPage: typeof import('./components/ComicPage.vue')['default']
     ComicPageEdit: typeof import('./components/ComicPageEdit.vue')['default']
+    DialogName: typeof import('./components/DialogName.vue')['default']
     FilesTree: typeof import('./components/FilesTree.vue')['default']
     FilesTreeItem: typeof import('./components/FilesTreeItem.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

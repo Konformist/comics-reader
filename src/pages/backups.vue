@@ -1,14 +1,10 @@
 <template>
   <v-main>
-    <v-progress-linear
-      v-if="loading"
-      indeterminate
-    />
     <v-container class="pa-0">
       <div class="px-4 py-8">
         <v-btn
           class="w-100"
-          :disabled="loading"
+          :disabled="loadingGlobal || loading"
           text="Создать бекап"
           @click="addBackup()"
         />
@@ -16,25 +12,26 @@
           v-if="backups.length"
           v-model="backupPath"
           class="mt-4"
+          :loading="loading"
           rounded
           :tree="backups"
         />
         <v-btn
           class="mt-4 w-100"
-          :disabled="!backupPath || loading"
+          :disabled="!backupPath || loadingGlobal || loading"
           text="Применить бекап"
           @click="getBackup()"
         />
         <v-btn
           class="mt-4 w-100"
-          :disabled="!backupPath || loading"
+          :disabled="!backupPath || loadingGlobal || loading"
           text="Сохранить в Документы"
           @click="saveBackupToGlobal()"
         />
         <v-btn
           class="mt-4 w-100"
           color="error"
-          :disabled="!backupPath || loading"
+          :disabled="!backupPath || loadingGlobal || loading"
           text="Удалить бекап"
           @click="delBackup()"
         />
@@ -51,7 +48,7 @@
         />
         <v-btn
           class="w-100"
-          :disabled="!backupFile || loading"
+          :disabled="!backupFile || loadingGlobal || loading"
           text="Сохранить бекап"
           @click="loadBackup()"
         />
@@ -60,14 +57,14 @@
       <div class="px-4 py-8">
         <v-btn
           class="w-100"
-          :disabled="loading"
+          :disabled="loadingGlobal || loading"
           text="Сохранить файлы в Документы"
           @click="saveImagesToGlobal()"
         />
         <v-btn
           class="mt-4 w-100"
           color="error"
-          :disabled="loading"
+          :disabled="loadingGlobal || loading"
           text="Загрузить файлы из Документов"
           @click="loadImagesFromGlobal()"
         />
@@ -90,7 +87,14 @@ definePage({
   },
 });
 
-const { loading, loadingStart, loadingEnd } = useLoading();
+const {
+  loading,
+  loadingStart,
+  loadingEnd,
+  loadingGlobal,
+  loadingGlobalStart,
+  loadingGlobalEnd,
+} = useLoading();
 
 const backups = ref<ITreeDirectory[]>([]);
 
@@ -146,12 +150,15 @@ const loadBackup = async () => {
   if (!backupFile.value) return;
 
   try {
+    loadingGlobalStart();
     const result = await backupFile.value.text();
     await server.setBackup(result, backupFile.value.name);
     await loadBackupsTree();
     Toast.show({ text: 'Данные получены' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
+  } finally {
+    loadingGlobalEnd();
   }
 };
 
@@ -166,6 +173,7 @@ const saveBackupToGlobal = async (): Promise<void> => {
   } catch (_) { /* empty */ }
 
   try {
+    loadingGlobalStart();
     await Filesystem.copy({
       from: backupPath.value,
       directory: Directory.Data,
@@ -176,21 +184,24 @@ const saveBackupToGlobal = async (): Promise<void> => {
     Toast.show({ text: 'Бекап сохранён в документы' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
+  } finally {
+    loadingGlobalEnd();
   }
 };
 
 const saveImagesToGlobal = async () => {
   try {
-    await Filesystem.rmdir({
-      path: `${APP_NAME}/${COMICS_FILES_DIRECTORY}`,
-      directory: Directory.Documents,
-      recursive: true,
-    });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (_) { /* empty */ }
+    loadingGlobalStart();
 
-  try {
-    loadingStart();
+    try {
+      await Filesystem.rmdir({
+        path: `${APP_NAME}/${COMICS_FILES_DIRECTORY}`,
+        directory: Directory.Documents,
+        recursive: true,
+      });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (_) { /* empty */ }
+
     await Filesystem.copy({
       from: `${COMICS_FILES_DIRECTORY}`,
       directory: Directory.Data,
@@ -202,13 +213,13 @@ const saveImagesToGlobal = async () => {
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {
-    loadingEnd();
+    loadingGlobalEnd();
   }
 };
 
 const loadImagesFromGlobal = async () => {
   try {
-    loadingStart();
+    loadingGlobalStart();
 
     try {
       await Filesystem.rmdir({
@@ -230,7 +241,7 @@ const loadImagesFromGlobal = async () => {
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {
-    loadingEnd();
+    loadingGlobalEnd();
   }
 };
 </script>

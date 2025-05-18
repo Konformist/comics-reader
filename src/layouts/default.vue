@@ -59,6 +59,12 @@
       />
     </v-list>
   </v-navigation-drawer>
+  <v-progress-linear
+    v-if="loadingGlobal"
+    absolute
+    indeterminate
+    style="top: 56px;"
+  />
   <router-view v-slot="{ Component, route }">
     <v-slide-x-transition leave-absolute>
       <component
@@ -72,6 +78,9 @@
 
 <script lang="ts" setup>
 import BottomNavigation from '@/components/BottomNavigation.vue';
+import useLoading from '@/composables/useLoading.ts';
 
 const drawer = ref(false);
+
+const { loadingGlobal } = useLoading();
 </script>

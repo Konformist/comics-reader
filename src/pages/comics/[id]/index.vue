@@ -1,9 +1,5 @@
 <template>
   <v-main scrollable>
-    <v-progress-linear
-      v-if="loading"
-      indeterminate
-    />
     <v-container class="pa-0">
       <router-link
         v-if="cover.url"
@@ -115,7 +111,7 @@
       </template>
     </v-container>
     <v-fab
-      :disabled="loading"
+      :disabled="loading || loadingGlobal"
       icon="$edit"
       :to="{
         name: '/comics/[id]/edit',
@@ -148,7 +144,12 @@ definePage({
 
 const route = useRoute('/comics/[id]/');
 const router = useRouter();
-const { loading, loadingStart,loadingEnd } = useLoading();
+const {
+  loading,
+  loadingStart,
+  loadingEnd,
+  loadingGlobal,
+} = useLoading();
 
 const comicId = +route.params.id;
 
@@ -221,5 +222,6 @@ const init = async () => {
 
   loadingEnd();
 };
+
 init();
 </script>

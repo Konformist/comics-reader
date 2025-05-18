@@ -3,7 +3,7 @@ import { Capacitor } from '@capacitor/core';
 import type { IComicDTO } from '@/core/entities/comic/ComicTypes.ts';
 import type { IFileDTO } from '@/core/object-value/file/FileTypes.ts';
 import { COMICS_FILES_DIRECTORY, COMICS_STORE } from '@/core/middleware/variables.ts';
-import ImageFuck from '@/plugins/imageOptimizator.ts';
+import ImageFuck from '@/plugins/ImageFuck.ts';
 import ServerAbstract from '@/core/middleware/ServerAbstract.ts';
 import FilesServer from '@/core/middleware/FilesServer.ts';
 

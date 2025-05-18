@@ -65,18 +65,20 @@
       </div>
       <v-divider />
       <div class="px-4 py-8">
-        <template v-if="cover.url">
-          <v-card
-            class="mb-4"
-            :image="cover.url"
-            :loading="loading"
+        <v-card
+          v-if="cover.url"
+          class="mb-8"
+          :loading="loading"
+          rounded
+        >
+          <v-img
             min-height="200"
-            rounded
+            :src="cover.url"
           />
-          <p class="mb-8 text-body-1">
+          <v-card-text>
             Размер: {{ formatBytes(cover.size) }}
-          </p>
-        </template>
+          </v-card-text>
+        </v-card>
         <v-file-input
           v-model="image"
           accept="image/*"

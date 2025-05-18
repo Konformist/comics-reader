@@ -113,7 +113,6 @@
             name: '/comics/[id]/edit-external',
             params: { id: comic.id },
           }"
-          @click="onSave()"
         />
         <v-btn
           class="w-100"
@@ -123,7 +122,6 @@
             name: '/comics/[id]/edit-pages',
             params: { id: comic.id },
           }"
-          @click="onSave()"
         />
       </div>
       <v-divider />
@@ -199,7 +197,6 @@ const loadCover = async () => {
 const comic = ref(new ComicModel());
 const loadComic = async () => {
   comic.value = await ComicController.load(comicId);
-  if (!comic.value.id) router.replace({ name: '/' });
 };
 
 const parsers = ref<ParserModel[]>([]);
@@ -225,15 +222,23 @@ const updateParser = () => {
 };
 
 onMounted(async () => {
-  await Promise.all([
-    loadParsers(),
-    loadTags(),
-    loadAuthors(),
-    loadLanguages(),
-    loadCover(),
-    loadComic(),
-  ]);
-  await loadParser();
+  loadingStart();
+
+  await loadComic();
+  if (!comic.value.id) {
+    router.replace({ name: '/' });
+  } else {
+    await Promise.all([
+      loadParsers(),
+      loadTags(),
+      loadAuthors(),
+      loadLanguages(),
+      loadCover(),
+    ]);
+    await loadParser();
+  }
+
+  loadingEnd();
 });
 
 const saveComic = async () => {

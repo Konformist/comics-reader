@@ -169,13 +169,16 @@ const loadComic = async () => {
 };
 
 const init = async () => {
+  loadingStart();
   await loadComic();
 
   if (!comic.value.id) {
     router.replace({ name: '/' });
   } else {
-    loadImages();
+    await loadImages();
   }
+
+  loadingEnd();
 };
 
 init();

@@ -85,19 +85,17 @@ import ParserModel from '@/core/entities/parser/ParserModel.ts';
 
 const route = useRoute('/comics/[id]/edit');
 const router = useRouter();
-const { loading, loadingStart,loadingEnd } = useLoading();
+const { loading, loadingStart, loadingEnd } = useLoading();
 
 const comicId = +(route.params.id || 0);
 
 const parser = ref(new ParserModel());
 const loadParser = async () => {
   parser.value = await ParserController.load(comic.value.parser);
-  if (!comic.value.id) router.replace({ name: '/' });
 };
 
 const comic = ref(new ComicModel());
 const loadComic = async () => {
-  if (!comicId) return;
   comic.value = await ComicController.load(comicId);
 };
 
@@ -149,7 +147,13 @@ const keyTags = computed({
 const init = async () => {
   loadingStart();
   await loadComic();
-  await loadParser();
+
+  if (!comic.value.id) {
+    router.replace({ name: '/' });
+  } else {
+    await loadParser();
+  }
+
   loadingEnd();
 };
 

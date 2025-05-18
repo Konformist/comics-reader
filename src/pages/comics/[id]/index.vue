@@ -206,6 +206,7 @@ const onCopy = async (string: string) => {
 const init = async () => {
   loadingStart();
   await loadComic();
+
   if (!comic.value.id) {
     router.replace({ name: '/' });
   } else {
@@ -217,6 +218,7 @@ const init = async () => {
       loadImages(),
     ]);
   }
+
   loadingEnd();
 };
 init();

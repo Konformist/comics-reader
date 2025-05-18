@@ -64,4 +64,8 @@ definePage({
     title: 'Настройки',
   },
 });
+
+onBeforeUnmount(() => {
+  appStore.loadSettings();
+});
 </script>

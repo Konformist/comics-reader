@@ -2,25 +2,6 @@
   <v-main scrollable>
     <v-container class="pa-0">
       <div class="pa-4 pb-8">
-        <v-label class="w-100" text="Авто перелистывание">
-          <v-switch
-            v-model="appStore.settings.autoReading"
-            class="ml-auto"
-            color="primary"
-            :false-value="false"
-            hide-details
-            inset
-            :true-value="true"
-          />
-        </v-label>
-        <v-number-input
-          v-model.number="appStore.settings.autoReadingTimeout"
-          control-variant="split"
-          :disabled="!appStore.settings.autoReading"
-          label="До перелистывания"
-          :min="0"
-          suffix="с"
-        />
         <v-label class="w-100" text="Направление прокрутки" />
         <v-btn-toggle
           v-model="appStore.settings.direction"
@@ -42,6 +23,25 @@
             value="none"
           />
         </v-btn-toggle>
+        <v-label class="w-100" text="Авто перелистывание">
+          <v-switch
+            v-model="appStore.settings.autoReading"
+            class="ml-auto"
+            color="primary"
+            :false-value="false"
+            hide-details
+            inset
+            :true-value="true"
+          />
+        </v-label>
+        <v-number-input
+          v-model.number="appStore.settings.autoReadingTimeout"
+          control-variant="split"
+          :disabled="!appStore.settings.autoReading"
+          label="До перелистывания"
+          :min="0"
+          suffix="с"
+        />
         <v-divider class="mt-6 mb-2" />
         <v-label class="w-100" text="Сжатие изображений при загрузке">
           <v-switch

@@ -106,7 +106,7 @@
                 :to="{
                   name: '/comics/[id]/read',
                   params: { id: comic.id },
-                  query: { page: index + 1 },
+                  query: { page: index },
                 }"
               />
             </v-col>

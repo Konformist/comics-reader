@@ -26,7 +26,7 @@ const init = async () => {
 
   await server.migrate();
   await server.autoBackup();
-  await useAppStore().loadSettings();
+  await useAppStore().initApp();
 
   app.mount('#app');
 };

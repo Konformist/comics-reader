@@ -1,12 +1,15 @@
 <template>
   <v-main>
     <v-container class="pa-0">
-      <div class="px-4 py-8">
-        <p class="d-flex justify-space-between">
-          <span class="font-weight-medium">Версия FrontEnd</span>
-          <span>v{{ appStore.frontVersion }}</span>
-        </p>
-      </div>
+      <p class="pa-4 d-flex justify-space-between">
+        <span class="font-weight-medium">Версия приложения</span>
+        <span>v{{ appStore.info.androidVersion || '—' }}</span>
+      </p>
+      <v-divider />
+      <p class="pa-4 d-flex justify-space-between">
+        <span class="font-weight-medium">Версия FrontEnd</span>
+        <span>v{{ appStore.info.frontVersion }}</span>
+      </p>
     </v-container>
   </v-main>
 </template>

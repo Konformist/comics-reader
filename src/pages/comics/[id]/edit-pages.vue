@@ -162,9 +162,7 @@ const comicId = +(route.params.id || 0);
 
 const files = ref<IFileDTO[]>([]);
 const loadFiles = async () => {
-  loadingStart();
   files.value = await server.loadImagesUnlink();
-  loadingEnd();
 };
 
 const images = ref<FileModel[]>([]);

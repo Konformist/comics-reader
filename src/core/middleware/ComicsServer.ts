@@ -289,7 +289,7 @@ class ComicsServer extends ServerAbstract<IComicDTO> {
     const exists = this.dataRaw.reduce((acc, item) => {
       acc.push(item.image.fileId);
       item.images.forEach((e) => {
-        exists.push(e.fileId);
+        acc.push(e.fileId);
       });
       return acc;
     }, [] as number[]);

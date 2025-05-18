@@ -1,9 +1,5 @@
 <template>
   <v-main scrollable>
-    <v-progress-linear
-      v-if="loading"
-      indeterminate
-    />
     <v-container class="pa-0">
       <div class="px-4 py-8">
         <v-number-input
@@ -16,7 +12,7 @@
         <v-btn
           class="w-100"
           color="error"
-          :disabled="!comic.images.length"
+          :disabled="!comic.images.length || loadingGlobal"
           :loading="loading"
           text="Удалить все картинки"
           @click="delPages()"
@@ -46,7 +42,7 @@
         />
         <v-btn
           class="w-100"
-          :disabled="!imagesTemplate"
+          :disabled="!imagesTemplate || loadingGlobal"
           :loading="loading"
           text="Заполнить ссылки"
           @click="setTemplate()"
@@ -56,14 +52,14 @@
       <div class="px-4 py-8">
         <v-btn
           class="w-100"
-          :disabled="!canLoadImages"
+          :disabled="!canLoadImages || loadingGlobal"
           :loading="loading"
           text="Загрузить только пустые"
           @click="onLoadImages()"
         />
         <v-btn
           class="mt-4 w-100"
-          :disabled="!canLoadImages"
+          :disabled="!canLoadImages || loadingGlobal"
           :loading="loading"
           text="Загрузить все"
           @click="onLoadImages(true)"

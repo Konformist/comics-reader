@@ -119,6 +119,8 @@ class ComicsServer extends ServerAbstract<IComicDTO> {
     if (!fileData) return;
 
     try {
+      comic.image.fileId = fileId;
+      await this.setDatabase();
       await this.#setFile(fileData.path, file);
       const fileStat = await FilesServer.getFileStat(fileData.path);
       await FilesServer.setItem({
@@ -127,13 +129,12 @@ class ComicsServer extends ServerAbstract<IComicDTO> {
         cdate: fileStat.cdate,
         mdate: fileStat.mdate,
       });
-      comic.image.fileId = fileId;
     } catch (e) {
       await FilesServer.delItem(fileData.id);
+      comic.image.fileId = 0;
+      await this.setDatabase();
       throw e;
     }
-
-    await this.setDatabase();
   }
 
   public async delCover(comicId: number): Promise<void> {
@@ -212,6 +213,8 @@ class ComicsServer extends ServerAbstract<IComicDTO> {
     if (!fileData) return;
 
     try {
+      image.fileId = fileId;
+      await this.setDatabase();
       await this.#setFile(fileData.path, file);
       const fileStat = await FilesServer.getFileStat(fileData.path);
       await FilesServer.setItem({
@@ -220,13 +223,12 @@ class ComicsServer extends ServerAbstract<IComicDTO> {
         cdate: fileStat.cdate,
         mdate: fileStat.mdate,
       });
-      image.fileId = fileId;
     } catch (e) {
       await FilesServer.delItem(fileId);
+      image.fileId = 0;
+      await this.setDatabase();
       throw e;
     }
-
-    await this.setDatabase();
   }
 
   public async setImage(comicId: number, imageId: number, file: string) {

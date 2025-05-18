@@ -163,11 +163,9 @@ const comicId = +(route.params.id || 0);
 const files = ref<IFileDTO[]>([]);
 const loadFiles = async () => {
   loadingStart();
-  files.value = await server.getImagesAll();
+  files.value = await server.loadImagesUnlink();
   loadingEnd();
 };
-
-loadFiles();
 
 const images = ref<FileModel[]>([]);
 const getImage = (id: number) => (images.value.find((e) => e.id === id));
@@ -182,6 +180,14 @@ const loadComic = async () => {
   pages.value = comic.value.images.length;
 };
 
+const reloadData = () => (
+  Promise.all([
+    loadComic(),
+    loadFiles(),
+    loadImages(),
+  ])
+);
+
 const init = async () => {
   loadingStart();
   await loadComic();
@@ -189,7 +195,10 @@ const init = async () => {
   if (!comic.value.id) {
     router.replace({ name: '/' });
   } else {
-    await loadImages();
+    await Promise.all([
+      loadFiles(),
+      loadImages(),
+    ]);
   }
 
   loadingEnd();
@@ -236,8 +245,7 @@ const onSave = async () => {
   try {
     loadingGlobalStart();
     await saveComic();
-    await loadComic();
-    await loadImages();
+    await reloadData();
     Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
@@ -254,8 +262,7 @@ const uploadImage = async (item: IComicImageUrl, event: File | File[]) => {
     await saveComic();
     const base64 = await fileToBase64(event);
     await ComicController.saveFile(comic.value.id, item, base64);
-    await loadComic();
-    await loadImages();
+    await reloadData();
     Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
@@ -272,8 +279,7 @@ const onLoadImage = async (item: IComicImageUrl) => {
     const result = await ParserController.loadImageRaw(item.url);
     await saveComic();
     await ComicController.saveFile(comic.value.id, item, result);
-    await loadComic();
-    await loadImages();
+    await reloadData();
     Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
@@ -304,13 +310,13 @@ const onLoadImages = async (force: boolean = false) => {
     Toast.show({ text: `Ошибка: ${e}` });
   }
 
-  await loadComic();
-  await loadImages();
   if (isError) {
     Toast.show({ text: 'Некоторые изображения не загружены' });
   } else {
     Toast.show({ text: 'Изображения загружены' });
   }
+
+  await reloadData();
   loadingGlobalEnd();
 };
 
@@ -328,8 +334,7 @@ const delPage = async (item: IComicImageUrl) => {
     loadingGlobalStart();
     comic.value.images = comic.value.images.filter((e) => e.id !== item.id);
     await saveComic();
-    await loadComic();
-    await loadImages();
+    await reloadData();
     Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
@@ -350,8 +355,7 @@ const delPages = async () => {
     loadingGlobalStart();
     comic.value.images = [];
     await saveComic();
-    await loadComic();
-    await loadImages();
+    await reloadData();
     Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });

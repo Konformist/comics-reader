@@ -283,17 +283,18 @@ class ComicsServer extends ServerAbstract<IComicDTO> {
     await this.setDatabase();
   }
 
-  public async loadAllImages() {
+  public async loadImagesUnlink() {
     const result = await FilesServer.getItems();
 
-    const ret: IFileDTO[] = [];
+    const exists = this.dataRaw.reduce((acc, item) => {
+      acc.push(item.image.fileId);
+      item.images.forEach((e) => {
+        exists.push(e.fileId);
+      });
+      return acc;
+    }, [] as number[]);
 
-    for (const item of result) {
-      const pathUri = await FilesServer.getFileUri(item.path);
-      ret.push({ ...item, path: Capacitor.convertFileSrc(pathUri) });
-    }
-
-    return ret;
+    return result.filter((e) => !exists.includes(e.id));
   }
 }
 

@@ -22,8 +22,19 @@
           :min="0"
           suffix="с"
         />
+        <v-label class="w-100" text="Сжатие">
+          <v-switch
+            v-model="appStore.settings.isCompress"
+            class="ml-auto"
+            color="primary"
+            :false-value="false"
+            hide-details
+            inset
+            :true-value="true"
+          />
+        </v-label>
         <v-btn
-          class="w-100"
+          class="mt-4 w-100"
           text="Сохранить"
           @click="appStore.saveSettings()"
         />

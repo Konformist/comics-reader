@@ -4,6 +4,7 @@ import type { ISettingsDTO } from '@/core/entities/settings/SettingsTypes.ts';
 export default class SettingsModel extends Entity<ISettingsDTO> {
   public autoReading: boolean = false;
   public autoReadingTimeout: number = 10;
+  public isCompress: boolean = false;
 
   constructor(dto?: Partial<ISettingsDTO>) {
     super();
@@ -11,6 +12,7 @@ export default class SettingsModel extends Entity<ISettingsDTO> {
     if (dto) {
       this.autoReading = dto.autoReading ?? false;
       this.autoReadingTimeout = dto.autoReadingTimeout ?? 10;
+      this.isCompress = dto.isCompress ?? false;
     }
   }
 
@@ -18,6 +20,7 @@ export default class SettingsModel extends Entity<ISettingsDTO> {
     return {
       autoReading: this.autoReading,
       autoReadingTimeout: this.autoReadingTimeout,
+      isCompress: this.isCompress,
     };
   }
 }

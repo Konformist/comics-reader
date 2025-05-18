@@ -1,10 +1,11 @@
+import serverSettings from '@/core/middleware/serverSettings.ts';
+import { Capacitor } from '@capacitor/core';
 import type { IComicDTO } from '@/core/entities/comic/ComicTypes.ts';
 import type { IFileDTO } from '@/core/object-value/file/FileTypes.ts';
-import { optimizeImage } from '@/core/utils/image.ts';
 import { COMICS_FILES_DIRECTORY, COMICS_STORE } from '@/core/middleware/variables.ts';
+import ImageFuck from '@/plugins/imageOptimizator.ts';
 import ServerAbstract from '@/core/middleware/ServerAbstract.ts';
 import FilesServer from '@/core/middleware/FilesServer.ts';
-import { Capacitor } from '@capacitor/core';
 
 class ComicsServer extends ServerAbstract<IComicDTO> {
   constructor() {
@@ -69,9 +70,14 @@ class ComicsServer extends ServerAbstract<IComicDTO> {
     await this.setDatabase();
   }
 
-  async #setFile(path: string, file: File): Promise<void> {
-    const optimizedFile = await optimizeImage(file);
-    await FilesServer.setFile(path, optimizedFile);
+  async #setFile(path: string, data: string): Promise<void> {
+    const settings = await serverSettings.getSettings();
+
+    if (settings.isCompress) {
+      await ImageFuck.optimization({ path, data });
+    } else {
+      await FilesServer.setFile(path, data);
+    }
   }
 
   #getCoverPath(comicId: number): string {
@@ -92,7 +98,7 @@ class ComicsServer extends ServerAbstract<IComicDTO> {
     return { ...result, path: Capacitor.convertFileSrc(pathUri) };
   }
 
-  public async addCover(comicId: number, file: File): Promise<void> {
+  public async addCover(comicId: number, file: string): Promise<void> {
     const comic = await this.getItem(comicId);
 
     if (!comic) return;
@@ -108,25 +114,25 @@ class ComicsServer extends ServerAbstract<IComicDTO> {
         cdate: 0,
         path: this.#getCoverPath(comicId),
       });
-    const cover = await FilesServer.getItem(fileId);
+    const fileData = await FilesServer.getItem(fileId);
 
-    if (!cover) return;
+    if (!fileData) return;
 
     let isFileSet = false;
 
     try {
-      await this.#setFile(cover.path, file);
+      await this.#setFile(fileData.path, file);
       isFileSet = true;
-      const fileStat = await FilesServer.getFileStat(cover.path);
+      const fileStat = await FilesServer.getFileStat(fileData.path);
       await FilesServer.setItem({
-        ...cover,
+        ...fileData,
         size: fileStat.size,
         cdate: fileStat.cdate,
         mdate: fileStat.mdate,
       });
       comic.image.fileId = fileId;
     } catch (e) {
-      if (isFileSet) await FilesServer.delFile(cover.path);
+      if (isFileSet) await FilesServer.delFile(fileData.path);
       throw e;
     }
 
@@ -186,7 +192,7 @@ class ComicsServer extends ServerAbstract<IComicDTO> {
     return ret;
   }
 
-  public async addImage(comicId: number, imageId: number, file: File): Promise<void> {
+  public async addImage(comicId: number, imageId: number, file: string): Promise<void> {
     const comic = await this.getItem(comicId);
 
     if (!comic) return;
@@ -197,41 +203,40 @@ class ComicsServer extends ServerAbstract<IComicDTO> {
 
     const fileId = await FilesServer.addItem({
       id: 0,
-      name: '',
-      mime: '',
+      name: `${image.id}.webp`,
+      mime: 'image/webp',
       size: 0,
       mdate: 0,
       cdate: 0,
-      path: '',
+      path: this.#getImagePath(comicId, image.id),
     });
+    const fileData = await FilesServer.getItem(fileId);
 
-    const pathFile = this.#getImagePath(comicId, image.id);
+    if (!fileData) return;
+
     let isFileSet = false;
 
     try {
-      await this.#setFile(pathFile, file);
+      await this.#setFile(fileData.path, file);
       isFileSet = true;
-      const fileStat = await FilesServer.getFileStat(pathFile);
+      const fileStat = await FilesServer.getFileStat(fileData.path);
       await FilesServer.setItem({
-        id: fileId,
-        name: `${image.id}.webp`,
-        mime: 'image/webp',
+        ...fileData,
         size: fileStat.size,
         cdate: fileStat.cdate,
         mdate: fileStat.mdate,
-        path: pathFile,
       });
       image.fileId = fileId;
     } catch (e) {
       await FilesServer.delItem(fileId);
-      if (isFileSet) await FilesServer.delFile(pathFile);
+      if (isFileSet) await FilesServer.delFile(fileData.path);
       throw e;
     }
 
     await this.setDatabase();
   }
 
-  public async setImage(comicId: number, imageId: number, file: File) {
+  public async setImage(comicId: number, imageId: number, file: string) {
     const comic = await this.getItem(comicId);
 
     if (!comic) return;

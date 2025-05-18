@@ -32,7 +32,7 @@ export default class ComicController {
     return new FileModel(result);
   }
 
-  static saveCover(comicId: number, file: File): Promise<void> {
+  static saveCover(comicId: number, file: string): Promise<void> {
     return server.addComicCover(comicId, file);
   }
 
@@ -52,7 +52,7 @@ export default class ComicController {
     return new FileModel(result);
   }
 
-  static saveFile(comicId: number, image: IComicImageUrl, file: File): Promise<void> {
+  static saveFile(comicId: number, image: IComicImageUrl, file: string): Promise<void> {
     return image.fileId
       ? server.setComicFile(comicId, image.id, file)
       : server.addComicFile(comicId, image.id, file);

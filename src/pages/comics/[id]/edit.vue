@@ -148,6 +148,7 @@
 <script lang="ts" setup>
 import useLoading from '@/composables/useLoading.ts';
 import { formatBytes } from '@/core/utils/format.ts';
+import { fileToBase64 } from '@/core/utils/image.ts';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
 import FileModel from '@/core/object-value/file/FileModel.ts';
@@ -244,7 +245,7 @@ const onLoadInfo = async () => {
 
   try {
     loadingStart();
-    const result = await ParserController.loadComic(comic.value.url);
+    const result = await ParserController.loadComicRaw(comic.value.url);
     const parsedComic = parser.value.parse(result, comic.value.override);
 
     if (!comic.value.image.url && parsedComic.image) {
@@ -319,7 +320,8 @@ const uploadCover = async () => {
   try {
     loadingStart();
     await saveComic();
-    await ComicController.saveCover(comic.value.id, image.value);
+    const base64 = await fileToBase64(image.value);
+    await ComicController.saveCover(comic.value.id, base64);
     await loadComic();
     await loadCover();
     Toast.show({ text: 'Комикс сохранён' });

@@ -95,9 +95,8 @@
               >
                 <ComicPageEdit
                   v-model:from="item.raw.url"
-                  :comic-id="comic.id"
-                  :item="item.raw"
-                  :loading-parent="loading"
+                  :image="getImage(item.raw.fileId)"
+                  :loading="loading"
                   @delete="delPage(item.raw)"
                   @download="onLoadImage(item.raw)"
                   @upload="uploadImage(item.raw, $event)"
@@ -128,6 +127,8 @@
 
 <script lang="ts" setup>
 import useLoading from '@/composables/useLoading.ts';
+import FileModel from '@/core/object-value/file/FileModel.ts';
+import { fileToBase64 } from '@/core/utils/image.ts';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
 import ComicController from '@/core/entities/comic/ComicController.ts';
@@ -152,15 +153,32 @@ const pages = ref(0);
 
 const comicId = +(route.params.id || 0);
 
+const images = ref<FileModel[]>([]);
+
+const getImage = (id: number) => (images.value.find((e) => e.id === id));
+
+const loadImages = async () => {
+  images.value = await ComicController.loadFiles(comicId);
+};
+
 const comic = ref(new ComicModel());
 
 const loadComic = async () => {
   comic.value = await ComicController.load(comicId);
-  if (!comic.value.id) router.replace({ name: '/' });
-  else pages.value = comic.value.images.length;
+  pages.value = comic.value.images.length;
 };
 
-loadComic();
+const init = async () => {
+  await loadComic();
+
+  if (!comic.value.id) {
+    router.replace({ name: '/' });
+  } else {
+    loadImages();
+  }
+};
+
+init();
 
 const setPages = () => {
   const diff = pages.value - comic.value.images.length;
@@ -188,7 +206,7 @@ const imagesTemplate = ref('');
 const imagesTemplateStart = ref(1);
 
 const setTemplate = () => {
-  comic.value?.images.forEach((image, index) => {
+  comic.value.images.forEach((image, index) => {
     image.url = imagesTemplate.value.replace('<ID>', (imagesTemplateStart.value + index).toString());
   });
 };
@@ -200,6 +218,7 @@ const saveComic = async () => {
 const onSave = async () => {
   await saveComic();
   await loadComic();
+  await loadImages();
   Toast.show({ text: 'Комикс сохранён' });
 };
 
@@ -209,8 +228,10 @@ const uploadImage = async (item: IComicImageUrl, event: File | File[]) => {
   try {
     loadingStart();
     await saveComic();
-    await ComicController.saveFile(comic.value.id, item, event);
+    const base64 = await fileToBase64(event);
+    await ComicController.saveFile(comic.value.id, item, base64);
     await loadComic();
+    await loadImages();
     Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
@@ -228,6 +249,7 @@ const onLoadImage = async (item: IComicImageUrl) => {
     await saveComic();
     await ComicController.saveFile(comic.value.id, item, result);
     await loadComic();
+    await loadImages();
     Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
@@ -256,6 +278,7 @@ const onLoadImages = async (force: boolean = false) => {
   }
 
   await loadComic();
+  await loadImages();
   Toast.show({ text: 'Комикс сохранён' });
   loadingEnd();
 };
@@ -275,6 +298,7 @@ const delPage = async (item: IComicImageUrl) => {
     comic.value.images = comic.value.images.filter((e) => e.id !== item.id);
     await saveComic();
     await loadComic();
+    await loadImages();
     Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
@@ -296,6 +320,7 @@ const delPages = async () => {
     comic.value.images = [];
     await saveComic();
     await loadComic();
+    await loadImages();
     Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });

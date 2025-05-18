@@ -6,6 +6,7 @@ const dataRaw: { item: ISettingsDTO } = {
   item: {
     autoReading: false,
     autoReadingTimeout: 10,
+    isCompress: false,
   },
 };
 

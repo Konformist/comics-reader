@@ -158,6 +158,9 @@ const loadCover = async () => {
 };
 
 const images = ref<FileModel[]>([]);
+
+const getImage = (id: number) => (images.value.find((e) => e.id === id));
+
 const loadImages = async () => {
   images.value = await ComicController.loadFiles(comicId);
 };
@@ -166,7 +169,6 @@ const comic = ref(new ComicModel());
 
 const loadComic = async () => {
   comic.value = await ComicController.load(comicId);
-  if (!comic.value.id) router.replace({ name: '/' });
 };
 
 const languages = ref<LanguageObject[]>([]);
@@ -196,8 +198,6 @@ const loadTags = async () => {
   tags.value = await TagController.loadAll();
 };
 
-const getImage = (id: number) => (images.value.find((e) => e.id === id));
-
 const onCopy = async (string: string) => {
   await Clipboard.write({ string });
   Toast.show({ text: 'Скопировано' });
@@ -205,14 +205,18 @@ const onCopy = async (string: string) => {
 
 const init = async () => {
   loadingStart();
-  await Promise.all([
-    loadLanguages(),
-    loadAuthors(),
-    loadTags(),
-    loadCover(),
-    loadImages(),
-    loadComic(),
-  ]);
+  await loadComic();
+  if (!comic.value.id) {
+    router.replace({ name: '/' });
+  } else {
+    await Promise.all([
+      loadLanguages(),
+      loadAuthors(),
+      loadTags(),
+      loadCover(),
+      loadImages(),
+    ]);
+  }
   loadingEnd();
 };
 init();

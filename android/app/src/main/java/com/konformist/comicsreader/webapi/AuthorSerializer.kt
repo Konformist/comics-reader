@@ -1,16 +1,46 @@
 package com.konformist.comicsreader.webapi
 
 import com.konformist.comicsreader.db.author.Author
+import com.konformist.comicsreader.db.author.AuthorCreate
+import com.konformist.comicsreader.db.author.AuthorDelete
+import com.konformist.comicsreader.db.author.AuthorUpdate
+import com.konformist.comicsreader.utils.ValidationException
 import org.json.JSONArray
 import org.json.JSONObject
 
 class AuthorSerializer : Serializer<Author>() {
+  @Throws(ValidationException::class)
+  override fun createFromJSON(value: JSONObject): AuthorCreate {
+    val name = value.optString("name", "").trim()
+    if (name == "") throw ValidationException("name")
+
+    return AuthorCreate(name = name)
+  }
+
+  @Throws(ValidationException::class)
+  override fun updateFromJSON(value: JSONObject): AuthorUpdate {
+    val id = value.optLong("id", 0)
+    if (id == 0.toLong()) throw ValidationException("id")
+    val name = value.optString("name", "").trim()
+    if (name == "") throw ValidationException("name")
+
+    return AuthorUpdate(id = id, mdate = getMDate(), name = name)
+  }
+
+  @Throws(ValidationException::class)
+  override fun deleteFromJSON(value: JSONObject): AuthorDelete {
+    val id = value.optLong("id", 0)
+    if (id == 0.toLong()) throw ValidationException("id")
+
+    return AuthorDelete(id = id)
+  }
+
   override fun toJSON(item: Author): JSONObject {
     val data = JSONObject()
 
     data.put("id", item.id)
-    data.put("cdate", item.cdate?.time)
-    data.put("mdate", item.mdate?.time)
+    data.put("cdate", item.cdate)
+    data.put("mdate", item.mdate)
     data.put("name", item.name)
 
     return data
@@ -24,15 +54,5 @@ class AuthorSerializer : Serializer<Author>() {
     }
 
     return result
-  }
-
-  override fun fromJSON(item: JSONObject): Author {
-
-    return Author(
-      id = getId(item.optLong("id", 0)),
-      cdate = getDate(item.optLong("cdate")),
-      mdate = getDate(item.optLong("mdate")),
-      name = item.getString("name"),
-    )
   }
 }

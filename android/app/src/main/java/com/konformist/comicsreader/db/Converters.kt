@@ -2,19 +2,8 @@ package com.konformist.comicsreader.db
 
 import androidx.room.TypeConverter
 import org.json.JSONArray
-import java.util.Date
 
 class Converters {
-  @TypeConverter
-  fun fromTimestamp(value: Long?): Date? {
-    return value?.let { Date(it) }
-  }
-
-  @TypeConverter
-  fun toTimestamp(date: Date?): Long? {
-    return date?.time?.toLong()
-  }
-
   @TypeConverter
   fun fromArrayString(value: String): List<Long> {
     val result = arrayListOf<Long>()

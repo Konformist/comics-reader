@@ -14,12 +14,12 @@ interface LanguageDao {
   @Query("SELECT * FROM languages WHERE id = :id")
   fun read(id: Long): Language
 
-  @Insert
-  fun create(item: Language): Long
+  @Insert(entity = Language::class)
+  fun create(item: LanguageCreate): Long
 
-  @Update
-  fun update(item: Language): Int
+  @Update(entity = Language::class)
+  fun update(item: LanguageUpdate): Int
 
-  @Delete
-  fun delete(item: Language): Int
+  @Delete(entity = Language::class)
+  fun delete(item: LanguageDelete): Int
 }

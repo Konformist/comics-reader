@@ -12,15 +12,15 @@
           Ссылка на сайт
         </h3>
         <p class="text-body-1">
-          <template v-if="parser.site">
-            <a :href="parser.site">
-              {{ parser.site }}
+          <template v-if="parser.siteUrl">
+            <a :href="parser.siteUrl">
+              {{ parser.siteUrl }}
             </a>
             <v-icon
               class="ml-2"
               icon="$copy"
               size="20"
-              @click="onCopy(parser.site)"
+              @click="onCopy(parser.siteUrl)"
             />
           </template>
           <template v-else>—</template>
@@ -32,49 +32,49 @@
           CSS указатель на название
         </h3>
         <p class="text-body-1">
-          {{ parser.title || '—' }}
+          {{ parser.titleCSS || '—' }}
         </p>
         <h3 class="mt-4 text-h6">
           CSS указатель на изображение
         </h3>
         <p class="text-body-1">
-          {{ parser.image || '—' }}
+          {{ parser.coverCSS || '—' }}
         </p>
         <h3 class="mt-4 text-h6">
           CSS указатель на авторов
         </h3>
         <p class="text-body-1">
-          {{ parser.authors || '—' }}
+          {{ parser.authorsCSS || '—' }}
         </p>
         <h3 class="mt-4 text-h6">
           CSS указатель на текст авторов
         </h3>
         <p class="text-body-1">
-          {{ parser.authorsText || '—' }}
+          {{ parser.authorsTextCSS || '—' }}
         </p>
         <h3 class="mt-4 text-h6">
           CSS указатель на текст язык
         </h3>
         <p class="text-body-1">
-          {{ parser.language || '—' }}
+          {{ parser.languageCSS || '—' }}
         </p>
         <h3 class="mt-4 text-h6">
           CSS указатель на теги
         </h3>
         <p class="text-body-1">
-          {{ parser.tags || '—' }}
+          {{ parser.tagsCSS || '—' }}
         </p>
         <h3 class="mt-4 text-h6">
           CSS указатель на текст тегов
         </h3>
         <p class="text-body-1">
-          {{ parser.tagsText || '—' }}
+          {{ parser.tagsTextCSS || '—' }}
         </p>
         <h3 class="mt-4 text-h6">
           CSS указатель на страницы
         </h3>
         <p class="text-body-1">
-          {{ parser.images || '—' }}
+          {{ parser.pagesCSS || '—' }}
         </p>
       </div>
     </v-container>
@@ -93,8 +93,8 @@
 import useLoading from '@/composables/useLoading.ts';
 import { Clipboard } from '@capacitor/clipboard';
 import { Toast } from '@capacitor/toast';
-import ParserController from '@/core/entities/parser/ParserController.ts';
-import ParserModel from '@/core/entities/parser/ParserModel.ts';
+import ParserController from '@/core/entities-v2/parser/ParserController.ts';
+import ParserModel from '@/core/entities-v2/parser/ParserModel.ts';
 
 definePage({
   meta: {

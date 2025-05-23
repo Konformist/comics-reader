@@ -1,9 +1,9 @@
 <template>
   <v-card>
-    <template v-if="image?.url">
-      <v-img :src="image.url" />
+    <template v-if="item.file?.url">
+      <v-img :src="item.file.url" />
       <v-card-text class="text-body-1">
-        Размер: {{ formatBytes(image.size) }}
+        Размер: {{ formatBytes(item.file.size) }}
       </v-card-text>
     </template>
     <v-card-item class="pb-0">
@@ -29,17 +29,6 @@
         rows="2"
         variant="solo-filled"
       />
-      <v-alert color="error">
-        Только для исправления багов загрузки
-      </v-alert>
-      <v-select
-        v-model="item.fileId"
-        class="mt-2"
-        item-title="path"
-        item-value="id"
-        :items="files || []"
-        variant="solo-filled"
-      />
     </v-card-item>
     <v-card-actions>
       <v-btn
@@ -59,10 +48,8 @@
 </template>
 
 <script setup lang="ts">
-import type { IComicImageUrl } from '@/core/entities/comic/ComicTypes.ts';
-import type { IFileDTO } from '@/core/object-value/file/FileTypes.ts';
 import { formatBytes } from '@/core/utils/format.ts';
-import FileModel from '@/core/object-value/file/FileModel.ts';
+import type ChapterPageModel from '@/core/entities-v2/chapter-page/ChapterPageModel.ts';
 
 const from = defineModel('from', { default: '' });
 
@@ -73,9 +60,7 @@ const emit = defineEmits<{
 }>();
 
 defineProps<{
-  files?: IFileDTO[]
-  item: IComicImageUrl
-  image?: FileModel
+  item: ChapterPageModel
   disabled: boolean
 }>();
 

@@ -2,13 +2,13 @@
   <v-main scrollable>
     <v-container class="pa-0">
       <router-link
-        v-if="cover.url"
+        v-if="comic.cover?.file?.url"
         :to="{
-          name: '/comics/[id]/read',
+          name: '/comics/[id]/chapter-read',
           params: { id: comic.id },
         }"
       >
-        <v-img :src="cover.url" />
+        <v-img :src="comic.cover.file.url" />
       </router-link>
       <div class="pa-4">
         <h3 class="font-weight-medium">
@@ -21,15 +21,15 @@
           />
         </h3>
         <p
-          v-if="comic.url"
+          v-if="comic.fromUrl"
           class="mt-2"
         >
-          <a :href="comic.url">Ссылка на комикс</a>
+          <a :href="comic.fromUrl">Ссылка на комикс</a>
           <v-icon
             class="ml-2"
             icon="$copy"
             size="20"
-            @click="onCopy(comic.url)"
+            @click="onCopy(comic.fromUrl)"
           />
         </p>
         <p
@@ -65,50 +65,43 @@
             :text="item.name"
           />
         </p>
-        <p class="mt-2 d-flex flex-wrap ga-1 align-center">
-          <b class="font-weight-medium">Страниц:</b>
-          <v-chip :text="comic.images.length" />
-        </p>
-        <p class="mt-2 d-flex flex-wrap ga-1 align-center">
-          <b class="font-weight-medium">Загружено:</b>
-          <v-chip :text="`${comic.imagesFilled.length} / ${comic.images.length}`" />
-        </p>
       </div>
+      <v-divider />
+      <v-list>
+        <v-list-item
+          v-for="(chapter, index) in chapters"
+          :key="chapter.id"
+          :title="chapter.name || `Глава ${index + 1}`"
+          :to="{
+            name: '/comics/[id]/chapter-read',
+            params: { id: chapter.id },
+          }"
+        >
+          <template #append>
+            <v-list-item-action end>
+              <v-btn
+                density="comfortable"
+                :disabled="loadingGlobal"
+                icon="$edit"
+                :to="{
+                  name: '/comics/[id]/chapter-edit',
+                  params: { id: chapter.id, chapterId: chapter.id },
+                }"
+                variant="tonal"
+                @click.prevent
+              />
+            </v-list-item-action>
+          </template>
+        </v-list-item>
+      </v-list>
       <v-divider />
       <div class="px-4 py-8">
         <v-btn
           class="w-100"
-          :disabled="!comic.images.length || loading"
-          text="Читать"
-          :to="{
-            name: '/comics/[id]/read',
-            params: { id: comic.id },
-          }"
+          text="Добавить главу"
+          @click="createChapter()"
         />
       </div>
-      <template v-if="comic.images.length && !loading">
-        <v-divider />
-        <div class="px-4 py-8">
-          <v-row>
-            <v-col
-              v-for="(image, index) in comic.images"
-              :key="image.id"
-              class="pa-2"
-              cols="6"
-            >
-              <v-card
-                height="250"
-                :image="getImage(image.fileId)?.url"
-                :to="{
-                  name: '/comics/[id]/read',
-                  params: { id: comic.id },
-                  query: { page: index },
-                }"
-              />
-            </v-col>
-          </v-row>
-        </div>
-      </template>
     </v-container>
     <v-fab
       :disabled="loading || loadingGlobal"
@@ -122,18 +115,19 @@
 </template>
 
 <script lang="ts" setup>
-import useLoading from '@/composables/useLoading.ts';
 import { Clipboard } from '@capacitor/clipboard';
 import { Toast } from '@capacitor/toast';
-import FileModel from '@/core/object-value/file/FileModel.ts';
-import ComicController from '@/core/entities/comic/ComicController.ts';
-import ComicModel from '@/core/entities/comic/ComicModel.ts';
-import AuthorController from '@/core/object-value/author/AuthorController.ts';
-import type AuthorObject from '@/core/object-value/author/AuthorObject.ts';
-import LanguageController from '@/core/object-value/language/LanguageController.ts';
-import type LanguageObject from '@/core/object-value/language/LanguageObject.ts';
-import TagController from '@/core/object-value/tag/TagController.ts';
-import type TagObject from '@/core/object-value/tag/TagObject.ts';
+import useLoading from '@/composables/useLoading.ts';
+import ComicController from '@/core/entities-v2/comic/ComicController.ts';
+import ComicModel from '@/core/entities-v2/comic/ComicModel.ts';
+import ChapterController from '@/core/entities-v2/chapter/ChapterController.ts';
+import ChapterModel from '@/core/entities-v2/chapter/ChapterModel.ts';
+import AuthorController from '@/core/entities-v2/author/AuthorController.ts';
+import type AuthorModel from '@/core/entities-v2/author/AuthorModel.ts';
+import LanguageController from '@/core/entities-v2/language/LanguageController.ts';
+import type LanguageModel from '@/core/entities-v2/language/LanguageModel.ts';
+import TagController from '@/core/entities-v2/tag/TagController.ts';
+import type TagModel from '@/core/entities-v2/tag/TagModel.ts';
 
 definePage({
   meta: {
@@ -153,17 +147,10 @@ const {
 
 const comicId = +route.params.id;
 
-const cover = ref(new FileModel());
-const loadCover = async () => {
-  cover.value = await ComicController.loadCover(comicId);
-};
+const chapters = ref<ChapterModel[]>([]);
 
-const images = ref<FileModel[]>([]);
-
-const getImage = (id: number) => (images.value.find((e) => e.id === id));
-
-const loadImages = async () => {
-  images.value = await ComicController.loadFiles(comicId);
+const loadChapters = async () => {
+  chapters.value = await ChapterController.loadAll(comicId);
 };
 
 const comic = ref(new ComicModel());
@@ -172,16 +159,16 @@ const loadComic = async () => {
   comic.value = await ComicController.load(comicId);
 };
 
-const languages = ref<LanguageObject[]>([]);
+const languages = ref<LanguageModel[]>([]);
 const languagesChips = computed(() => (
-  languages.value.filter((e) => comic.value.language === e.id)
+  languages.value.filter((e) => comic.value.languageId === e.id)
 ));
 
 const loadLanguages = async () => {
   languages.value = await LanguageController.loadAll();
 };
 
-const authors = ref<AuthorObject[]>([]);
+const authors = ref<AuthorModel[]>([]);
 const authorsChips = computed(() => (
   authors.value.filter((e) => comic.value.authors.includes(e.id))
 ));
@@ -190,7 +177,7 @@ const loadAuthors = async () => {
   authors.value = await AuthorController.loadAll();
 };
 
-const tags = ref<TagObject[]>([]);
+const tags = ref<TagModel[]>([]);
 const tagsChips = computed(() => (
   tags.value.filter((e) => comic.value.tags.includes(e.id))
 ));
@@ -215,8 +202,7 @@ const init = async () => {
       loadLanguages(),
       loadAuthors(),
       loadTags(),
-      loadCover(),
-      loadImages(),
+      loadChapters(),
     ]);
   }
 
@@ -224,4 +210,18 @@ const init = async () => {
 };
 
 init();
+
+const createChapter = async () => {
+  const chapterId = await ChapterController.save(new ChapterModel({
+    comicId,
+  }));
+
+  if (chapterId) {
+    Toast.show({ text: 'Глава создана' });
+    await router.push({
+      name: '/comics/[id]/chapter-edit',
+      params: { id: chapterId.toString() },
+    });
+  }
+};
 </script>

@@ -14,12 +14,12 @@ interface AuthorDao {
   @Query("SELECT * FROM authors WHERE id = :id")
   fun read(id: Long): Author
 
-  @Insert
-  fun create(item: Author): Long
+  @Insert(entity = Author::class)
+  fun create(item: AuthorCreate): Long
 
-  @Update
-  fun update(item: Author): Int
+  @Update(entity = Author::class)
+  fun update(item: AuthorUpdate): Int
 
-  @Delete
-  fun delete(item: Author): Int
+  @Delete(entity = Author::class)
+  fun delete(item: AuthorDelete): Int
 }

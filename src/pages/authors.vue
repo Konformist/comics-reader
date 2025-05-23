@@ -90,10 +90,10 @@ import useLoading from '@/composables/useLoading.ts';
 import { sortString } from '@/core/utils/array.ts';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
-import ComicController from '@/core/entities/comic/ComicController.ts';
-import ComicModel from '@/core/entities/comic/ComicModel.ts';
-import AuthorController from '@/core/object-value/author/AuthorController.ts';
-import AuthorObject from '@/core/object-value/author/AuthorObject.ts';
+import ComicController from '@/core/entities-v2/comic/ComicController.ts';
+import ComicModel from '@/core/entities-v2/comic/ComicModel.ts';
+import AuthorController from '@/core/entities-v2/author/AuthorController.ts';
+import AuthorModel from '@/core/entities-v2/author/AuthorModel.ts';
 
 definePage({
   meta: {
@@ -128,7 +128,7 @@ const loadComics = async () => {
 
 loadComics();
 
-const authors = ref<AuthorObject[]>([]);
+const authors = ref<AuthorModel[]>([]);
 
 const loadAuthors = async () => {
   authors.value = await AuthorController.loadAll();
@@ -145,10 +145,10 @@ onMounted(async () => {
   loadingEnd();
 });
 
-const selectedAuthor = ref(new AuthorObject());
+const selectedAuthor = ref(new AuthorModel());
 
 const clickAuthor = (value: number) => {
-  selectedAuthor.value = authors.value.find((e) => e.id === value) || new AuthorObject();
+  selectedAuthor.value = authors.value.find((e) => e.id === value) || new AuthorModel();
   dialog.value = true;
 };
 
@@ -204,7 +204,7 @@ const deleteAuthor = async (id: number) => {
 
   try {
     loadingGlobalStart();
-    await AuthorController.delete(id);
+    await AuthorController.remove(id);
     await loadAuthors();
     Toast.show({ text: 'Автор удалён' });
   } catch (e) {

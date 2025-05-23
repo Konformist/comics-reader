@@ -72,13 +72,15 @@
     </v-container>
   </v-main>
 </template>
+
 <script setup lang="ts">
 import useLoading from '@/composables/useLoading.ts';
 import server from '@/core/middleware/server.ts';
 import { APP_NAME, BACKUPS_DIRECTORY, COMICS_FILES_DIRECTORY } from '@/core/middleware/variables.ts';
 import type { ITreeDirectory } from '@/core/object-value/file/FileTypes.ts';
+import WebApi from '@/plugins/WebApiPlugin.ts';
 import { Dialog } from '@capacitor/dialog';
-import { Directory, Filesystem } from '@capacitor/filesystem';
+import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 import { Toast } from '@capacitor/toast';
 
 definePage({
@@ -108,11 +110,14 @@ loadBackupsTree();
 
 const addBackup = async () => {
   try {
-    await server.addBackup();
+    loadingGlobalStart();
+    await WebApi.addBackup();
     await loadBackupsTree();
     Toast.show({ text: 'Бекап создан' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
+  } finally {
+    loadingGlobalEnd();
   }
 };
 
@@ -120,10 +125,14 @@ const backupPath = ref('');
 
 const getBackup = async () => {
   try {
-    await server.getBackup(backupPath.value);
+    loadingGlobalStart();
+    const path = backupPath.value.replace(`${BACKUPS_DIRECTORY}/`, '');
+    await WebApi.restoreBackup({ path });
     Toast.show({ text: 'Бекап применён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
+  } finally {
+    loadingGlobalEnd();
   }
 };
 
@@ -136,7 +145,10 @@ const delBackup = async () => {
   if (!value) return;
 
   try {
-    await server.delBackup(backupPath.value);
+    await Filesystem.deleteFile({
+      path: backupPath.value,
+      directory: Directory.Data,
+    });
     await loadBackupsTree();
     Toast.show({ text: 'Бекап удалён' });
   } catch (e) {
@@ -152,7 +164,13 @@ const loadBackup = async () => {
   try {
     loadingGlobalStart();
     const result = await backupFile.value.text();
-    await server.setBackup(result, backupFile.value.name);
+    await Filesystem.writeFile({
+      path: `${BACKUPS_DIRECTORY}/${backupFile.value.name}`,
+      directory: Directory.Data,
+      data: result,
+      encoding: Encoding.UTF8,
+      recursive: true,
+    });
     await loadBackupsTree();
     Toast.show({ text: 'Данные получены' });
   } catch (e) {

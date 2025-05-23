@@ -9,6 +9,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     BottomNavigation: typeof import('./components/BottomNavigation.vue')['default']
+    ChapterPageRead: typeof import('./components/ChapterPageRead.vue')['default']
     ComicGallery: typeof import('./components/ComicGallery.vue')['default']
     ComicPageEdit: typeof import('./components/ComicPageEdit.vue')['default']
     FilesTree: typeof import('./components/FilesTree.vue')['default']

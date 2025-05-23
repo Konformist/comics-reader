@@ -4,7 +4,7 @@
       <div class="px-4 py-8">
         <v-select
           v-if="parsers.length"
-          v-model="comic.parser"
+          v-model="comic.parserId"
           item-title="name"
           item-value="id"
           :items="parsers"
@@ -12,7 +12,7 @@
           @update:model-value="loadParser()"
         />
         <v-textarea
-          v-model.trim="comic.url"
+          v-model.trim="comic.fromUrl"
           auto-grow
           :autocapitalize="false"
           :autocomplete="false"
@@ -28,7 +28,7 @@
           rows="2"
         />
         <v-select
-          v-model="comic.language"
+          v-model="comic.languageId"
           item-title="name"
           item-value="id"
           :items="languages"
@@ -54,7 +54,7 @@
         />
         <v-btn
           class="mt-4 w-100"
-          :disabled="!comic.parser || !comic.url || loading || loadingGlobal"
+          :disabled="!comic.parserId || !comic.fromUrl || loading || loadingGlobal"
           text="Загрузить"
           @click="onLoadInfo()"
         />
@@ -62,16 +62,16 @@
       <v-divider />
       <div class="px-4 py-8">
         <v-card
-          v-if="cover.url"
+          v-if="comic.cover.file?.url"
           class="mb-8"
           rounded
         >
           <v-img
             min-height="200"
-            :src="cover.url"
+            :src="comic.cover.file.url"
           />
           <v-card-text>
-            Размер: {{ formatBytes(cover.size) }}
+            Размер: {{ formatBytes(comic.cover.file.size) }}
           </v-card-text>
         </v-card>
         <v-file-input
@@ -84,7 +84,7 @@
           Или
         </p>
         <v-textarea
-          v-model.trim="comic.image.url"
+          v-model.trim="comic.cover.fromUrl"
           auto-grow
           :autocapitalize="false"
           :autocomplete="false"
@@ -94,29 +94,22 @@
         />
         <v-btn
           class="w-100"
-          :disabled="(!image && !comic.image.url) || loading || loadingGlobal"
+          :disabled="(!image && !comic.cover.fromUrl) || loading || loadingGlobal"
           text="Загрузить"
           @click="onLoadCover()"
         />
       </div>
       <v-divider />
-      <div class="px-4 py-8">
-        <v-btn
-          v-if="comic.parser"
-          class="mb-4 w-100"
-          :disabled="loading || loadingGlobal"
-          text="Расширенные настройки"
-          :to="{
-            name: '/comics/[id]/edit-external',
-            params: { id: comic.id },
-          }"
-        />
+      <div
+        v-if="comic.parserId"
+        class="px-4 py-8"
+      >
         <v-btn
           class="w-100"
           :disabled="loading || loadingGlobal"
-          text="Редактировать страницы"
+          text="Расширенные настройки"
           :to="{
-            name: '/comics/[id]/edit-pages',
+            name: '/comics/[id]/override-edit',
             params: { id: comic.id },
           }"
         />
@@ -141,22 +134,25 @@
 </template>
 
 <script lang="ts" setup>
-import useLoading from '@/composables/useLoading.ts';
-import { formatBytes } from '@/core/utils/format.ts';
-import { fileToBase64 } from '@/core/utils/image.ts';
+import { parseComic } from '@/core/entities-v2/parser/parseUtils.ts';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
-import FileModel from '@/core/object-value/file/FileModel.ts';
-import ComicController from '@/core/entities/comic/ComicController.ts';
-import ComicModel from '@/core/entities/comic/ComicModel.ts';
-import ParserController from '@/core/entities/parser/ParserController.ts';
-import ParserModel from '@/core/entities/parser/ParserModel.ts';
-import AuthorController from '@/core/object-value/author/AuthorController.ts';
-import AuthorObject from '@/core/object-value/author/AuthorObject.ts';
-import LanguageController from '@/core/object-value/language/LanguageController.ts';
-import LanguageObject from '@/core/object-value/language/LanguageObject.ts';
-import TagController from '@/core/object-value/tag/TagController.ts';
-import TagObject from '@/core/object-value/tag/TagObject.ts';
+import useLoading from '@/composables/useLoading.ts';
+import ComicCoverController from '@/core/entities-v2/comic-cover/ComicCoverController.ts';
+import ComicOverrideController from '@/core/entities-v2/comic-override/ComicOverrideController.ts';
+import ComicOverrideModel from '@/core/entities-v2/comic-override/ComicOverrideModel.ts';
+import { formatBytes } from '@/core/utils/format.ts';
+import { fileToBase64 } from '@/core/utils/image.ts';
+import ComicController from '@/core/entities-v2/comic/ComicController.ts';
+import ComicModel from '@/core/entities-v2/comic/ComicModel.ts';
+import ParserController from '@/core/entities-v2/parser/ParserController.ts';
+import ParserModel from '@/core/entities-v2/parser/ParserModel.ts';
+import AuthorController from '@/core/entities-v2/author/AuthorController.ts';
+import AuthorModel from '@/core/entities-v2/author/AuthorModel.ts';
+import LanguageController from '@/core/entities-v2/language/LanguageController.ts';
+import LanguageModel from '@/core/entities-v2/language/LanguageModel.ts';
+import TagController from '@/core/entities-v2/tag/TagController.ts';
+import TagModel from '@/core/entities-v2/tag/TagModel.ts';
 
 definePage({
   meta: {
@@ -176,31 +172,19 @@ const {
   loadingGlobalEnd,
 } = useLoading();
 
-const languages = ref<LanguageObject[]>([]);
+const languages = ref<LanguageModel[]>([]);
 const loadLanguages = async () => {
   languages.value = await LanguageController.loadAll();
 };
 
-const authors = ref<AuthorObject[]>([]);
+const authors = ref<AuthorModel[]>([]);
 const loadAuthors = async () => {
   authors.value = await AuthorController.loadAll();
 };
 
-const tags = ref<TagObject[]>([]);
+const tags = ref<TagModel[]>([]);
 const loadTags = async () => {
   tags.value = await TagController.loadAll();
-};
-
-const comicId = +(route.params.id || 0);
-
-const cover = ref(new FileModel());
-const loadCover = async () => {
-  cover.value = await ComicController.loadCover(comicId);
-};
-
-const comic = ref(new ComicModel());
-const loadComic = async () => {
-  comic.value = await ComicController.load(comicId);
 };
 
 const parsers = ref<ParserModel[]>([]);
@@ -208,20 +192,32 @@ const loadParsers = async () => {
   parsers.value = await ParserController.loadAll();
 };
 
+const comicId = +(route.params.id || 0);
+
+const comic = ref(new ComicModel());
+const loadComic = async () => {
+  comic.value = await ComicController.load(comicId);
+};
+
+const comicOverride = ref(new ComicOverrideModel());
+const loadComicOverride = async () => {
+  comicOverride.value = await ComicOverrideController.load(comicId);
+};
+
 const parser = ref(new ParserModel());
 const loadParser = async () => {
-  if (!comic.value.parser) return;
-  parser.value = await ParserController.load(comic.value.parser);
+  if (!comic.value.parserId) return;
+  parser.value = await ParserController.load(comic.value.parserId);
 };
 
 const updateParser = () => {
-  if (!comic.value.url) return;
+  if (!comic.value.fromUrl) return;
 
-  const item = parsers.value.find((e) => e.site && comic.value.url.includes(e.site));
+  const item = parsers.value.find((e) => e.siteUrl && comic.value.fromUrl.includes(e.siteUrl));
 
   if (!item) return;
 
-  comic.value.parser = item.id;
+  comic.value.parserId = item.id;
   loadParser();
 };
 
@@ -237,7 +233,7 @@ onMounted(async () => {
       loadTags(),
       loadAuthors(),
       loadLanguages(),
-      loadCover(),
+      loadComicOverride(),
     ]);
     await loadParser();
   }
@@ -254,20 +250,11 @@ const onLoadInfo = async () => {
 
   try {
     loadingGlobalStart();
-    const result = await ParserController.loadComicRaw(comic.value.url);
-    const parsedComic = parser.value.parse(result, comic.value.override);
+    const result = await ParserController.loadComicRaw(comic.value.fromUrl);
+    const parsedComic = parseComic(result, parser.value, comicOverride.value);
 
-    if (!comic.value.image.url && parsedComic.image) {
-      comic.value.image.url = parsedComic.image;
-    }
-
-    if (!comic.value.images.length && parsedComic.images) {
-      comic.value.images = parsedComic.images.map((e, i) => ({
-        id: i + 1,
-        url: e,
-        fileId: 0,
-      }));
-    }
+    if (!comic.value.cover.fromUrl && parsedComic.cover)
+      comic.value.cover.fromUrl = parsedComic.cover;
 
     if (parsedComic.name) {
       comic.value.name = parsedComic.name;
@@ -277,10 +264,10 @@ const onLoadInfo = async () => {
       const language = languages.value.find((e) => e.name.toLowerCase() === parsedComic.language?.toLowerCase());
 
       if (!language) {
-        const itemId = await LanguageController.save(new LanguageObject({ id: 0, name: parsedComic.language }));
-        if (itemId) comic.value.language = itemId;
+        const itemId = await LanguageController.save(new LanguageModel({ name: parsedComic.language }));
+        if (itemId) comic.value.languageId = itemId;
       } else {
-        comic.value.language = language.id;
+        comic.value.languageId = language.id;
       }
     }
 
@@ -288,7 +275,7 @@ const onLoadInfo = async () => {
       const newItem = authors.value.find((e) => e.name.toLowerCase() === item.toLowerCase());
 
       if (!newItem) {
-        const itemId = await AuthorController.save(new AuthorObject({ id: 0, name: item }));
+        const itemId = await AuthorController.save(new AuthorModel({ name: item }));
         if (itemId) comic.value.authors.push(itemId);
       } else {
         comic.value.authors.push(newItem.id);
@@ -299,7 +286,7 @@ const onLoadInfo = async () => {
       const newItem = tags.value.find((e) => e.name.toLowerCase() === item.toLowerCase());
 
       if (!newItem) {
-        const itemId = await TagController.save(new TagObject({ id: 0, name: item }));
+        const itemId = await TagController.save(new TagModel({ name: item }));
         if (itemId) comic.value.tags.push(itemId);
       } else {
         comic.value.tags.push(newItem.id);
@@ -330,9 +317,8 @@ const uploadCover = async () => {
     loadingGlobalStart();
     await saveComic();
     const base64 = await fileToBase64(image.value);
-    await ComicController.saveCover(comic.value.id, base64);
+    await ComicCoverController.saveFile(comic.value.id, base64);
     await loadComic();
-    await loadCover();
     Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
@@ -342,15 +328,14 @@ const uploadCover = async () => {
 };
 
 const loadByLink = async () => {
-  if (!comic.value.image.url) return;
+  if (!comic.value.cover.fromUrl) return;
 
   try {
     loadingGlobalStart();
-    const result = await ParserController.loadImageRaw(comic.value.image.url);
     await saveComic();
-    await ComicController.saveCover(comic.value.id, result);
+    const result = await ParserController.loadImageRaw(comic.value.cover.fromUrl);
+    await ComicCoverController.saveFile(comic.value.id, result);
     await loadComic();
-    await loadCover();
     Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
@@ -361,7 +346,7 @@ const loadByLink = async () => {
 
 const onLoadCover = () => {
   if (image.value) uploadCover();
-  else if (comic.value.image.url) loadByLink();
+  else if (comic.value.cover.fromUrl) loadByLink();
 };
 
 const onSave = async () => {
@@ -386,7 +371,7 @@ const deleteComic = async () => {
 
   try {
     loadingGlobalStart();
-    await ComicController.delete(comic.value.id);
+    await ComicController.remove(comic.value.id);
     Toast.show({ text: 'Комикс удалён' });
     router.replace({ name: '/' });
   } catch (e) {

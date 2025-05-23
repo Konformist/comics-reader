@@ -14,12 +14,12 @@ interface TagDao {
   @Query("SELECT * FROM tags WHERE id = :id")
   fun read(id: Long): Tag
 
-  @Insert
-  fun create(item: Tag): Long
+  @Insert(entity = Tag::class)
+  fun create(item: TagCreate): Long
 
-  @Update
-  fun update(item: Tag): Int
+  @Update(entity = Tag::class)
+  fun update(item: TagUpdate): Int
 
-  @Delete
-  fun delete(item: Tag): Int
+  @Delete(entity = Tag::class)
+  fun delete(item: TagDelete): Int
 }

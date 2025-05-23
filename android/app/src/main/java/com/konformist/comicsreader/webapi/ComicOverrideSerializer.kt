@@ -1,10 +1,37 @@
 package com.konformist.comicsreader.webapi
 
-import com.konformist.comicsreader.db.comic.ComicOverride
+import com.konformist.comicsreader.db.comicoverride.ComicOverride
+import com.konformist.comicsreader.db.comicoverride.ComicOverrideUpdate
+import com.konformist.comicsreader.utils.ValidationException
 import org.json.JSONArray
 import org.json.JSONObject
 
 class ComicOverrideSerializer : Serializer<ComicOverride>() {
+  @Throws(ValidationException::class)
+  override fun createFromJSON(value: JSONObject) {}
+
+  @Throws(ValidationException::class)
+  override fun updateFromJSON(value: JSONObject): ComicOverrideUpdate {
+    val id = value.optLong("id", 0)
+    if (id == 0.toLong()) throw ValidationException("id")
+
+    return ComicOverrideUpdate(
+      id = id,
+      mdate = getMDate(),
+      titleCSS = value.optString("titleCSS"),
+      coverCSS = value.optString("coverCSS"),
+      pagesCSS = value.optString("pagesCSS"),
+      authorsCSS = value.optString("authorsCSS"),
+      authorsTextCSS = value.optString("authorsTextCSS"),
+      languageCSS = value.optString("languageCSS"),
+      tagsCSS = value.optString("tagsCSS"),
+      tagsTextCSS = value.optString("tagsTextCSS"),
+    )
+  }
+
+  @Throws(ValidationException::class)
+  override fun deleteFromJSON(value: JSONObject) {}
+
   override fun toJSON(item: ComicOverride): JSONObject {
     val data = JSONObject()
 
@@ -29,22 +56,5 @@ class ComicOverrideSerializer : Serializer<ComicOverride>() {
     }
 
     return result
-  }
-
-  override fun fromJSON(item: JSONObject): ComicOverride {
-    return ComicOverride(
-      id = item.optLong("id"),
-      comicId = 0,
-      cdate = null,
-      mdate = null,
-      titleCSS = item.optString("titleCSS", ""),
-      coverCSS = item.optString("coverCSS", ""),
-      pagesCSS = item.optString("pagesCSS", ""),
-      languageCSS = item.optString("languageCSS", ""),
-      tagsCSS = item.optString("tagsCSS", ""),
-      tagsTextCSS = item.optString("tagsTextCSS", ""),
-      authorsCSS = item.optString("authorsCSS", ""),
-      authorsTextCSS = item.optString("authorsTextCSS", ""),
-    )
   }
 }

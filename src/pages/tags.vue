@@ -89,10 +89,10 @@
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
 import { sortString } from '@/core/utils/array.ts';
-import ComicController from '@/core/entities/comic/ComicController.ts';
-import ComicModel from '@/core/entities/comic/ComicModel.ts';
-import TagController from '@/core/object-value/tag/TagController.ts';
-import TagObject from '@/core/object-value/tag/TagObject.ts';
+import ComicController from '@/core/entities-v2/comic/ComicController.ts';
+import ComicModel from '@/core/entities-v2/comic/ComicModel.ts';
+import TagController from '@/core/entities-v2/tag/TagController.ts';
+import TagModel from '@/core/entities-v2/tag/TagModel.ts';
 import useLoading from '@/composables/useLoading.ts';
 
 definePage({
@@ -126,7 +126,7 @@ const loadComics = async () => {
   comics.value = await ComicController.loadAll();
 };
 
-const tags = ref<TagObject[]>([]);
+const tags = ref<TagModel[]>([]);
 
 const loadTags = async () => {
   tags.value = await TagController.loadAll();
@@ -141,10 +141,10 @@ onMounted(async () => {
   loadingEnd();
 });
 
-const selectedTag = ref(new TagObject());
+const selectedTag = ref(new TagModel());
 
 const clickTag = (value: number) => {
-  selectedTag.value = tags.value.find((e) => e.id === value) || new TagObject();
+  selectedTag.value = tags.value.find((e) => e.id === value) || new TagModel();
   dialog.value = true;
 };
 
@@ -200,7 +200,7 @@ const deleteTag = async (id: number) => {
 
   try {
     loadingGlobalStart();
-    await TagController.delete(id);
+    await TagController.remove(id);
     await loadTags();
     Toast.show({ text: 'Тег удалён' });
   } catch (e) {

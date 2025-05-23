@@ -115,18 +115,18 @@
 </template>
 
 <script lang="ts" setup>
-import ComicGallery from '@/components/ComicGallery.vue';
-import useLoading from '@/composables/useLoading.ts';
-import ComicController from '@/core/entities/comic/ComicController.ts';
-import ComicModel from '@/core/entities/comic/ComicModel.ts';
-import AuthorController from '@/core/object-value/author/AuthorController.ts';
-import type AuthorObject from '@/core/object-value/author/AuthorObject.ts';
-import LanguageController from '@/core/object-value/language/LanguageController.ts';
-import type LanguageObject from '@/core/object-value/language/LanguageObject.ts';
-import TagController from '@/core/object-value/tag/TagController.ts';
-import type TagObject from '@/core/object-value/tag/TagObject.ts';
-import { useComicsStore } from '@/stores/comics.ts';
 import { Toast } from '@capacitor/toast';
+import ComicController from '@/core/entities-v2/comic/ComicController.ts';
+import ComicModel from '@/core/entities-v2/comic/ComicModel.ts';
+import AuthorController from '@/core/entities-v2/author/AuthorController.ts';
+import type AuthorModel from '@/core/entities-v2/author/AuthorModel.ts';
+import LanguageController from '@/core/entities-v2/language/LanguageController.ts';
+import type LanguageModel from '@/core/entities-v2/language/LanguageModel.ts';
+import TagController from '@/core/entities-v2/tag/TagController.ts';
+import type TagModel from '@/core/entities-v2/tag/TagModel.ts';
+import { useComicsStore } from '@/stores/comics.ts';
+import useLoading from '@/composables/useLoading.ts';
+import ComicGallery from '@/components/ComicGallery.vue';
 
 definePage({
   meta: {
@@ -145,17 +145,17 @@ const {
 
 const filtersSheet = ref(false);
 
-const languages = ref<LanguageObject[]>([]);
+const languages = ref<LanguageModel[]>([]);
 const loadLanguages = async () => {
   languages.value = await LanguageController.loadAll();
 };
 
-const authors = ref<AuthorObject[]>([]);
+const authors = ref<AuthorModel[]>([]);
 const loadAuthors = async () => {
   authors.value = await AuthorController.loadAll();
 };
 
-const tags = ref<TagObject[]>([]);
+const tags = ref<TagModel[]>([]);
 const loadTags = async () => {
   tags.value = await TagController.loadAll();
 };
@@ -169,19 +169,20 @@ const filterArrays = <T>(f: T[], s: T[]): boolean => (
 
 const comicsFiltered = computed(() => (
   comics.value.filter((item) => {
-    if ((comicsStore.filters.filling === 1 && !item.isFilled)
-      || (comicsStore.filters.filling === 2 && item.isFilled)) {
-      return false;
-    }
+    // if ((comicsStore.filters.filling === 1 && !item.isFilled)
+    //   || (comicsStore.filters.filling === 2 && item.isFilled)) {
+    //   return false;
+    // }
 
     return filterArrays(item.tags, comicsStore.filters.tags)
       && filterArrays(item.authors, comicsStore.filters.authors)
-      && filterArrays([item.language], comicsStore.filters.languages);
+      && filterArrays([item.languageId], comicsStore.filters.languages);
   })
 ));
 
 const loadComics = async () => {
-  comics.value = await ComicController.loadAll();
+  const result = await ComicController.loadAll();
+  comics.value = result.reverse();
 };
 
 const createComic = async () => {

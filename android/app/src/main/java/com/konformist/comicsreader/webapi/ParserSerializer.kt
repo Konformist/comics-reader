@@ -1,16 +1,67 @@
 package com.konformist.comicsreader.webapi
 
 import com.konformist.comicsreader.db.parser.Parser
+import com.konformist.comicsreader.db.parser.ParserCreate
+import com.konformist.comicsreader.db.parser.ParserDelete
+import com.konformist.comicsreader.db.parser.ParserUpdate
+import com.konformist.comicsreader.utils.ValidationException
 import org.json.JSONArray
 import org.json.JSONObject
 
 class ParserSerializer : Serializer<Parser>() {
+  @Throws(ValidationException::class)
+  override fun createFromJSON(value: JSONObject): ParserCreate {
+    return ParserCreate(
+      name = value.optString("name", ""),
+      siteUrl = value.optString("siteUrl", ""),
+      titleCSS = value.optString("titleCSS", ""),
+      coverCSS = value.optString("coverCSS", ""),
+      pagesCSS = value.optString("pagesCSS", ""),
+      authorsCSS = value.optString("authorsCSS", ""),
+      authorsTextCSS = value.optString("authorsTextCSS", ""),
+      languageCSS = value.optString("languageCSS", ""),
+      tagsCSS = value.optString("tagsCSS", ""),
+      tagsTextCSS = value.optString("tagsTextCSS", ""),
+    )
+  }
+
+  @Throws(ValidationException::class)
+  override fun updateFromJSON(value: JSONObject): ParserUpdate {
+    val id = value.optLong("id", 0)
+    if (id == 0.toLong()) throw ValidationException("id")
+    val name = value.optString("name", "").trim()
+    if (name == "") throw ValidationException("name")
+
+    return ParserUpdate(
+      id = id,
+      mdate = getMDate(),
+      name = name,
+      siteUrl = value.optString("siteUrl", ""),
+      titleCSS = value.optString("titleCSS", ""),
+      coverCSS = value.optString("coverCSS", ""),
+      pagesCSS = value.optString("pagesCSS", ""),
+      authorsCSS = value.optString("authorsCSS", ""),
+      authorsTextCSS = value.optString("authorsTextCSS", ""),
+      languageCSS = value.optString("languageCSS", ""),
+      tagsCSS = value.optString("tagsCSS", ""),
+      tagsTextCSS = value.optString("tagsTextCSS", ""),
+    )
+  }
+
+  @Throws(ValidationException::class)
+  override fun deleteFromJSON(value: JSONObject): ParserDelete {
+    val id = value.optLong("id", 0)
+    if (id == 0.toLong()) throw ValidationException("id")
+
+    return ParserDelete(id = id)
+  }
+
   override fun toJSON(item: Parser): JSONObject {
     val data = JSONObject()
 
     data.put("id", item.id)
-    data.put("cdate", item.cdate?.time)
-    data.put("mdate", item.mdate?.time)
+    data.put("cdate", item.cdate)
+    data.put("mdate", item.mdate)
     data.put("name", item.name)
     data.put("siteUrl", item.siteUrl)
     data.put("titleCSS", item.titleCSS)
@@ -33,24 +84,5 @@ class ParserSerializer : Serializer<Parser>() {
     }
 
     return result
-  }
-
-  override fun fromJSON(item: JSONObject): Parser {
-
-    return Parser(
-      id = getId(item.optLong("id")),
-      cdate = getDate(item.optLong("cdate")),
-      mdate = getDate(item.optLong("mdate")),
-      name = item.getString("name"),
-      siteUrl = item.getString("siteUrl"),
-      titleCSS = item.getString("titleCSS"),
-      coverCSS = item.getString("coverCSS"),
-      pagesCSS = item.getString("pagesCSS"),
-      authorsCSS = item.getString("authorsCSS"),
-      authorsTextCSS = item.getString("authorsTextCSS"),
-      languageCSS = item.getString("languageCSS"),
-      tagsCSS = item.getString("tagsCSS"),
-      tagsTextCSS = item.getString("tagsTextCSS"),
-    )
   }
 }

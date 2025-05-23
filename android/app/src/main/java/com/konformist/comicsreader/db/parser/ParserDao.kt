@@ -14,12 +14,12 @@ interface ParserDao {
   @Query("SELECT * FROM parsers WHERE id = :id")
   fun read(id: Long): Parser
 
-  @Insert
-  fun create(item: Parser): Long
+  @Insert(entity = Parser::class)
+  fun create(item: ParserCreate): Long
 
-  @Update
-  fun update(item: Parser): Int
+  @Update(entity = Parser::class)
+  fun update(item: ParserUpdate): Int
 
-  @Delete
-  fun delete(item: Parser): Int
+  @Delete(entity = Parser::class)
+  fun delete(item: ParserDelete): Int
 }

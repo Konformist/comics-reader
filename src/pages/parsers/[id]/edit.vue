@@ -7,7 +7,7 @@
           label="Название парсера"
         />
         <v-text-field
-          v-model.trim="parser.site"
+          v-model.trim="parser.siteUrl"
           :autocapitalize="false"
           :autocomplete="false"
           hide-details
@@ -18,7 +18,7 @@
       <v-divider />
       <div class="px-4 py-8">
         <v-textarea
-          v-model.trim="parser.title"
+          v-model.trim="parser.titleCSS"
           :autocapitalize="false"
           :autocomplete="false"
           inputmode="url"
@@ -26,7 +26,7 @@
           rows="2"
         />
         <v-textarea
-          v-model.trim="parser.image"
+          v-model.trim="parser.coverCSS"
           :autocapitalize="false"
           :autocomplete="false"
           inputmode="url"
@@ -34,7 +34,7 @@
           rows="2"
         />
         <v-textarea
-          v-model.trim="parser.authors"
+          v-model.trim="parser.authorsCSS"
           :autocapitalize="false"
           :autocomplete="false"
           inputmode="url"
@@ -42,14 +42,14 @@
           rows="2"
         />
         <v-text-field
-          v-model.trim="parser.authorsText"
+          v-model.trim="parser.authorsTextCSS"
           :autocapitalize="false"
           :autocomplete="false"
           inputmode="url"
           label="CSS указатель на текст авторов"
         />
         <v-textarea
-          v-model.trim="parser.language"
+          v-model.trim="parser.languageCSS"
           :autocapitalize="false"
           :autocomplete="false"
           inputmode="url"
@@ -57,7 +57,7 @@
           rows="2"
         />
         <v-textarea
-          v-model.trim="parser.tags"
+          v-model.trim="parser.tagsCSS"
           :autocapitalize="false"
           :autocomplete="false"
           inputmode="url"
@@ -65,14 +65,14 @@
           rows="2"
         />
         <v-text-field
-          v-model.trim="parser.tagsText"
+          v-model.trim="parser.tagsTextCSS"
           :autocapitalize="false"
           :autocomplete="false"
           inputmode="url"
           label="CSS указатель на текст тегов"
         />
         <v-textarea
-          v-model.trim="parser.images"
+          v-model.trim="parser.pagesCSS"
           :autocapitalize="false"
           :autocomplete="false"
           hide-details
@@ -123,13 +123,13 @@
 
 <script lang="ts" setup>
 import useLoading from '@/composables/useLoading.ts';
-import type { IParserDTO } from '@/core/entities/parser/ParserTypes.ts';
+import type { IParserDTO } from '@/plugins/WebApiPlugin.ts';
 import { APP_NAME } from '@/core/middleware/variables.ts';
 import { Dialog } from '@capacitor/dialog';
 import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 import { Toast } from '@capacitor/toast';
-import ParserController from '@/core/entities/parser/ParserController.ts';
-import ParserModel from '@/core/entities/parser/ParserModel.ts';
+import ParserController from '@/core/entities-v2/parser/ParserController.ts';
+import ParserModel from '@/core/entities-v2/parser/ParserModel.ts';
 
 definePage({
   meta: {
@@ -224,7 +224,7 @@ const deleteParser = async () => {
 
   try {
     loadingGlobalStart();
-    await ParserController.delete(parser.value.id);
+    await ParserController.remove(parser.value.id);
     Toast.show({ text: 'Парсер удалён' });
     router.replace({ name: '/parsers/' });
   } catch (e) {

@@ -1,0 +1,16 @@
+package com.konformist.comicsreader.db.appfile
+
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "files")
+data class AppFile(
+  @PrimaryKey(autoGenerate = true) val id: Long,
+  @ColumnInfo(defaultValue = "(datetime('now'))") val cdate: String,
+  @ColumnInfo(defaultValue = "(datetime('now'))") val mdate: String,
+  @ColumnInfo val name: String,
+  @ColumnInfo val mime: String,
+  @ColumnInfo val size: Long,
+  @ColumnInfo val path: String,
+)

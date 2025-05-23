@@ -90,10 +90,10 @@ import useLoading from '@/composables/useLoading.ts';
 import { sortString } from '@/core/utils/array.ts';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
-import ComicController from '@/core/entities/comic/ComicController.ts';
-import ComicModel from '@/core/entities/comic/ComicModel.ts';
-import LanguageController from '@/core/object-value/language/LanguageController.ts';
-import LanguageObject from '@/core/object-value/language/LanguageObject.ts';
+import ComicController from '@/core/entities-v2/comic/ComicController.ts';
+import ComicModel from '@/core/entities-v2/comic/ComicModel.ts';
+import LanguageController from '@/core/entities-v2/language/LanguageController.ts';
+import LanguageModel from '@/core/entities-v2/language/LanguageModel.ts';
 
 definePage({
   meta: {
@@ -128,7 +128,7 @@ const loadComics = async () => {
 
 loadComics();
 
-const languages = ref<LanguageObject[]>([]);
+const languages = ref<LanguageModel[]>([]);
 
 const loadLanguages = async () => {
   languages.value = await LanguageController.loadAll();
@@ -145,10 +145,10 @@ onMounted(async () => {
   loadingEnd();
 });
 
-const selectedLanguage = ref(new LanguageObject());
+const selectedLanguage = ref(new LanguageModel());
 
 const clickLanguage = (value: number) => {
-  selectedLanguage.value = languages.value.find((e) => e.id === value) || new LanguageObject();
+  selectedLanguage.value = languages.value.find((e) => e.id === value) || new LanguageModel();
   dialog.value = true;
 };
 
@@ -157,7 +157,7 @@ const languagesCount = computed(() => (
     acc[languale.id] = 0;
 
     comics.value.forEach((item) => {
-      if (item.language === languale.id) acc[languale.id]++;
+      if (item.languageId === languale.id) acc[languale.id]++;
     });
 
     return acc;
@@ -204,7 +204,7 @@ const deleteLanguage = async (id: number) => {
 
   try {
     loadingGlobalStart();
-    await LanguageController.delete(id);
+    await LanguageController.remove(id);
     await loadLanguages();
     Toast.show({ text: 'Язык удалён' });
   } catch (e) {

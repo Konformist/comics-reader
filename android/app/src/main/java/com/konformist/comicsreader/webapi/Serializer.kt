@@ -1,42 +1,47 @@
 package com.konformist.comicsreader.webapi
 
+import com.konformist.comicsreader.utils.Dates
+import com.konformist.comicsreader.utils.ValidationException
 import org.json.JSONArray
 import org.json.JSONObject
-import java.util.Date
+import java.time.LocalDateTime
 
 abstract class Serializer<T> {
-  protected fun fromArrayString(value: String): List<Long> {
-    val result = arrayListOf<Long>()
-    val data = JSONArray(value)
+  protected fun getMDate(): String {
+    return Dates.dateTimeFormatted(LocalDateTime.now())
+  }
 
-    for (index in 0 until data.length()) {
-      result.add(data.getLong(index))
+  protected fun listFromJSONArray(value: JSONArray?): List<Long> {
+    val result = arrayListOf<Long>()
+    if (value == null) return result;
+
+    for (index in 0 until value.length()) {
+      result.add(value.getLong(index))
     }
 
     return result
   }
 
-  protected fun toArrayString(list: List<Long>): String {
+  protected fun listToJSONArray(value: List<Long>?): JSONArray {
     val result = JSONArray()
+    if (value == null) return result;
 
-    for (item in list) {
+    for (item in value) {
       result.put(item)
     }
 
-    return list.toString()
+    return result
   }
 
-  protected fun getId(value: Long): Long? {
-    return if (value == 0.toLong()) null
-    else value
-  }
+  @Throws(ValidationException::class)
+  abstract fun createFromJSON(value: JSONObject): Any
 
-  protected fun getDate(value: Long): Date? {
-    return if (value == 0.toLong()) null
-    else Date(value)
-  }
+  @Throws(ValidationException::class)
+  abstract fun updateFromJSON(value: JSONObject): Any
+
+  @Throws(ValidationException::class)
+  abstract fun deleteFromJSON(value: JSONObject): Any
 
   abstract fun toJSON(item: T): JSONObject
   abstract fun toJSONArray(items: List<T>): JSONArray
-  abstract fun fromJSON(item: JSONObject): T
 }

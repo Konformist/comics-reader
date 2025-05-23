@@ -1,11 +1,5 @@
 import type { IParserDTO } from '@/core/entities/parser/ParserTypes.ts';
 
-export interface IComicImageDTO {
-  id: number
-  url: string
-  from: string
-}
-
 export interface IComicImageUrl {
   /** ID */
   id: number

@@ -1,5 +1,8 @@
 package com.konformist.comicsreader.utils
 
-enum class AppDirectory(val value: String) {
-  Comics("comics")
+class AppDirectory(val value: String) {
+  companion object {
+    const val COMICS_IMAGES = "comics-images"
+    const val BACKUPS = "backups"
+  }
 }

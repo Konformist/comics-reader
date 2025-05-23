@@ -1,27 +1,73 @@
 package com.konformist.comicsreader.webapi
 
-import com.konformist.comicsreader.db.comic.Comic
+import com.konformist.comicsreader.db.comic.ComicCreate
+import com.konformist.comicsreader.db.comic.ComicDelete
+import com.konformist.comicsreader.db.comic.ComicLite
+import com.konformist.comicsreader.db.comic.ComicUpdate
+import com.konformist.comicsreader.utils.ValidationException
 import org.json.JSONArray
 import org.json.JSONObject
 
-class ComicSerializer : Serializer<Comic>() {
-  override fun toJSON(item: Comic): JSONObject {
+class ComicSerializer : Serializer<ComicLite>() {
+  private val coverSerializer = ComicCoverSerializer()
+
+  @Throws(ValidationException::class)
+  override fun createFromJSON(value: JSONObject): ComicCreate {
+    return ComicCreate(
+      name = value.optString("name", ""),
+      parserId = value.optLong("parserId", 0),
+      fromUrl = value.optString("fromUrl", ""),
+      languageId = value.optLong("languageId", 0),
+      authors = listFromJSONArray(value.optJSONArray("authors")),
+      tags = listFromJSONArray(value.optJSONArray("tags")),
+    )
+  }
+
+  @Throws(ValidationException::class)
+  override fun updateFromJSON(value: JSONObject): ComicUpdate {
+    val id = value.optLong("id", 0)
+    if (id == 0.toLong()) throw ValidationException("id")
+
+    return ComicUpdate(
+      id = id,
+      mdate = getMDate(),
+      name = value.optString("name", ""),
+      parserId = value.optLong("parserId", 0),
+      fromUrl = value.optString("fromUrl", ""),
+      languageId = value.optLong("languageId", 0),
+      authors = listFromJSONArray(value.optJSONArray("authors")),
+      tags = listFromJSONArray(value.optJSONArray("tags")),
+    )
+  }
+
+  @Throws(ValidationException::class)
+  override fun deleteFromJSON(value: JSONObject): ComicDelete {
+    val id = value.optLong("id", 0)
+    if (id == 0.toLong()) throw ValidationException("id")
+
+    return ComicDelete(id = id)
+  }
+
+  override fun toJSON(item: ComicLite): JSONObject {
     val data = JSONObject()
 
-    data.put("id", item.id)
-    data.put("cdate", item.cdate?.time)
-    data.put("mdate", item.mdate?.time)
-    data.put("name", item.name)
-    data.put("parser", item.parserId)
-    data.put("fromUrl", item.fromUrl)
-    data.put("language", item.languageId)
-    data.put("authors", toArrayString(item.authors))
-    data.put("tags", toArrayString(item.tags))
+    data.put("id", item.comic.id)
+    data.put("cdate", item.comic.cdate)
+    data.put("mdate", item.comic.mdate)
+    data.put("name", item.comic.name)
+    data.put("parserId", item.comic.parserId)
+    data.put("fromUrl", item.comic.fromUrl)
+    data.put("languageId", item.comic.languageId)
+    data.put("authors", listToJSONArray(item.comic.authors))
+    data.put("tags", listToJSONArray(item.comic.tags))
+
+    if (item.cover == null) data.put("cover", null)
+    else data.put("cover", coverSerializer.toJSON(item.cover))
 
     return data
   }
 
-  override fun toJSONArray(items: List<Comic>): JSONArray {
+  override fun toJSONArray(items: List<ComicLite>): JSONArray {
     val result = JSONArray()
 
     for (i in items.indices) {
@@ -29,19 +75,5 @@ class ComicSerializer : Serializer<Comic>() {
     }
 
     return result
-  }
-
-  override fun fromJSON(item: JSONObject): Comic {
-    return Comic(
-      id = getId(item.optLong("id")),
-      cdate = getDate(item.optLong("cdate")),
-      mdate = getDate(item.optLong("mdate")),
-      name = item.optString("name", ""),
-      parserId = item.optLong("parser", 0),
-      fromUrl = item.optString("fromUrl", ""),
-      languageId = item.optLong("language", 0),
-      authors = fromArrayString(item.optString("authors")),
-      tags = fromArrayString(item.optString("tags"))
-    )
   }
 }

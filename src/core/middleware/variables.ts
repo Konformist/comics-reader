@@ -11,5 +11,5 @@ export const LANGUAGES_STORE = 'languages';
 export const FILES_STORE = 'files';
 export const COMICS_STORE = 'comics';
 
-export const COMICS_FILES_DIRECTORY = 'comics';
+export const COMICS_FILES_DIRECTORY = 'comics-images';
 export const BACKUPS_DIRECTORY = 'backups';

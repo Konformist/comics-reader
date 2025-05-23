@@ -5,27 +5,21 @@
     :max-width="maxWidth"
     :src="item.file.url"
   />
-  <v-skeleton-loader
-    v-else-if="item.fromUrl"
-    min-height="200"
-    min-width="100%"
-    type="image"
-  />
+  <div
+    v-else
+    class="w-100 flex justify-center align-center"
+    style="min-height: 400px"
+  >
+    Нет изображения
+  </div>
 </template>
 
 <script lang="ts" setup>
 import type ChapterPageModel from '@/core/entities/chapter-page/ChapterPageModel.ts';
 
-const emit = defineEmits<{
-  (e: 'download', v: void): void
-}>();
 const { item } = defineProps<{
   item: ChapterPageModel
   maxWidth?: string
   maxHeight?: string
 }>();
-
-if (!item.file?.url && item.fromUrl) {
-  emit('download');
-}
 </script>

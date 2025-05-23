@@ -13,7 +13,6 @@
         :key="item.id"
         :item="item"
         max-width="100%"
-        @download="onLoadImage(item)"
       />
     </v-container>
     <v-container
@@ -39,7 +38,6 @@
             :item="item"
             max-height="100%"
             max-width="100%"
-            @download="onLoadImage(item)"
           />
         </swiper-slide>
       </swiper-container>
@@ -49,20 +47,15 @@
 </template>
 
 <script lang="ts" setup>
-import ChapterPageRead from '@/components/ChapterPageRead.vue';
-import useLoading from '@/composables/useLoading.ts';
-import ChapterPageController from '@/core/entities/chapter-page/ChapterPageController.ts';
-import type ChapterPageModel from '@/core/entities/chapter-page/ChapterPageModel.ts';
-import ParserController from '@/core/entities/parser/ParserController.ts';
 import { KeepAwake } from '@capacitor-community/keep-awake';
 import { Capacitor } from '@capacitor/core';
 import { StatusBar } from '@capacitor/status-bar';
-import { Toast } from '@capacitor/toast';
 import { Autoplay, Pagination } from 'swiper/modules';
 import { register, type SwiperContainer, type SwiperSlide } from 'swiper/element';
 import { useAppStore } from '@/stores/app.ts';
 import ChapterController from '@/core/entities/chapter/ChapterController.ts';
 import ChapterModel from '@/core/entities/chapter/ChapterModel.ts';
+import ChapterPageRead from '@/components/ChapterPageRead.vue';
 
 definePage({
   meta: {
@@ -70,18 +63,13 @@ definePage({
     isBack: true,
   },
 });
-const {
-  loadingGlobal,
-  loadingGlobalStart,
-  loadingGlobalEnd,
-} = useLoading();
 
 const route = useRoute('/comics/[id]/chapter-read');
 const router = useRouter();
 const appStore = useAppStore();
 
 const autoPlay = computed(() => (
-  appStore.settings.autoReading && !loadingGlobal.value
+  appStore.settings.autoReading
     ? { delay: appStore.settings.autoReadingTimeout * 1000, stopOnLastSlide: true }
     : false
 ));
@@ -127,22 +115,6 @@ onBeforeUnmount(async () => {
     await StatusBar.show();
   }
 });
-
-const onLoadImage = async (item: ChapterPageModel) => {
-  if (!item.fromUrl) return;
-
-  try {
-    loadingGlobalStart();
-    const result = await ParserController.loadImageRaw(item.fromUrl);
-    await ChapterPageController.saveFile(item.id, result, appStore.settings.isCompress);
-    await loadChapter();
-    Toast.show({ text: 'Глава сохранена' });
-  } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
-  } finally {
-    loadingGlobalEnd();
-  }
-};
 </script>
 
 <style lang="scss">

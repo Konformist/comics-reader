@@ -174,6 +174,7 @@ const chapterReserve = ref(new ChapterModel());
 const loadChapter = async () => {
   chapter.value = await ChapterController.load(chapterId);
   chapterReserve.value = new ChapterModel(chapter.value.getDTO());
+  pages.value = chapter.value.pages.length;
 };
 
 const saveChapter = async () => {

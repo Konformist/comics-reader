@@ -13,5 +13,6 @@ ext {
     androidxJunitVersion = '1.2.1'
     androidxEspressoCoreVersion = '3.6.1'
     cordovaAndroidVersion = '10.1.1'
-    roomVersion = "2.7.1"
+    roomVersion = '2.7.1'
+    datastore = '1.1.7'
 }

@@ -44,8 +44,9 @@ class ChapterPageSerializer : Serializer<ChapterPageWithFile>() {
     val data = JSONObject()
 
     data.put("id", item.page.id)
-    data.put("fromUrl", item.page.fromUrl)
     data.put("chapterId", item.page.chapterId)
+    data.put("fromUrl", item.page.fromUrl)
+    data.put("isRead", item.page.isRead)
 
     if (item.file == null) data.put("file", null)
     else data.put("file", fileSerializer.toJSON(item.file))

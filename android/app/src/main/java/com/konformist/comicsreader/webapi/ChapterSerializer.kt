@@ -41,10 +41,10 @@ class ChapterSerializer : Serializer<ChapterWithPages>() {
     val data = JSONObject()
 
     data.put("id", item.chapter.id)
-    data.put("comicId", item.chapter.comicId)
     data.put("cdate", item.chapter.cdate)
     data.put("mdate", item.chapter.mdate)
     data.put("name", item.chapter.name)
+    data.put("comicId", item.chapter.comicId)
     data.put("pages", pageSerializer.toJSONArray(item.pages))
 
     return data

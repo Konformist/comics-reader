@@ -8,7 +8,8 @@ import org.json.JSONObject
 
 class ComicOverrideSerializer : Serializer<ComicOverride>() {
   @Throws(ValidationException::class)
-  override fun createFromJSON(value: JSONObject) {}
+  override fun createFromJSON(value: JSONObject) {
+  }
 
   @Throws(ValidationException::class)
   override fun updateFromJSON(value: JSONObject): ComicOverrideUpdate {
@@ -30,7 +31,8 @@ class ComicOverrideSerializer : Serializer<ComicOverride>() {
   }
 
   @Throws(ValidationException::class)
-  override fun deleteFromJSON(value: JSONObject) {}
+  override fun deleteFromJSON(value: JSONObject) {
+  }
 
   override fun toJSON(item: ComicOverride): JSONObject {
     val data = JSONObject()

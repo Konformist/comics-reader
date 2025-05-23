@@ -42,8 +42,9 @@ import com.konformist.comicsreader.db.tag.TagDao
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
   companion object {
-    public const val DATABASE_NAME = "app-database"
+    const val DATABASE_NAME = "app-database"
   }
+
   abstract fun comicDao(): ComicDao
   abstract fun comicCoverDao(): ComicCoverDao
   abstract fun comicOverrideDao(): ComicOverrideDao

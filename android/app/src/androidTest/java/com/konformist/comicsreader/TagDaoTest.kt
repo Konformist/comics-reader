@@ -5,12 +5,17 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.konformist.comicsreader.db.AppDatabase
 import com.konformist.comicsreader.db.tag.Tag
+import com.konformist.comicsreader.db.tag.TagCreate
 import com.konformist.comicsreader.db.tag.TagDao
+import com.konformist.comicsreader.db.tag.TagDelete
+import com.konformist.comicsreader.db.tag.TagUpdate
+import com.konformist.comicsreader.utils.Dates
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.time.LocalDateTime
 
 @RunWith(AndroidJUnit4::class)
 class TagDaoTest {
@@ -37,40 +42,29 @@ class TagDaoTest {
   @Test
   @Throws(Exception::class)
   fun create() {
-    val tag = Tag(id = null, cdate = null, mdate = null, name = "New tag")
-
-    val rowId = tagDao.create(tag)
-
+    val rowId = tagDao.create(TagCreate(name = "New tag"))
     Assert.assertEquals(1, rowId)
 
     val tagSaved = tagDao.read(rowId)
-    val tagExpect = Tag(id = 1, cdate = null, mdate = null, name = "New tag")
-
-    Assert.assertEquals(tagExpect, tagSaved)
+    Assert.assertEquals(TagCreate(name = "New tag"), TagCreate(name = tagSaved.name))
   }
 
   @Test
   @Throws(Exception::class)
   fun update() {
-    val tag = Tag(id = null, cdate = null, mdate = null, name = "New tag 2")
-    val rowId = tagDao.create(tag)
-
-    tagDao.update(tag)
+    val mdate = Dates.dateTimeFormatted(LocalDateTime.now())
+    val rowId = tagDao.create(TagCreate(name = "New tag 2"))
+    tagDao.update(TagUpdate(id = 1, mdate = mdate, name = "New tag 2"))
 
     val tagSaved = tagDao.read(rowId)
-    val tagExpect = Tag(id = 1, cdate = null, mdate = null, name = "New tag 2")
-
-    Assert.assertEquals(tagExpect, tagSaved)
+    Assert.assertEquals(TagUpdate(id = 1, mdate = mdate, name = "New tag 2"), TagUpdate(id = tagSaved.id, mdate = tagSaved.mdate, name = tagSaved.name))
   }
 
   @Test
   @Throws(Exception::class)
   fun delete() {
-    val tag = Tag(id = null, cdate = null, mdate = null, name = "New tag")
-    val rowId = tagDao.create(tag)
-    val tagExpect = Tag(id = rowId, cdate = null, mdate = null, name = "")
-
-    val rows = tagDao.delete(tagExpect)
+    val rowId = tagDao.create(TagCreate(name = "New tag"))
+    val rows = tagDao.delete(TagDelete(id = rowId))
 
     Assert.assertEquals(1, rows)
   }

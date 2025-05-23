@@ -13,7 +13,7 @@ abstract class Serializer<T> {
 
   protected fun listFromJSONArray(value: JSONArray?): List<Long> {
     val result = arrayListOf<Long>()
-    if (value == null) return result;
+    if (value == null) return result
 
     for (index in 0 until value.length()) {
       result.add(value.getLong(index))
@@ -24,7 +24,7 @@ abstract class Serializer<T> {
 
   protected fun listToJSONArray(value: List<Long>?): JSONArray {
     val result = JSONArray()
-    if (value == null) return result;
+    if (value == null) return result
 
     for (item in value) {
       result.put(item)

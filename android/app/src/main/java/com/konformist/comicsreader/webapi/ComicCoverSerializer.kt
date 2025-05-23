@@ -10,7 +10,8 @@ class ComicCoverSerializer : Serializer<ComicCoverWithFile>() {
   private val fileSerializer = FileSerializer()
 
   @Throws(ValidationException::class)
-  override fun createFromJSON(value: JSONObject) {}
+  override fun createFromJSON(value: JSONObject) {
+  }
 
   @Throws(ValidationException::class)
   override fun updateFromJSON(value: JSONObject): ComicCoverUpdate {
@@ -26,7 +27,8 @@ class ComicCoverSerializer : Serializer<ComicCoverWithFile>() {
   }
 
   @Throws(ValidationException::class)
-  override fun deleteFromJSON(value: JSONObject) {}
+  override fun deleteFromJSON(value: JSONObject) {
+  }
 
   override fun toJSON(item: ComicCoverWithFile): JSONObject {
     val data = JSONObject()

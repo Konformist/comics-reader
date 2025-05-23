@@ -13,8 +13,6 @@ class WebApiPlugin : Plugin() {
 
   override fun load() {
     super.load()
-    // TODO for testing
-//    context.deleteDatabase("app-database")
     webApi = WebApi(context)
   }
 
@@ -231,11 +229,5 @@ class WebApiPlugin : Plugin() {
   @PluginMethod
   fun restoreBackup(call: PluginCall) {
     call.resolve(JSObject.fromJSONObject(webApi.restoreBackup(call.data)))
-  }
-
-  @PluginMethod
-  fun migrate(call: PluginCall) {
-    webApi.migrate(call.data)
-    call.resolve()
   }
 }

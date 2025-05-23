@@ -35,7 +35,7 @@ class WebApiPluginTest {
       JSONObject("{\"id\":1,\"cdate\":${Date().time},\"mdate\":${Date().time},\"name\":\"New tag 2\"}")
     webApi.setTag(tag)
 
-    val tagJson = webApi.getTag(1.toLong())
+    val tagJson = webApi.getTag(JSONObject().put("id", 1))
 
     Assert.assertEquals("{\"id\":1,\"name\":\"New tag 2\"}", tagJson)
   }

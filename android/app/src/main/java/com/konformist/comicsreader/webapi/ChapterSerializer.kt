@@ -34,7 +34,8 @@ class ChapterSerializer : Serializer<ChapterWithPages>() {
   }
 
   @Throws(ValidationException::class)
-  override fun deleteFromJSON(value: JSONObject) {}
+  override fun deleteFromJSON(value: JSONObject) {
+  }
 
   override fun toJSON(item: ChapterWithPages): JSONObject {
     val data = JSONObject()

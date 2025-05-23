@@ -19,7 +19,8 @@ class FileSerializer : Serializer<AppFile>() {
   }
 
   @Throws(ValidationException::class)
-  override fun updateFromJSON(value: JSONObject) {}
+  override fun updateFromJSON(value: JSONObject) {
+  }
 
   @Throws(ValidationException::class)
   override fun deleteFromJSON(value: JSONObject): AppFileDelete {

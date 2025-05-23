@@ -74,7 +74,8 @@ class DBBackup(val context: Context) {
   }
 
   fun restore(db: AppDatabase, path: String) {
-    val file = File("${context.filesDir}${File.separator}${AppDirectory.BACKUPS}${File.separator}${path}")
+    val file =
+      File("${context.filesDir}${File.separator}${AppDirectory.BACKUPS}${File.separator}${path}")
     val inputStream = FileInputStream(file)
 
     db.close()

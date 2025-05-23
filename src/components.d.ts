@@ -9,9 +9,9 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     BottomNavigation: typeof import('./components/BottomNavigation.vue')['default']
+    ChapterPageEdit: typeof import('./components/ChapterPageEdit.vue')['default']
     ChapterPageRead: typeof import('./components/ChapterPageRead.vue')['default']
     ComicGallery: typeof import('./components/ComicGallery.vue')['default']
-    ChapterPageEdit: typeof import('./components/ChapterPageEdit.vue')['default']
     FilesTree: typeof import('./components/FilesTree.vue')['default']
     FilesTreeItem: typeof import('./components/FilesTreeItem.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

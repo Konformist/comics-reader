@@ -12,10 +12,11 @@ export default class ChapterPageController {
     return WebApi.delChapterPage({ id });
   }
 
-  static saveFile(chapterPageId: number, file: string) {
+  static saveFile(chapterPageId: number, file: string, optimization?: boolean) {
     return WebApi.addChapterPageFile({
       chapterPageId,
       file,
+      optimization,
     });
   }
 }

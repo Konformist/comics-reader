@@ -16,6 +16,7 @@ import com.konformist.comicsreader.db.comiccover.ComicCoverDelete
 import com.konformist.comicsreader.db.comiccover.ComicCoverUpdate
 import com.konformist.comicsreader.db.comicoverride.ComicOverrideCreate
 import com.konformist.comicsreader.db.comicoverride.ComicOverrideDelete
+import com.konformist.comicsreader.imageutils.ImageUtils
 import com.konformist.comicsreader.utils.AppDirectory
 import com.konformist.comicsreader.utils.DatabaseException
 import com.konformist.comicsreader.utils.Dates
@@ -37,7 +38,7 @@ class WebApi(private val context: Context) {
   private val authorDao = db.authorDao()
   private val languageDao = db.languageDao()
   private val parserDao = db.parserDao()
-  private val fileDao = db.fileDao()
+  private val appFileDao = db.appFileDao()
   private val comicOverrideDao = db.comicOverrideDao()
   private val comicCoverDao = db.comicCoverDao()
   private val chapterDao = db.chapterDao()
@@ -148,7 +149,7 @@ class WebApi(private val context: Context) {
   }
 
   @Throws(DatabaseException::class)
-  private fun createComicImage(directory: String, name: String, file: String): Long {
+  private fun createComicImage(directory: String, name: String, file: String, optimization: Boolean? = false): Long {
     val cleaned = FileUtils.cleanImageData(file)
     val decodedImage: Bitmap = FileUtils.base64ToBitmap(cleaned)
     val dirOut = File("${context.filesDir}/${AppDirectory.COMICS_IMAGES}/${directory}")
@@ -156,9 +157,10 @@ class WebApi(private val context: Context) {
 
     if (!dirOut.exists()) dirOut.mkdirs()
     FileUtils.writeImage(fileOut, decodedImage)
+    if (optimization == true) ImageUtils.optimization(fileOut)
 
     try {
-      val rowId = fileDao.create(
+      val rowId = appFileDao.create(
         AppFileCreate(
           name = name,
           mime = "image/webp",
@@ -177,12 +179,12 @@ class WebApi(private val context: Context) {
   @Throws(DatabaseException::class)
   private fun deleteImage(id: Long?) {
     if (id == null || id == 0.toLong()) return
-    val row = fileDao.read(id)
+    val row = appFileDao.read(id)
 
     val fileOut = File("${context.filesDir}/${row.path}")
     if (fileOut.exists()) fileOut.delete()
 
-    val count = fileDao.delete(AppFileDelete(id = row.id))
+    val count = appFileDao.delete(AppFileDelete(id = row.id))
     if (count == 0) throw DatabaseException("File not deleted")
   }
 
@@ -537,7 +539,8 @@ class WebApi(private val context: Context) {
       if (cover.fileId != null && cover.fileId != 0.toLong())
         deleteImage(cover.fileId)
 
-      val rowId = createComicImage(comicId.toString(), "cover.webp", file)
+      val optimization = data.optBoolean("optimization", false)
+      val rowId = createComicImage(comicId.toString(), "cover.webp", file, optimization)
       if (rowId == 0.toLong()) throw DatabaseException("Comic cover file not added")
 
       val count = comicCoverDao.update(
@@ -735,7 +738,8 @@ class WebApi(private val context: Context) {
 
       if (chapterPage.fileId != 0.toLong()) deleteImage(chapterPage.fileId)
 
-      val rowId = createComicImage(chapter.chapter.comicId.toString(), "$chapterPageId.webp", file)
+      val optimization = data.optBoolean("optimization", false)
+      val rowId = createComicImage(chapter.chapter.comicId.toString(), "$chapterPageId.webp", file, optimization)
       if (rowId == 0.toLong()) throw DatabaseException("Chapter page file not added")
 
       val newPageFile = ChapterPageUpdate(

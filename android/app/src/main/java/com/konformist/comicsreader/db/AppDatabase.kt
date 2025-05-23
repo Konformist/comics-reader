@@ -54,5 +54,5 @@ abstract class AppDatabase : RoomDatabase() {
   abstract fun tagDao(): TagDao
   abstract fun authorDao(): AuthorDao
   abstract fun languageDao(): LanguageDao
-  abstract fun fileDao(): AppFileDao
+  abstract fun appFileDao(): AppFileDao
 }

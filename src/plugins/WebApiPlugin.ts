@@ -114,7 +114,7 @@ interface IWebApiPlugin {
   getComicOverride(data: { comicId: number }): Promise<{ result: IComicOverrideDTO }>
   setComicOverride(data: IComicOverrideDTO): Promise<void>
 
-  addCoverFile(data: { comicId: number, file: string }): Promise<{ result: number }>
+  addCoverFile(data: { comicId: number, file: string, optimization?: boolean }): Promise<{ result: number }>
   delCoverFile(data: { comicId: number }): Promise<void>
 
   getChaptersAll(data: { comicId: number }): Promise<{ result: IChapterDTO[] }>
@@ -129,7 +129,7 @@ interface IWebApiPlugin {
   setChapterPage(data: IChapterPageDTO): Promise<void>
   delChapterPage(data: { id: number }): Promise<void>
 
-  addChapterPageFile(data: { chapterPageId: number, file: string }): Promise<{ result: number }>
+  addChapterPageFile(data: { chapterPageId: number, file: string, optimization?: boolean }): Promise<{ result: number }>
   delChapterPageFile(data: { chapterPageId: number }): Promise<void>
 
   addBackup(): Promise<void>

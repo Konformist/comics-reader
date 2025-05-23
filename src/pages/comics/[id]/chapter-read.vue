@@ -134,7 +134,7 @@ const onLoadImage = async (item: ChapterPageModel) => {
   try {
     loadingGlobalStart();
     const result = await ParserController.loadImageRaw(item.fromUrl);
-    await ChapterPageController.saveFile(item.id, result);
+    await ChapterPageController.saveFile(item.id, result, appStore.settings.isCompress);
     await loadChapter();
     Toast.show({ text: 'Глава сохранена' });
   } catch (e) {

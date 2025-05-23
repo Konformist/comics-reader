@@ -135,6 +135,7 @@
 
 <script lang="ts" setup>
 import { parseComic } from '@/core/entities/parser/parseUtils.ts';
+import { useAppStore } from '@/stores/app.ts';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
 import useLoading from '@/composables/useLoading.ts';
@@ -163,6 +164,8 @@ definePage({
 
 const route = useRoute('/comics/[id]/edit');
 const router = useRouter();
+const appStore = useAppStore();
+
 const {
   loading,
   loadingStart,
@@ -317,7 +320,7 @@ const uploadCover = async () => {
     loadingGlobalStart();
     await saveComic();
     const base64 = await fileToBase64(image.value);
-    await ComicCoverController.saveFile(comic.value.id, base64);
+    await ComicCoverController.saveFile(comic.value.id, base64, appStore.settings.isCompress);
     await loadComic();
     Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
@@ -334,7 +337,7 @@ const loadByLink = async () => {
     loadingGlobalStart();
     await saveComic();
     const result = await ParserController.loadImageRaw(comic.value.cover.fromUrl);
-    await ComicCoverController.saveFile(comic.value.id, result);
+    await ComicCoverController.saveFile(comic.value.id, result, appStore.settings.isCompress);
     await loadComic();
     Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {

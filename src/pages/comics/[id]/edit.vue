@@ -134,25 +134,25 @@
 </template>
 
 <script lang="ts" setup>
-import { parseComic } from '@/core/entities-v2/parser/parseUtils.ts';
+import { parseComic } from '@/core/entities/parser/parseUtils.ts';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
 import useLoading from '@/composables/useLoading.ts';
-import ComicCoverController from '@/core/entities-v2/comic-cover/ComicCoverController.ts';
-import ComicOverrideController from '@/core/entities-v2/comic-override/ComicOverrideController.ts';
-import ComicOverrideModel from '@/core/entities-v2/comic-override/ComicOverrideModel.ts';
+import ComicCoverController from '@/core/entities/comic-cover/ComicCoverController.ts';
+import ComicOverrideController from '@/core/entities/comic-override/ComicOverrideController.ts';
+import ComicOverrideModel from '@/core/entities/comic-override/ComicOverrideModel.ts';
 import { formatBytes } from '@/core/utils/format.ts';
 import { fileToBase64 } from '@/core/utils/image.ts';
-import ComicController from '@/core/entities-v2/comic/ComicController.ts';
-import ComicModel from '@/core/entities-v2/comic/ComicModel.ts';
-import ParserController from '@/core/entities-v2/parser/ParserController.ts';
-import ParserModel from '@/core/entities-v2/parser/ParserModel.ts';
-import AuthorController from '@/core/entities-v2/author/AuthorController.ts';
-import AuthorModel from '@/core/entities-v2/author/AuthorModel.ts';
-import LanguageController from '@/core/entities-v2/language/LanguageController.ts';
-import LanguageModel from '@/core/entities-v2/language/LanguageModel.ts';
-import TagController from '@/core/entities-v2/tag/TagController.ts';
-import TagModel from '@/core/entities-v2/tag/TagModel.ts';
+import ComicController from '@/core/entities/comic/ComicController.ts';
+import ComicModel from '@/core/entities/comic/ComicModel.ts';
+import ParserController from '@/core/entities/parser/ParserController.ts';
+import ParserModel from '@/core/entities/parser/ParserModel.ts';
+import AuthorController from '@/core/entities/author/AuthorController.ts';
+import AuthorModel from '@/core/entities/author/AuthorModel.ts';
+import LanguageController from '@/core/entities/language/LanguageController.ts';
+import LanguageModel from '@/core/entities/language/LanguageModel.ts';
+import TagController from '@/core/entities/tag/TagController.ts';
+import TagModel from '@/core/entities/tag/TagModel.ts';
 
 definePage({
   meta: {

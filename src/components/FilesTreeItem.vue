@@ -27,7 +27,7 @@
 
 <script lang="ts" setup>
 import FilesTree from '@/components/FilesTree.vue';
-import type { ITreeDirectory, ITreeFile } from '@/core/object-value/file/FileTypes.ts';
+import type { ITreeDirectory, ITreeFile } from '@/core/entities/file/FileTypes.ts';
 import { formatBytes } from '@/core/utils/format.ts';
 
 const model = defineModel<string>({ default: '' });

@@ -90,12 +90,12 @@
 
 <script setup lang="ts">
 import useLoading from '@/composables/useLoading.ts';
-import ComicOverrideController from '@/core/entities-v2/comic-override/ComicOverrideController.ts';
-import ComicOverrideModel from '@/core/entities-v2/comic-override/ComicOverrideModel.ts';
-import ComicController from '@/core/entities-v2/comic/ComicController.ts';
-import ComicModel from '@/core/entities-v2/comic/ComicModel.ts';
-import ParserController from '@/core/entities-v2/parser/ParserController.ts';
-import ParserModel from '@/core/entities-v2/parser/ParserModel.ts';
+import ComicOverrideController from '@/core/entities/comic-override/ComicOverrideController.ts';
+import ComicOverrideModel from '@/core/entities/comic-override/ComicOverrideModel.ts';
+import ComicController from '@/core/entities/comic/ComicController.ts';
+import ComicModel from '@/core/entities/comic/ComicModel.ts';
+import ParserController from '@/core/entities/parser/ParserController.ts';
+import ParserModel from '@/core/entities/parser/ParserModel.ts';
 import { Toast } from '@capacitor/toast';
 
 definePage({

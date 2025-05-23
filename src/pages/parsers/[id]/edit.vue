@@ -124,12 +124,12 @@
 <script lang="ts" setup>
 import useLoading from '@/composables/useLoading.ts';
 import type { IParserDTO } from '@/plugins/WebApiPlugin.ts';
-import { APP_NAME } from '@/core/middleware/variables.ts';
+import { APP_NAME } from '@/core/utils/variables.ts';
 import { Dialog } from '@capacitor/dialog';
 import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 import { Toast } from '@capacitor/toast';
-import ParserController from '@/core/entities-v2/parser/ParserController.ts';
-import ParserModel from '@/core/entities-v2/parser/ParserModel.ts';
+import ParserController from '@/core/entities/parser/ParserController.ts';
+import ParserModel from '@/core/entities/parser/ParserModel.ts';
 
 definePage({
   meta: {

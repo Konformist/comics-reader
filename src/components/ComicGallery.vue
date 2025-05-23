@@ -7,6 +7,14 @@
       params: { id: comic.id }
     }"
   >
+    <div class="ma-2 position-absolute top-0 right-0 d-flex">
+      <v-badge
+        v-if="comic.isFilled"
+        color="success"
+        icon="$check"
+        inline
+      />
+    </div>
     <v-card-text
       class="position-absolute bottom-0 left-0 right-0"
       style="background-color: rgba(0, 0, 0, 0.4)"
@@ -19,7 +27,7 @@
 </template>
 
 <script lang="ts" setup>
-import type ComicModel from '@/core/entities-v2/comic/ComicModel.ts';
+import type ComicModel from '@/core/entities/comic/ComicModel.ts';
 
 const { comic } = defineProps<{
   comic: ComicModel

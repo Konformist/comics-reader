@@ -90,10 +90,10 @@ import useLoading from '@/composables/useLoading.ts';
 import { sortString } from '@/core/utils/array.ts';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
-import ComicController from '@/core/entities-v2/comic/ComicController.ts';
-import ComicModel from '@/core/entities-v2/comic/ComicModel.ts';
-import LanguageController from '@/core/entities-v2/language/LanguageController.ts';
-import LanguageModel from '@/core/entities-v2/language/LanguageModel.ts';
+import ComicController from '@/core/entities/comic/ComicController.ts';
+import ComicModel from '@/core/entities/comic/ComicModel.ts';
+import LanguageController from '@/core/entities/language/LanguageController.ts';
+import LanguageModel from '@/core/entities/language/LanguageModel.ts';
 
 definePage({
   meta: {

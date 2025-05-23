@@ -12,9 +12,9 @@
 <script lang="ts" setup>
 import FilesTree from '@/components/FilesTree.vue';
 import useLoading from '@/composables/useLoading.ts';
-import server from '@/core/middleware/server.ts';
-import { BACKUPS_DIRECTORY, COMICS_FILES_DIRECTORY } from '@/core/middleware/variables.ts';
-import type { ITreeDirectory } from '@/core/object-value/file/FileTypes.ts';
+import { BACKUPS_DIRECTORY, COMICS_FILES_DIRECTORY } from '@/core/utils/variables.ts';
+import type { ITreeDirectory } from '@/core/entities/file/FileTypes.ts';
+import { getTree } from '@/core/utils/files.ts';
 
 definePage({
   meta: {
@@ -32,8 +32,8 @@ const treeFiles = ref<ITreeDirectory[]>([]);
 
 const loadTreeFiles = async () => {
   loadingStart();
-  treeFiles.value.push(...await server.getTree(COMICS_FILES_DIRECTORY));
-  treeFiles.value.push(...await server.getTree(BACKUPS_DIRECTORY));
+  treeFiles.value.push(...await getTree(COMICS_FILES_DIRECTORY));
+  treeFiles.value.push(...await getTree(BACKUPS_DIRECTORY));
   loadingEnd();
 };
 

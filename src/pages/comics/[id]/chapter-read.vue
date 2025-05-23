@@ -51,9 +51,9 @@
 <script lang="ts" setup>
 import ChapterPageRead from '@/components/ChapterPageRead.vue';
 import useLoading from '@/composables/useLoading.ts';
-import ChapterPageController from '@/core/entities-v2/chapter-page/ChapterPageController.ts';
-import type ChapterPageModel from '@/core/entities-v2/chapter-page/ChapterPageModel.ts';
-import ParserController from '@/core/entities-v2/parser/ParserController.ts';
+import ChapterPageController from '@/core/entities/chapter-page/ChapterPageController.ts';
+import type ChapterPageModel from '@/core/entities/chapter-page/ChapterPageModel.ts';
+import ParserController from '@/core/entities/parser/ParserController.ts';
 import { KeepAwake } from '@capacitor-community/keep-awake';
 import { Capacitor } from '@capacitor/core';
 import { StatusBar } from '@capacitor/status-bar';
@@ -61,8 +61,8 @@ import { Toast } from '@capacitor/toast';
 import { Autoplay, Pagination } from 'swiper/modules';
 import { register, type SwiperContainer, type SwiperSlide } from 'swiper/element';
 import { useAppStore } from '@/stores/app.ts';
-import ChapterController from '@/core/entities-v2/chapter/ChapterController.ts';
-import ChapterModel from '@/core/entities-v2/chapter/ChapterModel.ts';
+import ChapterController from '@/core/entities/chapter/ChapterController.ts';
+import ChapterModel from '@/core/entities/chapter/ChapterModel.ts';
 
 definePage({
   meta: {

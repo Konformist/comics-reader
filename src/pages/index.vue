@@ -116,14 +116,14 @@
 
 <script lang="ts" setup>
 import { Toast } from '@capacitor/toast';
-import ComicController from '@/core/entities-v2/comic/ComicController.ts';
-import ComicModel from '@/core/entities-v2/comic/ComicModel.ts';
-import AuthorController from '@/core/entities-v2/author/AuthorController.ts';
-import type AuthorModel from '@/core/entities-v2/author/AuthorModel.ts';
-import LanguageController from '@/core/entities-v2/language/LanguageController.ts';
-import type LanguageModel from '@/core/entities-v2/language/LanguageModel.ts';
-import TagController from '@/core/entities-v2/tag/TagController.ts';
-import type TagModel from '@/core/entities-v2/tag/TagModel.ts';
+import ComicController from '@/core/entities/comic/ComicController.ts';
+import ComicModel from '@/core/entities/comic/ComicModel.ts';
+import AuthorController from '@/core/entities/author/AuthorController.ts';
+import type AuthorModel from '@/core/entities/author/AuthorModel.ts';
+import LanguageController from '@/core/entities/language/LanguageController.ts';
+import type LanguageModel from '@/core/entities/language/LanguageModel.ts';
+import TagController from '@/core/entities/tag/TagController.ts';
+import type TagModel from '@/core/entities/tag/TagModel.ts';
 import { useComicsStore } from '@/stores/comics.ts';
 import useLoading from '@/composables/useLoading.ts';
 import ComicGallery from '@/components/ComicGallery.vue';
@@ -169,10 +169,10 @@ const filterArrays = <T>(f: T[], s: T[]): boolean => (
 
 const comicsFiltered = computed(() => (
   comics.value.filter((item) => {
-    // if ((comicsStore.filters.filling === 1 && !item.isFilled)
-    //   || (comicsStore.filters.filling === 2 && item.isFilled)) {
-    //   return false;
-    // }
+    if ((comicsStore.filters.filling === 1 && !item.isFilled)
+      || (comicsStore.filters.filling === 2 && item.isFilled)) {
+      return false;
+    }
 
     return filterArrays(item.tags, comicsStore.filters.tags)
       && filterArrays(item.authors, comicsStore.filters.authors)

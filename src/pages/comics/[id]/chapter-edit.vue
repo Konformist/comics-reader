@@ -99,7 +99,7 @@
                 :key="item.raw.id"
                 cols="12"
               >
-                <ComicPageEdit
+                <ChapterPageEdit
                   v-model:from="item.raw.fromUrl"
                   :disabled="loading || loadingGlobal || !item.raw.id"
                   :item="item.raw"
@@ -136,11 +136,11 @@ import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
 import useLoading from '@/composables/useLoading.ts';
 import { fileToBase64 } from '@/core/utils/image.ts';
-import ChapterPageController from '@/core/entities-v2/chapter-page/ChapterPageController.ts';
-import type ChapterPageModel from '@/core/entities-v2/chapter-page/ChapterPageModel.ts';
-import ChapterController from '@/core/entities-v2/chapter/ChapterController.ts';
-import ChapterModel from '@/core/entities-v2/chapter/ChapterModel.ts';
-import ParserController from '@/core/entities-v2/parser/ParserController.ts';
+import ChapterPageController from '@/core/entities/chapter-page/ChapterPageController.ts';
+import type ChapterPageModel from '@/core/entities/chapter-page/ChapterPageModel.ts';
+import ChapterController from '@/core/entities/chapter/ChapterController.ts';
+import ChapterModel from '@/core/entities/chapter/ChapterModel.ts';
+import ParserController from '@/core/entities/parser/ParserController.ts';
 
 definePage({
   meta: {

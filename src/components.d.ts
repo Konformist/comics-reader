@@ -11,7 +11,7 @@ declare module 'vue' {
     BottomNavigation: typeof import('./components/BottomNavigation.vue')['default']
     ChapterPageRead: typeof import('./components/ChapterPageRead.vue')['default']
     ComicGallery: typeof import('./components/ComicGallery.vue')['default']
-    ComicPageEdit: typeof import('./components/ComicPageEdit.vue')['default']
+    ChapterPageEdit: typeof import('./components/ChapterPageEdit.vue')['default']
     FilesTree: typeof import('./components/FilesTree.vue')['default']
     FilesTreeItem: typeof import('./components/FilesTreeItem.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

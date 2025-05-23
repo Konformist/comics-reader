@@ -1,5 +1,5 @@
+import SettingsController from '@/core/entities/settings/SettingsController.ts';
 import SettingsModel from '@/core/entities/settings/SettingsModel.ts';
-import server from '@/core/middleware/server.ts';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import { version } from '../../package.json';
@@ -17,13 +17,11 @@ export const useAppStore = defineStore('app', {
 
   actions: {
     async saveSettings() {
-      await server.setSettings(this.settings.getDTO());
+      await SettingsController.save(this.settings);
     },
 
     async loadSettings() {
-      const result = await server.getSettings();
-
-      this.settings = new SettingsModel(result);
+      this.settings = await SettingsController.load();
     },
 
     async initApp() {

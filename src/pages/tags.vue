@@ -89,10 +89,10 @@
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
 import { sortString } from '@/core/utils/array.ts';
-import ComicController from '@/core/entities-v2/comic/ComicController.ts';
-import ComicModel from '@/core/entities-v2/comic/ComicModel.ts';
-import TagController from '@/core/entities-v2/tag/TagController.ts';
-import TagModel from '@/core/entities-v2/tag/TagModel.ts';
+import ComicController from '@/core/entities/comic/ComicController.ts';
+import ComicModel from '@/core/entities/comic/ComicModel.ts';
+import TagController from '@/core/entities/tag/TagController.ts';
+import TagModel from '@/core/entities/tag/TagModel.ts';
 import useLoading from '@/composables/useLoading.ts';
 
 definePage({

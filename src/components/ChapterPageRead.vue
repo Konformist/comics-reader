@@ -14,7 +14,7 @@
 </template>
 
 <script lang="ts" setup>
-import type ChapterPageModel from '@/core/entities-v2/chapter-page/ChapterPageModel.ts';
+import type ChapterPageModel from '@/core/entities/chapter-page/ChapterPageModel.ts';
 
 const emit = defineEmits<{
   (e: 'download', v: void): void

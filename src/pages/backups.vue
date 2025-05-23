@@ -75,9 +75,9 @@
 
 <script setup lang="ts">
 import useLoading from '@/composables/useLoading.ts';
-import server from '@/core/middleware/server.ts';
-import { APP_NAME, BACKUPS_DIRECTORY, COMICS_FILES_DIRECTORY } from '@/core/middleware/variables.ts';
-import type { ITreeDirectory } from '@/core/object-value/file/FileTypes.ts';
+import { APP_NAME, BACKUPS_DIRECTORY, COMICS_FILES_DIRECTORY } from '@/core/utils/variables.ts';
+import type { ITreeDirectory } from '@/core/entities/file/FileTypes.ts';
+import { getTree } from '@/core/utils/files.ts';
 import WebApi from '@/plugins/WebApiPlugin.ts';
 import { Dialog } from '@capacitor/dialog';
 import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
@@ -102,7 +102,7 @@ const backups = ref<ITreeDirectory[]>([]);
 
 const loadBackupsTree = async () => {
   loadingStart();
-  backups.value = await server.getTree(BACKUPS_DIRECTORY);
+  backups.value = await getTree(BACKUPS_DIRECTORY);
   loadingEnd();
 };
 

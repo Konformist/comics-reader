@@ -1,30 +1,24 @@
 import { registerPlugin } from '@capacitor/core';
 
-export interface ITagDTO {
+interface DBDates {
   id: number
-  cdate: number
-  mdate: number
+  cdate: string
+  mdate: string
+}
+
+export interface ITagDTO extends DBDates {
   name: string
 }
 
-export interface IAuthorDTO {
-  id: number
-  cdate: number
-  mdate: number
+export interface IAuthorDTO extends DBDates {
   name: string
 }
 
-export interface ILanguageDTO {
-  id: number
-  cdate: number
-  mdate: number
+export interface ILanguageDTO extends DBDates {
   name: string
 }
 
-export interface IParserDTO {
-  id: number
-  cdate: number
-  mdate: number
+export interface IParserDTO extends DBDates {
   name: string
   siteUrl: string
   titleCSS: string
@@ -37,10 +31,7 @@ export interface IParserDTO {
   tagsTextCSS: string
 }
 
-export interface IFileDTO {
-  id: number
-  cdate: number
-  mdate: number
+export interface IFileDTO extends DBDates {
   name: string
   size: number
   path: string
@@ -65,10 +56,7 @@ export interface IComicOverrideDTO {
   authorsTextCSS: string
 }
 
-export interface IComicDTO {
-  id: number
-  cdate: number
-  mdate: number
+export interface IComicDTO extends DBDates {
   name: string
   parserId: number
   fromUrl: string
@@ -86,10 +74,7 @@ export interface IChapterPageDTO {
   file: IFileDTO | null
 }
 
-export interface IChapterDTO {
-  id: number
-  cdate: number
-  mdate: number
+export interface IChapterDTO extends DBDates {
   name: string
   comicId: number
   pages: IChapterPageDTO[]
@@ -149,8 +134,6 @@ interface IWebApiPlugin {
 
   addBackup(): Promise<void>
   restoreBackup(data: { path: string }): Promise<void>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  migrate(data: any): Promise<void>
 }
 
 const WebApi = registerPlugin<IWebApiPlugin>('WebApi');

@@ -41,8 +41,8 @@
 import useLoading from '@/composables/useLoading.ts';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
-import ParserController from '@/core/entities-v2/parser/ParserController.ts';
-import ParserModel from '@/core/entities-v2/parser/ParserModel.ts';
+import ParserController from '@/core/entities/parser/ParserController.ts';
+import ParserModel from '@/core/entities/parser/ParserModel.ts';
 
 definePage({
   meta: {

@@ -118,16 +118,16 @@
 import { Clipboard } from '@capacitor/clipboard';
 import { Toast } from '@capacitor/toast';
 import useLoading from '@/composables/useLoading.ts';
-import ComicController from '@/core/entities-v2/comic/ComicController.ts';
-import ComicModel from '@/core/entities-v2/comic/ComicModel.ts';
-import ChapterController from '@/core/entities-v2/chapter/ChapterController.ts';
-import ChapterModel from '@/core/entities-v2/chapter/ChapterModel.ts';
-import AuthorController from '@/core/entities-v2/author/AuthorController.ts';
-import type AuthorModel from '@/core/entities-v2/author/AuthorModel.ts';
-import LanguageController from '@/core/entities-v2/language/LanguageController.ts';
-import type LanguageModel from '@/core/entities-v2/language/LanguageModel.ts';
-import TagController from '@/core/entities-v2/tag/TagController.ts';
-import type TagModel from '@/core/entities-v2/tag/TagModel.ts';
+import ComicController from '@/core/entities/comic/ComicController.ts';
+import ComicModel from '@/core/entities/comic/ComicModel.ts';
+import ChapterController from '@/core/entities/chapter/ChapterController.ts';
+import ChapterModel from '@/core/entities/chapter/ChapterModel.ts';
+import AuthorController from '@/core/entities/author/AuthorController.ts';
+import type AuthorModel from '@/core/entities/author/AuthorModel.ts';
+import LanguageController from '@/core/entities/language/LanguageController.ts';
+import type LanguageModel from '@/core/entities/language/LanguageModel.ts';
+import TagController from '@/core/entities/tag/TagController.ts';
+import type TagModel from '@/core/entities/tag/TagModel.ts';
 
 definePage({
   meta: {

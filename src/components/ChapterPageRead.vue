@@ -7,7 +7,7 @@
   />
   <div
     v-else
-    class="w-100 flex justify-center align-center"
+    class="w-100 d-flex justify-center align-center"
     style="min-height: 400px"
   >
     Нет изображения

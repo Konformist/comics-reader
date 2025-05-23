@@ -48,7 +48,6 @@ class WebApi(private val context: Context) {
   private val authorSerializer = AuthorSerializer()
   private val languageSerializer = LanguageSerializer()
   private val parserSerializer = ParserSerializer()
-  private val fileSerializer = FileSerializer()
   private val chapterSerializer = ChapterSerializer()
   private val chapterPageSerializer = ChapterPageSerializer()
   private val comicCoverSerializer = ComicCoverSerializer()

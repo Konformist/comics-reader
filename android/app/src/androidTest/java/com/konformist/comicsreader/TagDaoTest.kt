@@ -4,7 +4,6 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.konformist.comicsreader.db.AppDatabase
-import com.konformist.comicsreader.db.tag.Tag
 import com.konformist.comicsreader.db.tag.TagCreate
 import com.konformist.comicsreader.db.tag.TagDao
 import com.konformist.comicsreader.db.tag.TagDelete

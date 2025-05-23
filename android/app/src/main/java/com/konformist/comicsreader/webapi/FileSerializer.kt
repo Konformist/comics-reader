@@ -30,18 +30,6 @@ class FileSerializer : Serializer<AppFile>() {
     return AppFileDelete(id = id)
   }
 
-  fun fromJSON(item: JSONObject): AppFile {
-    return AppFile(
-      id = item.getLong("id"),
-      cdate = item.getString("cdate"),
-      mdate = item.getString("mdate"),
-      name = item.getString("name"),
-      mime = item.getString("mime"),
-      size = item.getLong("size"),
-      path = item.getString("path"),
-    )
-  }
-
   override fun toJSON(item: AppFile): JSONObject {
     val data = JSONObject()
 

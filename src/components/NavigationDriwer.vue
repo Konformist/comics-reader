@@ -33,11 +33,6 @@
         title="Прочее"
       />
       <v-list-item
-        prepend-icon="$files"
-        title="Файлы"
-        :to="{ name: '/filemanager' }"
-      />
-      <v-list-item
         prepend-icon="$settings"
         title="Настройки"
         :to="{ name: '/settings' }"
@@ -46,6 +41,9 @@
         prepend-icon="$info"
         title="О приложении"
         :to="{ name: '/about' }"
+      />
+      <v-list-subheader
+        title="Dev"
       />
       <v-list-item
         prepend-icon="$dev"

@@ -1,7 +1,8 @@
-package com.konformist.comicsreader.imageutils
+package com.konformist.comicsreader.utils
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Base64
 import java.io.File
 import java.io.FileOutputStream
 
@@ -9,18 +10,32 @@ class ImageUtils {
   companion object {
     private const val SIZE_ZERO = 0
 
-    private fun write(file: File, bitmap: Bitmap) {
+    private fun cleanImageData(value: String): String {
+      return value
+        .replace("data:image/jpeg;base64,", "")
+        .replace("data:image/webp;base64,", "")
+        .replace("data:image/png;base64,", "")
+        .replace("data:image/gif;base64,", "")
+    }
+
+    fun write(filePath: File, bitmap: Bitmap, quality: Int = 100) {
       var outStream: FileOutputStream? = null
 
       try {
-        outStream = FileOutputStream(file)
-        bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, 80, outStream)
+        outStream = FileOutputStream(filePath)
+        bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, quality, outStream)
       } finally {
         if (outStream != null) {
           outStream.flush()
           outStream.close()
         }
       }
+    }
+
+    fun base64ToBitmap(value: String): Bitmap {
+      val cleanedImage = cleanImageData(value)
+      val decodedBytes: ByteArray = Base64.decode(cleanedImage, Base64.DEFAULT)
+      return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
     }
 
     /**
@@ -60,10 +75,6 @@ class ImageUtils {
       )
 
       return true
-    }
-
-    fun optimization(file: File) {
-      write(file, BitmapFactory.decodeFile(file.path))
     }
   }
 }

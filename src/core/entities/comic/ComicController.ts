@@ -1,26 +1,24 @@
+import Api from '@/core/api/Api.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
-import WebApi from '@/plugins/WebApiPlugin.ts';
 
 export default class ComicController {
   static async loadAll() {
-    const { result } = await WebApi.getComicsAll();
-
+    const result = await Api.api('comic/comic/list');
     return result.map((e) => new ComicModel(e));
   }
 
   static async load(id: number) {
-    const { result } = await WebApi.getComic({ id });
-
+    const result = await Api.api('comic/comic/get', { id });
     return new ComicModel(result);
   }
 
-  static async save(value: ComicModel) {
+  static save(value: ComicModel) {
     return value.id
-      ? WebApi.setComic(value.getDTO())
-      : (await WebApi.addComic(value.getDTO())).result;
+      ? Api.api('comic/comic/set', value.getDTO())
+      : Api.api('comic/comic/add', value.getDTO());
   }
 
   static remove(id: number) {
-    return WebApi.delComic({ id });
+    return Api.api('comic/comic/del', { id });
   }
 }

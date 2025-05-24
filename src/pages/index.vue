@@ -2,7 +2,7 @@
   <v-main scrollable>
     <v-toolbar density="compact">
       <v-toolbar-title class="text-subtitle-1">
-        {{ comics.length !== comicsFiltered.length ? 'Найдено' : 'Всего' }}: {{ comicsFiltered.length }}
+        {{ comicsStore.comics.length !== comicsFiltered.length ? 'Найдено' : 'Всего' }}: {{ comicsFiltered.length }}
       </v-toolbar-title>
       <v-spacer />
       <v-btn
@@ -29,7 +29,7 @@
       </v-row>
       <v-data-iterator
         v-else
-        v-model:page="comicsStore.filters.page"
+        v-model:page="comicsPageStore.filters.page"
         :items="comicsFiltered"
         items-per-page="20"
       >
@@ -49,7 +49,7 @@
         </template>
         <template #footer="{ pageCount, prevPage, nextPage }">
           <v-pagination
-            v-model="comicsStore.filters.page"
+            v-model="comicsPageStore.filters.page"
             class="mt-4"
             density="comfortable"
             :length="pageCount"
@@ -63,34 +63,34 @@
       <v-card>
         <v-card-item>
           <v-select
-            v-model="comicsStore.filters.authors"
+            v-model="comicsPageStore.filters.authors"
             item-title="name"
             item-value="id"
-            :items="authors"
+            :items="authorsStore.authors"
             label="Авторы"
             multiple
             variant="solo-filled"
           />
           <v-select
-            v-model="comicsStore.filters.languages"
+            v-model="comicsPageStore.filters.languages"
             item-title="name"
             item-value="id"
-            :items="languages"
+            :items="languagesStore.languages"
             label="Языки"
             multiple
             variant="solo-filled"
           />
           <v-select
-            v-model="comicsStore.filters.tags"
+            v-model="comicsPageStore.filters.tags"
             item-title="name"
             item-value="id"
-            :items="tags"
+            :items="tagsStore.tags"
             label="Теги"
             multiple
             variant="solo-filled"
           />
           <v-btn-toggle
-            v-model="comicsStore.filters.filling"
+            v-model="comicsPageStore.filters.filling"
             class="w-100"
             density="comfortable"
             divided
@@ -113,16 +113,14 @@
 </template>
 
 <script lang="ts" setup>
+import { useAuthorsStore } from '@/stores/authors.ts';
+import { useComicsStore } from '@/stores/comics.ts';
+import { useLanguagesStore } from '@/stores/languages.ts';
+import { useTagsStore } from '@/stores/tags.ts';
 import { Toast } from '@capacitor/toast';
 import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
-import AuthorController from '@/core/entities/author/AuthorController.ts';
-import type AuthorModel from '@/core/entities/author/AuthorModel.ts';
-import LanguageController from '@/core/entities/language/LanguageController.ts';
-import type LanguageModel from '@/core/entities/language/LanguageModel.ts';
-import TagController from '@/core/entities/tag/TagController.ts';
-import type TagModel from '@/core/entities/tag/TagModel.ts';
-import { useComicsStore } from '@/stores/comics.ts';
+import { useComicsPageStore } from '@/stores/comicsPage.ts';
 import useLoading from '@/composables/useLoading.ts';
 import ComicGallery from '@/components/ComicGallery.vue';
 
@@ -135,6 +133,11 @@ definePage({
 
 const router = useRouter();
 const comicsStore = useComicsStore();
+const comicsPageStore = useComicsPageStore();
+const tagsStore = useTagsStore();
+const authorsStore = useAuthorsStore();
+const languagesStore = useLanguagesStore();
+
 const {
   loading,
   loadingStart,
@@ -144,65 +147,46 @@ const {
 
 const filtersSheet = ref(false);
 
-const languages = ref<LanguageModel[]>([]);
-const loadLanguages = async () => {
-  languages.value = await LanguageController.loadAll();
-};
-
-const authors = ref<AuthorModel[]>([]);
-const loadAuthors = async () => {
-  authors.value = await AuthorController.loadAll();
-};
-
-const tags = ref<TagModel[]>([]);
-const loadTags = async () => {
-  tags.value = await TagController.loadAll();
-};
-
-const comics = ref<ComicModel[]>([]);
-
 const filterArrays = <T>(f: T[], s: T[]): boolean => (
   !s.length
   || f.some((e) => s.includes(e))
 );
 
 const comicsFiltered = computed(() => (
-  comics.value.filter((item) => {
-    if ((comicsStore.filters.filling === 1 && !item.isFilled)
-      || (comicsStore.filters.filling === 2 && item.isFilled)) {
-      return false;
-    }
+  comicsStore.comics
+    .filter((item) => {
+      if ((comicsPageStore.filters.filling === 1 && !item.isFilled)
+        || (comicsPageStore.filters.filling === 2 && item.isFilled)) {
+        return false;
+      }
 
-    return filterArrays(item.tags, comicsStore.filters.tags)
-      && filterArrays(item.authors, comicsStore.filters.authors)
-      && filterArrays([item.languageId], comicsStore.filters.languages);
-  })
+      return filterArrays(item.tags, comicsPageStore.filters.tags)
+        && filterArrays(item.authors, comicsPageStore.filters.authors)
+        && filterArrays([item.languageId], comicsPageStore.filters.languages);
+    })
+    .reverse()
 ));
-
-const loadComics = async () => {
-  const result = await ComicController.loadAll();
-  comics.value = result.reverse();
-};
 
 const createComic = async () => {
   const comicId = await ComicController.save(new ComicModel());
 
-  if (comicId) {
-    Toast.show({ text: 'Комикс создан' });
-    await router.push({
-      name: '/comics/[id]/',
-      params: { id: comicId },
-    });
-  }
+  if (typeof comicId !== 'number') return;
+
+  await comicsStore.loadComicsForce();
+  Toast.show({ text: 'Комикс создан' });
+  await router.push({
+    name: '/comics/[id]/',
+    params: { id: comicId },
+  });
 };
 
 const init = async () => {
   loadingStart();
   await Promise.all([
-    loadLanguages(),
-    loadAuthors(),
-    loadTags(),
-    loadComics(),
+    languagesStore.loadLanguages(),
+    authorsStore.loadAuthors(),
+    tagsStore.loadTags(),
+    comicsStore.loadComics(),
   ]);
   loadingEnd();
 };

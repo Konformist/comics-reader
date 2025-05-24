@@ -1,18 +1,14 @@
 <template>
   <v-main scrollable>
     <v-container class="pa-0">
-      <v-list>
-        <v-list-item
-          v-for="(chapter, index) in chapters"
-          :key="chapter.id"
-          append-icon="$edit"
-          :title="chapter.name || `Глава ${index + 1}`"
-          :to="{
-            name: '/chapters/[id]/edit',
-            params: { id: chapter.id },
-          }"
-        />
-      </v-list>
+      <DictionaryList
+        :items="chaptersList"
+        :loading="loading"
+        @click-item="$router.push({
+          name: '/chapters/[id]/edit',
+          params: { id: $event }
+        })"
+      />
     </v-container>
     <v-fab
       :disabled="loadingGlobal"
@@ -40,18 +36,31 @@ const route = useRoute('/chapters/[comicId]');
 const comicId = +route.params.comicId;
 
 const {
+  loading,
+  loadingStart,
+  loadingEnd,
   loadingGlobal,
   loadingGlobalStart,
   loadingGlobalEnd,
 } = useLoading();
 
 const chapters = ref<ChapterModel[]>([]);
+const chaptersList = computed(() => (
+  chapters.value.map((e, i) => ({
+    id: e.id,
+    name: e.name || `Глава ${i + 1}`,
+  }))
+));
 
 const loadChapters = async () => {
   chapters.value = await ChapterController.loadAll(comicId);
 };
 
-loadChapters();
+onMounted(async () => {
+  loadingStart();
+  await loadChapters();
+  loadingEnd();
+});
 
 const createChapter = async () => {
   try {

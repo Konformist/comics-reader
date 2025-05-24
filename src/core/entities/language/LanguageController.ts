@@ -1,20 +1,19 @@
-import WebApi from '@/plugins/WebApiPlugin.ts';
+import Api from '@/core/api/Api.ts';
 import LanguageModel from '@/core/entities/language/LanguageModel.ts';
 
 export default class LanguageController {
   static async loadAll() {
-    const { result } = await WebApi.getLanguagesAll();
-
+    const result = await Api.api('language/language/list');
     return result.map((e) => new LanguageModel(e));
   }
 
-  static async save(value: LanguageModel) {
+  static save(value: LanguageModel) {
     return value.id
-      ? WebApi.setLanguage(value.getDTO())
-      : (await WebApi.addLanguage(value.getDTO())).result;
+      ? Api.api('language/language/set', value.getDTO())
+      : Api.api('language/language/add', value.getDTO());
   }
 
   static remove(id: number) {
-    return WebApi.delLanguage({ id });
+    return Api.api('language/language/del', { id });
   }
 }

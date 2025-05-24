@@ -4,30 +4,14 @@
       <v-alert color="info" rounded="0">
         Парсеры работают с DOM деревом. См. CSS.
       </v-alert>
-      <v-list v-if="parsers.length">
-        <v-list-item
-          v-for="item in parsers"
-          :key="item.id"
-          :title="item.name"
-          :to="{
-            name: '/parsers/[id]/',
-            params: { id: item.id }
-          }"
-        >
-          <template #append>
-            <v-list-item-action end>
-              <v-btn
-                color="error"
-                density="comfortable"
-                :disabled="loadingGlobal"
-                icon="$delete"
-                variant="tonal"
-                @click.prevent="deleteParser(item.id)"
-              />
-            </v-list-item-action>
-          </template>
-        </v-list-item>
-      </v-list>
+      <DictionaryList
+        :items="parsersStore.parsers"
+        :loading="loading"
+        @click-item="$router.push({
+          name: '/parsers/[id]/',
+          params: { id: $event }
+        })"
+      />
     </v-container>
     <v-fab
       class="mb-14"
@@ -39,11 +23,11 @@
 </template>
 
 <script lang="ts" setup>
-import useLoading from '@/composables/useLoading.ts';
-import { Dialog } from '@capacitor/dialog';
+import { useParsersStore } from '@/stores/parsers.ts';
 import { Toast } from '@capacitor/toast';
 import ParserController from '@/core/entities/parser/ParserController.ts';
 import ParserModel from '@/core/entities/parser/ParserModel.ts';
+import useLoading from '@/composables/useLoading.ts';
 
 definePage({
   meta: {
@@ -53,52 +37,36 @@ definePage({
 });
 
 const router = useRouter();
+const parsersStore = useParsersStore();
+
 const {
+  loading,
+  loadingStart,
+  loadingEnd,
   loadingGlobal,
   loadingGlobalStart,
   loadingGlobalEnd,
 } = useLoading();
 
-const parsers = ref<ParserModel[]>([]);
-
-const loadParsers = async (): Promise<void> => {
-  parsers.value = await ParserController.loadAll();
-};
-
-loadParsers();
+onMounted(async () => {
+  loadingStart();
+  await parsersStore.loadParsers();
+  loadingEnd();
+});
 
 const createParser = async () => {
   try {
     loadingGlobalStart();
     const parserId = await ParserController.save(new ParserModel());
 
-    if (parserId) {
-      Toast.show({ text: 'Парсер создан' });
-      router.push({
-        name: '/parsers/[id]/',
-        params: { id: parserId },
-      });
-    }
-  } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
-  } finally {
-    loadingGlobalEnd();
-  }
-};
+    if (typeof parserId !== 'number') return;
 
-const deleteParser = async (id: number) => {
-  const { value } = await Dialog.confirm({
-    title: 'Подтверждение удаления',
-    message: 'Удалить парсер?',
-  });
-
-  if (!value) return;
-
-  try {
-    loadingGlobalStart();
-    await ParserController.remove(id);
-    await loadParsers();
-    Toast.show({ text: 'Парсер удалён' });
+    await parsersStore.loadParsersForce();
+    Toast.show({ text: 'Парсер создан' });
+    router.push({
+      name: '/parsers/[id]/',
+      params: { id: parserId },
+    });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {

@@ -12,6 +12,8 @@ declare module 'vue' {
     ChapterPageEdit: typeof import('./components/ChapterPageEdit.vue')['default']
     ChapterPageRead: typeof import('./components/ChapterPageRead.vue')['default']
     ComicGallery: typeof import('./components/ComicGallery.vue')['default']
+    DictionaryEditDialog: typeof import('./components/DictionaryEditDialog.vue')['default']
+    DictionaryList: typeof import('./components/DictionaryList.vue')['default']
     FilesTree: typeof import('./components/FilesTree.vue')['default']
     FilesTreeItem: typeof import('./components/FilesTreeItem.vue')['default']
     NavigationDriwer: typeof import('./components/NavigationDriwer.vue')['default']

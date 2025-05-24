@@ -16,7 +16,7 @@
           :src="comic.cover.file.url"
         />
       </template>
-      <div class="pa-4">
+      <div class="px-4 py-8">
         <h3 class="font-weight-medium">
           {{ comic.name || '—' }}
           <v-icon
@@ -73,23 +73,25 @@
         </p>
       </div>
       <v-divider />
-      <v-list>
-        <v-list-item
-          v-for="(chapter, index) in chapters"
-          :key="chapter.id"
-          :title="chapter.name || `Глава ${index + 1}`"
-          :to="{
-            name: '/chapters/[id]/read',
-            params: { id: chapter.id },
-          }"
-        >
-          <template #append>
-            <v-icon
-              :color="chapter.pages.length && chapter.pages.every((e) => e.isRead) ? 'success' : ''"
-              icon="$read"
-            />
-          </template>
-        </v-list-item>
+      <v-list
+        class="pa-0"
+        density="comfortable"
+        item-title="name"
+        item-value="id"
+        :items="chaptersList"
+        :loading="loading"
+        selectable
+        @click:select="$router.push({
+          name: '/chapters/[id]/read',
+          params: { id: $event.id as number },
+        })"
+      >
+        <template #append="{ item }">
+          <v-icon
+            :color="item.isRead ? 'success' : ''"
+            icon="$read"
+          />
+        </template>
       </v-list>
     </v-container>
     <v-fab
@@ -127,6 +129,9 @@
 </template>
 
 <script lang="ts" setup>
+import { useAuthorsStore } from '@/stores/authors.ts';
+import { useLanguagesStore } from '@/stores/languages.ts';
+import { useTagsStore } from '@/stores/tags.ts';
 import { Clipboard } from '@capacitor/clipboard';
 import { Toast } from '@capacitor/toast';
 import useLoading from '@/composables/useLoading.ts';
@@ -134,12 +139,6 @@ import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import ChapterController from '@/core/entities/chapter/ChapterController.ts';
 import ChapterModel from '@/core/entities/chapter/ChapterModel.ts';
-import AuthorController from '@/core/entities/author/AuthorController.ts';
-import type AuthorModel from '@/core/entities/author/AuthorModel.ts';
-import LanguageController from '@/core/entities/language/LanguageController.ts';
-import type LanguageModel from '@/core/entities/language/LanguageModel.ts';
-import TagController from '@/core/entities/tag/TagController.ts';
-import type TagModel from '@/core/entities/tag/TagModel.ts';
 
 definePage({
   meta: {
@@ -152,6 +151,10 @@ const route = useRoute('/comics/[id]/');
 const router = useRouter();
 const comicId = +route.params.id;
 
+const tagsStore = useTagsStore();
+const authorsStore = useAuthorsStore();
+const languagesStore = useLanguagesStore();
+
 const {
   loading,
   loadingStart,
@@ -162,43 +165,32 @@ const {
 const editOpened = ref(false);
 
 const chapters = ref<ChapterModel[]>([]);
+const chaptersList = computed(() => (
+  chapters.value.map((e, i) => ({
+    id: e.id,
+    name: e.name || `Глава ${i + 1}`,
+    isRead: e.pages.length && e.pages.every((e) => e.isRead),
+  }))
+));
 
 const loadChapters = async () => {
   chapters.value = await ChapterController.loadAll(comicId);
 };
 
 const comic = ref(new ComicModel());
-
 const loadComic = async () => {
   comic.value = await ComicController.load(comicId);
 };
 
-const languages = ref<LanguageModel[]>([]);
 const languagesChips = computed(() => (
-  languages.value.filter((e) => comic.value.languageId === e.id)
+  languagesStore.languages.filter((e) => comic.value.languageId === e.id)
 ));
-
-const loadLanguages = async () => {
-  languages.value = await LanguageController.loadAll();
-};
-
-const authors = ref<AuthorModel[]>([]);
 const authorsChips = computed(() => (
-  authors.value.filter((e) => comic.value.authors.includes(e.id))
+  authorsStore.authors.filter((e) => comic.value.authors.includes(e.id))
 ));
-
-const loadAuthors = async () => {
-  authors.value = await AuthorController.loadAll();
-};
-
-const tags = ref<TagModel[]>([]);
 const tagsChips = computed(() => (
-  tags.value.filter((e) => comic.value.tags.includes(e.id))
+  tagsStore.tags.filter((e) => comic.value.tags.includes(e.id))
 ));
-
-const loadTags = async () => {
-  tags.value = await TagController.loadAll();
-};
 
 const onCopy = async (string: string) => {
   await Clipboard.write({ string });
@@ -213,9 +205,9 @@ const init = async () => {
     router.replace({ name: '/' });
   } else {
     await Promise.all([
-      loadLanguages(),
-      loadAuthors(),
-      loadTags(),
+      languagesStore.loadLanguages(),
+      authorsStore.loadAuthors(),
+      tagsStore.loadTags(),
       loadChapters(),
     ]);
   }

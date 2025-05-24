@@ -1,7 +1,9 @@
 <template>
   <v-list
     :class="isChild ? 'pl-4 pa-0' : 'pa-0'"
+    density="comfortable"
     :rounded="rounded"
+    slim
   >
     <v-skeleton-loader
       v-if="loading"
@@ -10,7 +12,7 @@
     <template v-else>
       <template
         v-for="(item, index) in tree"
-        :key="item.path"
+        :key="item.name"
       >
         <FilesTreeItem
           v-model="model"
@@ -24,7 +26,7 @@
 
 <script lang="ts" setup>
 import FilesTreeItem from '@/components/FilesTreeItem.vue';
-import type { ITreeDirectory, ITreeFile } from '@/core/entities/file/FileTypes.ts';
+import type { ITreeDirectory, ITreeFile } from '@/plugins/WebApiPlugin.ts';
 
 const model = defineModel<string>({ default: '' });
 

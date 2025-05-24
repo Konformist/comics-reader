@@ -29,7 +29,6 @@ declare module 'vue-router/auto-routes' {
     '/comics/[id]/edit': RouteRecordInfo<'/comics/[id]/edit', '/comics/:id/edit', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/comics/[id]/override-edit': RouteRecordInfo<'/comics/[id]/override-edit', '/comics/:id/override-edit', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/debug': RouteRecordInfo<'/debug', '/debug', Record<never, never>, Record<never, never>>,
-    '/filemanager': RouteRecordInfo<'/filemanager', '/filemanager', Record<never, never>, Record<never, never>>,
     '/languages': RouteRecordInfo<'/languages', '/languages', Record<never, never>, Record<never, never>>,
     '/parsers/': RouteRecordInfo<'/parsers/', '/parsers', Record<never, never>, Record<never, never>>,
     '/parsers/[id]/': RouteRecordInfo<'/parsers/[id]/', '/parsers/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,

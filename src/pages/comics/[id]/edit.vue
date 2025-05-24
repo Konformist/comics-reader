@@ -3,11 +3,11 @@
     <v-container class="pa-0">
       <div class="px-4 py-8">
         <v-select
-          v-if="parsers.length"
+          v-if="parsersStore.parsers.length"
           v-model="comic.parserId"
           item-title="name"
           item-value="id"
-          :items="parsers"
+          :items="parsersStore.parsers"
           label="Парсер"
           @update:model-value="loadParser()"
         />
@@ -31,7 +31,7 @@
           v-model="comic.languageId"
           item-title="name"
           item-value="id"
-          :items="languages"
+          :items="languagesStore.languages"
           label="Язык"
         />
         <v-select
@@ -39,7 +39,7 @@
           chips
           item-title="name"
           item-value="id"
-          :items="authors"
+          :items="authorsStore.authors"
           label="Авторы"
           multiple
         />
@@ -48,7 +48,7 @@
           chips
           item-title="name"
           item-value="id"
-          :items="tags"
+          :items="tagsStore.tags"
           label="Теги"
           multiple
         />
@@ -136,6 +136,11 @@
 <script lang="ts" setup>
 import { parseComic } from '@/core/entities/parser/parseUtils.ts';
 import { useAppStore } from '@/stores/app.ts';
+import { useAuthorsStore } from '@/stores/authors.ts';
+import { useComicsStore } from '@/stores/comics.ts';
+import { useLanguagesStore } from '@/stores/languages.ts';
+import { useParsersStore } from '@/stores/parsers.ts';
+import { useTagsStore } from '@/stores/tags.ts';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
 import useLoading from '@/composables/useLoading.ts';
@@ -164,7 +169,13 @@ definePage({
 
 const route = useRoute('/comics/[id]/edit');
 const router = useRouter();
+
 const appStore = useAppStore();
+const comicsStore = useComicsStore();
+const tagsStore = useTagsStore();
+const authorsStore = useAuthorsStore();
+const languagesStore = useLanguagesStore();
+const parsersStore = useParsersStore();
 
 const {
   loading,
@@ -174,26 +185,6 @@ const {
   loadingGlobalStart,
   loadingGlobalEnd,
 } = useLoading();
-
-const languages = ref<LanguageModel[]>([]);
-const loadLanguages = async () => {
-  languages.value = await LanguageController.loadAll();
-};
-
-const authors = ref<AuthorModel[]>([]);
-const loadAuthors = async () => {
-  authors.value = await AuthorController.loadAll();
-};
-
-const tags = ref<TagModel[]>([]);
-const loadTags = async () => {
-  tags.value = await TagController.loadAll();
-};
-
-const parsers = ref<ParserModel[]>([]);
-const loadParsers = async () => {
-  parsers.value = await ParserController.loadAll();
-};
 
 const comicId = +(route.params.id || 0);
 
@@ -216,7 +207,7 @@ const loadParser = async () => {
 const updateParser = () => {
   if (!comic.value.fromUrl) return;
 
-  const item = parsers.value.find((e) => e.siteUrl && comic.value.fromUrl.includes(e.siteUrl));
+  const item = parsersStore.parsers.find((e) => e.siteUrl && comic.value.fromUrl.includes(e.siteUrl));
 
   if (!item) return;
 
@@ -232,10 +223,10 @@ onMounted(async () => {
     router.replace({ name: '/' });
   } else {
     await Promise.all([
-      loadParsers(),
-      loadTags(),
-      loadAuthors(),
-      loadLanguages(),
+      parsersStore.loadParsers(),
+      tagsStore.loadTags(),
+      authorsStore.loadAuthors(),
+      languagesStore.loadLanguages(),
       loadComicOverride(),
     ]);
     await loadParser();
@@ -264,43 +255,44 @@ const onLoadInfo = async () => {
     }
 
     if (parsedComic.language) {
-      const language = languages.value.find((e) => e.name.toLowerCase() === parsedComic.language?.toLowerCase());
+      const language = languagesStore.languages.find((e) => e.name.toLowerCase() === parsedComic.language?.toLowerCase());
 
       if (!language) {
         const itemId = await LanguageController.save(new LanguageModel({ name: parsedComic.language }));
-        if (itemId) comic.value.languageId = itemId;
+        if (typeof itemId === 'number') comic.value.languageId = itemId;
       } else {
         comic.value.languageId = language.id;
       }
     }
 
     for (const item of parsedComic.authors || []) {
-      const newItem = authors.value.find((e) => e.name.toLowerCase() === item.toLowerCase());
+      const newItem = authorsStore.authors.find((e) => e.name.toLowerCase() === item.toLowerCase());
 
       if (!newItem) {
         const itemId = await AuthorController.save(new AuthorModel({ name: item }));
-        if (itemId) comic.value.authors.push(itemId);
+        if (typeof itemId === 'number') comic.value.authors.push(itemId);
       } else {
         comic.value.authors.push(newItem.id);
       }
     }
 
     for (const item of parsedComic.tags || []) {
-      const newItem = tags.value.find((e) => e.name.toLowerCase() === item.toLowerCase());
+      const newItem = tagsStore.tags.find((e) => e.name.toLowerCase() === item.toLowerCase());
 
       if (!newItem) {
         const itemId = await TagController.save(new TagModel({ name: item }));
-        if (itemId) comic.value.tags.push(itemId);
+        if (typeof itemId === 'number') comic.value.tags.push(itemId);
       } else {
         comic.value.tags.push(newItem.id);
       }
     }
 
     await saveComic();
+    await comicsStore.loadComicsForce();
     await Promise.all([
-      loadTags(),
-      loadAuthors(),
-      loadLanguages(),
+      tagsStore.loadTagsForce(),
+      authorsStore.loadAuthorsForce(),
+      languagesStore.loadLanguagesForce(),
       loadComic(),
     ]);
     Toast.show({ text: 'Комикс сохранён' });
@@ -321,6 +313,7 @@ const uploadCover = async () => {
     await saveComic();
     const base64 = await fileToBase64(image.value);
     await ComicCoverController.saveFile(comic.value.id, base64, appStore.settings.isCompress);
+    await comicsStore.loadComicsForce();
     await loadComic();
     Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
@@ -339,6 +332,7 @@ const loadByLink = async () => {
     const result = await ParserController.loadImageRaw(comic.value.cover.fromUrl);
     await ComicCoverController.saveFile(comic.value.id, result, appStore.settings.isCompress);
     await loadComic();
+    await comicsStore.loadComicsForce();
     Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
@@ -356,6 +350,7 @@ const onSave = async () => {
   try {
     loadingGlobalStart();
     await saveComic();
+    await comicsStore.loadComicsForce();
     Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
@@ -375,6 +370,7 @@ const deleteComic = async () => {
   try {
     loadingGlobalStart();
     await ComicController.remove(comic.value.id);
+    await comicsStore.loadComicsForce();
     Toast.show({ text: 'Комикс удалён' });
     router.replace({ name: '/' });
   } catch (e) {

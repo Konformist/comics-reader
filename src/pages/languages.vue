@@ -9,74 +9,27 @@
           v-model="sortValue"
           :chips="false"
           class="mt-3"
-          :disabled="!languages.length"
+          :disabled="!languagesStore.languages.length"
           item-title="name"
           item-value="id"
           :items="sortItems"
           label="Сортировать"
         />
       </v-toolbar>
-      <v-list v-if="loading">
-        <v-skeleton-loader
-          type="list-item"
-        />
-      </v-list>
-      <v-list
-        v-else-if="languages.length"
-        activatable
-      >
-        <v-list-item
-          v-for="item in sortedLanguages"
-          :key="item.id"
-          :active="item.id === selectedLanguage.id"
-          :title="item.name"
-        >
-          <template #append>
-            <v-list-item-subtitle class="mr-1">
-              {{ item.count }}
-            </v-list-item-subtitle>
-            <v-list-item-action end>
-              <v-btn
-                class="mr-4"
-                density="comfortable"
-                :disabled="loadingGlobal"
-                icon="$edit"
-                variant="tonal"
-                @click="clickLanguage(item.id)"
-              />
-              <v-btn
-                color="error"
-                density="comfortable"
-                :disabled="loadingGlobal"
-                icon="$delete"
-                variant="tonal"
-                @click="deleteLanguage(item.id)"
-              />
-            </v-list-item-action>
-          </template>
-        </v-list-item>
-      </v-list>
+      <DictionaryList
+        :items="sortedLanguages"
+        :loading="loading"
+        @click-item="clickLanguage($event)"
+      />
     </v-container>
-    <v-dialog v-model="dialog">
-      <v-card>
-        <v-card-title>
-          {{ selectedLanguage.id ? 'Редактирование' : 'Создание' }}
-        </v-card-title>
-        <v-card-item class="pb-0">
-          <v-text-field
-            v-model.trim="selectedLanguage.name"
-            variant="solo-filled"
-          />
-        </v-card-item>
-        <v-card-actions>
-          <v-btn
-            :disabled="loadingGlobal"
-            text="Сохранить"
-            @click="saveLanguage()"
-          />
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <DictionaryEditDialog
+      v-model="selectedLanguage.name"
+      v-model:opened="dialog"
+      :disabled="loadingGlobal"
+      :is-created="!selectedLanguage.id"
+      @remove="deleteLanguage()"
+      @save="saveLanguage()"
+    />
     <v-fab
       class="mb-14"
       :disabled="loading"
@@ -87,12 +40,14 @@
 </template>
 
 <script setup lang="ts">
+import DictionaryEditDialog from '@/components/DictionaryEditDialog.vue';
+import DictionaryList from '@/components/DictionaryList.vue';
 import useLoading from '@/composables/useLoading.ts';
 import { sortString } from '@/core/utils/array.ts';
+import { useComicsStore } from '@/stores/comics.ts';
+import { useLanguagesStore } from '@/stores/languages.ts';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
-import ComicController from '@/core/entities/comic/ComicController.ts';
-import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import LanguageController from '@/core/entities/language/LanguageController.ts';
 import LanguageModel from '@/core/entities/language/LanguageModel.ts';
 
@@ -102,6 +57,9 @@ definePage({
     isBottomNavigation: true,
   },
 });
+
+const comicsStore = useComicsStore();
+const languagesStore = useLanguagesStore();
 
 const {
   loading,
@@ -122,27 +80,11 @@ const sortItems = [
 
 const dialog = ref(false);
 
-const comics = ref<ComicModel[]>([]);
-
-const loadComics = async () => {
-  comics.value = await ComicController.loadAll();
-};
-
-loadComics();
-
-const languages = ref<LanguageModel[]>([]);
-
-const loadLanguages = async () => {
-  languages.value = await LanguageController.loadAll();
-};
-
-loadLanguages();
-
 onMounted(async () => {
   loadingStart();
   await Promise.all([
-    loadComics(),
-    loadLanguages(),
+    comicsStore.loadComics(),
+    languagesStore.loadLanguages(),
   ]);
   loadingEnd();
 });
@@ -150,15 +92,15 @@ onMounted(async () => {
 const selectedLanguage = ref(new LanguageModel());
 
 const clickLanguage = (value: number) => {
-  selectedLanguage.value = languages.value.find((e) => e.id === value) || new LanguageModel();
+  selectedLanguage.value = languagesStore.languages.find((e) => e.id === value) || new LanguageModel();
   dialog.value = true;
 };
 
 const languagesCount = computed(() => (
-  languages.value.reduce((acc, languale) => {
+  languagesStore.languages.reduce((acc, languale) => {
     acc[languale.id] = 0;
 
-    comics.value.forEach((item) => {
+    comicsStore.comics.forEach((item) => {
       if (item.languageId === languale.id) acc[languale.id]++;
     });
 
@@ -167,7 +109,7 @@ const languagesCount = computed(() => (
 ));
 
 const fullLanguages = computed(() => (
-  languages.value.map((item) => ({
+  languagesStore.languages.map((item) => ({
     ...item.getDTO(),
     count: languagesCount.value[item.id] || 0,
   }))
@@ -186,7 +128,7 @@ const saveLanguage = async () => {
   try {
     loadingGlobalStart();
     await LanguageController.save(selectedLanguage.value);
-    await loadLanguages();
+    await languagesStore.loadLanguagesForce();
     dialog.value = false;
     Toast.show({ text: 'Язык сохранён' });
   } catch (e) {
@@ -196,7 +138,7 @@ const saveLanguage = async () => {
   }
 };
 
-const deleteLanguage = async (id: number) => {
+const deleteLanguage = async () => {
   const { value } = await Dialog.confirm({
     title: 'Подтверждение удаления',
     message: 'Удалить язык?',
@@ -206,8 +148,8 @@ const deleteLanguage = async (id: number) => {
 
   try {
     loadingGlobalStart();
-    await LanguageController.remove(id);
-    await loadLanguages();
+    await LanguageController.remove(selectedLanguage.value.id);
+    await languagesStore.loadLanguagesForce();
     Toast.show({ text: 'Язык удалён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });

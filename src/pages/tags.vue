@@ -9,74 +9,27 @@
           v-model="sortValue"
           :chips="false"
           class="mt-3"
-          :disabled="!tags.length"
+          :disabled="!tagsStore.tags.length"
           item-title="name"
           item-value="id"
           :items="sortItems"
           label="Сортировать"
         />
       </v-toolbar>
-      <v-list v-if="loading">
-        <v-skeleton-loader
-          type="list-item"
-        />
-      </v-list>
-      <v-list
-        v-else-if="tags.length"
-        activatable
-      >
-        <v-list-item
-          v-for="item in sortedTags"
-          :key="item.id"
-          :active="item.id === selectedTag.id"
-          :title="item.name"
-        >
-          <template #append>
-            <v-list-item-subtitle class="mr-1">
-              {{ item.count }}
-            </v-list-item-subtitle>
-            <v-list-item-action end>
-              <v-btn
-                class="mr-4"
-                density="comfortable"
-                :disabled="loadingGlobal"
-                icon="$edit"
-                variant="tonal"
-                @click="clickTag(item.id)"
-              />
-              <v-btn
-                color="error"
-                density="comfortable"
-                :disabled="loadingGlobal"
-                icon="$delete"
-                variant="tonal"
-                @click="deleteTag(item.id)"
-              />
-            </v-list-item-action>
-          </template>
-        </v-list-item>
-      </v-list>
+      <DictionaryList
+        :items="sortedTags"
+        :loading="loading"
+        @click-item="clickTag($event)"
+      />
     </v-container>
-    <v-dialog v-model="dialog">
-      <v-card>
-        <v-card-title>
-          {{ selectedTag.id ? 'Редактирование' : 'Создание' }}
-        </v-card-title>
-        <v-card-item class="pb-0">
-          <v-text-field
-            v-model.trim="selectedTag.name"
-            variant="solo-filled"
-          />
-        </v-card-item>
-        <v-card-actions>
-          <v-btn
-            :disabled="loadingGlobal"
-            text="Сохранить"
-            @click="saveTag()"
-          />
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <DictionaryEditDialog
+      v-model="selectedTag.name"
+      v-model:opened="dialog"
+      :disabled="loadingGlobal"
+      :is-created="!selectedTag.id"
+      @remove="deleteTag()"
+      @save="saveTag()"
+    />
     <v-fab
       class="mb-14"
       :disabled="loading"
@@ -87,11 +40,13 @@
 </template>
 
 <script setup lang="ts">
+import DictionaryEditDialog from '@/components/DictionaryEditDialog.vue';
+import DictionaryList from '@/components/DictionaryList.vue';
+import { useComicsStore } from '@/stores/comics.ts';
+import { useTagsStore } from '@/stores/tags.ts';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
 import { sortString } from '@/core/utils/array.ts';
-import ComicController from '@/core/entities/comic/ComicController.ts';
-import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import TagController from '@/core/entities/tag/TagController.ts';
 import TagModel from '@/core/entities/tag/TagModel.ts';
 import useLoading from '@/composables/useLoading.ts';
@@ -102,6 +57,9 @@ definePage({
     isBottomNavigation: true,
   },
 });
+
+const comicsStore = useComicsStore();
+const tagsStore = useTagsStore();
 
 const {
   loadingGlobal,
@@ -122,23 +80,11 @@ const sortItems = [
 
 const dialog = ref(false);
 
-const comics = ref<ComicModel[]>([]);
-
-const loadComics = async () => {
-  comics.value = await ComicController.loadAll();
-};
-
-const tags = ref<TagModel[]>([]);
-
-const loadTags = async () => {
-  tags.value = await TagController.loadAll();
-};
-
 onMounted(async () => {
   loadingStart();
   await Promise.all([
-    loadComics(),
-    loadTags(),
+    comicsStore.loadComics(),
+    tagsStore.loadTags(),
   ]);
   loadingEnd();
 });
@@ -146,15 +92,15 @@ onMounted(async () => {
 const selectedTag = ref(new TagModel());
 
 const clickTag = (value: number) => {
-  selectedTag.value = tags.value.find((e) => e.id === value) || new TagModel();
+  selectedTag.value = tagsStore.tags.find((e) => e.id === value) || new TagModel();
   dialog.value = true;
 };
 
 const tagsCount = computed(() => (
-  tags.value.reduce((acc, tag) => {
+  tagsStore.tags.reduce((acc, tag) => {
     acc[tag.id] = 0;
 
-    comics.value.forEach((item) => {
+    comicsStore.comics.forEach((item) => {
       if (item.tags.includes(tag.id)) acc[tag.id]++;
     });
 
@@ -163,7 +109,7 @@ const tagsCount = computed(() => (
 ));
 
 const fullTags = computed(() => (
-  tags.value.map((item) => ({
+  tagsStore.tags.map((item) => ({
     ...item.getDTO(),
     count: tagsCount.value[item.id] || 0,
   }))
@@ -182,7 +128,7 @@ const saveTag = async () => {
   try {
     loadingGlobalStart();
     await TagController.save(selectedTag.value);
-    await loadTags();
+    await tagsStore.loadTagsForce();
     dialog.value = false;
     Toast.show({ text: 'Тег сохранён' });
   } catch (e) {
@@ -192,7 +138,7 @@ const saveTag = async () => {
   }
 };
 
-const deleteTag = async (id: number) => {
+const deleteTag = async () => {
   const { value } = await Dialog.confirm({
     title: 'Подтверждение удаления',
     message: 'Удалить тег?',
@@ -202,8 +148,9 @@ const deleteTag = async (id: number) => {
 
   try {
     loadingGlobalStart();
-    await TagController.remove(id);
-    await loadTags();
+    await TagController.remove(selectedTag.value.id);
+    await tagsStore.loadTagsForce();
+    dialog.value = false;
     Toast.show({ text: 'Тег удалён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });

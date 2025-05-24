@@ -1,10 +1,30 @@
 import WebApiPluginFake from '@/plugins/WebApiPluginFake.ts';
 import { registerPlugin, WebPlugin } from '@capacitor/core';
 
+interface IApiError {
+  error: string
+}
+
 interface DBDates {
   id: number
   cdate: string
   mdate: string
+}
+
+export interface ITreeFile {
+  type: 'file'
+  name: string
+  extension: string
+  size: number
+  lastModified: number
+  path: string
+}
+
+export interface ITreeDirectory {
+  type: 'directory'
+  name: string
+  count: number
+  childes: Array<ITreeDirectory | ITreeFile>
 }
 
 export interface ITagDTO extends DBDates {
@@ -81,211 +101,284 @@ export interface IChapterDTO extends DBDates {
   pages: IChapterPageDTO[]
 }
 
+export interface IApi {
+  'tag/tag/list': {
+    request: object
+    response: ITagDTO[]
+  }
+  'tag/tag/get': {
+    request: { id: number }
+    response: ITagDTO
+  }
+  'tag/tag/add': {
+    request: ITagDTO
+    response: number
+  }
+  'tag/tag/set': {
+    request: ITagDTO
+    response: boolean
+  }
+  'tag/tag/del': {
+    request: { id: number }
+    response: boolean
+  }
+  'author/author/list': {
+    request: object
+    response: IAuthorDTO[]
+  }
+  'author/author/get': {
+    request: { id: number }
+    response: IAuthorDTO
+  }
+  'author/author/add': {
+    request: IAuthorDTO
+    response: number
+  }
+  'author/author/set': {
+    request: IAuthorDTO
+    response: boolean
+  }
+  'author/author/del': {
+    request: { id: number }
+    response: boolean
+  }
+  'language/language/list': {
+    request: object
+    response: ILanguageDTO[]
+  }
+  'language/language/get': {
+    request: { id: number }
+    response: ILanguageDTO
+  }
+  'language/language/add': {
+    request: ILanguageDTO
+    response: number
+  }
+  'language/language/set': {
+    request: ILanguageDTO
+    response: boolean
+  }
+  'language/language/del': {
+    request: { id: number }
+    response: boolean
+  }
+  'parser/parser/list': {
+    request: object
+    response: IParserDTO[]
+  }
+  'parser/parser/get': {
+    request: { id: number }
+    response: IParserDTO
+  }
+  'parser/parser/add': {
+    request: IParserDTO
+    response: number
+  }
+  'parser/parser/set': {
+    request: IParserDTO
+    response: boolean
+  }
+  'parser/parser/del': {
+    request: { id: number }
+    response: boolean
+  }
+  'comic/comic/list': {
+    request: object
+    response: IComicDTO[]
+  }
+  'comic/comic/get': {
+    request: { id: number }
+    response: IComicDTO
+  }
+  'comic/comic/add': {
+    request: IComicDTO
+    response: number
+  }
+  'comic/comic/set': {
+    request: IComicDTO
+    response: boolean
+  }
+  'comic/comic/del': {
+    request: { id: number }
+    response: boolean
+  }
+  'comic/override/get': {
+    request: { comicId: number }
+    response: IComicOverrideDTO
+  }
+  'comic/override/set': {
+    request: IComicOverrideDTO
+    response: boolean
+  }
+  'chapter/chapter/list': {
+    request: { comicId: number }
+    response: IChapterDTO[]
+  }
+  'chapter/chapter/get': {
+    request: { id: number }
+    response: IChapterDTO
+  }
+  'chapter/chapter/add': {
+    request: IChapterDTO
+    response: number
+  }
+  'chapter/chapter/set': {
+    request: IChapterDTO
+    response: boolean
+  }
+  'chapter/chapter/del': {
+    request: { id: number }
+    response: boolean
+  }
+  'chapter/page/list': {
+    request: { chapterId: number }
+    response: IChapterPageDTO[]
+  }
+  'chapter/page/get': {
+    request: { id: number }
+    response: IChapterPageDTO
+  }
+  'chapter/page/add': {
+    request: IChapterPageDTO
+    response: number
+  }
+  'chapter/page/set': {
+    request: IChapterPageDTO
+    response: boolean
+  }
+  'chapter/page/del': {
+    request: { id: number }
+    response: boolean
+  }
+  'file/comic-cover/add': {
+    request: {
+      comicId: number
+      file: string
+      optimization?: boolean
+    }
+    response: number
+  }
+  'file/comic-cover/del': {
+    request: { comicId: number }
+    response: boolean
+  }
+  'file/chapter-page/add': {
+    request: {
+      chapterPageId: number
+      file: string
+      optimization?: boolean
+    }
+    response: number
+  }
+  'file/chapter-page/del': {
+    request: { chapterPageId: number }
+    response: boolean
+  }
+  'file/comic-images/tree': {
+    request: object
+    response: ITreeDirectory
+  }
+  'file/backups/tree': {
+    request: object
+    response: ITreeDirectory
+  }
+  'backup/backup/add': {
+    request: object
+    response: boolean
+  }
+  'backup/backup/del': {
+    request: { fileName: string }
+    response: boolean
+  }
+  'backup/backup/restore': {
+    request: { fileName: string }
+    response: boolean
+  }
+}
+
 interface IWebApiPlugin {
-  getTagsAll(): Promise<{ result: ITagDTO[] }>
-  getTag(data: { id: number }): Promise<{ result: ITagDTO }>
-  addTag(data: ITagDTO): Promise<{ result: number }>
-  setTag(data: ITagDTO): Promise<void>
-  delTag(data: { id: number }): Promise<void>
-
-  getAuthorsAll(): Promise<{ result: IAuthorDTO[] }>
-  getAuthor(data: { id: number }): Promise<{ result: IAuthorDTO }>
-  addAuthor(data: IAuthorDTO): Promise<{ result: number }>
-  setAuthor(data: IAuthorDTO): Promise<void>
-  delAuthor(data: { id: number }): Promise<void>
-
-  getLanguagesAll(): Promise<{ result: ILanguageDTO[] }>
-  getLanguage(data: { id: number }): Promise<{ result: ILanguageDTO }>
-  addLanguage(data: ILanguageDTO): Promise<{ result: number }>
-  setLanguage(data: ILanguageDTO): Promise<void>
-  delLanguage(data: { id: number }): Promise<void>
-
-  getParsersAll(): Promise<{ result: IParserDTO[] }>
-  getParser(data: { id: number }): Promise<{ result: IParserDTO }>
-  addParser(data: IParserDTO): Promise<{ result: number }>
-  setParser(data: IParserDTO): Promise<void>
-  delParser(data: { id: number }): Promise<void>
-
-  getComicsAll(): Promise<{ result: IComicDTO[] }>
-  getComic(data: { id: number }): Promise<{ result: IComicDTO }>
-  addComic(data: IComicDTO): Promise<{ result: number }>
-  setComic(data: IComicDTO): Promise<void>
-  delComic(data: { id: number }): Promise<void>
-
-  getComicOverride(data: { comicId: number }): Promise<{ result: IComicOverrideDTO }>
-  setComicOverride(data: IComicOverrideDTO): Promise<void>
-
-  addCoverFile(data: { comicId: number, file: string, optimization?: boolean }): Promise<{ result: number }>
-  delCoverFile(data: { comicId: number }): Promise<void>
-
-  getChaptersAll(data: { comicId: number }): Promise<{ result: IChapterDTO[] }>
-  getChapter(data: { id: number }): Promise<{ result: IChapterDTO }>
-  addChapter(data: IChapterDTO): Promise<{ result: number }>
-  setChapter(data: IChapterDTO): Promise<void>
-  delChapter(data: { id: number }): Promise<void>
-
-  getChapterPagesAll(data: { chapterId: number }): Promise<{ result: IChapterPageDTO[] }>
-  getChapterPage(data: { id: number }): Promise<{ result: IChapterPageDTO }>
-  addChapterPage(data: IChapterPageDTO): Promise<{ result: number }>
-  setChapterPage(data: IChapterPageDTO): Promise<void>
-  delChapterPage(data: { id: number }): Promise<void>
-
-  addChapterPageFile(data: { chapterPageId: number, file: string, optimization?: boolean }): Promise<{ result: number }>
-  delChapterPageFile(data: { chapterPageId: number }): Promise<void>
-
-  addBackup(): Promise<void>
-  restoreBackup(data: { path: string }): Promise<void>
+  api<K extends keyof IApi>(options: { path: K, body?: IApi[K]['request'] }): Promise<{ result: IApi[K]['response'] } | IApiError>
 }
 
 class WebApiPlugin extends WebPlugin implements IWebApiPlugin {
   fake: WebApiPluginFake = new WebApiPluginFake();
 
-  async getTagsAll(): Promise<{ result: ITagDTO[] }> {
-    return { result: this.fake.getTags() };
-  }
-  async getTag(data: { id: number }): Promise<{ result: ITagDTO }> {
-    console.log(data);
-    return { result: this.fake.getTag() };
-  }
-  async addTag(data: ITagDTO): Promise<{ result: number }> {
-    console.log(data);
-    return { result: this.fake.getTagId() };
-  }
-  async setTag(data: ITagDTO): Promise<void> {
-    console.log(data);
-  }
-  async delTag(data: { id: number }): Promise<void> {
-    console.log(data);
-  }
-  async getAuthorsAll(): Promise<{ result: IAuthorDTO[] }> {
-    return { result: this.fake.getAuthors() };
-  }
-  async getAuthor(data: { id: number }): Promise<{ result: IAuthorDTO }> {
-    console.log(data);
-    return { result: this.fake.getAuthor() };
-  }
-  async addAuthor(data: IAuthorDTO): Promise<{ result: number }> {
-    console.log(data);
-    return { result: this.fake.getAuthorId() };
-  }
-  async setAuthor(data: IAuthorDTO): Promise<void> {
-    console.log(data);
-  }
-  async delAuthor(data: { id: number }): Promise<void> {
-    console.log(data);
-  }
-  async getLanguagesAll(): Promise<{ result: ILanguageDTO[] }> {
-    return { result: this.fake.getLanguages() };
-  }
-  async getLanguage(data: { id: number }): Promise<{ result: ILanguageDTO }> {
-    console.log(data);
-    return { result: this.fake.getLanguage() };
-  }
-  async addLanguage(data: ILanguageDTO): Promise<{ result: number }> {
-    console.log(data);
-    return { result: this.fake.getLanguageId() };
-  }
-  async setLanguage(data: ILanguageDTO): Promise<void> {
-    console.log(data);
-  }
-  async delLanguage(data: { id: number }): Promise<void> {
-    console.log(data);
-  }
-  async getParsersAll(): Promise<{ result: IParserDTO[] }> {
-    return { result: this.fake.getParsers() };
-  }
-  async getParser(data: { id: number }): Promise<{ result: IParserDTO }> {
-    console.log(data);
-    return { result: this.fake.getParser() };
-  }
-  async addParser(data: IParserDTO): Promise<{ result: number }> {
-    console.log(data);
-    return { result: this.fake.getParserId() };
-  }
-  async setParser(data: IParserDTO): Promise<void> {
-    console.log(data);
-  }
-  async delParser(data: { id: number }): Promise<void> {
-    console.log(data);
-  }
-  async getComicsAll(): Promise<{ result: IComicDTO[] }> {
-    return { result: this.fake.getComics() };
-  }
-  async getComic(data: { id: number }): Promise<{ result: IComicDTO }> {
-    console.log(data);
-    return { result: this.fake.getComic({ id: data.id }) };
-  }
-  async addComic(data: IComicDTO): Promise<{ result: number }> {
-    console.log(data);
-    return { result: this.fake.getComicId() };
-  }
-  async setComic(data: IComicDTO): Promise<void> {
-    console.log(data);
-  }
-  async delComic(data: { id: number }): Promise<void> {
-    console.log(data);
-  }
-  async getComicOverride(data: { comicId: number }): Promise<{ result: IComicOverrideDTO }> {
-    console.log(data);
-    return { result: this.fake.getComicOverride() };
-  }
-  async setComicOverride(data: IComicOverrideDTO): Promise<void> {
-    console.log(data);
-  }
-  async addCoverFile(data: { comicId: number, file: string, optimization?: boolean }): Promise<{ result: number }> {
-    console.log(data);
-    return { result: 1 };
-  }
-  async delCoverFile(data: { comicId: number }): Promise<void> {
-    console.log(data);
-  }
-  async getChaptersAll(data: { comicId: number }): Promise<{ result: IChapterDTO[] }> {
-    console.log(data);
-    return { result: this.fake.getChapters(data.comicId) };
-  }
-  async getChapter(data: { id: number }): Promise<{ result: IChapterDTO }> {
-    console.log(data);
-    return { result: this.fake.getChapter({ id: data.id }) };
-  }
-  async addChapter(data: IChapterDTO): Promise<{ result: number }> {
-    console.log(data);
-    return { result: this.fake.getChapterId() };
-  }
-  async setChapter(data: IChapterDTO): Promise<void> {
-    console.log(data);
-  }
-  async delChapter(data: { id: number }): Promise<void> {
-    console.log(data);
-  }
-  async getChapterPagesAll(data: { chapterId: number }): Promise<{ result: IChapterPageDTO[] }> {
-    console.log(data);
-    return { result: this.fake.getChapterPages(data.chapterId) };
-  }
-  async getChapterPage(data: { id: number }): Promise<{ result: IChapterPageDTO }> {
-    console.log(data);
-    return { result: this.fake.getChapterPage({ id: data.id }) };
-  }
-  async addChapterPage(data: IChapterPageDTO): Promise<{ result: number }> {
-    console.log(data);
-    return { result: this.fake.getChapterPageId() };
-  }
-  async setChapterPage(data: IChapterPageDTO): Promise<void> {
-    console.log(data);
-  }
-  async delChapterPage(data: { id: number }): Promise<void> {
-    console.log(data);
-  }
-  async addChapterPageFile(data: { chapterPageId: number, file: string, optimization?: boolean }): Promise<{ result: number }> {
-    console.log(data);
-    return { result: 1 };
-  }
-  async delChapterPageFile(data: { chapterPageId: number }): Promise<void> {
-    console.log(data);
-  }
-  async addBackup(): Promise<void> {
-  }
-  async restoreBackup(data: { path: string }): Promise<void> {
-    console.log(data);
+  // eslint-disable-next-line complexity
+  async api<K extends keyof IApi>(options: { path: K, body: IApi[K]['request'] }): Promise<{ result: IApi[K]['response'] } | IApiError> {
+    let result: IApi[K]['response'] = true;
+
+    console.log(options.path, options.body);
+
+    switch (options.path) {
+      case 'tag/tag/list': result = this.fake.getTags(); break;
+      // @ts-expect-error fuck
+      case 'tag/tag/get': result = this.fake.getTag({ id: options.body.id }); break;
+      case 'tag/tag/add': result = this.fake.getTagId(); break;
+      case 'tag/tag/set': result = true; break;
+      case 'tag/tag/del': result = true; break;
+      case 'author/author/list': result = this.fake.getAuthors(); break;
+      // @ts-expect-error fuck
+      case 'author/author/get': result = this.fake.getAuthor({ id: options.body.id }); break;
+      case 'author/author/add': result = this.fake.getAuthorId(); break;
+      case 'author/author/set': result = true; break;
+      case 'author/author/del': result = true; break;
+      case 'language/language/list': result = this.fake.getLanguages(); break;
+      // @ts-expect-error fuck
+      case 'language/language/get': result = this.fake.getLanguage({ id: options.body.id }); break;
+      case 'language/language/add': result = this.fake.getLanguageId(); break;
+      case 'language/language/set': result = true; break;
+      case 'language/language/del': result = true; break;
+      case 'parser/parser/list': result = this.fake.getParsers(); break;
+      // @ts-expect-error fuck
+      case 'parser/parser/get': result = this.fake.getParser({ id: options.body.id }); break;
+      case 'parser/parser/add': result = this.fake.getParserId(); break;
+      case 'parser/parser/set': result = true; break;
+      case 'parser/parser/del': result = true; break;
+      case 'comic/comic/list': result = this.fake.getComics(); break;
+      // @ts-expect-error fuck
+      case 'comic/comic/get': result = this.fake.getComic({ id: options.body.id }); break;
+      case 'comic/comic/add': result = this.fake.getComicId(); break;
+      case 'comic/comic/set': result = true; break;
+      case 'comic/comic/del': result = true; break;
+      case 'comic/override/get': result = this.fake.getComicOverride(); break;
+      case 'comic/override/set': result = true; break;
+      // @ts-expect-error fuck
+      case 'chapter/chapter/list': result = this.fake.getChapters(options.body.comicId); break;
+      // @ts-expect-error fuck
+      case 'chapter/chapter/get': result = this.fake.getChapter({ id: options.body.id }); break;
+      case 'chapter/chapter/add': result = this.fake.getChapterId(); break;
+      case 'chapter/chapter/set': result = true; break;
+      case 'chapter/chapter/del': result = true; break;
+      // @ts-expect-error fuck
+      case 'chapter/page/list': result = this.fake.getChapterPages(options.body.chapterId); break;
+      // @ts-expect-error fuck
+      case 'chapter/page/get': result = this.fake.getChapterPage({ id: options.body.id }); break;
+      case 'chapter/page/add': result = this.fake.getChapterPageId(); break;
+      case 'chapter/page/set': result = true; break;
+      case 'chapter/page/del': result = true; break;
+      case 'file/comic-cover/add': result = 1; break;
+      case 'file/comic-cover/del': result = true; break;
+      case 'file/chapter-page/add': result = 1; break;
+      case 'file/chapter-page/del': result = true; break;
+      case 'file/comic-images/tree': result = {
+        type: 'directory',
+        name: 'comic-images',
+        count: 0,
+        childes: [],
+      }; break;
+      case 'file/backups/tree': result = {
+        type: 'directory',
+        name: 'backups',
+        count: 0,
+        childes: [],
+      }; break;
+      case 'backup/backup/add': result = true; break;
+      case 'backup/backup/del': result = true; break;
+      case 'backup/backup/restore': result = true; break;
+      default: break;
+    }
+
+    return { result };
   }
 }
 

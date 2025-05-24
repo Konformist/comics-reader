@@ -1,19 +1,19 @@
+import Api from '@/core/api/Api.ts';
 import type ChapterPageModel from '@/core/entities/chapter-page/ChapterPageModel.ts';
-import WebApi from '@/plugins/WebApiPlugin.ts';
 
 export default class ChapterPageController {
-  static async save(value: ChapterPageModel) {
+  static save(value: ChapterPageModel) {
     return value.id
-      ? WebApi.setChapterPage(value.getDTO())
-      : (await WebApi.addChapterPage(value.getDTO())).result;
+      ? Api.api('chapter/page/set', value.getDTO())
+      : Api.api('chapter/page/add', value.getDTO());
   }
 
   static remove(id: number) {
-    return WebApi.delChapterPage({ id });
+    return Api.api('chapter/page/del', { id });
   }
 
   static saveFile(chapterPageId: number, file: string, optimization?: boolean) {
-    return WebApi.addChapterPageFile({
+    return Api.api('file/chapter-page/add', {
       chapterPageId,
       file,
       optimization,

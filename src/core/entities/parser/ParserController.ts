@@ -1,29 +1,27 @@
+import Api from '@/core/api/Api.ts';
 import ParserModel from '@/core/entities/parser/ParserModel.ts';
 import { fileToBase64 } from '@/core/utils/image.ts';
-import WebApi from '@/plugins/WebApiPlugin.ts';
 import { CapacitorHttp } from '@capacitor/core';
 
 export default class ParserController {
   static async loadAll() {
-    const { result } = await WebApi.getParsersAll();
-
+    const result = await Api.api('parser/parser/list');
     return result.map((e) => new ParserModel(e));
   }
 
   static async load(id: number) {
-    const { result } = await WebApi.getParser({ id });
-
+    const result = await Api.api('parser/parser/get', { id });
     return new ParserModel(result);
   }
 
-  static async save(value: ParserModel) {
+  static save(value: ParserModel) {
     return value.id
-      ? WebApi.setParser(value.getDTO())
-      : (await WebApi.addParser(value.getDTO())).result;
+      ? Api.api('parser/parser/set', value.getDTO())
+      : Api.api('parser/parser/add', value.getDTO());
   }
 
   static remove(id: number) {
-    return WebApi.delParser({ id });
+    return Api.api('parser/parser/del', { id });
   }
 
   static async loadComicRaw(url: string): Promise<string> {

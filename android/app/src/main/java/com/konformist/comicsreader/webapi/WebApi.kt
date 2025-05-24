@@ -16,13 +16,14 @@ import com.konformist.comicsreader.db.comiccover.ComicCoverDelete
 import com.konformist.comicsreader.db.comiccover.ComicCoverUpdate
 import com.konformist.comicsreader.db.comicoverride.ComicOverrideCreate
 import com.konformist.comicsreader.db.comicoverride.ComicOverrideDelete
-import com.konformist.comicsreader.imageutils.ImageUtils
 import com.konformist.comicsreader.utils.AppDirectory
 import com.konformist.comicsreader.utils.DatabaseException
 import com.konformist.comicsreader.utils.Dates
 import com.konformist.comicsreader.utils.FileUtils
 import com.konformist.comicsreader.utils.FilesException
+import com.konformist.comicsreader.utils.ImageUtils
 import com.konformist.comicsreader.utils.ValidationException
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import java.time.LocalDateTime
@@ -149,17 +150,24 @@ class WebApi(private val context: Context) {
   }
 
   @Throws(DatabaseException::class)
-  private fun createComicImage(directory: String, name: String, file: String, optimization: Boolean? = false): Long {
-    val cleaned = FileUtils.cleanImageData(file)
-    val decodedImage: Bitmap = FileUtils.base64ToBitmap(cleaned)
+  private fun createComicImage(
+    directory: String,
+    name: String,
+    file: String,
+    optimization: Boolean? = false
+  ): Long {
     val dirOut = File("${context.filesDir}/${AppDirectory.COMICS_IMAGES}/${directory}")
     val fileOut = File("${dirOut.path}/${name}")
 
-    if (!dirOut.exists()) dirOut.mkdirs()
-    FileUtils.writeImage(fileOut, decodedImage)
-    if (optimization == true) ImageUtils.optimization(fileOut)
-
     try {
+      if (file.trim() == "") throw ValidationException("File is empty")
+
+      if (!dirOut.exists()) dirOut.mkdirs()
+
+      val decodedImage: Bitmap = ImageUtils.base64ToBitmap(file)
+      if (optimization == true) ImageUtils.write(fileOut, decodedImage, 80)
+      else ImageUtils.write(fileOut, decodedImage)
+
       val rowId = appFileDao.create(
         AppFileCreate(
           name = name,
@@ -168,6 +176,7 @@ class WebApi(private val context: Context) {
           path = "${AppDirectory.COMICS_IMAGES}/$directory/$name",
         )
       )
+
       if (rowId == 0.toLong()) throw DatabaseException("File not created")
       return rowId
     } catch (e: Error) {
@@ -204,603 +213,475 @@ class WebApi(private val context: Context) {
     if (!result) throw FilesException("Directory not deleted ${AppDirectory.COMICS_IMAGES}/${path}")
   }
 
-  fun getTagsAll(): JSONObject {
-    return wrappedToResult(tagSerializer.toJSONArray(tagDao.readAll()))
+  private fun getTagsAll(): JSONArray {
+    return tagSerializer.toJSONArray(tagDao.readAll())
   }
 
-  fun getTag(data: JSONObject): JSONObject {
-    try {
-      val rowId = data.optLong("id", 0)
-      checkRowId(rowId)
+  private fun getTag(data: JSONObject): JSONObject {
+    val rowId = data.optLong("id", 0)
+    checkRowId(rowId)
+    return tagSerializer.toJSON(tagDao.read(rowId))
+  }
 
-      return wrappedToResult(tagSerializer.toJSON(tagDao.read(rowId)))
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
+  private fun addTag(data: JSONObject): Long {
+    val rowId = tagDao.create(tagSerializer.createFromJSON(data))
+    if (rowId == 0.toLong()) throw DatabaseException("Tag not created")
+    return rowId
+  }
+
+  private fun setTag(data: JSONObject): Boolean {
+    val count = tagDao.update(tagSerializer.updateFromJSON(data))
+    if (count == 0) throw DatabaseException("Tag not updated")
+    return true
+  }
+
+  private fun delTag(data: JSONObject): Boolean {
+    val count = tagDao.delete(tagSerializer.deleteFromJSON(data))
+    if (count == 0) throw DatabaseException("Tag not deleted")
+    return true
+  }
+
+  private fun getAuthorsAll(): JSONArray {
+    return authorSerializer.toJSONArray(authorDao.readAll())
+  }
+
+  private fun getAuthor(data: JSONObject): JSONObject {
+    val rowId = data.optLong("id", 0)
+    checkRowId(rowId)
+
+    return authorSerializer.toJSON(authorDao.read(rowId))
+  }
+
+  private fun addAuthor(data: JSONObject): Long {
+    val rowId = authorDao.create(authorSerializer.createFromJSON(data))
+    if (rowId == 0.toLong()) throw DatabaseException("Author not created")
+
+    return rowId
+  }
+
+  private fun setAuthor(data: JSONObject): Boolean {
+    val count = authorDao.update(authorSerializer.updateFromJSON(data))
+    if (count == 0) throw DatabaseException("Author not updated")
+    return true
+  }
+
+  private fun delAuthor(data: JSONObject): Boolean {
+    val count = authorDao.delete(authorSerializer.deleteFromJSON(data))
+    if (count == 0) throw DatabaseException("Author not deleted")
+
+    return true
+  }
+
+  private fun getLanguagesAll(): JSONArray {
+    return languageSerializer.toJSONArray(languageDao.readAll())
+  }
+
+  private fun getLanguage(data: JSONObject): JSONObject {
+    val rowId = data.optLong("id", 0)
+    checkRowId(rowId)
+
+    return languageSerializer.toJSON(languageDao.read(rowId))
+  }
+
+  private fun addLanguage(data: JSONObject): Long {
+    val rowId = languageDao.create(languageSerializer.createFromJSON(data))
+    if (rowId == 0.toLong()) throw DatabaseException("Language not created")
+
+    return rowId
+  }
+
+  private fun setLanguage(data: JSONObject): Boolean {
+    val count = languageDao.update(languageSerializer.updateFromJSON(data))
+    if (count == 0) throw DatabaseException("Language not updated")
+
+    return true
+  }
+
+  private fun delLanguage(data: JSONObject): Boolean {
+    val count = languageDao.delete(languageSerializer.deleteFromJSON(data))
+    if (count == 0) throw DatabaseException("Language not deleted")
+
+    return true
+  }
+
+  private fun getParsersAll(): JSONArray {
+    return parserSerializer.toJSONArray(parserDao.readAll())
+  }
+
+  private fun getParser(data: JSONObject): JSONObject {
+    val rowId = data.optLong("id", 0)
+    checkRowId(rowId)
+
+    return parserSerializer.toJSON(parserDao.read(rowId))
+  }
+
+  private fun addParser(data: JSONObject): Long {
+    val rowId = parserDao.create(parserSerializer.createFromJSON(data))
+    if (rowId == 0.toLong()) throw DatabaseException("Parser not created")
+
+    return rowId
+  }
+
+  private fun setParser(data: JSONObject): Boolean {
+    val count = parserDao.update(parserSerializer.updateFromJSON(data))
+    if (count == 0) throw DatabaseException("Parser not updated")
+
+    return true
+  }
+
+  private fun delParser(data: JSONObject): Boolean {
+    val count = parserDao.delete(parserSerializer.deleteFromJSON(data))
+    if (count == 0) throw DatabaseException("Parser not deleted")
+
+    return true
+  }
+
+  private fun getComicsAll(): JSONArray {
+    return comicSerializer.toJSONArray(comicDao.readLiteAll())
+  }
+
+  private fun getComic(data: JSONObject): JSONObject {
+    val rowId = data.optLong("id", 0)
+    checkRowId(rowId)
+
+    return comicSerializer.toJSON(comicDao.readLite(rowId))
+  }
+
+  private fun addComic(data: JSONObject): Long {
+    val rowId = comicDao.create(comicSerializer.createFromJSON(data))
+    if (rowId == 0.toLong()) throw DatabaseException("Comic not created")
+
+    createCover(rowId)
+    createComicOverride(rowId)
+    createComicDirectory(rowId.toString())
+
+    return rowId
+  }
+
+  private fun setComic(data: JSONObject): Boolean {
+    val comicId = data.getLong("id")
+    checkRowId(comicId)
+
+    val coverJSON = data.optJSONObject("cover")
+
+    // TODO вынести обновление отдельно
+    if (coverJSON != null) {
+      val coverId = coverJSON.optLong("id")
+      val cover = comicCoverDao.read(coverId)
+      coverJSON.put("fileId", cover.fileId)
+      updateCover(comicCoverSerializer.updateFromJSON(coverJSON))
     }
+
+    val count = comicDao.update(comicSerializer.updateFromJSON(data))
+    if (count == 0) throw DatabaseException("Comic not updated")
+
+    return true
   }
 
-  fun addTag(data: JSONObject): JSONObject {
-    try {
-      val rowId = tagDao.create(tagSerializer.createFromJSON(data))
-      if (rowId == 0.toLong()) throw DatabaseException("Tag not created")
+  private fun delComic(data: JSONObject): Boolean {
+    val id = data.getLong("id")
+    checkRowId(id)
 
-      return wrappedToResult(rowId)
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    } catch (e: DatabaseException) {
-      return wrappedToError(e)
-    }
+    deleteCover(id)
+    deleteComicOverride(id)
+
+    val chapters = chapterDao.readByComicAll(id)
+    for (chapter in chapters) deleteChapter(chapter.id)
+    deleteComicDirectory(id.toString())
+
+    val count = comicDao.delete(comicSerializer.deleteFromJSON(data))
+    if (count == 0) throw DatabaseException("Comic not deleted")
+
+    return true
   }
 
-  fun setTag(data: JSONObject): JSONObject {
-    try {
-      val count = tagDao.update(tagSerializer.updateFromJSON(data))
-      if (count == 0) throw DatabaseException("Tag not updated")
+  private fun getComicOverride(data: JSONObject): JSONObject {
+    val rowId = data.optLong("comicId", 0)
+    checkRowId(rowId)
 
-      return wrappedToResult(true)
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    } catch (e: DatabaseException) {
-      return wrappedToError(e)
-    }
+    return comicOverrideSerializer.toJSON(comicOverrideDao.readByComic(rowId))
   }
 
-  fun delTag(data: JSONObject): JSONObject {
-    try {
-      val count = tagDao.delete(tagSerializer.deleteFromJSON(data))
-      if (count == 0) throw DatabaseException("Tag not deleted")
+  private fun setComicOverride(data: JSONObject): Boolean {
+    val count = comicOverrideDao.update(comicOverrideSerializer.updateFromJSON(data))
+    if (count == 0) throw DatabaseException("Comic override not updated")
 
-      return wrappedToResult(true)
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    } catch (e: DatabaseException) {
-      return wrappedToError(e)
-    }
+    return true
   }
 
-  fun getAuthorsAll(): JSONObject {
-    return wrappedToResult(authorSerializer.toJSONArray(authorDao.readAll()))
-  }
+  private fun addCoverFile(data: JSONObject): Long {
+    val comicId = data.optLong("comicId")
+    checkRowId(comicId)
+    val file = data.optString("file")
+    if (file == "") throw ValidationException("File is empty")
 
-  fun getAuthor(data: JSONObject): JSONObject {
-    try {
-      val rowId = data.optLong("id", 0)
-      checkRowId(rowId)
+    val cover = comicCoverDao.readByComic(comicId)
 
-      return wrappedToResult(authorSerializer.toJSON(authorDao.read(rowId)))
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    }
-  }
-
-  fun addAuthor(data: JSONObject): JSONObject {
-    try {
-      val rowId = authorDao.create(authorSerializer.createFromJSON(data))
-      if (rowId == 0.toLong()) throw DatabaseException("Author not created")
-
-      return wrappedToResult(rowId)
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    } catch (e: DatabaseException) {
-      return wrappedToError(e)
-    }
-  }
-
-  fun setAuthor(data: JSONObject): JSONObject {
-    try {
-      val count = authorDao.update(authorSerializer.updateFromJSON(data))
-      if (count == 0) throw DatabaseException("Author not updated")
-
-      return wrappedToResult(true)
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    } catch (e: DatabaseException) {
-      return wrappedToError(e)
-    }
-  }
-
-  fun delAuthor(data: JSONObject): JSONObject {
-    try {
-      val count = authorDao.delete(authorSerializer.deleteFromJSON(data))
-      if (count == 0) throw DatabaseException("Author not deleted")
-
-      return wrappedToResult(true)
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    } catch (e: DatabaseException) {
-      return wrappedToError(e)
-    }
-  }
-
-  fun getLanguagesAll(): JSONObject {
-    return wrappedToResult(languageSerializer.toJSONArray(languageDao.readAll()))
-  }
-
-  fun getLanguage(data: JSONObject): JSONObject {
-    try {
-      val rowId = data.optLong("id", 0)
-      checkRowId(rowId)
-
-      return wrappedToResult(languageSerializer.toJSON(languageDao.read(rowId)))
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    }
-  }
-
-  fun addLanguage(data: JSONObject): JSONObject {
-    try {
-      val rowId = languageDao.create(languageSerializer.createFromJSON(data))
-      if (rowId == 0.toLong()) throw DatabaseException("Language not created")
-
-      return wrappedToResult(rowId)
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    } catch (e: DatabaseException) {
-      return wrappedToError(e)
-    }
-  }
-
-  fun setLanguage(data: JSONObject): JSONObject {
-    try {
-      val count = languageDao.update(languageSerializer.updateFromJSON(data))
-      if (count == 0) throw DatabaseException("Language not updated")
-
-      return wrappedToResult(true)
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    } catch (e: DatabaseException) {
-      return wrappedToError(e)
-    }
-  }
-
-  fun delLanguage(data: JSONObject): JSONObject {
-    try {
-      val count = languageDao.delete(languageSerializer.deleteFromJSON(data))
-      if (count == 0) throw DatabaseException("Language not deleted")
-
-      return wrappedToResult(true)
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    } catch (e: DatabaseException) {
-      return wrappedToError(e)
-    }
-  }
-
-  fun getParsersAll(): JSONObject {
-    return wrappedToResult(parserSerializer.toJSONArray(parserDao.readAll()))
-  }
-
-  fun getParser(data: JSONObject): JSONObject {
-    try {
-      val rowId = data.optLong("id", 0)
-      checkRowId(rowId)
-
-      return wrappedToResult(parserSerializer.toJSON(parserDao.read(rowId)))
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    }
-  }
-
-  fun addParser(data: JSONObject): JSONObject {
-    try {
-      val rowId = parserDao.create(parserSerializer.createFromJSON(data))
-      if (rowId == 0.toLong()) throw DatabaseException("Parser not created")
-
-      return wrappedToResult(rowId)
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    } catch (e: DatabaseException) {
-      return wrappedToError(e)
-    }
-  }
-
-  fun setParser(data: JSONObject): JSONObject {
-    try {
-      val count = parserDao.update(parserSerializer.updateFromJSON(data))
-      if (count == 0) throw DatabaseException("Parser not updated")
-
-      return wrappedToResult(true)
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    } catch (e: DatabaseException) {
-      return wrappedToError(e)
-    }
-  }
-
-  fun delParser(data: JSONObject): JSONObject {
-    try {
-      val count = parserDao.delete(parserSerializer.deleteFromJSON(data))
-      if (count == 0) throw DatabaseException("Parser not deleted")
-
-      return wrappedToResult(true)
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    } catch (e: DatabaseException) {
-      return wrappedToError(e)
-    }
-  }
-
-  fun getComicsAll(): JSONObject {
-    return wrappedToResult(comicSerializer.toJSONArray(comicDao.readLiteAll()))
-  }
-
-  fun getComic(data: JSONObject): JSONObject {
-    try {
-      val rowId = data.optLong("id", 0)
-      checkRowId(rowId)
-
-      return wrappedToResult(comicSerializer.toJSON(comicDao.readLite(rowId)))
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    }
-  }
-
-  fun addComic(data: JSONObject): JSONObject {
-    try {
-      val rowId = comicDao.create(comicSerializer.createFromJSON(data))
-      if (rowId == 0.toLong()) throw DatabaseException("Comic not created")
-
-      createCover(rowId)
-      createComicOverride(rowId)
-      createComicDirectory(rowId.toString())
-
-      return wrappedToResult(rowId)
-    } catch (e: FilesException) {
-      return wrappedToError(e)
-    } catch (e: DatabaseException) {
-      return wrappedToError(e)
-    }
-  }
-
-  fun setComic(data: JSONObject): JSONObject {
-    try {
-      val comicId = data.getLong("id")
-      checkRowId(comicId)
-
-      val coverJSON = data.optJSONObject("cover")
-
-      // TODO вынести обновление отдельно
-      if (coverJSON != null) {
-        val coverId = coverJSON.optLong("id")
-        val cover = comicCoverDao.read(coverId)
-        coverJSON.put("fileId", cover.fileId)
-        updateCover(comicCoverSerializer.updateFromJSON(coverJSON))
-      }
-
-      val count = comicDao.update(comicSerializer.updateFromJSON(data))
-      if (count == 0) throw DatabaseException("Comic not updated")
-
-      return wrappedToResult(true)
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    } catch (e: DatabaseException) {
-      return wrappedToError(e)
-    }
-  }
-
-  fun delComic(data: JSONObject): JSONObject {
-    try {
-      val id = data.getLong("id")
-      checkRowId(id)
-
-      deleteCover(id)
-      deleteComicOverride(id)
-
-      val chapters = chapterDao.readByComicAll(id)
-      for (chapter in chapters) deleteChapter(chapter.id)
-      deleteComicDirectory(id.toString())
-
-      val count = comicDao.delete(comicSerializer.deleteFromJSON(data))
-      if (count == 0) throw DatabaseException("Comic not deleted")
-
-      return wrappedToResult(true)
-    } catch (e: FilesException) {
-      return wrappedToError(e)
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    } catch (e: DatabaseException) {
-      return wrappedToError(e)
-    }
-  }
-
-  fun getComicOverride(data: JSONObject): JSONObject {
-    try {
-      val rowId = data.optLong("comicId", 0)
-      checkRowId(rowId)
-
-      return wrappedToResult(comicOverrideSerializer.toJSON(comicOverrideDao.readByComic(rowId)))
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    }
-  }
-
-  fun setComicOverride(data: JSONObject): JSONObject {
-    try {
-      val count = comicOverrideDao.update(comicOverrideSerializer.updateFromJSON(data))
-      if (count == 0) throw DatabaseException("Comic override not updated")
-
-      return wrappedToResult(true)
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    } catch (e: DatabaseException) {
-      return wrappedToError(e)
-    }
-  }
-
-  fun addCoverFile(data: JSONObject): JSONObject {
-    try {
-      val comicId = data.optLong("comicId")
-      checkRowId(comicId)
-      val file = data.optString("file")
-      if (file == "") throw ValidationException("File is empty")
-
-      val cover = comicCoverDao.readByComic(comicId)
-
-      if (cover.fileId != null && cover.fileId != 0.toLong())
-        deleteImage(cover.fileId)
-
-      val optimization = data.optBoolean("optimization", false)
-      val rowId = createComicImage(comicId.toString(), "cover.webp", file, optimization)
-      if (rowId == 0.toLong()) throw DatabaseException("Comic cover file not added")
-
-      val count = comicCoverDao.update(
-        ComicCoverUpdate(
-          id = cover.id,
-          mdate = Dates.dateTimeFormatted(LocalDateTime.now()),
-          fromUrl = cover.fromUrl,
-          fileId = rowId
-        )
-      )
-      if (count == 0) throw DatabaseException("Comic cover not updated")
-
-      return wrappedToResult(rowId)
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    } catch (e: DatabaseException) {
-      return wrappedToError(e)
-    }
-  }
-
-  fun delCoverFile(data: JSONObject): JSONObject {
-    try {
-      val comicId = data.optLong("comicId")
-      checkRowId(comicId)
-      val cover = comicCoverDao.readByComic(comicId)
+    if (cover.fileId != null && cover.fileId != 0.toLong())
       deleteImage(cover.fileId)
-      val count = comicCoverDao.update(
-        ComicCoverUpdate(
-          id = cover.id,
-          mdate = Dates.dateTimeFormatted(LocalDateTime.now()),
-          fromUrl = cover.fromUrl,
-          fileId = 0,
-        )
-      )
-      if (count == 0) throw DatabaseException("Comic cover not updated")
 
-      return wrappedToResult(true)
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    } catch (e: DatabaseException) {
-      return wrappedToError(e)
-    }
-  }
+    val optimization = data.optBoolean("optimization", false)
+    val rowId = createComicImage(comicId.toString(), "cover.webp", file, optimization)
+    if (rowId == 0.toLong()) throw DatabaseException("Comic cover file not added")
 
-  fun getChaptersAll(data: JSONObject): JSONObject {
-    try {
-      val comicId = data.getLong("comicId")
-      checkRowId(comicId)
-      return wrappedToResult(
-        chapterSerializer.toJSONArray(
-          chapterDao.readWithPagesByComicAll(comicId)
-        )
-      )
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    }
-  }
-
-  fun getChapter(data: JSONObject): JSONObject {
-    try {
-      val rowId = data.optLong("id", 0)
-      checkRowId(rowId)
-      return wrappedToResult(
-        chapterSerializer.toJSON(
-          chapterDao.readWithPages(rowId)
-        )
-      )
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    }
-  }
-
-  fun addChapter(data: JSONObject): JSONObject {
-    try {
-      val rowId = chapterDao.create(chapterSerializer.createFromJSON(data))
-      if (rowId == 0.toLong()) throw DatabaseException("Chapter not created")
-
-      return wrappedToResult(rowId)
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    } catch (e: DatabaseException) {
-      return wrappedToError(e)
-    }
-  }
-
-  fun setChapter(data: JSONObject): JSONObject {
-    try {
-      val count = chapterDao.update(chapterSerializer.updateFromJSON(data))
-      if (count == 0) throw DatabaseException("Chapter not updated")
-
-      return wrappedToResult(true)
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    } catch (e: DatabaseException) {
-      return wrappedToError(e)
-    }
-  }
-
-  fun delChapter(data: JSONObject): JSONObject {
-    try {
-      val id = data.getLong("id")
-      checkRowId(id)
-      deleteChapter(id)
-
-      return wrappedToResult(true)
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    } catch (e: DatabaseException) {
-      return wrappedToError(e)
-    }
-  }
-
-  fun getChapterPagesAll(data: JSONObject): JSONObject {
-    try {
-      val chapterId = data.getLong("chapterId")
-      checkRowId(chapterId)
-      return wrappedToResult(
-        chapterPageSerializer.toJSONArray(
-          chapterPageDao.readByChapterAll(chapterId)
-        )
-      )
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    }
-  }
-
-  fun getChapterPage(data: JSONObject): JSONObject {
-    try {
-      val rowId = data.optLong("id", 0)
-      checkRowId(rowId)
-      return wrappedToResult(
-        chapterPageSerializer.toJSON(
-          chapterPageDao.readWithFile(rowId)
-        )
-      )
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    }
-  }
-
-  fun addChapterPage(data: JSONObject): JSONObject {
-    try {
-      val rowId = chapterPageDao.create(chapterPageSerializer.createFromJSON(data))
-      if (rowId == 0.toLong()) throw DatabaseException("Chapter page not created")
-
-      return wrappedToResult(rowId)
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    } catch (e: DatabaseException) {
-      return wrappedToError(e)
-    }
-  }
-
-  fun setChapterPage(data: JSONObject): JSONObject {
-    try {
-      val chapterPageId = data.getLong("id")
-      checkRowId(chapterPageId)
-      val chapterPage = chapterPageDao.read(chapterPageId)
-      data.put("fileId", chapterPage.fileId)
-
-      val count = chapterPageDao.update(chapterPageSerializer.updateFromJSON(data))
-      if (count == 0) throw DatabaseException("Chapter not updated")
-
-      return wrappedToResult(true)
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    } catch (e: DatabaseException) {
-      return wrappedToError(e)
-    }
-  }
-
-  fun delChapterPage(data: JSONObject): JSONObject {
-    try {
-      val id = data.getLong("id")
-      checkRowId(id)
-      deleteChapterPage(id)
-
-      return wrappedToResult(true)
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    } catch (e: DatabaseException) {
-      return wrappedToError(e)
-    }
-  }
-
-  fun addChapterPageFile(data: JSONObject): JSONObject {
-    try {
-      val chapterPageId = data.optLong("chapterPageId")
-      checkRowId(chapterPageId, "ChapterPageId")
-      val file = data.optString("file")
-      if (file == "") throw ValidationException("File is empty")
-
-      val chapterPage = chapterPageDao.read(chapterPageId)
-      val chapter = chapterDao.readWithPages(chapterPage.chapterId)
-
-      if (chapterPage.fileId != 0.toLong()) deleteImage(chapterPage.fileId)
-
-      val optimization = data.optBoolean("optimization", false)
-      val rowId = createComicImage(chapter.chapter.comicId.toString(), "$chapterPageId.webp", file, optimization)
-      if (rowId == 0.toLong()) throw DatabaseException("Chapter page file not added")
-
-      val newPageFile = ChapterPageUpdate(
-        id = chapterPage.id,
+    val count = comicCoverDao.update(
+      ComicCoverUpdate(
+        id = cover.id,
         mdate = Dates.dateTimeFormatted(LocalDateTime.now()),
-        fromUrl = chapterPage.fromUrl,
-        fileId = rowId,
-        isRead = chapterPage.isRead,
+        fromUrl = cover.fromUrl,
+        fileId = rowId
       )
+    )
+    if (count == 0) throw DatabaseException("Comic cover not updated")
 
-      val count = chapterPageDao.update(newPageFile)
-      if (count == 0) throw DatabaseException("Chapter page not updated")
-
-      return wrappedToResult(rowId)
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    } catch (e: DatabaseException) {
-      return wrappedToError(e)
-    }
+    return rowId
   }
 
-  fun delChapterPageFile(data: JSONObject): JSONObject {
-    try {
-      val chapterPageId = data.optLong("chapterPageId")
-      checkRowId(chapterPageId, "ChapterPageId")
-
-      val page = chapterPageDao.read(chapterPageId)
-      deleteImage(page.fileId)
-
-      val count = chapterPageDao.update(
-        ChapterPageUpdate(
-          id = page.id,
-          mdate = Dates.dateTimeFormatted(LocalDateTime.now()),
-          fromUrl = page.fromUrl,
-          fileId = 0,
-          isRead = page.isRead,
-        )
+  private fun delCoverFile(data: JSONObject): Boolean {
+    val comicId = data.optLong("comicId")
+    checkRowId(comicId)
+    val cover = comicCoverDao.readByComic(comicId)
+    deleteImage(cover.fileId)
+    val count = comicCoverDao.update(
+      ComicCoverUpdate(
+        id = cover.id,
+        mdate = Dates.dateTimeFormatted(LocalDateTime.now()),
+        fromUrl = cover.fromUrl,
+        fileId = 0,
       )
+    )
+    if (count == 0) throw DatabaseException("Comic cover not updated")
 
-      if (count == 0) throw DatabaseException("Chapter page not updated")
-
-      return wrappedToResult(true)
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    } catch (e: DatabaseException) {
-      return wrappedToError(e)
-    }
+    return true
   }
 
-  fun addBackup(): JSONObject {
+  private fun getChaptersAll(data: JSONObject): JSONArray {
+    val comicId = data.getLong("comicId")
+    checkRowId(comicId)
+    return chapterSerializer.toJSONArray(
+      chapterDao.readWithPagesByComicAll(comicId)
+    )
+  }
+
+  private fun getChapter(data: JSONObject): JSONObject {
+    val rowId = data.optLong("id", 0)
+    checkRowId(rowId)
+    return chapterSerializer.toJSON(
+      chapterDao.readWithPages(rowId)
+    )
+  }
+
+  private fun addChapter(data: JSONObject): Long {
+    val rowId = chapterDao.create(chapterSerializer.createFromJSON(data))
+    if (rowId == 0.toLong()) throw DatabaseException("Chapter not created")
+
+    return rowId
+  }
+
+  private fun setChapter(data: JSONObject): Boolean {
+    val count = chapterDao.update(chapterSerializer.updateFromJSON(data))
+    if (count == 0) throw DatabaseException("Chapter not updated")
+
+    return true
+  }
+
+  private fun delChapter(data: JSONObject): Boolean {
+    val id = data.getLong("id")
+    checkRowId(id)
+    deleteChapter(id)
+
+    return true
+  }
+
+  private fun getChapterPagesAll(data: JSONObject): JSONArray {
+    val chapterId = data.getLong("chapterId")
+    checkRowId(chapterId)
+    return chapterPageSerializer.toJSONArray(
+      chapterPageDao.readByChapterAll(chapterId)
+    )
+  }
+
+  private fun getChapterPage(data: JSONObject): JSONObject {
+    val rowId = data.optLong("id", 0)
+    checkRowId(rowId)
+    return chapterPageSerializer.toJSON(
+      chapterPageDao.readWithFile(rowId)
+    )
+  }
+
+  private fun addChapterPage(data: JSONObject): Long {
+    val rowId = chapterPageDao.create(chapterPageSerializer.createFromJSON(data))
+    if (rowId == 0.toLong()) throw DatabaseException("Chapter page not created")
+
+    return rowId
+  }
+
+  private fun setChapterPage(data: JSONObject): Boolean {
+    val chapterPageId = data.getLong("id")
+    checkRowId(chapterPageId)
+    val chapterPage = chapterPageDao.read(chapterPageId)
+    data.put("fileId", chapterPage.fileId)
+
+    val count = chapterPageDao.update(chapterPageSerializer.updateFromJSON(data))
+    if (count == 0) throw DatabaseException("Chapter not updated")
+
+    return true
+  }
+
+  private fun delChapterPage(data: JSONObject): Boolean {
+    val id = data.getLong("id")
+    checkRowId(id)
+    deleteChapterPage(id)
+
+    return true
+  }
+
+  private fun addChapterPageFile(data: JSONObject): Long {
+    val chapterPageId = data.optLong("chapterPageId")
+    checkRowId(chapterPageId, "ChapterPageId")
+    val file = data.optString("file")
+    if (file == "") throw ValidationException("File is empty")
+
+    val chapterPage = chapterPageDao.read(chapterPageId)
+    val chapter = chapterDao.readWithPages(chapterPage.chapterId)
+
+    if (chapterPage.fileId != 0.toLong()) deleteImage(chapterPage.fileId)
+
+    val optimization = data.optBoolean("optimization", false)
+    val rowId = createComicImage(
+      chapter.chapter.comicId.toString(),
+      "$chapterPageId.webp",
+      file,
+      optimization
+    )
+    if (rowId == 0.toLong()) throw DatabaseException("Chapter page file not added")
+
+    val newPageFile = ChapterPageUpdate(
+      id = chapterPage.id,
+      mdate = Dates.dateTimeFormatted(LocalDateTime.now()),
+      fromUrl = chapterPage.fromUrl,
+      fileId = rowId,
+      isRead = chapterPage.isRead,
+    )
+
+    val count = chapterPageDao.update(newPageFile)
+    if (count == 0) throw DatabaseException("Chapter page not updated")
+
+    return rowId
+  }
+
+  private fun delChapterPageFile(data: JSONObject): Boolean {
+    val chapterPageId = data.optLong("chapterPageId")
+    checkRowId(chapterPageId, "ChapterPageId")
+
+    val page = chapterPageDao.read(chapterPageId)
+    deleteImage(page.fileId)
+
+    val count = chapterPageDao.update(
+      ChapterPageUpdate(
+        id = page.id,
+        mdate = Dates.dateTimeFormatted(LocalDateTime.now()),
+        fromUrl = page.fromUrl,
+        fileId = 0,
+        isRead = page.isRead,
+      )
+    )
+
+    if (count == 0) throw DatabaseException("Chapter page not updated")
+
+    return true
+  }
+
+  private fun getComicImagesTree(): JSONObject {
+    return FileUtils.tree(File("${context.filesDir}${File.separator}${AppDirectory.COMICS_IMAGES}"))
+  }
+
+  private fun addBackup(): Boolean {
     dbBackup.backup(db)
-    return wrappedToResult(true)
+    return true
   }
 
-  fun restoreBackup(data: JSONObject): JSONObject {
+  private fun delBackup(data: JSONObject): Boolean {
+    val fileName = data.optString("fileName", "")
+    if (fileName == "") throw ValidationException("fileName is empty")
+    val filePath =
+      File("${context.filesDir}${File.separator}${AppDirectory.BACKUPS}${File.separator}${fileName}")
+    if (!filePath.exists()) throw FilesException("File not found")
+    filePath.delete()
+    return true
+  }
+
+  private fun restoreBackup(data: JSONObject): Boolean {
+    val fileName = data.optString("fileName", "").trim()
+    if (fileName == "") throw ValidationException("fileName is empty")
+    dbBackup.restore(db, fileName)
+    return true
+  }
+
+  private fun getBackupsTree(): JSONObject {
+    return FileUtils.tree(File("${context.filesDir}${File.separator}${AppDirectory.BACKUPS}"))
+  }
+
+  fun api(query: String, data: JSONObject? = JSONObject()): JSONObject {
     try {
-      val path = data.optString("path", "").trim()
-      if (path == "") throw ValidationException("Path is empty")
-      dbBackup.restore(db, path)
-      return wrappedToResult(true)
+      if (data == null) throw ValidationException("Body is null")
+
+      return wrappedToResult(
+        when (query) {
+          Query.TAG_TAG_LIST -> getTagsAll()
+          Query.TAG_TAG_GET -> getTag(data)
+          Query.TAG_TAG_ADD -> addTag(data)
+          Query.TAG_TAG_SET -> setTag(data)
+          Query.TAG_TAG_DEL -> delTag(data)
+          Query.AUTHOR_AUTHOR_LIST -> getAuthorsAll()
+          Query.AUTHOR_AUTHOR_GET -> getAuthor(data)
+          Query.AUTHOR_AUTHOR_ADD -> addAuthor(data)
+          Query.AUTHOR_AUTHOR_SET -> setAuthor(data)
+          Query.AUTHOR_AUTHOR_DEL -> delAuthor(data)
+          Query.LANGUAGE_LANGUAGE_LIST -> getLanguagesAll()
+          Query.LANGUAGE_LANGUAGE_GET -> getLanguage(data)
+          Query.LANGUAGE_LANGUAGE_ADD -> addLanguage(data)
+          Query.LANGUAGE_LANGUAGE_SET -> setLanguage(data)
+          Query.LANGUAGE_LANGUAGE_DEL -> delLanguage(data)
+          Query.PARSER_PARSER_LIST -> getParsersAll()
+          Query.PARSER_PARSER_GET -> getParser(data)
+          Query.PARSER_PARSER_ADD -> addParser(data)
+          Query.PARSER_PARSER_SET -> setParser(data)
+          Query.PARSER_PARSER_DEL -> delParser(data)
+          Query.COMIC_COMIC_LIST -> getComicsAll()
+          Query.COMIC_COMIC_GET -> getComic(data)
+          Query.COMIC_COMIC_ADD -> addComic(data)
+          Query.COMIC_COMIC_SET -> setComic(data)
+          Query.COMIC_COMIC_DEL -> delComic(data)
+          Query.COMIC_OVERRIDE_GET -> getComicOverride(data)
+          Query.COMIC_OVERRIDE_SET -> setComicOverride(data)
+          Query.CHAPTER_CHAPTER_LIST -> getChaptersAll(data)
+          Query.CHAPTER_CHAPTER_GET -> getChapter(data)
+          Query.CHAPTER_CHAPTER_ADD -> addChapter(data)
+          Query.CHAPTER_CHAPTER_SET -> setChapter(data)
+          Query.CHAPTER_CHAPTER_DEL -> delChapter(data)
+          Query.CHAPTER_PAGE_LIST -> getChapterPagesAll(data)
+          Query.CHAPTER_PAGE_GET -> getChapterPage(data)
+          Query.CHAPTER_PAGE_ADD -> addChapterPage(data)
+          Query.CHAPTER_PAGE_SET -> setChapterPage(data)
+          Query.CHAPTER_PAGE_DEL -> delChapterPage(data)
+          Query.FILE_COMIC_COVER_ADD -> addCoverFile(data)
+          Query.FILE_COMIC_COVER_DEL -> delCoverFile(data)
+          Query.FILE_CHAPTER_PAGE_ADD -> addChapterPageFile(data)
+          Query.FILE_CHAPTER_PAGE_DEL -> delChapterPageFile(data)
+          Query.BACKUP_BACKUP_ADD -> addBackup()
+          Query.BACKUP_BACKUP_DEL -> delBackup(data)
+          Query.BACKUP_BACKUP_RESTORE -> restoreBackup(data)
+          Query.FILE_COMIC_IMAGES_TREE -> getComicImagesTree()
+          Query.FILE_BACKUPS_TREE -> getBackupsTree()
+          else -> "Not implemented"
+        }
+      )
+    } catch (e: FilesException) {
+      return wrappedToError(e)
     } catch (e: ValidationException) {
+      return wrappedToError(e)
+    } catch (e: DatabaseException) {
       return wrappedToError(e)
     }
   }

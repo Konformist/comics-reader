@@ -84,16 +84,10 @@
       <v-divider />
       <div class="px-4 py-8">
         <v-file-input
-          v-model="file"
           accept="application/json"
           hide-details
           label="Добавить файл"
-        />
-        <v-btn
-          class="mt-4 w-100"
-          :disabled="!file || loadingGlobal"
-          text="Загрузить из файла"
-          @click="setParser()"
+          @update:model-value="setParser($event)"
         />
         <v-btn
           class="mt-4 w-100"
@@ -123,8 +117,8 @@
 
 <script lang="ts" setup>
 import useLoading from '@/composables/useLoading.ts';
-import type { IParserDTO } from '@/plugins/WebApiPlugin.ts';
 import { APP_NAME } from '@/core/utils/variables.ts';
+import { useParsersStore } from '@/stores/parsers.ts';
 import { Dialog } from '@capacitor/dialog';
 import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 import { Toast } from '@capacitor/toast';
@@ -140,6 +134,8 @@ definePage({
 
 const route = useRoute('/parsers/[id]/edit');
 const router = useRouter();
+const parsersStore = useParsersStore();
+
 const {
   loadingGlobal,
   loadingGlobalStart,
@@ -154,8 +150,6 @@ const loadParser = async () => {
   parser.value = await ParserController.load(parserId);
 };
 
-loadParser();
-
 onMounted(async () => {
   await loadParser();
   if (!parser.value.id) router.replace({ name: '/parsers/' });
@@ -165,8 +159,9 @@ const saveParser = async () => {
   try {
     loadingGlobalStart();
     await ParserController.save(parser.value);
-    Toast.show({ text: 'Парсер сохранён' });
+    await parsersStore.loadParsersForce();
     loadParser();
+    Toast.show({ text: 'Парсер сохранён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {
@@ -174,18 +169,18 @@ const saveParser = async () => {
   }
 };
 
-const file = ref<File | null>(null);
+const setParser = async (value: File | File[]) => {
+  const file = Array.isArray(value) ? value[0] : value;
 
-const setParser = async () => {
-  if (!file.value) return;
+  if (!file) return;
 
   try {
     loadingGlobalStart();
-    const result = await file.value.text();
-    const parsed = JSON.parse(result) as Partial<IParserDTO>;
+    const result = await file.text();
+    const parsed = JSON.parse(result);
     parsed.id = parser.value.id;
     parser.value = new ParserModel(parsed);
-    Toast.show({ text: 'Данные получены' });
+    Toast.show({ text: 'Парсен обновлён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {
@@ -225,6 +220,7 @@ const deleteParser = async () => {
   try {
     loadingGlobalStart();
     await ParserController.remove(parser.value.id);
+    await parsersStore.loadParsersForce();
     Toast.show({ text: 'Парсер удалён' });
     router.replace({ name: '/parsers/' });
   } catch (e) {

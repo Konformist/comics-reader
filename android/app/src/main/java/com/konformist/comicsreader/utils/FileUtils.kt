@@ -1,38 +1,40 @@
 package com.konformist.comicsreader.utils
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.util.Base64
+import android.net.Uri
+import org.json.JSONArray
+import org.json.JSONObject
 import java.io.File
-import java.io.FileOutputStream
 
 class FileUtils {
   companion object {
-    fun cleanImageData(value: String): String {
-      return value
-        .replace("data:image/jpeg;base64,", "")
-        .replace("data:image/webp;base64,", "")
-        .replace("data:image/png;base64,", "")
-        .replace("data:image/gif;base64,", "")
-    }
+    fun tree(path: File): JSONObject {
+      val result = JSONObject()
 
-    fun base64ToBitmap(value: String): Bitmap {
-      val decodedBytes: ByteArray = Base64.decode(value, Base64.DEFAULT)
-      return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
-    }
+      if (path.isFile) {
+        result.put("type", "file")
+        result.put("name", path.name)
+        result.put("extension", path.extension)
+        result.put("size", path.length())
+        result.put("lastModified", path.lastModified())
+        result.put("path", Uri.fromFile(path))
+      } else {
+        result.put("type", "directory")
+        result.put("name", path.name)
+        val childes = JSONArray()
 
-    fun writeImage(file: File, bitmap: Bitmap) {
-      var outStream: FileOutputStream? = null
+        if (path.isDirectory) {
+          val list = path.listFiles()
 
-      try {
-        outStream = FileOutputStream(file)
-        bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, 80, outStream)
-      } finally {
-        if (outStream != null) {
-          outStream.flush()
-          outStream.close()
+          if (list != null) {
+            for (file in list) childes.put(tree(file))
+          }
         }
+
+        result.put("count", childes.length())
+        result.put("childes", childes)
       }
+
+      return result
     }
   }
 }

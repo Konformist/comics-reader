@@ -9,74 +9,27 @@
           v-model="sortValue"
           :chips="false"
           class="mt-3"
-          :disabled="!authors.length"
+          :disabled="!authorsStore.authors.length"
           item-title="name"
           item-value="id"
           :items="sortItems"
           label="Сортировать"
         />
       </v-toolbar>
-      <v-list v-if="loading">
-        <v-skeleton-loader
-          type="list-item"
-        />
-      </v-list>
-      <v-list
-        v-else-if="authors.length"
-        activatable
-      >
-        <v-list-item
-          v-for="item in sortedAuthors"
-          :key="item.id"
-          :active="item.id === selectedAuthor.id"
-          :title="item.name"
-        >
-          <template #append>
-            <v-list-item-subtitle class="mr-1">
-              {{ item.count }}
-            </v-list-item-subtitle>
-            <v-list-item-action end>
-              <v-btn
-                class="mr-4"
-                density="comfortable"
-                :disabled="loadingGlobal"
-                icon="$edit"
-                variant="tonal"
-                @click="clickAuthor(item.id)"
-              />
-              <v-btn
-                color="error"
-                density="comfortable"
-                :disabled="loadingGlobal"
-                icon="$delete"
-                variant="tonal"
-                @click="deleteAuthor(item.id)"
-              />
-            </v-list-item-action>
-          </template>
-        </v-list-item>
-      </v-list>
+      <DictionaryList
+        :items="sortedAuthors"
+        :loading="loading"
+        @click-item="clickAuthor($event)"
+      />
     </v-container>
-    <v-dialog v-model="dialog">
-      <v-card>
-        <v-card-title>
-          {{ selectedAuthor.id ? 'Редактирование' : 'Создание' }}
-        </v-card-title>
-        <v-card-item class="pb-0">
-          <v-text-field
-            v-model.trim="selectedAuthor.name"
-            variant="solo-filled"
-          />
-        </v-card-item>
-        <v-card-actions>
-          <v-btn
-            :disabled="loadingGlobal"
-            text="Сохранить"
-            @click="saveAuthor()"
-          />
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <DictionaryEditDialog
+      v-model="selectedAuthor.name"
+      v-model:opened="dialog"
+      :disabled="loadingGlobal"
+      :is-created="!selectedAuthor.id"
+      @remove="deleteAuthor()"
+      @save="saveAuthor()"
+    />
     <v-fab
       class="mb-14"
       :disabled="loading"
@@ -87,12 +40,14 @@
 </template>
 
 <script setup lang="ts">
+import DictionaryEditDialog from '@/components/DictionaryEditDialog.vue';
+import DictionaryList from '@/components/DictionaryList.vue';
 import useLoading from '@/composables/useLoading.ts';
 import { sortString } from '@/core/utils/array.ts';
+import { useAuthorsStore } from '@/stores/authors.ts';
+import { useComicsStore } from '@/stores/comics.ts';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
-import ComicController from '@/core/entities/comic/ComicController.ts';
-import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import AuthorController from '@/core/entities/author/AuthorController.ts';
 import AuthorModel from '@/core/entities/author/AuthorModel.ts';
 
@@ -102,6 +57,9 @@ definePage({
     isBottomNavigation: true,
   },
 });
+
+const comicsStore = useComicsStore();
+const authorsStore = useAuthorsStore();
 
 const {
   loading,
@@ -122,27 +80,11 @@ const sortItems = [
 
 const dialog = ref(false);
 
-const comics = ref<ComicModel[]>([]);
-
-const loadComics = async () => {
-  comics.value = await ComicController.loadAll();
-};
-
-loadComics();
-
-const authors = ref<AuthorModel[]>([]);
-
-const loadAuthors = async () => {
-  authors.value = await AuthorController.loadAll();
-};
-
-loadAuthors();
-
 onMounted(async () => {
   loadingStart();
   await Promise.all([
-    loadComics(),
-    loadAuthors(),
+    comicsStore.loadComics(),
+    authorsStore.loadAuthors(),
   ]);
   loadingEnd();
 });
@@ -150,15 +92,15 @@ onMounted(async () => {
 const selectedAuthor = ref(new AuthorModel());
 
 const clickAuthor = (value: number) => {
-  selectedAuthor.value = authors.value.find((e) => e.id === value) || new AuthorModel();
+  selectedAuthor.value = authorsStore.authors.find((e) => e.id === value) || new AuthorModel();
   dialog.value = true;
 };
 
 const authorsCount = computed(() => (
-  authors.value.reduce((acc, author) => {
+  authorsStore.authors.reduce((acc, author) => {
     acc[author.id] = 0;
 
-    comics.value.forEach((item) => {
+    comicsStore.comics.forEach((item) => {
       if (item.authors.includes(author.id)) acc[author.id]++;
     });
 
@@ -167,7 +109,7 @@ const authorsCount = computed(() => (
 ));
 
 const fullAuthors = computed(() => (
-  authors.value.map((item) => ({
+  authorsStore.authors.map((item) => ({
     ...item.getDTO(),
     count: authorsCount.value[item.id] || 0,
   }))
@@ -186,7 +128,7 @@ const saveAuthor = async () => {
   try {
     loadingGlobalStart();
     await AuthorController.save(selectedAuthor.value);
-    await loadAuthors();
+    await authorsStore.loadAuthorsForce();
     dialog.value = false;
     Toast.show({ text: 'Автор сохранён' });
   } catch (e) {
@@ -196,7 +138,7 @@ const saveAuthor = async () => {
   }
 };
 
-const deleteAuthor = async (id: number) => {
+const deleteAuthor = async () => {
   const { value } = await Dialog.confirm({
     title: 'Подтверждение удаления',
     message: 'Удалить автора?',
@@ -206,8 +148,8 @@ const deleteAuthor = async (id: number) => {
 
   try {
     loadingGlobalStart();
-    await AuthorController.remove(id);
-    await loadAuthors();
+    await AuthorController.remove(selectedAuthor.value.id);
+    await authorsStore.loadAuthorsForce();
     Toast.show({ text: 'Автор удалён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });

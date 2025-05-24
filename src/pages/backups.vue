@@ -75,10 +75,9 @@
 
 <script setup lang="ts">
 import useLoading from '@/composables/useLoading.ts';
+import Api from '@/core/api/Api.ts';
 import { APP_NAME, BACKUPS_DIRECTORY, COMICS_FILES_DIRECTORY } from '@/core/utils/variables.ts';
-import type { ITreeDirectory } from '@/core/entities/file/FileTypes.ts';
-import { getTree } from '@/core/utils/files.ts';
-import WebApi from '@/plugins/WebApiPlugin.ts';
+import type { ITreeDirectory } from '@/plugins/WebApiPlugin.ts';
 import { Dialog } from '@capacitor/dialog';
 import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 import { Toast } from '@capacitor/toast';
@@ -102,7 +101,7 @@ const backups = ref<ITreeDirectory[]>([]);
 
 const loadBackupsTree = async () => {
   loadingStart();
-  backups.value = await getTree(BACKUPS_DIRECTORY);
+  backups.value = [await Api.api('file/backups/tree')];
   loadingEnd();
 };
 
@@ -111,7 +110,7 @@ loadBackupsTree();
 const addBackup = async () => {
   try {
     loadingGlobalStart();
-    await WebApi.addBackup();
+    await Api.api('backup/backup/add');
     await loadBackupsTree();
     Toast.show({ text: 'Бекап создан' });
   } catch (e) {
@@ -126,8 +125,9 @@ const backupPath = ref('');
 const getBackup = async () => {
   try {
     loadingGlobalStart();
+    // @todo path replace to file name
     const path = backupPath.value.replace(`${BACKUPS_DIRECTORY}/`, '');
-    await WebApi.restoreBackup({ path });
+    await Api.api('backup/backup/restore', { fileName: path });
     Toast.show({ text: 'Бекап применён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
@@ -145,10 +145,9 @@ const delBackup = async () => {
   if (!value) return;
 
   try {
-    await Filesystem.deleteFile({
-      path: backupPath.value,
-      directory: Directory.Data,
-    });
+    // @todo path replace to file name
+    const path = backupPath.value.replace(`${BACKUPS_DIRECTORY}/`, '');
+    await Api.api('backup/backup/del', { fileName: path });
     await loadBackupsTree();
     Toast.show({ text: 'Бекап удалён' });
   } catch (e) {

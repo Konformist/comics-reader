@@ -1,9 +1,8 @@
 <template>
   <v-list-item
-    :active="model === item.path"
+    :active="item.type === 'file' && model === item.path"
     :prepend-icon="icon"
-    slim
-    :title="`${ item.name }${ item.type === 'directory' ? '/' : '' }`"
+    :title="`${item.name}${item.type === 'directory' ? '/' : ''}`"
     @click="onClick()"
   >
     <template #append>
@@ -11,23 +10,23 @@
         {{ formatBytes(item.size) }}
       </v-list-item-subtitle>
       <v-list-item-subtitle v-else>
-        Элементов: {{ item.children.length }}
+        Элементов: {{ item.count }}
       </v-list-item-subtitle>
     </template>
   </v-list-item>
-  <template v-if="item.type === 'directory' && opened">
+  <template v-if="item.type === 'directory' && item.count && opened">
     <v-divider />
     <FilesTree
       v-model="model"
       is-child
-      :tree="item.children"
+      :tree="item.childes"
     />
   </template>
 </template>
 
 <script lang="ts" setup>
 import FilesTree from '@/components/FilesTree.vue';
-import type { ITreeDirectory, ITreeFile } from '@/core/entities/file/FileTypes.ts';
+import type { ITreeDirectory, ITreeFile } from '@/plugins/WebApiPlugin.ts';
 import { formatBytes } from '@/core/utils/format.ts';
 
 const model = defineModel<string>({ default: '' });
@@ -47,8 +46,13 @@ const icon = computed(() => {
     return opened.value ? '$folder-open' : '$folder';
   }
 
-  if (item.name.includes('.json')) return '$file-code';
-  else return '$file-image';
+  if (item.extension === 'json') {
+    return '$file-code';
+  } else if (['webp', 'jpg', 'jpeg', 'png'].includes(item.extension)) {
+    return '$file-image';
+  } else {
+    return '$file';
+  }
 });
 
 const onClick = () => {

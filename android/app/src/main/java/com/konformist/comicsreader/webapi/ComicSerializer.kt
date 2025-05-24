@@ -7,9 +7,10 @@ import com.konformist.comicsreader.db.comic.ComicUpdate
 import com.konformist.comicsreader.utils.ValidationException
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.File
 
-class ComicSerializer : Serializer<ComicLite>() {
-  private val coverSerializer = ComicCoverSerializer()
+class ComicSerializer(filesDir: File) : Serializer<ComicLite>() {
+  private val coverSerializer = ComicCoverSerializer(filesDir)
 
   @Throws(ValidationException::class)
   override fun createFromJSON(value: JSONObject): ComicCreate {

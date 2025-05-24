@@ -20,6 +20,7 @@ import { useAppStore } from '@/stores/app.ts';
 definePage({
   meta: {
     title: 'О приложении',
+    isBottomNavigation: true,
   },
 });
 

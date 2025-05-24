@@ -49,11 +49,11 @@ class WebApi(private val context: Context) {
   private val authorSerializer = AuthorSerializer()
   private val languageSerializer = LanguageSerializer()
   private val parserSerializer = ParserSerializer()
-  private val chapterSerializer = ChapterSerializer()
-  private val chapterPageSerializer = ChapterPageSerializer()
-  private val comicCoverSerializer = ComicCoverSerializer()
+  private val chapterSerializer = ChapterSerializer(context.filesDir)
+  private val chapterPageSerializer = ChapterPageSerializer(context.filesDir)
+  private val comicCoverSerializer = ComicCoverSerializer(context.filesDir)
   private val comicOverrideSerializer = ComicOverrideSerializer()
-  private val comicSerializer = ComicSerializer()
+  private val comicSerializer = ComicSerializer(context.filesDir)
 
   private fun <T : Exception> wrappedToError(value: T): JSONObject {
     Log.d("Error", "${value.message} ${value.stackTrace}")

@@ -15,12 +15,12 @@ import { aliases, mdi } from 'vuetify/iconsets/mdi-svg';
 import {
   mdiAccount,
   mdiArrowLeft,
-  mdiArrowRight,
-  mdiCheckBold,
+  mdiArrowRight, mdiBookOpenPageVariant,
+  mdiCheckBold, mdiClose,
   mdiCog,
   mdiContentCopy,
   mdiContentSave,
-  mdiDelete,
+  mdiDelete, mdiDevTo,
   mdiDownload,
   mdiFileCode,
   mdiFileEye,
@@ -74,6 +74,9 @@ export default createVuetify({
       'check': mdiCheckBold,
       'delete': mdiDelete,
       'info': mdiInformation,
+      'close': mdiClose,
+      'dev': mdiDevTo,
+      'read': mdiBookOpenPageVariant,
     },
     sets: {
       mdi,
@@ -109,7 +112,7 @@ export default createVuetify({
     },
     VFab: {
       app: true,
-      class: ['mb-14'],
+      size: 'large',
     },
     VBottomNavigation: {
       elevation: '2',

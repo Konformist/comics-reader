@@ -14,6 +14,7 @@ declare module 'vue' {
     ComicGallery: typeof import('./components/ComicGallery.vue')['default']
     FilesTree: typeof import('./components/FilesTree.vue')['default']
     FilesTreeItem: typeof import('./components/FilesTreeItem.vue')['default']
+    NavigationDriwer: typeof import('./components/NavigationDriwer.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
   }

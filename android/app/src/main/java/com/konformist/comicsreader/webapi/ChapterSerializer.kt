@@ -6,9 +6,10 @@ import com.konformist.comicsreader.db.chapter.ChapterWithPages
 import com.konformist.comicsreader.utils.ValidationException
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.File
 
-class ChapterSerializer : Serializer<ChapterWithPages>() {
-  private val pageSerializer = ChapterPageSerializer()
+class ChapterSerializer(filesDir: File) : Serializer<ChapterWithPages>() {
+  private val pageSerializer = ChapterPageSerializer(filesDir)
 
   @Throws(ValidationException::class)
   override fun createFromJSON(value: JSONObject): ChapterCreate {

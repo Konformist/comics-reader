@@ -1,15 +1,21 @@
 <template>
   <v-main scrollable>
     <v-container class="pa-0">
-      <router-link
-        v-if="comic.cover?.file?.url"
-        :to="{
-          name: '/comics/[id]/chapter-read',
-          params: { id: comic.id },
-        }"
-      >
-        <v-img :src="comic.cover.file.url" />
-      </router-link>
+      <template v-if="comic.cover?.file?.url">
+        <router-link
+          v-if="chapters[0].id"
+          :to="{
+            name: '/chapters/[id]/read',
+            params: { id: chapters[0].id },
+          }"
+        >
+          <v-img :src="comic.cover.file.url" />
+        </router-link>
+        <v-img
+          v-else
+          :src="comic.cover.file.url"
+        />
+      </template>
       <div class="pa-4">
         <h3 class="font-weight-medium">
           {{ comic.name || '—' }}
@@ -73,44 +79,50 @@
           :key="chapter.id"
           :title="chapter.name || `Глава ${index + 1}`"
           :to="{
-            name: '/comics/[id]/chapter-read',
+            name: '/chapters/[id]/read',
             params: { id: chapter.id },
           }"
         >
           <template #append>
-            <v-list-item-action end>
-              <v-btn
-                density="comfortable"
-                :disabled="loadingGlobal"
-                icon="$edit"
-                :to="{
-                  name: '/comics/[id]/chapter-edit',
-                  params: { id: chapter.id, chapterId: chapter.id },
-                }"
-                variant="tonal"
-                @click.prevent
-              />
-            </v-list-item-action>
+            <v-icon
+              :color="chapter.pages.length && chapter.pages.every((e) => e.isRead) ? 'success' : ''"
+              icon="$read"
+            />
           </template>
         </v-list-item>
       </v-list>
-      <v-divider />
-      <div class="px-4 py-8">
-        <v-btn
-          class="w-100"
-          text="Добавить главу"
-          @click="createChapter()"
-        />
-      </div>
     </v-container>
     <v-fab
       :disabled="loading || loadingGlobal"
-      icon="$edit"
-      :to="{
-        name: '/comics/[id]/edit',
-        params: { id: comic.id },
-      }"
-    />
+      icon
+    >
+      <v-icon :icon="editOpened ? '$close' : '$edit'" />
+      <v-speed-dial
+        v-model="editOpened"
+        activator="parent"
+        location="top right"
+        transition="scale-transition"
+      >
+        <v-btn
+          key="2"
+          color="secondary"
+          text="Главы"
+          :to="{
+            name: '/chapters/[comicId]',
+            params: { comicId: comic.id },
+          }"
+        />
+        <v-btn
+          key="1"
+          color="secondary"
+          text="Комикс"
+          :to="{
+            name: '/comics/[id]/edit',
+            params: { id: comic.id },
+          }"
+        />
+      </v-speed-dial>
+    </v-fab>
   </v-main>
 </template>
 
@@ -138,6 +150,8 @@ definePage({
 
 const route = useRoute('/comics/[id]/');
 const router = useRouter();
+const comicId = +route.params.id;
+
 const {
   loading,
   loadingStart,
@@ -145,7 +159,7 @@ const {
   loadingGlobal,
 } = useLoading();
 
-const comicId = +route.params.id;
+const editOpened = ref(false);
 
 const chapters = ref<ChapterModel[]>([]);
 
@@ -210,18 +224,4 @@ const init = async () => {
 };
 
 init();
-
-const createChapter = async () => {
-  const chapterId = await ChapterController.save(new ChapterModel({
-    comicId,
-  }));
-
-  if (chapterId) {
-    Toast.show({ text: 'Глава создана' });
-    await router.push({
-      name: '/comics/[id]/chapter-edit',
-      params: { id: chapterId.toString() },
-    });
-  }
-};
 </script>

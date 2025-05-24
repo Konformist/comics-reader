@@ -5,9 +5,10 @@ import com.konformist.comicsreader.db.comiccover.ComicCoverWithFile
 import com.konformist.comicsreader.utils.ValidationException
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.File
 
-class ComicCoverSerializer : Serializer<ComicCoverWithFile>() {
-  private val fileSerializer = FileSerializer()
+class ComicCoverSerializer(filesDir: File) : Serializer<ComicCoverWithFile>() {
+  private val fileSerializer = FileSerializer(filesDir)
 
   @Throws(ValidationException::class)
   override fun createFromJSON(value: JSONObject) {

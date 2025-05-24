@@ -78,6 +78,7 @@
       </v-card>
     </v-dialog>
     <v-fab
+      class="mb-14"
       :disabled="loading"
       icon="$plus"
       @click="clickTag(0)"
@@ -98,6 +99,7 @@ import useLoading from '@/composables/useLoading.ts';
 definePage({
   meta: {
     title: 'Теги',
+    isBottomNavigation: true,
   },
 });
 

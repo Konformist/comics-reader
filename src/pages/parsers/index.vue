@@ -30,6 +30,7 @@
       </v-list>
     </v-container>
     <v-fab
+      class="mb-14"
       :disabled="loadingGlobal"
       icon="$plus"
       @click="createParser()"
@@ -47,6 +48,7 @@ import ParserModel from '@/core/entities/parser/ParserModel.ts';
 definePage({
   meta: {
     title: 'Парсеры',
+    isBottomNavigation: true,
   },
 });
 

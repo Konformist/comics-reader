@@ -19,6 +19,7 @@ import { getTree } from '@/core/utils/files.ts';
 definePage({
   meta: {
     title: 'Файловый менеджер',
+    isBottomNavigation: true,
   },
 });
 

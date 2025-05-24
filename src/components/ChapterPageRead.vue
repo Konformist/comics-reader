@@ -1,6 +1,7 @@
 <template>
   <v-img
     v-if="item.file?.url"
+    v-intersect.once="onRead"
     :max-height="maxHeight"
     :max-width="maxWidth"
     :src="item.file.url"
@@ -17,9 +18,17 @@
 <script lang="ts" setup>
 import type ChapterPageModel from '@/core/entities/chapter-page/ChapterPageModel.ts';
 
+const emit = defineEmits<{
+  (e: 'read', v: void): void
+}>();
+
 const { item } = defineProps<{
   item: ChapterPageModel
   maxWidth?: string
   maxHeight?: string
 }>();
+
+const onRead = (isIntersect: boolean) => {
+  if (!item.isRead && isIntersect) emit('read');
+};
 </script>

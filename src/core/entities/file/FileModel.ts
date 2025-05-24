@@ -1,5 +1,6 @@
 import Entity from '@/core/entities/Entity.ts';
 import type { IFileDTO } from '@/plugins/WebApiPlugin.ts';
+import { Capacitor } from '@capacitor/core';
 
 export default class FileModel extends Entity<IFileDTO> implements IFileDTO {
   id: number;
@@ -23,7 +24,7 @@ export default class FileModel extends Entity<IFileDTO> implements IFileDTO {
   }
 
   get url(): string {
-    return this.path ? `${this.path}?${this.mdate}` : '';
+    return this.path ? `${Capacitor.convertFileSrc(this.path)}?${this.mdate}` : '';
   }
 
   getDTO(): IFileDTO {

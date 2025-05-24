@@ -78,6 +78,7 @@
       </v-card>
     </v-dialog>
     <v-fab
+      class="mb-14"
       :disabled="loading"
       icon="$plus"
       @click="clickLanguage(0)"
@@ -98,6 +99,7 @@ import LanguageModel from '@/core/entities/language/LanguageModel.ts';
 definePage({
   meta: {
     title: 'Языки',
+    isBottomNavigation: true,
   },
 });
 

@@ -1,4 +1,5 @@
-import { registerPlugin } from '@capacitor/core';
+import WebApiPluginFake from '@/plugins/WebApiPluginFake.ts';
+import { registerPlugin, WebPlugin } from '@capacitor/core';
 
 interface DBDates {
   id: number
@@ -94,7 +95,7 @@ interface IWebApiPlugin {
   delAuthor(data: { id: number }): Promise<void>
 
   getLanguagesAll(): Promise<{ result: ILanguageDTO[] }>
-  getLanguage(data: { id: number }): Promise<ILanguageDTO>
+  getLanguage(data: { id: number }): Promise<{ result: ILanguageDTO }>
   addLanguage(data: ILanguageDTO): Promise<{ result: number }>
   setLanguage(data: ILanguageDTO): Promise<void>
   delLanguage(data: { id: number }): Promise<void>
@@ -124,7 +125,7 @@ interface IWebApiPlugin {
   delChapter(data: { id: number }): Promise<void>
 
   getChapterPagesAll(data: { chapterId: number }): Promise<{ result: IChapterPageDTO[] }>
-  getChapterPage(data: { id: number }): Promise<{ result: IChapterPageDTO[] }>
+  getChapterPage(data: { id: number }): Promise<{ result: IChapterPageDTO }>
   addChapterPage(data: IChapterPageDTO): Promise<{ result: number }>
   setChapterPage(data: IChapterPageDTO): Promise<void>
   delChapterPage(data: { id: number }): Promise<void>
@@ -136,6 +137,160 @@ interface IWebApiPlugin {
   restoreBackup(data: { path: string }): Promise<void>
 }
 
-const WebApi = registerPlugin<IWebApiPlugin>('WebApi');
+class WebApiPlugin extends WebPlugin implements IWebApiPlugin {
+  fake: WebApiPluginFake = new WebApiPluginFake();
+
+  async getTagsAll(): Promise<{ result: ITagDTO[] }> {
+    return { result: this.fake.getTags() };
+  }
+  async getTag(data: { id: number }): Promise<{ result: ITagDTO }> {
+    console.log(data);
+    return { result: this.fake.getTag() };
+  }
+  async addTag(data: ITagDTO): Promise<{ result: number }> {
+    console.log(data);
+    return { result: this.fake.getTagId() };
+  }
+  async setTag(data: ITagDTO): Promise<void> {
+    console.log(data);
+  }
+  async delTag(data: { id: number }): Promise<void> {
+    console.log(data);
+  }
+  async getAuthorsAll(): Promise<{ result: IAuthorDTO[] }> {
+    return { result: this.fake.getAuthors() };
+  }
+  async getAuthor(data: { id: number }): Promise<{ result: IAuthorDTO }> {
+    console.log(data);
+    return { result: this.fake.getAuthor() };
+  }
+  async addAuthor(data: IAuthorDTO): Promise<{ result: number }> {
+    console.log(data);
+    return { result: this.fake.getAuthorId() };
+  }
+  async setAuthor(data: IAuthorDTO): Promise<void> {
+    console.log(data);
+  }
+  async delAuthor(data: { id: number }): Promise<void> {
+    console.log(data);
+  }
+  async getLanguagesAll(): Promise<{ result: ILanguageDTO[] }> {
+    return { result: this.fake.getLanguages() };
+  }
+  async getLanguage(data: { id: number }): Promise<{ result: ILanguageDTO }> {
+    console.log(data);
+    return { result: this.fake.getLanguage() };
+  }
+  async addLanguage(data: ILanguageDTO): Promise<{ result: number }> {
+    console.log(data);
+    return { result: this.fake.getLanguageId() };
+  }
+  async setLanguage(data: ILanguageDTO): Promise<void> {
+    console.log(data);
+  }
+  async delLanguage(data: { id: number }): Promise<void> {
+    console.log(data);
+  }
+  async getParsersAll(): Promise<{ result: IParserDTO[] }> {
+    return { result: this.fake.getParsers() };
+  }
+  async getParser(data: { id: number }): Promise<{ result: IParserDTO }> {
+    console.log(data);
+    return { result: this.fake.getParser() };
+  }
+  async addParser(data: IParserDTO): Promise<{ result: number }> {
+    console.log(data);
+    return { result: this.fake.getParserId() };
+  }
+  async setParser(data: IParserDTO): Promise<void> {
+    console.log(data);
+  }
+  async delParser(data: { id: number }): Promise<void> {
+    console.log(data);
+  }
+  async getComicsAll(): Promise<{ result: IComicDTO[] }> {
+    return { result: this.fake.getComics() };
+  }
+  async getComic(data: { id: number }): Promise<{ result: IComicDTO }> {
+    console.log(data);
+    return { result: this.fake.getComic({ id: data.id }) };
+  }
+  async addComic(data: IComicDTO): Promise<{ result: number }> {
+    console.log(data);
+    return { result: this.fake.getComicId() };
+  }
+  async setComic(data: IComicDTO): Promise<void> {
+    console.log(data);
+  }
+  async delComic(data: { id: number }): Promise<void> {
+    console.log(data);
+  }
+  async getComicOverride(data: { comicId: number }): Promise<{ result: IComicOverrideDTO }> {
+    console.log(data);
+    return { result: this.fake.getComicOverride() };
+  }
+  async setComicOverride(data: IComicOverrideDTO): Promise<void> {
+    console.log(data);
+  }
+  async addCoverFile(data: { comicId: number, file: string, optimization?: boolean }): Promise<{ result: number }> {
+    console.log(data);
+    return { result: 1 };
+  }
+  async delCoverFile(data: { comicId: number }): Promise<void> {
+    console.log(data);
+  }
+  async getChaptersAll(data: { comicId: number }): Promise<{ result: IChapterDTO[] }> {
+    console.log(data);
+    return { result: this.fake.getChapters(data.comicId) };
+  }
+  async getChapter(data: { id: number }): Promise<{ result: IChapterDTO }> {
+    console.log(data);
+    return { result: this.fake.getChapter({ id: data.id }) };
+  }
+  async addChapter(data: IChapterDTO): Promise<{ result: number }> {
+    console.log(data);
+    return { result: this.fake.getChapterId() };
+  }
+  async setChapter(data: IChapterDTO): Promise<void> {
+    console.log(data);
+  }
+  async delChapter(data: { id: number }): Promise<void> {
+    console.log(data);
+  }
+  async getChapterPagesAll(data: { chapterId: number }): Promise<{ result: IChapterPageDTO[] }> {
+    console.log(data);
+    return { result: this.fake.getChapterPages(data.chapterId) };
+  }
+  async getChapterPage(data: { id: number }): Promise<{ result: IChapterPageDTO }> {
+    console.log(data);
+    return { result: this.fake.getChapterPage({ id: data.id }) };
+  }
+  async addChapterPage(data: IChapterPageDTO): Promise<{ result: number }> {
+    console.log(data);
+    return { result: this.fake.getChapterPageId() };
+  }
+  async setChapterPage(data: IChapterPageDTO): Promise<void> {
+    console.log(data);
+  }
+  async delChapterPage(data: { id: number }): Promise<void> {
+    console.log(data);
+  }
+  async addChapterPageFile(data: { chapterPageId: number, file: string, optimization?: boolean }): Promise<{ result: number }> {
+    console.log(data);
+    return { result: 1 };
+  }
+  async delChapterPageFile(data: { chapterPageId: number }): Promise<void> {
+    console.log(data);
+  }
+  async addBackup(): Promise<void> {
+  }
+  async restoreBackup(data: { path: string }): Promise<void> {
+    console.log(data);
+  }
+}
+
+const WebApi = import.meta.env.DEV
+  ? registerPlugin<IWebApiPlugin>('WebApi', { web: () => new WebApiPlugin() })
+  : registerPlugin<IWebApiPlugin>('WebApi');
 
 export default WebApi;

@@ -5,9 +5,16 @@
         <v-textarea
           v-model.trim="chapter.name"
           auto-grow
-          hide-details
           label="Название"
           rows="2"
+        />
+        <v-btn
+          class="w-100"
+          color="error"
+          :disabled="!chapter.pages.length || loadingGlobal"
+          :loading="loading"
+          text="Удалить главу"
+          @click="delChapter()"
         />
       </div>
       <v-divider />
@@ -19,17 +26,6 @@
           :min="minPages"
           @change="setPages()"
         />
-        <v-btn
-          class="w-100"
-          color="error"
-          :disabled="!chapter.pages.length || loadingGlobal"
-          :loading="loading"
-          text="Удалить все картинки"
-          @click="delPages()"
-        />
-      </div>
-      <v-divider />
-      <div class="px-4 py-8">
         <v-textarea
           v-model.trim="imagesTemplate"
           auto-grow
@@ -71,8 +67,16 @@
           class="mt-4 w-100"
           :disabled="!canLoadImages || loadingGlobal"
           :loading="loading"
-          text="Загрузить все"
+          text="Загрузить все изображения"
           @click="onLoadImages(true)"
+        />
+        <v-btn
+          class="mt-4 w-100"
+          color="error"
+          :disabled="!chapter.pages.length || loadingGlobal"
+          :loading="loading"
+          text="Удалить все страницы"
+          @click="delPages()"
         />
       </div>
       <v-divider />
@@ -150,7 +154,7 @@ definePage({
   },
 });
 
-const route = useRoute('/comics/[id]/chapter-edit');
+const route = useRoute('/chapters/[id]/edit');
 const router = useRouter();
 const appStore = useAppStore();
 
@@ -342,6 +346,29 @@ const delPages = async () => {
     );
     await loadChapter();
     Toast.show({ text: 'Глава сохранена' });
+  } catch (e) {
+    Toast.show({ text: `Ошибка: ${e}` });
+  } finally {
+    loadingGlobalEnd();
+  }
+};
+
+const delChapter = async () => {
+  const { value } = await Dialog.confirm({
+    title: 'Подтверждение удаления',
+    message: 'Удалить главу?',
+  });
+
+  if (!value) return;
+
+  try {
+    loadingGlobalStart();
+    await ChapterController.remove(chapterId);
+    Toast.show({ text: 'Глава удалена' });
+    router.replace({
+      name: '/chapters/[comicId]',
+      params: { comicId: chapter.value.comicId },
+    });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {

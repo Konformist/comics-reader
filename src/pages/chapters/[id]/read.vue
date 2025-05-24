@@ -13,6 +13,7 @@
         :key="item.id"
         :item="item"
         max-width="100%"
+        @read="onRead(item)"
       />
     </v-container>
     <v-container
@@ -38,6 +39,7 @@
             :item="item"
             max-height="100%"
             max-width="100%"
+            @read="onRead(item)"
           />
         </swiper-slide>
       </swiper-container>
@@ -47,9 +49,12 @@
 </template>
 
 <script lang="ts" setup>
+import ChapterPageController from '@/core/entities/chapter-page/ChapterPageController.ts';
+import type ChapterPageModel from '@/core/entities/chapter-page/ChapterPageModel.ts';
 import { KeepAwake } from '@capacitor-community/keep-awake';
 import { Capacitor } from '@capacitor/core';
 import { StatusBar } from '@capacitor/status-bar';
+import { Toast } from '@capacitor/toast';
 import { Autoplay, Pagination } from 'swiper/modules';
 import { register, type SwiperContainer, type SwiperSlide } from 'swiper/element';
 import { useAppStore } from '@/stores/app.ts';
@@ -64,7 +69,7 @@ definePage({
   },
 });
 
-const route = useRoute('/comics/[id]/chapter-read');
+const route = useRoute('/chapters/[id]/read');
 const router = useRouter();
 const appStore = useAppStore();
 
@@ -115,6 +120,17 @@ onBeforeUnmount(async () => {
     await StatusBar.show();
   }
 });
+
+const onRead = async (item: ChapterPageModel) => {
+  if (item.isRead) return;
+
+  try {
+    item.isRead = true;
+    await ChapterPageController.save(item);
+  } catch (e) {
+    Toast.show({ text: `Ошибка: ${e}` });
+  }
+};
 </script>
 
 <style lang="scss">

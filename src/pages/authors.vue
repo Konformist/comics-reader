@@ -78,6 +78,7 @@
       </v-card>
     </v-dialog>
     <v-fab
+      class="mb-14"
       :disabled="loading"
       icon="$plus"
       @click="clickAuthor(0)"
@@ -98,6 +99,7 @@ import AuthorModel from '@/core/entities/author/AuthorModel.ts';
 definePage({
   meta: {
     title: 'Авторы',
+    isBottomNavigation: true,
   },
 });
 

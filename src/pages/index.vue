@@ -1,11 +1,8 @@
 <template>
   <v-main scrollable>
     <v-toolbar density="compact">
-      <v-toolbar-title
-        v-if="comics.length !== comicsFiltered.length"
-        class="text-subtitle-1"
-      >
-        Найдено: {{ comicsFiltered.length }}
+      <v-toolbar-title class="text-subtitle-1">
+        {{ comics.length !== comicsFiltered.length ? 'Найдено' : 'Всего' }}: {{ comicsFiltered.length }}
       </v-toolbar-title>
       <v-spacer />
       <v-btn
@@ -62,11 +59,6 @@
         </template>
       </v-data-iterator>
     </v-container>
-    <v-fab
-      :disabled="loading || loadingGlobal"
-      icon="$plus"
-      @click="createComic()"
-    />
     <v-bottom-sheet v-model="filtersSheet">
       <v-card>
         <v-card-item>
@@ -111,6 +103,12 @@
         </v-card-item>
       </v-card>
     </v-bottom-sheet>
+    <v-fab
+      class="mb-14"
+      :disabled="loading || loadingGlobal"
+      icon="$plus"
+      @click="createComic()"
+    />
   </v-main>
 </template>
 
@@ -131,6 +129,7 @@ import ComicGallery from '@/components/ComicGallery.vue';
 definePage({
   meta: {
     title: 'Галерея',
+    isBottomNavigation: true,
   },
 });
 

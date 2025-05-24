@@ -166,6 +166,7 @@ class WebApi(private val context: Context) {
 
       val decodedImage: Bitmap = ImageUtils.base64ToBitmap(file)
       if (optimization == true) ImageUtils.write(fileOut, decodedImage, 80)
+      // TODO bug size
       else ImageUtils.write(fileOut, decodedImage)
 
       val rowId = appFileDao.create(

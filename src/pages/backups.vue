@@ -1,6 +1,13 @@
 <template>
   <v-main>
     <v-container class="pa-0">
+      <v-alert
+        color="info"
+        rounded="0"
+        variant="tonal"
+      >
+        При создании или применении бекапа нужно перезапустить приложение
+      </v-alert>
       <div class="px-4 py-8">
         <v-btn
           class="w-100"
@@ -22,12 +29,12 @@
           :disabled="!backupPath || loadingGlobal || loading"
           text="Применить бекап"
           variant="tonal"
-          @click="getBackup()"
+          @click="restoreBackup()"
         />
         <v-btn
           class="mt-4 w-100"
           :disabled="!backupPath || loadingGlobal || loading"
-          text="Сохранить в Документы"
+          text="Сохранить в Загрузки"
           variant="tonal"
           @click="saveBackupToGlobal()"
         />
@@ -63,7 +70,7 @@
         <v-btn
           class="w-100"
           :disabled="loadingGlobal || loading"
-          text="Сохранить файлы в Документы"
+          text="Сохранить изображения в Загрузки"
           variant="tonal"
           @click="saveImagesToGlobal()"
         />
@@ -71,7 +78,7 @@
           class="mt-4 w-100"
           color="error"
           :disabled="loadingGlobal || loading"
-          text="Загрузить файлы из Документов"
+          text="Загрузить изображения из Загрузок"
           variant="tonal"
           @click="loadImagesFromGlobal()"
         />
@@ -81,13 +88,17 @@
 </template>
 
 <script setup lang="ts">
-import useLoading from '@/composables/useLoading.ts';
-import Api from '@/core/api/Api.ts';
-import { APP_NAME, BACKUPS_DIRECTORY, COMICS_FILES_DIRECTORY } from '@/core/utils/variables.ts';
-import type { ITreeDirectory } from '@/plugins/WebApiPlugin.ts';
+import { fileToBase64 } from '@/core/utils/image.ts';
 import { Dialog } from '@capacitor/dialog';
-import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 import { Toast } from '@capacitor/toast';
+import Api from '@/core/api/Api.ts';
+import type { ITreeDirectory, ITreeFile } from '@/plugins/WebApiPlugin.ts';
+import useLoading from '@/composables/useLoading.ts';
+import { useAuthorsStore } from '@/stores/authors.ts';
+import { useComicsStore } from '@/stores/comics.ts';
+import { useLanguagesStore } from '@/stores/languages.ts';
+import { useParsersStore } from '@/stores/parsers.ts';
+import { useTagsStore } from '@/stores/tags.ts';
 
 definePage({
   meta: {
@@ -95,6 +106,12 @@ definePage({
     title: 'Бекапы',
   },
 });
+
+const comicsStore = useComicsStore();
+const tagsStore = useTagsStore();
+const authorsStore = useAuthorsStore();
+const languagesStore = useLanguagesStore();
+const parsersStore = useParsersStore();
 
 const {
   loading,
@@ -128,14 +145,21 @@ const addBackup = async () => {
   }
 };
 
-const backupPath = ref('');
+const backupPath = ref<ITreeFile>();
 
-const getBackup = async () => {
+const restoreBackup = async () => {
+  if (!backupPath.value) return;
+
   try {
     loadingGlobalStart();
-    // @todo path replace to file name
-    const path = backupPath.value.replace(`${BACKUPS_DIRECTORY}/`, '');
-    await Api.api('backup/backup/restore', { fileName: path });
+    await Api.api('backup/backup/restore', { fileName: backupPath.value.name });
+    await Promise.all([
+      comicsStore.loadComicsForce(),
+      tagsStore.loadTagsForce(),
+      authorsStore.loadAuthorsForce(),
+      languagesStore.loadLanguagesForce(),
+      parsersStore.loadParsersForce(),
+    ]);
     Toast.show({ text: 'Бекап применён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
@@ -145,6 +169,8 @@ const getBackup = async () => {
 };
 
 const delBackup = async () => {
+  if (!backupPath.value) return;
+
   const { value } = await Dialog.confirm({
     title: 'Подтверждение удаления',
     message: 'Удалить бекап?',
@@ -153,9 +179,7 @@ const delBackup = async () => {
   if (!value) return;
 
   try {
-    // @todo path replace to file name
-    const path = backupPath.value.replace(`${BACKUPS_DIRECTORY}/`, '');
-    await Api.api('backup/backup/del', { fileName: path });
+    await Api.api('backup/backup/del', { fileName: backupPath.value.name });
     await loadBackupsTree();
     Toast.show({ text: 'Бекап удалён' });
   } catch (e) {
@@ -170,13 +194,10 @@ const loadBackup = async () => {
 
   try {
     loadingGlobalStart();
-    const result = await backupFile.value.text();
-    await Filesystem.writeFile({
-      path: `${BACKUPS_DIRECTORY}/${backupFile.value.name}`,
-      directory: Directory.Data,
-      data: result,
-      encoding: Encoding.UTF8,
-      recursive: true,
+    const result = await fileToBase64(backupFile.value);
+    await Api.api('file/backups/upload', {
+      fileName: backupFile.value.name,
+      file: result,
     });
     await loadBackupsTree();
     Toast.show({ text: 'Данные получены' });
@@ -188,25 +209,13 @@ const loadBackup = async () => {
 };
 
 const saveBackupToGlobal = async (): Promise<void> => {
-  try {
-    await Filesystem.mkdir({
-      path: `${APP_NAME}/${BACKUPS_DIRECTORY}`,
-      directory: Directory.Documents,
-      recursive: true,
-    });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (_) { /* empty */ }
+  if (!backupPath.value) return;
 
   try {
-    loadingGlobalStart();
-    await Filesystem.copy({
-      from: backupPath.value,
-      directory: Directory.Data,
-      to: `${APP_NAME}/${backupPath.value}`,
-      toDirectory: Directory.Documents,
+    await Api.api('file/backups/downloads', {
+      fileName: backupPath.value.name,
     });
-
-    Toast.show({ text: 'Бекап сохранён в документы' });
+    Toast.show({ text: 'Бекап сохранен в Загрузки' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {
@@ -217,24 +226,8 @@ const saveBackupToGlobal = async (): Promise<void> => {
 const saveImagesToGlobal = async () => {
   try {
     loadingGlobalStart();
-
-    try {
-      await Filesystem.rmdir({
-        path: `${APP_NAME}/${COMICS_FILES_DIRECTORY}`,
-        directory: Directory.Documents,
-        recursive: true,
-      });
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (_) { /* empty */ }
-
-    await Filesystem.copy({
-      from: `${COMICS_FILES_DIRECTORY}`,
-      directory: Directory.Data,
-      to: `${APP_NAME}/${COMICS_FILES_DIRECTORY}`,
-      toDirectory: Directory.Documents,
-    });
-
-    Toast.show({ text: 'Картинки сохранены в Документы' });
+    await Api.api('file/comics-images/downloads');
+    Toast.show({ text: 'Картинки сохранены в Загрузки' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {
@@ -245,24 +238,8 @@ const saveImagesToGlobal = async () => {
 const loadImagesFromGlobal = async () => {
   try {
     loadingGlobalStart();
-
-    try {
-      await Filesystem.rmdir({
-        path: `${COMICS_FILES_DIRECTORY}`,
-        directory: Directory.Data,
-        recursive: true,
-      });
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (_) { /* empty */ }
-
-    await Filesystem.copy({
-      from: `${APP_NAME}/${COMICS_FILES_DIRECTORY}`,
-      directory: Directory.Documents,
-      to: `${COMICS_FILES_DIRECTORY}`,
-      toDirectory: Directory.Data,
-    });
-
-    Toast.show({ text: 'Картинки загружены из Документов' });
+    await Api.api('file/comics-images/upload');
+    Toast.show({ text: 'Картинки загружены из Загрузок' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {

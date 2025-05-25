@@ -2,10 +2,8 @@ package com.konformist.comicsreader.webapi
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.os.Environment
 import android.util.Log
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
 import com.konformist.comicsreader.db.AppDatabase
 import com.konformist.comicsreader.db.DBBackup
@@ -19,13 +17,13 @@ import com.konformist.comicsreader.db.comiccover.ComicCoverDelete
 import com.konformist.comicsreader.db.comiccover.ComicCoverUpdate
 import com.konformist.comicsreader.db.comicoverride.ComicOverrideCreate
 import com.konformist.comicsreader.db.comicoverride.ComicOverrideDelete
-import com.konformist.comicsreader.utils.AppDirectory
 import com.konformist.comicsreader.exceptions.DatabaseException
+import com.konformist.comicsreader.exceptions.FilesException
+import com.konformist.comicsreader.exceptions.ValidationException
+import com.konformist.comicsreader.utils.AppDirectory
 import com.konformist.comicsreader.utils.DatesUtils
 import com.konformist.comicsreader.utils.FileUtils
-import com.konformist.comicsreader.exceptions.FilesException
 import com.konformist.comicsreader.utils.ImageUtils
-import com.konformist.comicsreader.exceptions.ValidationException
 import com.konformist.comicsreader.webapi.serializers.AuthorSerializer
 import com.konformist.comicsreader.webapi.serializers.ChapterPageSerializer
 import com.konformist.comicsreader.webapi.serializers.ChapterSerializer
@@ -40,16 +38,25 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import java.time.LocalDateTime
+import android.util.Base64
+import java.io.BufferedOutputStream
+import java.io.FileOutputStream
 
 class WebApi(private val context: Context) {
-  private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
-  private val dataStore = AppDataStore(context.dataStore)
-
   private val db: AppDatabase = Room
     .databaseBuilder(context, AppDatabase::class.java, AppDatabase.DATABASE_NAME)
     .build()
 
   private val dbBackup = DBBackup(context)
+
+  private val downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+
+  private fun getAppName(): String {
+    val applicationInfo = context.applicationInfo
+    val stringId = applicationInfo.labelRes
+    return if (stringId == 0) applicationInfo.nonLocalizedLabel.toString()
+    else context.getString(stringId)
+  }
 
   private val tagDao = db.tagDao()
   private val authorDao = db.authorDao()
@@ -170,7 +177,6 @@ class WebApi(private val context: Context) {
     directory: String,
     name: String,
     file: String,
-    optimization: Boolean? = false
   ): Long {
     val dirOut = File("${context.filesDir}/${AppDirectory.COMICS_IMAGES}/${directory}")
     val fileOut = File("${dirOut.path}/${name}")
@@ -180,10 +186,12 @@ class WebApi(private val context: Context) {
 
       if (!dirOut.exists()) dirOut.mkdirs()
 
-      val decodedImage: Bitmap = ImageUtils.base64ToBitmap(file)
-      if (optimization == true) ImageUtils.write(fileOut, decodedImage, 80)
-      // TODO bug size
-      else ImageUtils.write(fileOut, decodedImage)
+      if (AppDataStore.settings.isCompress) {
+        val decodedImage: Bitmap = ImageUtils.base64ToBitmap(file)
+        ImageUtils.write(fileOut, decodedImage, 80)
+      } else {
+        FileUtils.writeBase64(fileOut, file)
+      }
 
       val rowId = appFileDao.create(
         AppFileCreate(
@@ -437,8 +445,7 @@ class WebApi(private val context: Context) {
     if (cover.fileId != null && cover.fileId != 0.toLong())
       deleteImage(cover.fileId)
 
-    val optimization = data.optBoolean("optimization", false)
-    val rowId = createComicImage(comicId.toString(), "cover.webp", file, optimization)
+    val rowId = createComicImage(comicId.toString(), "cover.webp", file)
     if (rowId == 0.toLong()) throw DatabaseException("Comic cover file not added")
 
     val count = comicCoverDao.update(
@@ -564,13 +571,7 @@ class WebApi(private val context: Context) {
 
     if (chapterPage.fileId != 0.toLong()) deleteImage(chapterPage.fileId)
 
-    val optimization = data.optBoolean("optimization", false)
-    val rowId = createComicImage(
-      chapter.chapter.comicId.toString(),
-      "$chapterPageId.webp",
-      file,
-      optimization
-    )
+    val rowId = createComicImage(chapter.chapter.comicId.toString(), "$chapterPageId.webp", file)
     if (rowId == 0.toLong()) throw DatabaseException("Chapter page file not added")
 
     val newPageFile = ChapterPageUpdate(
@@ -614,26 +615,26 @@ class WebApi(private val context: Context) {
   }
 
   private fun getSettings(): JSONObject {
-    runBlocking { dataStore.readStore() }
+    runBlocking { AppDataStore.readStore() }
     val result = JSONObject()
-    result.put("autoReading", dataStore.settings.autoReading)
-    result.put("autoReadingTimeout", dataStore.settings.autoReadingTimeout)
-    result.put("readingMode", dataStore.settings.readingMode)
-    result.put("isCompress", dataStore.settings.isCompress)
+    result.put("autoReading", AppDataStore.settings.autoReading)
+    result.put("autoReadingTimeout", AppDataStore.settings.autoReadingTimeout)
+    result.put("readingMode", AppDataStore.settings.readingMode)
+    result.put("isCompress", AppDataStore.settings.isCompress)
     return result
   }
 
   private fun setSettings(data: JSONObject): Boolean {
     val readingMode = data.optString("readingMode", "")
 
-    if (!dataStore.readingModeList.contains(readingMode))
-      throw ValidationException("ReadingMode invalid, use ${dataStore.readingModeList}")
+    if (!AppDataStore.readingModeList.contains(readingMode))
+      throw ValidationException("ReadingMode invalid, use ${AppDataStore.readingModeList}")
 
-    dataStore.settings.autoReading = data.optBoolean("autoReading", false)
-    dataStore.settings.autoReadingTimeout = data.optInt("autoReadingTimeout", 0)
-    dataStore.settings.readingMode = readingMode
-    dataStore.settings.isCompress = data.optBoolean("isCompress", true)
-    return runBlocking { dataStore.saveStore() }
+    AppDataStore.settings.autoReading = data.optBoolean("autoReading", false)
+    AppDataStore.settings.autoReadingTimeout = data.optInt("autoReadingTimeout", 0)
+    AppDataStore.settings.readingMode = readingMode
+    AppDataStore.settings.isCompress = data.optBoolean("isCompress", true)
+    return runBlocking { AppDataStore.saveStore() }
   }
 
   private fun addBackup(): Boolean {
@@ -660,6 +661,58 @@ class WebApi(private val context: Context) {
 
   private fun getBackupsTree(): JSONObject {
     return FileUtils.tree(File("${context.filesDir}${File.separator}${AppDirectory.BACKUPS}"))
+  }
+
+  private fun setBackupsUpload(data: JSONObject): Boolean {
+    val file = data.optString("file", "")
+    val fileName = data.optString("fileName", "")
+
+    if (file == "") throw ValidationException("File is empty")
+    if (fileName == "") throw ValidationException("FileName is empty")
+
+    val filePath = File("${context.filesDir}${File.separator}${AppDirectory.BACKUPS}${File.separator}${fileName}")
+
+    return FileUtils.writeBase64(filePath, file)
+  }
+
+  private fun setBackupsToDownloads(data: JSONObject): Boolean {
+    val fileName = data.optString("fileName", "")
+    if (fileName == "") throw ValidationException("FileName is empty")
+
+    val dirFrom = File("${context.filesDir}${File.separator}${AppDirectory.BACKUPS}${File.separator}${fileName}")
+    val dirTo = File("${downloads.path}${File.separator}${getAppName()}${File.separator}${AppDirectory.BACKUPS}${File.separator}${fileName}")
+
+    dirFrom.copyTo(target = dirTo, overwrite = true)
+
+    return true
+  }
+
+  private fun setComicsImagesFromDownloads(): Boolean {
+    val fileFrom = File("${downloads.path}${File.separator}${getAppName()}${File.separator}${AppDirectory.COMICS_IMAGES}")
+    val fileTo = File("${context.filesDir}${File.separator}${AppDirectory.COMICS_IMAGES}")
+
+    return fileFrom.copyRecursively(target = fileTo, overwrite = true)
+  }
+
+  private fun setComicsImagesToDownloads(): Boolean {
+    val fileFrom = File("${context.filesDir}${File.separator}${AppDirectory.COMICS_IMAGES}")
+    val fileTo = File("${downloads.path}${File.separator}${getAppName()}${File.separator}${AppDirectory.COMICS_IMAGES}")
+
+    return fileFrom.copyRecursively(target = fileTo, overwrite = true)
+  }
+
+  private fun setFileToDownloads(data: JSONObject): Boolean {
+    val file = data.optString("file", "")
+    val fileName = data.optString("fileName", "")
+
+    if (file == "") throw ValidationException("File is empty")
+    if (fileName == "") throw ValidationException("FileName is empty")
+
+    val filePath = File("${downloads.path}${File.separator}${getAppName()}${File.separator}${fileName}")
+
+    val result = FileUtils.write(filePath, file)
+    if (!result) throw FilesException("File not written")
+    return true
   }
 
   fun api(query: String, data: JSONObject? = JSONObject()): JSONObject {
@@ -711,14 +764,21 @@ class WebApi(private val context: Context) {
           Query.FILE_CHAPTER_PAGE_DEL -> delChapterPageFile(data)
           Query.FILE_COMIC_IMAGES_TREE -> getComicImagesTree()
           Query.FILE_BACKUPS_TREE -> getBackupsTree()
+          Query.FILE_FILE_DOWNLOADS -> setFileToDownloads(data)
+          Query.FILE_BACKUPS_DOWNLOADS -> setBackupsToDownloads(data)
+          Query.FILE_BACKUPS_UPLOAD -> setBackupsUpload(data)
+          Query.FILE_COMICS_IMAGES_DOWNLOADS -> setComicsImagesToDownloads()
+          Query.FILE_COMICS_IMAGES_UPLOAD -> setComicsImagesFromDownloads()
           Query.SETTINGS_SETTINGS_GET -> getSettings()
           Query.SETTINGS_SETTINGS_SET -> setSettings(data)
           Query.BACKUP_BACKUP_ADD -> addBackup()
           Query.BACKUP_BACKUP_DEL -> delBackup(data)
           Query.BACKUP_BACKUP_RESTORE -> restoreBackup(data)
-          else -> "Not implemented"
+          else -> throw Exception("Not implemented")
         }
       )
+    } catch (e: Exception) {
+      return wrappedToError(e)
     } catch (e: FilesException) {
       return wrappedToError(e)
     } catch (e: ValidationException) {

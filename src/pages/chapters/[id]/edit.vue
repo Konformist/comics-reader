@@ -144,7 +144,6 @@
 </template>
 
 <script lang="ts" setup>
-import { useAppStore } from '@/stores/app.ts';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
 import useLoading from '@/composables/useLoading.ts';
@@ -164,7 +163,6 @@ definePage({
 
 const route = useRoute('/chapters/[id]/edit');
 const router = useRouter();
-const appStore = useAppStore();
 
 const {
   loading,
@@ -257,7 +255,7 @@ const uploadImage = async (item: ChapterPageModel, event: File | File[]) => {
     loadingGlobalStart();
     await saveChapter();
     const base64 = await fileToBase64(event);
-    await ChapterPageController.saveFile(item.id, base64, appStore.settings.isCompress);
+    await ChapterPageController.saveFile(item.id, base64);
     await loadChapter();
     Toast.show({ text: 'Глава сохранена' });
   } catch (e) {
@@ -273,7 +271,7 @@ const onLoadImage = async (item: ChapterPageModel) => {
   try {
     loadingGlobalStart();
     const result = await ParserController.loadImageRaw(item.fromUrl);
-    await ChapterPageController.saveFile(item.id, result, appStore.settings.isCompress);
+    await ChapterPageController.saveFile(item.id, result);
     await loadChapter();
     Toast.show({ text: 'Глава сохранена' });
   } catch (e) {
@@ -297,7 +295,7 @@ const onLoadImages = async (force: boolean = false) => {
     for (const item of chapter.value.pages) {
       if (item.fromUrl && (!item.file || force)) {
         const result = await ParserController.loadImageRaw(item.fromUrl);
-        await ChapterPageController.saveFile(item.id, result, appStore.settings.isCompress);
+        await ChapterPageController.saveFile(item.id, result);
       }
     }
   } catch (e) {

@@ -1,12 +1,55 @@
 package com.konformist.comicsreader.utils
 
 import android.net.Uri
+import android.util.Base64
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import android.util.Log
+import java.io.BufferedOutputStream
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.FileWriter
+
+
 
 class FileUtils {
   companion object {
+    fun cleanBase64(value: String): String {
+      return value
+        .replace("data:image/jpeg;base64,", "")
+        .replace("data:image/webp;base64,", "")
+        .replace("data:image/png;base64,", "")
+        .replace("data:image/gif;base64,", "")
+        .replace("data:application/octet-stream;base64,", "")
+    }
+
+    fun writeBase64(fileOut: File, data: String): Boolean {
+      val decodedFile = Base64.decode(cleanBase64(data), Base64.DEFAULT)
+      val fileOutStream = FileOutputStream(fileOut)
+      val bufferedOutputStream = BufferedOutputStream(fileOutStream)
+      bufferedOutputStream.write(decodedFile)
+
+      return true
+    }
+
+    fun write(file: File, data: String): Boolean {
+      val parentDir = file.parent ?: return false
+      val parentFile = File(parentDir)
+
+      if (!parentFile.exists()) parentFile.mkdirs()
+
+      try {
+        val outputStreamWriter = FileWriter(file)
+        outputStreamWriter.write(data)
+        outputStreamWriter.close()
+        return true
+      } catch (e: IOException) {
+        Log.e("FileUtils", e.message.toString())
+        return false
+      }
+    }
+
     fun tree(path: File): JSONObject {
       val result = JSONObject()
 

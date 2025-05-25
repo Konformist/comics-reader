@@ -97,7 +97,7 @@
         <v-btn
           class="mt-4 w-100"
           :disabled="loadingGlobal"
-          text="Сохранить в Документы"
+          text="Сохранить в Загрузки"
           variant="tonal"
           @click="toDownloads()"
         />
@@ -124,10 +124,9 @@
 
 <script lang="ts" setup>
 import useLoading from '@/composables/useLoading.ts';
-import { APP_NAME } from '@/core/utils/variables.ts';
+import Api from '@/core/api/Api.ts';
 import { useParsersStore } from '@/stores/parsers.ts';
 import { Dialog } from '@capacitor/dialog';
-import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 import { Toast } from '@capacitor/toast';
 import ParserController from '@/core/entities/parser/ParserController.ts';
 import ParserModel from '@/core/entities/parser/ParserModel.ts';
@@ -200,15 +199,11 @@ const toDownloads = async () => {
     loadingGlobalStart();
     const parserDTO = parser.value.getDTO();
     parserDTO.id = 0;
-
-    await Filesystem.writeFile({
-      path: `${APP_NAME}/parsers/${parser.value.name}.json`,
-      directory: Directory.Documents,
-      data: JSON.stringify(parserDTO),
-      encoding: Encoding.UTF8,
-      recursive: true,
+    await Api.api('file/file/downloads', {
+      file: JSON.stringify(parserDTO),
+      fileName: `${parser.value.name}.json`,
     });
-    Toast.show({ text: 'Парсер сохранён в документы' });
+    Toast.show({ text: 'Парсер сохранён в Загрузки' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {

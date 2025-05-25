@@ -12,11 +12,10 @@ export default class ChapterPageController {
     return Api.api('chapter/page/del', { id });
   }
 
-  static saveFile(chapterPageId: number, file: string, optimization?: boolean) {
+  static saveFile(chapterPageId: number, file: string) {
     return Api.api('file/chapter-page/add', {
       chapterPageId,
       file,
-      optimization,
     });
   }
 }

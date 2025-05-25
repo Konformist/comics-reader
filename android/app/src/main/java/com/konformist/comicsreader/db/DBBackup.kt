@@ -14,7 +14,7 @@ import java.nio.channels.FileChannel
 import java.time.LocalDate
 
 
-class DBBackup(val context: Context) {
+class DBBackup(private val context: Context) {
   fun backup(db: AppDatabase) {
     db.close()
 
@@ -28,65 +28,16 @@ class DBBackup(val context: Context) {
     }
 
     val saveFile = File(saveFilePath)
-    if (saveFile.exists()) {
-      Log.d("Backup", "File exists. Deleting it and then creating new file.")
-      saveFile.delete()
-    }
-
-    try {
-      if (saveFile.createNewFile()) {
-        val bufferSize = 8 * 1024
-        val buffer = ByteArray(bufferSize)
-        val saveDB: OutputStream = FileOutputStream(saveFilePath)
-        val inputDB: InputStream = FileInputStream(dbFile)
-
-        var bytesRead: Int
-
-        while ((inputDB.read(buffer, 0, bufferSize).also { bytesRead = it }) > 0) {
-          saveDB.write(buffer, 0, bytesRead)
-        }
-
-        saveDB.flush()
-        inputDB.close()
-        saveDB.close()
-      }
-    } catch (e: Exception) {
-      e.printStackTrace()
-      Log.d("Backup", "ex: $e")
-    }
-  }
-
-  @Throws(IOException::class)
-  private fun copyFile(fromFile: FileInputStream, toFile: FileOutputStream) {
-    var fromChannel: FileChannel? = null
-    var toChannel: FileChannel? = null
-    try {
-      fromChannel = fromFile.channel
-      toChannel = toFile.channel
-      fromChannel.transferTo(0, fromChannel.size(), toChannel)
-    } finally {
-      try {
-        fromChannel?.close()
-      } finally {
-        toChannel?.close()
-      }
-    }
+    dbFile.copyTo(target = saveFile, overwrite = true)
   }
 
   fun restore(db: AppDatabase, path: String) {
     val file =
       File("${context.filesDir}${File.separator}${AppDirectory.BACKUPS}${File.separator}${path}")
-    val inputStream = FileInputStream(file)
 
     db.close()
 
     val oldDB: File = context.getDatabasePath(AppDatabase.DATABASE_NAME)
-
-    try {
-      copyFile(inputStream, FileOutputStream(oldDB))
-    } catch (e: IOException) {
-      Log.d("Database", "ex for is of restore: $e")
-      e.printStackTrace()
-    }
+    file.copyTo(target = oldDB, overwrite = true)
   }
 }

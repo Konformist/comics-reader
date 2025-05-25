@@ -267,7 +267,6 @@ export interface IApi {
     request: {
       comicId: number
       file: string
-      optimization?: boolean
     }
     response: number
   }
@@ -279,7 +278,6 @@ export interface IApi {
     request: {
       chapterPageId: number
       file: string
-      optimization?: boolean
     }
     response: number
   }
@@ -287,13 +285,39 @@ export interface IApi {
     request: { chapterPageId: number }
     response: boolean
   }
-  'file/comic-images/tree': {
+  'file/comics-images/tree': {
     request: object
     response: ITreeDirectory
   }
   'file/backups/tree': {
     request: object
     response: ITreeDirectory
+  }
+  'file/file/downloads': {
+    request: {
+      fileName: string
+      file: string
+    }
+    response: boolean
+  }
+  'file/comics-images/downloads': {
+    request: object
+    response: boolean
+  }
+  'file/comics-images/upload': {
+    request: object
+    response: boolean
+  }
+  'file/backups/downloads': {
+    request: { fileName: string }
+    response: boolean
+  }
+  'file/backups/upload': {
+    request: {
+      fileName: string
+      file: string
+    }
+    response: boolean
   }
   'settings/settings/get': {
     request: object
@@ -381,7 +405,7 @@ class WebApiPlugin extends WebPlugin implements IWebApiPlugin {
       case 'file/comic-cover/del': result = true; break;
       case 'file/chapter-page/add': result = 1; break;
       case 'file/chapter-page/del': result = true; break;
-      case 'file/comic-images/tree': result = {
+      case 'file/comics-images/tree': result = {
         type: 'directory',
         name: 'comic-images',
         count: 0,
@@ -393,6 +417,7 @@ class WebApiPlugin extends WebPlugin implements IWebApiPlugin {
         count: 0,
         childes: [],
       }; break;
+      case 'file/file/downloads': result = true; break;
       case 'settings/settings/get': result = {
         autoReading: false,
         autoReadingTimeout: 20,

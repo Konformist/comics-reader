@@ -10,14 +10,6 @@ class ImageUtils {
   companion object {
     private const val SIZE_ZERO = 0
 
-    private fun cleanImageData(value: String): String {
-      return value
-        .replace("data:image/jpeg;base64,", "")
-        .replace("data:image/webp;base64,", "")
-        .replace("data:image/png;base64,", "")
-        .replace("data:image/gif;base64,", "")
-    }
-
     fun write(filePath: File, bitmap: Bitmap, quality: Int = 100) {
       var outStream: FileOutputStream? = null
 
@@ -33,7 +25,7 @@ class ImageUtils {
     }
 
     fun base64ToBitmap(value: String): Bitmap {
-      val cleanedImage = cleanImageData(value)
+      val cleanedImage = FileUtils.cleanBase64(value)
       val decodedBytes: ByteArray = Base64.decode(cleanedImage, Base64.DEFAULT)
       return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
     }

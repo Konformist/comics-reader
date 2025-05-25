@@ -1,6 +1,6 @@
 <template>
   <v-list-item
-    :active="item.type === 'file' && model === item.path"
+    :active="item.type === 'file' && model?.path === item.path"
     :prepend-icon="icon"
     :title="`${item.name}${item.type === 'directory' ? '/' : ''}`"
     @click="onClick()"
@@ -25,11 +25,10 @@
 </template>
 
 <script lang="ts" setup>
-import FilesTree from '@/components/FilesTree.vue';
 import type { ITreeDirectory, ITreeFile } from '@/plugins/WebApiPlugin.ts';
 import { formatBytes } from '@/core/utils/format.ts';
 
-const model = defineModel<string>({ default: '' });
+const model = defineModel<ITreeFile>();
 
 const { item } = defineProps<{
   item: ITreeDirectory | ITreeFile
@@ -57,6 +56,6 @@ const icon = computed(() => {
 
 const onClick = () => {
   if (item.type === 'directory') toggleOpened();
-  else model.value = item.path;
+  else model.value = item;
 };
 </script>

@@ -22,7 +22,6 @@
 </template>
 
 <script setup lang="ts">
-import FilesTree from '@/components/FilesTree.vue';
 import useLoading from '@/composables/useLoading.ts';
 import Api from '@/core/api/Api.ts';
 import type { ITreeDirectory } from '@/plugins/WebApiPlugin.ts';
@@ -44,7 +43,7 @@ const treeFiles = ref<ITreeDirectory[]>([]);
 
 const loadTreeFiles = async () => {
   loadingStart();
-  treeFiles.value.push(await Api.api('file/comic-images/tree'));
+  treeFiles.value.push(await Api.api('file/comics-images/tree'));
   treeFiles.value.push(await Api.api('file/backups/tree'));
   loadingEnd();
 };

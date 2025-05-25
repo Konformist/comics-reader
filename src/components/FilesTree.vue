@@ -27,7 +27,7 @@
 import FilesTreeItem from '@/components/FilesTreeItem.vue';
 import type { ITreeDirectory, ITreeFile } from '@/plugins/WebApiPlugin.ts';
 
-const model = defineModel<string>({ default: '' });
+const model = defineModel<ITreeFile>();
 
 defineProps<{
   tree: Array<ITreeDirectory | ITreeFile>

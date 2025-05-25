@@ -26,12 +26,12 @@
     v-model="drawer"
   />
   <router-view v-slot="{ Component, route }">
-    <v-fade-transition leave-absolute>
+    <v-slide-x-transition leave-absolute>
       <component
         :is="Component"
         :key="route"
       />
-    </v-fade-transition>
+    </v-slide-x-transition>
   </router-view>
   <BottomNavigation
     v-if="$route.meta?.isBottomNavigation"

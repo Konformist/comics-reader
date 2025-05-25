@@ -1,3 +1,3 @@
-package com.konformist.comicsreader.utils
+package com.konformist.comicsreader.exceptions
 
 class FilesException(message: String) : Exception("Filesystem: $message")

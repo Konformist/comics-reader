@@ -1,17 +1,11 @@
 <template>
   <v-main scrollable>
-    <v-container class="pa-0">
-      <v-toolbar
-        class="px-2 pt-2"
-        density="comfortable"
-      >
+    <v-container class="pa-0 pb-16 mb-4">
+      <v-toolbar class="px-2">
         <v-select
           v-model="sortValue"
           :chips="false"
-          class="mt-3"
           :disabled="!tagsStore.tags.length"
-          item-title="name"
-          item-value="id"
           :items="sortItems"
           label="Сортировать"
         />

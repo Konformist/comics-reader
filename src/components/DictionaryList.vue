@@ -10,14 +10,11 @@
     v-else-if="items.length"
     v-model:selected="selected"
     class="pa-0"
-    density="comfortable"
-    item-title="name"
-    item-value="id"
     :items="items"
     select-strategy="single-independent"
     selectable
     slim
-    @click:select="$emit('click-item', $event.id)"
+    @click:select="$emit('click-item', $event.id as number)"
   >
     <template #append="{ item }">
       <v-list-item-subtitle

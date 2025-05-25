@@ -1,8 +1,8 @@
-package com.konformist.comicsreader.webapi
+package com.konformist.comicsreader.webapi.serializers
 
 import com.konformist.comicsreader.db.comiccover.ComicCoverUpdate
 import com.konformist.comicsreader.db.comiccover.ComicCoverWithFile
-import com.konformist.comicsreader.utils.ValidationException
+import com.konformist.comicsreader.exceptions.ValidationException
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File

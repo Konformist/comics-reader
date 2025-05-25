@@ -1,7 +1,6 @@
 <template>
   <v-list
     :class="isChild ? 'pl-4 pa-0' : 'pa-0'"
-    density="comfortable"
     :rounded="rounded"
     slim
   >

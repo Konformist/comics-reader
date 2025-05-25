@@ -1,9 +1,9 @@
-package com.konformist.comicsreader.webapi
+package com.konformist.comicsreader.webapi.serializers
 
 import com.konformist.comicsreader.db.chapterpage.ChapterPageCreate
 import com.konformist.comicsreader.db.chapterpage.ChapterPageUpdate
 import com.konformist.comicsreader.db.chapterpage.ChapterPageWithFile
-import com.konformist.comicsreader.utils.ValidationException
+import com.konformist.comicsreader.exceptions.ValidationException
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File

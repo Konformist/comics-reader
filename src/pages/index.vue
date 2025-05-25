@@ -1,6 +1,6 @@
 <template>
   <v-main scrollable>
-    <v-toolbar density="compact">
+    <v-toolbar>
       <v-toolbar-title class="text-subtitle-1">
         {{ comicsStore.comics.length !== comicsFiltered.length ? 'Найдено' : 'Всего' }}: {{ comicsFiltered.length }}
       </v-toolbar-title>
@@ -12,15 +12,14 @@
         @click="filtersSheet = true"
       />
     </v-toolbar>
-    <v-container>
+    <v-container class="pb-16 mb-4">
       <v-row v-if="loading">
-        <v-col class="pa-2">
-          <v-skeleton-loader
-            height="250"
-            type="card"
-          />
-        </v-col>
-        <v-col class="pa-2">
+        <v-col
+          v-for="i in 4"
+          :key="i"
+          class="pa-2"
+          cols="6"
+        >
           <v-skeleton-loader
             height="250"
             type="card"
@@ -41,9 +40,7 @@
               class="pa-2"
               cols="6"
             >
-              <ComicGallery
-                :comic="item.raw"
-              />
+              <ComicGallery :comic="item.raw" />
             </v-col>
           </v-row>
         </template>
@@ -64,8 +61,7 @@
         <v-card-item>
           <v-select
             v-model="comicsPageStore.filters.authors"
-            item-title="name"
-            item-value="id"
+            class="mb-4"
             :items="authorsStore.authors"
             label="Авторы"
             multiple
@@ -73,8 +69,7 @@
           />
           <v-select
             v-model="comicsPageStore.filters.languages"
-            item-title="name"
-            item-value="id"
+            class="mb-4"
             :items="languagesStore.languages"
             label="Языки"
             multiple
@@ -82,8 +77,7 @@
           />
           <v-select
             v-model="comicsPageStore.filters.tags"
-            item-title="name"
-            item-value="id"
+            class="mb-4"
             :items="tagsStore.tags"
             label="Теги"
             multiple

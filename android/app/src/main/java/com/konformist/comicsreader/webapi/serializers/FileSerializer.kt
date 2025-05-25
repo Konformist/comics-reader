@@ -1,10 +1,10 @@
-package com.konformist.comicsreader.webapi
+package com.konformist.comicsreader.webapi.serializers
 
 import android.net.Uri
 import com.konformist.comicsreader.db.appfile.AppFile
 import com.konformist.comicsreader.db.appfile.AppFileCreate
 import com.konformist.comicsreader.db.appfile.AppFileDelete
-import com.konformist.comicsreader.utils.ValidationException
+import com.konformist.comicsreader.exceptions.ValidationException
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File

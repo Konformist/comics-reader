@@ -4,7 +4,7 @@
       <v-card-title>
         {{ isCreated ? 'Создание' : 'Редактирование' }}
       </v-card-title>
-      <v-card-item class="pb-0">
+      <v-card-item>
         <v-text-field
           v-model.trim="model"
           variant="solo-filled"
@@ -13,13 +13,12 @@
       <v-card-actions>
         <v-btn
           v-if="!isCreated"
-          class="mr-auto"
           color="error"
-          density="comfortable"
           :disabled="disabled"
           text="Удалить"
           @click="$emit('remove')"
         />
+        <v-spacer />
         <v-btn
           :disabled="disabled"
           text="Сохранить"

@@ -4,7 +4,7 @@
     scrollable
   >
     <v-container
-      v-if="appStore.settings.direction === 'webtoon'"
+      v-if="appStore.settings.readingMode === 'webtoon'"
       class="pa-0"
       min-height="100%"
     >
@@ -24,7 +24,7 @@
       <swiper-container
         :autoplay="autoPlay"
         class="h-100"
-        :direction="appStore.settings.direction"
+        :direction="appStore.settings.readingMode"
         :initial-slide="currentPage"
         lazy
         :modules="[Autoplay, Pagination]"
@@ -75,7 +75,7 @@ const appStore = useAppStore();
 
 const autoPlay = computed(() => (
   appStore.settings.autoReading
-    ? { delay: appStore.settings.autoReadingTimeout * 1000, stopOnLastSlide: true }
+    ? { delay: appStore.settings.autoReadingTimeout, stopOnLastSlide: true }
     : false
 ));
 

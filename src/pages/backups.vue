@@ -6,6 +6,7 @@
           class="w-100"
           :disabled="loadingGlobal || loading"
           text="Создать бекап"
+          variant="tonal"
           @click="addBackup()"
         />
         <FilesTree
@@ -20,12 +21,14 @@
           class="mt-4 w-100"
           :disabled="!backupPath || loadingGlobal || loading"
           text="Применить бекап"
+          variant="tonal"
           @click="getBackup()"
         />
         <v-btn
           class="mt-4 w-100"
           :disabled="!backupPath || loadingGlobal || loading"
           text="Сохранить в Документы"
+          variant="tonal"
           @click="saveBackupToGlobal()"
         />
         <v-btn
@@ -33,12 +36,13 @@
           color="error"
           :disabled="!backupPath || loadingGlobal || loading"
           text="Удалить бекап"
+          variant="tonal"
           @click="delBackup()"
         />
       </div>
       <v-divider />
       <div class="px-4 py-8">
-        <v-alert color="info">
+        <v-alert color="info" variant="tonal">
           Если есть бекап с таким же именем, он будет заменён загруженным
         </v-alert>
         <v-file-input
@@ -47,9 +51,10 @@
           label="Файл бекапа"
         />
         <v-btn
-          class="w-100"
+          class="mt-4 w-100"
           :disabled="!backupFile || loadingGlobal || loading"
           text="Сохранить бекап"
+          variant="tonal"
           @click="loadBackup()"
         />
       </div>
@@ -59,6 +64,7 @@
           class="w-100"
           :disabled="loadingGlobal || loading"
           text="Сохранить файлы в Документы"
+          variant="tonal"
           @click="saveImagesToGlobal()"
         />
         <v-btn
@@ -66,6 +72,7 @@
           color="error"
           :disabled="loadingGlobal || loading"
           text="Загрузить файлы из Документов"
+          variant="tonal"
           @click="loadImagesFromGlobal()"
         />
       </div>
@@ -84,6 +91,7 @@ import { Toast } from '@capacitor/toast';
 
 definePage({
   meta: {
+    isBack: true,
     title: 'Бекапы',
   },
 });

@@ -1,10 +1,11 @@
 <template>
   <v-main scrollable>
-    <v-container class="pa-0">
+    <v-container class="pa-0 pb-12">
       <div class="px-4 py-8">
         <v-textarea
           v-model.trim="chapter.name"
           auto-grow
+          class="mb-4"
           label="Название"
           rows="2"
         />
@@ -14,6 +15,7 @@
           :disabled="!chapter.pages.length || loadingGlobal"
           :loading="loading"
           text="Удалить главу"
+          variant="tonal"
           @click="delChapter()"
         />
       </div>
@@ -21,6 +23,7 @@
       <div class="px-4 py-8">
         <v-number-input
           v-model.number="pages"
+          class="mb-4"
           control-variant="hidden"
           label="Количество страниц"
           :min="minPages"
@@ -31,7 +34,8 @@
           auto-grow
           :autocapitalize="false"
           :autocomplete="false"
-          clearable
+          class="mb-4"
+          :hide-details="false"
           hint="Пример: https://domain.com/12/23/<ID>.jpeg"
           inputmode="url"
           label="Шаблон для автозаполнения"
@@ -40,7 +44,7 @@
         />
         <v-number-input
           v-model.number="imagesTemplateStart"
-          class="mt-4"
+          class="mb-4"
           control-variant="split"
           label="Начальный ID"
           :min="0"
@@ -51,6 +55,7 @@
           :disabled="!imagesTemplate || loadingGlobal"
           :loading="loading"
           text="Заполнить ссылки"
+          variant="tonal"
           @click="setTemplate()"
         />
       </div>
@@ -61,6 +66,7 @@
           :disabled="!canLoadImages || loadingGlobal"
           :loading="loading"
           text="Загрузить только пустые"
+          variant="tonal"
           @click="onLoadImages()"
         />
         <v-btn
@@ -68,6 +74,7 @@
           :disabled="!canLoadImages || loadingGlobal"
           :loading="loading"
           text="Загрузить все изображения"
+          variant="tonal"
           @click="onLoadImages(true)"
         />
         <v-btn
@@ -76,11 +83,12 @@
           :disabled="!chapter.pages.length || loadingGlobal"
           :loading="loading"
           text="Удалить все страницы"
+          variant="tonal"
           @click="delPages()"
         />
       </div>
       <v-divider />
-      <div class="pa-4">
+      <div class="px-4 py-8">
         <v-data-iterator
           v-model:page="currentPage"
           :items="chapter.pages"

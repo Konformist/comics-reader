@@ -1,84 +1,93 @@
 <template>
   <v-main>
-    <v-container>
-      <h2 class="text-h6">
-        Переопределение настроек парсера
-      </h2>
-      <v-textarea
-        v-model.trim="keyTitle"
-        auto-grow
-        :autocapitalize="false"
-        :autocomplete="false"
-        class="mt-4"
-        inputmode="url"
-        label="CSS указатель на название"
-        rows="2"
-        variant="solo-filled"
-      />
-      <v-textarea
-        v-model.trim="keyCover"
-        auto-grow
-        :autocapitalize="false"
-        :autocomplete="false"
-        class="mt-4"
-        inputmode="url"
-        label="CSS указатель на картинку"
-        rows="2"
-        variant="solo-filled"
-      />
-      <v-textarea
-        v-model.trim="keyLanguage"
-        auto-grow
-        :autocapitalize="false"
-        :autocomplete="false"
-        :disabled="!comic.parserId"
-        inputmode="url"
-        label="CSS указатель на язык"
-        rows="2"
-        variant="solo-filled"
-      />
-      <v-textarea
-        v-model.trim="keyAuthors"
-        auto-grow
-        :autocapitalize="false"
-        :autocomplete="false"
-        inputmode="url"
-        label="CSS указатель на авторов"
-        rows="2"
-        variant="solo-filled"
-      />
-      <v-textarea
-        v-model.trim="keyAuthorsText"
-        auto-grow
-        :autocapitalize="false"
-        :autocomplete="false"
-        inputmode="url"
-        label="CSS указатель на текст авторов"
-        rows="2"
-        variant="solo-filled"
-      />
-      <v-textarea
-        v-model.trim="keyTags"
-        auto-grow
-        :autocapitalize="false"
-        :autocomplete="false"
-        class="mb-4"
-        inputmode="url"
-        label="CSS указатель на теги"
-        rows="2"
-        variant="solo-filled"
-      />
-      <v-textarea
-        v-model.trim="keyTagsText"
-        auto-grow
-        :autocapitalize="false"
-        :autocomplete="false"
-        hide-details
-        inputmode="url"
-        label="CSS указатель на текст тегов"
-        rows="2"
-        variant="solo-filled"
-      />
+    <v-container class="pa-0 pb-12">
+      <v-alert
+        color="info"
+        rounded="0"
+        variant="tonal"
+      >
+        Переопределение настроек парсера.<br>
+        Работают с DOM деревом. См. CSS.
+      </v-alert>
+      <div class="px-4 py-8">
+        <v-textarea
+          v-model.trim="keyTitle"
+          auto-grow
+          :autocapitalize="false"
+          :autocomplete="false"
+          class="mb-4"
+          inputmode="url"
+          label="CSS указатель на название"
+          rows="2"
+          variant="solo-filled"
+        />
+        <v-textarea
+          v-model.trim="keyCover"
+          auto-grow
+          :autocapitalize="false"
+          :autocomplete="false"
+          class="mb-4"
+          inputmode="url"
+          label="CSS указатель на картинку"
+          rows="2"
+          variant="solo-filled"
+        />
+        <v-textarea
+          v-model.trim="keyLanguage"
+          auto-grow
+          :autocapitalize="false"
+          :autocomplete="false"
+          class="mb-4"
+          :disabled="!comic.parserId"
+          inputmode="url"
+          label="CSS указатель на язык"
+          rows="2"
+          variant="solo-filled"
+        />
+        <v-textarea
+          v-model.trim="keyAuthors"
+          auto-grow
+          :autocapitalize="false"
+          :autocomplete="false"
+          class="mb-4"
+          inputmode="url"
+          label="CSS указатель на авторов"
+          rows="2"
+          variant="solo-filled"
+        />
+        <v-textarea
+          v-model.trim="keyAuthorsText"
+          auto-grow
+          :autocapitalize="false"
+          :autocomplete="false"
+          class="mb-4"
+          inputmode="url"
+          label="CSS указатель на текст авторов"
+          rows="2"
+          variant="solo-filled"
+        />
+        <v-textarea
+          v-model.trim="keyTags"
+          auto-grow
+          :autocapitalize="false"
+          :autocomplete="false"
+          class="mb-4"
+          inputmode="url"
+          label="CSS указатель на теги"
+          rows="2"
+          variant="solo-filled"
+        />
+        <v-textarea
+          v-model.trim="keyTagsText"
+          auto-grow
+          :autocapitalize="false"
+          :autocomplete="false"
+          inputmode="url"
+          label="CSS указатель на текст тегов"
+          rows="2"
+          variant="solo-filled"
+        />
+      </div>
     </v-container>
     <v-fab
       :disabled="loading || loadingGlobal"

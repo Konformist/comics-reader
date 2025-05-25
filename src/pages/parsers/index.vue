@@ -1,7 +1,11 @@
 <template>
   <v-main scrollable>
     <v-container class="pa-0">
-      <v-alert color="info" rounded="0">
+      <v-alert
+        color="info"
+        rounded="0"
+        variant="tonal"
+      >
         Парсеры работают с DOM деревом. См. CSS.
       </v-alert>
       <DictionaryList

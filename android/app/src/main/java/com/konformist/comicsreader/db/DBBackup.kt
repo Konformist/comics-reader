@@ -3,7 +3,7 @@ package com.konformist.comicsreader.db
 import android.content.Context
 import android.util.Log
 import com.konformist.comicsreader.utils.AppDirectory
-import com.konformist.comicsreader.utils.Dates
+import com.konformist.comicsreader.utils.DatesUtils
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -20,7 +20,7 @@ class DBBackup(val context: Context) {
 
     val dbFile = context.getDatabasePath(AppDatabase.DATABASE_NAME)
     val saveDir = File("${context.filesDir}${File.separator}${AppDirectory.BACKUPS}")
-    val fileName = "backup-${Dates.dateFormatted(LocalDate.now())}"
+    val fileName = "backup-${DatesUtils.dateFormatted(LocalDate.now())}"
     val saveFilePath = "${saveDir.path}${File.separator}${fileName}"
 
     if (!saveDir.exists()) {

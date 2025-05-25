@@ -1,6 +1,6 @@
 <template>
   <v-main scrollable>
-    <v-container class="pa-0">
+    <v-container class="pa-0 pb-16 mb-4">
       <DictionaryList
         :items="chaptersList"
         :loading="loading"

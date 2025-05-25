@@ -1,6 +1,9 @@
 <template>
   <v-navigation-drawer v-model="model">
-    <v-list nav>
+    <v-list
+      nav
+      slim
+    >
       <v-list-item
         prepend-icon="$home"
         title="Галерея"

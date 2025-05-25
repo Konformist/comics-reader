@@ -1,12 +1,11 @@
 <template>
   <v-main scrollable>
-    <v-container class="pa-0">
+    <v-container class="pa-0 pb-12">
       <div class="px-4 py-8">
         <v-select
           v-if="parsersStore.parsers.length"
           v-model="comic.parserId"
-          item-title="name"
-          item-value="id"
+          class="mb-4"
           :items="parsersStore.parsers"
           label="Парсер"
           @update:model-value="loadParser()"
@@ -16,6 +15,7 @@
           auto-grow
           :autocapitalize="false"
           :autocomplete="false"
+          class="mb-4"
           inputmode="url"
           label="Ссылка на комикс"
           rows="2"
@@ -24,38 +24,35 @@
         <v-textarea
           v-model.trim="comic.name"
           auto-grow
+          class="mb-4"
           label="Название"
           rows="2"
         />
         <v-select
           v-model="comic.languageId"
-          item-title="name"
-          item-value="id"
+          class="mb-4"
           :items="languagesStore.languages"
           label="Язык"
         />
         <v-select
           v-model="comic.authors"
-          chips
-          item-title="name"
-          item-value="id"
+          class="mb-4"
           :items="authorsStore.authors"
           label="Авторы"
           multiple
         />
         <v-select
           v-model="comic.tags"
-          chips
-          item-title="name"
-          item-value="id"
+          class="mb-4"
           :items="tagsStore.tags"
           label="Теги"
           multiple
         />
         <v-btn
-          class="mt-4 w-100"
+          class="w-100"
           :disabled="!comic.parserId || !comic.fromUrl || loading || loadingGlobal"
           text="Загрузить"
+          variant="tonal"
           @click="onLoadInfo()"
         />
       </div>
@@ -77,7 +74,6 @@
         <v-file-input
           v-model="image"
           accept="image/*"
-          hide-details
           label="Загрузить картинку"
         />
         <p class="my-2">
@@ -88,6 +84,7 @@
           auto-grow
           :autocapitalize="false"
           :autocomplete="false"
+          class="mb-4"
           inputmode="url"
           label="Ссылка на картинку"
           rows="2"
@@ -96,6 +93,7 @@
           class="w-100"
           :disabled="(!image && !comic.cover.fromUrl) || loading || loadingGlobal"
           text="Загрузить"
+          variant="tonal"
           @click="onLoadCover()"
         />
       </div>
@@ -105,22 +103,21 @@
         class="px-4 py-8"
       >
         <v-btn
-          class="w-100"
+          class="mb-4 w-100"
           :disabled="loading || loadingGlobal"
           text="Расширенные настройки"
           :to="{
             name: '/comics/[id]/override-edit',
             params: { id: comic.id },
           }"
+          variant="tonal"
         />
-      </div>
-      <v-divider />
-      <div class="px-4 py-8">
         <v-btn
           class="w-100"
           color="error"
           :disabled="loading || loadingGlobal"
           text="Удалить"
+          variant="tonal"
           @click="deleteComic()"
         />
       </div>

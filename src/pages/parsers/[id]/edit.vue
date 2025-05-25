@@ -1,16 +1,16 @@
 <template>
   <v-main scrollable>
-    <v-container class="pa-0">
+    <v-container class="pa-0 pb-12">
       <div class="px-4 py-8">
         <v-text-field
           v-model.trim="parser.name"
+          class="mb-4"
           label="Название парсера"
         />
         <v-text-field
           v-model.trim="parser.siteUrl"
           :autocapitalize="false"
           :autocomplete="false"
-          hide-details
           inputmode="url"
           label="Ссылка на сайт"
         />
@@ -21,6 +21,7 @@
           v-model.trim="parser.titleCSS"
           :autocapitalize="false"
           :autocomplete="false"
+          class="mb-4"
           inputmode="url"
           label="CSS указатель на название"
           rows="2"
@@ -29,6 +30,7 @@
           v-model.trim="parser.coverCSS"
           :autocapitalize="false"
           :autocomplete="false"
+          class="mb-4"
           inputmode="url"
           label="CSS указатель на изображение"
           rows="2"
@@ -37,6 +39,7 @@
           v-model.trim="parser.authorsCSS"
           :autocapitalize="false"
           :autocomplete="false"
+          class="mb-4"
           inputmode="url"
           label="CSS указатель на авторов"
           rows="2"
@@ -45,6 +48,7 @@
           v-model.trim="parser.authorsTextCSS"
           :autocapitalize="false"
           :autocomplete="false"
+          class="mb-4"
           inputmode="url"
           label="CSS указатель на текст авторов"
         />
@@ -52,6 +56,7 @@
           v-model.trim="parser.languageCSS"
           :autocapitalize="false"
           :autocomplete="false"
+          class="mb-4"
           inputmode="url"
           label="CSS указатель на текст язык"
           rows="2"
@@ -60,6 +65,7 @@
           v-model.trim="parser.tagsCSS"
           :autocapitalize="false"
           :autocomplete="false"
+          class="mb-4"
           inputmode="url"
           label="CSS указатель на теги"
           rows="2"
@@ -68,6 +74,7 @@
           v-model.trim="parser.tagsTextCSS"
           :autocapitalize="false"
           :autocomplete="false"
+          class="mb-4"
           inputmode="url"
           label="CSS указатель на текст тегов"
         />
@@ -75,7 +82,6 @@
           v-model.trim="parser.pagesCSS"
           :autocapitalize="false"
           :autocomplete="false"
-          hide-details
           inputmode="url"
           label="CSS указатель на страницы"
           rows="2"
@@ -85,7 +91,6 @@
       <div class="px-4 py-8">
         <v-file-input
           accept="application/json"
-          hide-details
           label="Добавить файл"
           @update:model-value="setParser($event)"
         />
@@ -93,6 +98,7 @@
           class="mt-4 w-100"
           :disabled="loadingGlobal"
           text="Сохранить в Документы"
+          variant="tonal"
           @click="toDownloads()"
         />
       </div>
@@ -103,6 +109,7 @@
           color="error"
           :disabled="loadingGlobal"
           text="Удалить"
+          variant="tonal"
           @click="deleteParser()"
         />
       </div>

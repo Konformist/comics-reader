@@ -8,7 +8,7 @@ import com.konformist.comicsreader.db.tag.TagCreate
 import com.konformist.comicsreader.db.tag.TagDao
 import com.konformist.comicsreader.db.tag.TagDelete
 import com.konformist.comicsreader.db.tag.TagUpdate
-import com.konformist.comicsreader.utils.Dates
+import com.konformist.comicsreader.utils.DatesUtils
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -51,7 +51,7 @@ class TagDaoTest {
   @Test
   @Throws(Exception::class)
   fun update() {
-    val mdate = Dates.dateTimeFormatted(LocalDateTime.now())
+    val mdate = DatesUtils.dateTimeFormatted(LocalDateTime.now())
     val rowId = tagDao.create(TagCreate(name = "New tag 2"))
     tagDao.update(TagUpdate(id = 1, mdate = mdate, name = "New tag 2"))
 

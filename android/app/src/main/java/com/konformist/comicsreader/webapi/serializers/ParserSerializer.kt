@@ -1,10 +1,10 @@
-package com.konformist.comicsreader.webapi
+package com.konformist.comicsreader.webapi.serializers
 
 import com.konformist.comicsreader.db.parser.Parser
 import com.konformist.comicsreader.db.parser.ParserCreate
 import com.konformist.comicsreader.db.parser.ParserDelete
 import com.konformist.comicsreader.db.parser.ParserUpdate
-import com.konformist.comicsreader.utils.ValidationException
+import com.konformist.comicsreader.exceptions.ValidationException
 import org.json.JSONArray
 import org.json.JSONObject
 

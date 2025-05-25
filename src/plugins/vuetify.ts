@@ -121,42 +121,56 @@ export default createVuetify({
       elevation: '2',
     },
     VFileInput: {
-      density: 'comfortable',
       prependIcon: '',
       prependInnerIcon: '$download',
+      hideDetails: true,
       variant: 'solo',
     },
     VTextField: {
-      density: 'comfortable',
+      clearable: true,
+      persistentClear: true,
       variant: 'solo',
+      hideDetails: true,
     },
     VTextarea: {
-      density: 'comfortable',
+      clearable: true,
+      persistentClear: true,
       variant: 'solo',
+      hideDetails: true,
+    },
+    VList: {
+      itemTitle: 'name',
+      itemValue: 'id',
+    },
+    VListItem: {
+      itemTitle: 'name',
+      itemValue: 'id',
     },
     VSelect: {
-      density: 'comfortable',
       variant: 'solo',
       chips: true,
+      itemTitle: 'name',
+      itemValue: 'id',
       closableChips: true,
+      hideDetails: true,
       menuProps: {
         scrim: true,
         locationStrategy: 'static',
         height: '100vh',
         width: '100vw',
         contentProps: {
-          style: 'margin: 16px; width: calc(100vw - 32px); height: calc(100vh - 32px); max-height: inherit',
+          style: 'margin: 16px; width: calc(100vw - 32px); height: calc(100vh - 32px - 64px); max-height: inherit',
         },
       },
     },
-    VCombobox: {
-      density: 'comfortable',
-      variant: 'solo',
-      closableChips: true,
-    },
     VNumberInput: {
-      density: 'comfortable',
       variant: 'solo',
+      hideDetails: true,
+      controlVariant: 'hidden',
+    },
+    VSwitch: {
+      inset: true,
+      hideDetails: true,
     },
   },
 });

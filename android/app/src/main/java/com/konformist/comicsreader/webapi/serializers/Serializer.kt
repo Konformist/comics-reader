@@ -1,14 +1,14 @@
-package com.konformist.comicsreader.webapi
+package com.konformist.comicsreader.webapi.serializers
 
-import com.konformist.comicsreader.utils.Dates
-import com.konformist.comicsreader.utils.ValidationException
+import com.konformist.comicsreader.utils.DatesUtils
+import com.konformist.comicsreader.exceptions.ValidationException
 import org.json.JSONArray
 import org.json.JSONObject
 import java.time.LocalDateTime
 
 abstract class Serializer<T> {
   protected fun getMDate(): String {
-    return Dates.dateTimeFormatted(LocalDateTime.now())
+    return DatesUtils.dateTimeFormatted(LocalDateTime.now())
   }
 
   protected fun listFromJSONArray(value: JSONArray?): List<Long> {

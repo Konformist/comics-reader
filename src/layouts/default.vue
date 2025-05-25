@@ -1,36 +1,37 @@
 <template>
-  <v-app-bar density="comfortable">
-    <v-btn
-      v-if="$route.meta?.isBack"
-      icon="$arrow-left"
-      slim
-      @click="$router.back()"
-    />
-    <v-btn
-      v-else
-      :active="drawer"
-      icon="$menu"
-      slim
-      @click="drawer = !drawer"
-    />
-    <v-app-bar-title :text="($route.meta?.title as string) || ''" />
+  <v-app-bar :title="($route.meta?.title as string) || ''">
+    <template #prepend>
+      <v-btn
+        v-if="$route.meta?.isBack"
+        icon="$arrow-left"
+        @click="$router.back()"
+      />
+      <v-btn
+        v-else
+        :active="drawer"
+        icon="$menu"
+        @click="drawer = !drawer"
+      />
+    </template>
+    <template #append>
+      <v-progress-linear
+        v-if="loadingGlobal"
+        absolute
+        indeterminate
+        style="bottom: 0; top: auto"
+      />
+    </template>
   </v-app-bar>
   <NavigationDriwer
     v-model="drawer"
   />
-  <v-progress-linear
-    v-if="loadingGlobal"
-    absolute
-    indeterminate
-    style="top: 56px;"
-  />
   <router-view v-slot="{ Component, route }">
-    <v-slide-x-transition leave-absolute>
+    <v-fade-transition leave-absolute>
       <component
         :is="Component"
         :key="route"
       />
-    </v-slide-x-transition>
+    </v-fade-transition>
   </router-view>
   <BottomNavigation
     v-if="$route.meta?.isBottomNavigation"

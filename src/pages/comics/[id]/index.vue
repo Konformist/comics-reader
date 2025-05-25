@@ -1,6 +1,6 @@
 <template>
   <v-main scrollable>
-    <v-container class="pa-0">
+    <v-container class="pa-0 pb-16 mb-4">
       <template v-if="comic.cover?.file?.url">
         <router-link
           v-if="chapters[0].id"
@@ -76,8 +76,6 @@
       <v-list
         class="pa-0"
         density="comfortable"
-        item-title="name"
-        item-value="id"
         :items="chaptersList"
         :loading="loading"
         selectable

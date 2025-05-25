@@ -55,6 +55,9 @@ class Query {
     const val FILE_COMIC_IMAGES_TREE = "file/comic-images/tree"
     const val FILE_BACKUPS_TREE = "file/backups/tree"
 
+    const val SETTINGS_SETTINGS_GET = "settings/settings/get"
+    const val SETTINGS_SETTINGS_SET = "settings/settings/set"
+
     const val BACKUP_BACKUP_ADD = "backup/backup/add"
     const val BACKUP_BACKUP_DEL = "backup/backup/del"
     const val BACKUP_BACKUP_RESTORE = "backup/backup/restore"

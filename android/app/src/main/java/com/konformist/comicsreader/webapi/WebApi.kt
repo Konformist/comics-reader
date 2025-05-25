@@ -3,6 +3,9 @@ package com.konformist.comicsreader.webapi
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
 import com.konformist.comicsreader.db.AppDatabase
 import com.konformist.comicsreader.db.DBBackup
@@ -17,18 +20,31 @@ import com.konformist.comicsreader.db.comiccover.ComicCoverUpdate
 import com.konformist.comicsreader.db.comicoverride.ComicOverrideCreate
 import com.konformist.comicsreader.db.comicoverride.ComicOverrideDelete
 import com.konformist.comicsreader.utils.AppDirectory
-import com.konformist.comicsreader.utils.DatabaseException
-import com.konformist.comicsreader.utils.Dates
+import com.konformist.comicsreader.exceptions.DatabaseException
+import com.konformist.comicsreader.utils.DatesUtils
 import com.konformist.comicsreader.utils.FileUtils
-import com.konformist.comicsreader.utils.FilesException
+import com.konformist.comicsreader.exceptions.FilesException
 import com.konformist.comicsreader.utils.ImageUtils
-import com.konformist.comicsreader.utils.ValidationException
+import com.konformist.comicsreader.exceptions.ValidationException
+import com.konformist.comicsreader.webapi.serializers.AuthorSerializer
+import com.konformist.comicsreader.webapi.serializers.ChapterPageSerializer
+import com.konformist.comicsreader.webapi.serializers.ChapterSerializer
+import com.konformist.comicsreader.webapi.serializers.ComicCoverSerializer
+import com.konformist.comicsreader.webapi.serializers.ComicOverrideSerializer
+import com.konformist.comicsreader.webapi.serializers.ComicSerializer
+import com.konformist.comicsreader.webapi.serializers.LanguageSerializer
+import com.konformist.comicsreader.webapi.serializers.ParserSerializer
+import com.konformist.comicsreader.webapi.serializers.TagSerializer
+import kotlinx.coroutines.runBlocking
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import java.time.LocalDateTime
 
 class WebApi(private val context: Context) {
+  private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
+  private val dataStore = AppDataStore(context.dataStore)
+
   private val db: AppDatabase = Room
     .databaseBuilder(context, AppDatabase::class.java, AppDatabase.DATABASE_NAME)
     .build()
@@ -428,7 +444,7 @@ class WebApi(private val context: Context) {
     val count = comicCoverDao.update(
       ComicCoverUpdate(
         id = cover.id,
-        mdate = Dates.dateTimeFormatted(LocalDateTime.now()),
+        mdate = DatesUtils.dateTimeFormatted(LocalDateTime.now()),
         fromUrl = cover.fromUrl,
         fileId = rowId
       )
@@ -446,7 +462,7 @@ class WebApi(private val context: Context) {
     val count = comicCoverDao.update(
       ComicCoverUpdate(
         id = cover.id,
-        mdate = Dates.dateTimeFormatted(LocalDateTime.now()),
+        mdate = DatesUtils.dateTimeFormatted(LocalDateTime.now()),
         fromUrl = cover.fromUrl,
         fileId = 0,
       )
@@ -559,7 +575,7 @@ class WebApi(private val context: Context) {
 
     val newPageFile = ChapterPageUpdate(
       id = chapterPage.id,
-      mdate = Dates.dateTimeFormatted(LocalDateTime.now()),
+      mdate = DatesUtils.dateTimeFormatted(LocalDateTime.now()),
       fromUrl = chapterPage.fromUrl,
       fileId = rowId,
       isRead = chapterPage.isRead,
@@ -581,7 +597,7 @@ class WebApi(private val context: Context) {
     val count = chapterPageDao.update(
       ChapterPageUpdate(
         id = page.id,
-        mdate = Dates.dateTimeFormatted(LocalDateTime.now()),
+        mdate = DatesUtils.dateTimeFormatted(LocalDateTime.now()),
         fromUrl = page.fromUrl,
         fileId = 0,
         isRead = page.isRead,
@@ -595,6 +611,29 @@ class WebApi(private val context: Context) {
 
   private fun getComicImagesTree(): JSONObject {
     return FileUtils.tree(File("${context.filesDir}${File.separator}${AppDirectory.COMICS_IMAGES}"))
+  }
+
+  private fun getSettings(): JSONObject {
+    runBlocking { dataStore.readStore() }
+    val result = JSONObject()
+    result.put("autoReading", dataStore.settings.autoReading)
+    result.put("autoReadingTimeout", dataStore.settings.autoReadingTimeout)
+    result.put("readingMode", dataStore.settings.readingMode)
+    result.put("isCompress", dataStore.settings.isCompress)
+    return result
+  }
+
+  private fun setSettings(data: JSONObject): Boolean {
+    val readingMode = data.optString("readingMode", "")
+
+    if (!dataStore.readingModeList.contains(readingMode))
+      throw ValidationException("ReadingMode invalid, use ${dataStore.readingModeList}")
+
+    dataStore.settings.autoReading = data.optBoolean("autoReading", false)
+    dataStore.settings.autoReadingTimeout = data.optInt("autoReadingTimeout", 0)
+    dataStore.settings.readingMode = readingMode
+    dataStore.settings.isCompress = data.optBoolean("isCompress", true)
+    return runBlocking { dataStore.saveStore() }
   }
 
   private fun addBackup(): Boolean {
@@ -670,11 +709,13 @@ class WebApi(private val context: Context) {
           Query.FILE_COMIC_COVER_DEL -> delCoverFile(data)
           Query.FILE_CHAPTER_PAGE_ADD -> addChapterPageFile(data)
           Query.FILE_CHAPTER_PAGE_DEL -> delChapterPageFile(data)
+          Query.FILE_COMIC_IMAGES_TREE -> getComicImagesTree()
+          Query.FILE_BACKUPS_TREE -> getBackupsTree()
+          Query.SETTINGS_SETTINGS_GET -> getSettings()
+          Query.SETTINGS_SETTINGS_SET -> setSettings(data)
           Query.BACKUP_BACKUP_ADD -> addBackup()
           Query.BACKUP_BACKUP_DEL -> delBackup(data)
           Query.BACKUP_BACKUP_RESTORE -> restoreBackup(data)
-          Query.FILE_COMIC_IMAGES_TREE -> getComicImagesTree()
-          Query.FILE_BACKUPS_TREE -> getBackupsTree()
           else -> "Not implemented"
         }
       )

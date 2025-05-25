@@ -5,6 +5,19 @@ interface IApiError {
   error: string
 }
 
+export type TReaderDirection = 'vertical' | 'horizontal' | 'webtoon';
+
+export interface ISettingsDTO {
+  /** Авто перелистывание */
+  autoReading: boolean
+  /** Таймер для авто перелистывания */
+  autoReadingTimeout: number
+  /** Сжимать картинки при загрузке */
+  isCompress: boolean
+  /** Направление прокрутки */
+  readingMode: TReaderDirection
+}
+
 interface DBDates {
   id: number
   cdate: string
@@ -282,6 +295,14 @@ export interface IApi {
     request: object
     response: ITreeDirectory
   }
+  'settings/settings/get': {
+    request: object
+    response: ISettingsDTO
+  }
+  'settings/settings/set': {
+    request: ISettingsDTO
+    response: boolean
+  }
   'backup/backup/add': {
     request: object
     response: boolean
@@ -372,6 +393,13 @@ class WebApiPlugin extends WebPlugin implements IWebApiPlugin {
         count: 0,
         childes: [],
       }; break;
+      case 'settings/settings/get': result = {
+        autoReading: false,
+        autoReadingTimeout: 20,
+        isCompress: true,
+        readingMode: 'vertical',
+      }; break;
+      case 'settings/settings/set': result = true; break;
       case 'backup/backup/add': result = true; break;
       case 'backup/backup/del': result = true; break;
       case 'backup/backup/restore': result = true; break;

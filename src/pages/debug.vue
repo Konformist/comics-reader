@@ -1,12 +1,14 @@
 <template>
   <v-main>
     <v-container class="pa-0">
+      <v-alert color="error" rounded="0">
+        Осторожно! Опасный функционал!<br>
+        При неправильном использовании можно потерять данные
+      </v-alert>
       <div class="px-4 py-8">
-        <v-alert color="error">
-          Осторожно! Опасный функционал! При неправильном использовании можно потерять данные
-        </v-alert>
         <v-btn
-          class="mt-4 w-100"
+          class="w-100"
+          color="error"
           text="Бекапы"
           :to="{ name: '/backups' }"
         />

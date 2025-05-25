@@ -22,7 +22,6 @@
     "@capacitor/dialog": "^7.0.1",
     "@capacitor/filesystem": "^7.0.1",
     "@capacitor/keyboard": "^7.0.1",
-    "@capacitor/preferences": "^7.0.1",
     "@capacitor/status-bar": "^7.0.1",
     "@capacitor/toast": "^7.0.1",
     "@fontsource/roboto": "5.2.5",

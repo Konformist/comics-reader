@@ -11,7 +11,6 @@
         v-model="imageFile"
         accept="image/*"
         :disabled="disabled"
-        hide-details
         label="Загрузить картинку"
         variant="solo-filled"
       />

@@ -1,3 +1,3 @@
-package com.konformist.comicsreader.utils
+package com.konformist.comicsreader.exceptions
 
 class DatabaseException(message: String) : Exception("Database: $message")

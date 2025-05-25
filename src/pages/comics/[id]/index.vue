@@ -1,35 +1,40 @@
 <template>
-  <v-main scrollable>
+  <v-main>
     <v-container class="pa-0 pb-16 mb-4">
-      <template v-if="comic.cover?.file?.url">
-        <router-link
-          v-if="chapters[0].id"
-          :to="{
-            name: '/chapters/[id]/read',
-            params: { id: chapters[0].id },
-          }"
-        >
-          <v-img :src="comic.cover.file.url" />
-        </router-link>
+      <!--      <template v-if="comic.cover?.file?.url">-->
+      <p class="pt-4">
+        <v-skeleton-loader
+          v-if="loading"
+          type="image"
+        />
         <v-img
           v-else
-          :src="comic.cover.file.url"
-        />
-      </template>
-      <div class="px-4 py-8">
-        <h3 class="font-weight-medium">
-          {{ comic.name || '—' }}
-          <v-icon
-            v-if="comic.name"
-            icon="$copy"
-            size="20"
-            @click="onCopy(comic.name)"
-          />
-        </h3>
-        <p
-          v-if="comic.fromUrl"
-          class="mt-2"
+          class="mx-auto bg-grey-darken-4"
+          height="300px"
+          rounded="xl"
+          :src="comic.cover.file?.url || '/'"
+          width="200px"
         >
+          <template #error>
+            <div class="w-100 h-100 d-flex align-center justify-center">
+              Нет изображения
+            </div>
+          </template>
+        </v-img>
+      </p>
+      <v-divider class="my-4" />
+      <h3 class="px-4 pt-4 font-weight-medium">
+        {{ comic.name || '—' }}
+        <v-icon
+          v-if="comic.name"
+          icon="$copy"
+          size="20"
+          @click="onCopy(comic.name)"
+        />
+      </h3>
+      <v-divider class="my-4" />
+      <template v-if="comic.fromUrl">
+        <p class="px-4">
           <a :href="comic.fromUrl">Ссылка на комикс</a>
           <v-icon
             class="ml-2"
@@ -38,65 +43,55 @@
             @click="onCopy(comic.fromUrl)"
           />
         </p>
-        <p
-          v-if="authorsChips.length"
-          class="mt-2 d-flex flex-wrap ga-1 align-center"
-        >
-          <b class="font-weight-medium">Авторы:</b>
-          <v-chip
-            v-for="item in authorsChips"
-            :key="item.id"
-            :text="item.name"
-          />
-        </p>
-        <p
-          v-if="languagesChips.length"
-          class="mt-2 d-flex flex-wrap ga-1 align-center"
-        >
-          <b class="font-weight-medium">Язык:</b>
-          <v-chip
-            v-for="item in languagesChips"
-            :key="item.id"
-            :text="item.name"
-          />
-        </p>
-        <p
-          v-if="tagsChips.length"
-          class="mt-2 d-flex flex-wrap ga-1 align-center"
-        >
-          <b class="font-weight-medium">Теги:</b>
+        <v-divider class="my-4" />
+      </template>
+      <p class="px-4">
+        <b class="font-weight-medium">Авторы:</b> {{ authorsChips.length ? authorsChips.map((e) => e.name).join(", ") : '—' }}
+      </p>
+      <v-divider class="my-4" />
+      <p class="px-4">
+        <b class="font-weight-medium">Язык:</b> {{ languagesChips.length ? languagesChips[0].name : '—' }}
+      </p>
+      <v-divider class="my-4" />
+      <template v-if="tagsChips.length">
+        <p class="px-4 d-flex flex-wrap ga-1 align-center">
           <v-chip
             v-for="item in tagsChips"
             :key="item.id"
+            color="primary"
             :text="item.name"
+            variant="tonal"
           />
         </p>
-      </div>
-      <v-divider />
-      <v-list
-        class="pa-0"
-        density="comfortable"
-        :items="chaptersList"
-        :loading="loading"
-        selectable
-        @click:select="$router.push({
-          name: '/chapters/[id]/read',
-          params: { id: $event.id as number },
-        })"
-      >
-        <template #append="{ item }">
-          <v-icon
-            :color="item.isRead ? 'success' : ''"
-            icon="$read"
-          />
-        </template>
-      </v-list>
+        <v-divider class="my-4" />
+      </template>
+      <p class="px-4">
+        <v-list
+          :items="chaptersList"
+          :loading="loading"
+          selectable
+          @click:select="$router.push({
+            name: '/chapters/[id]/read',
+            params: { id: $event.id as number },
+          })"
+        >
+          <template #append="{ item }">
+            <v-icon
+              :color="item.isRead ? 'success' : ''"
+              icon="$read"
+            />
+          </template>
+        </v-list>
+      </p>
     </v-container>
     <v-fab
       :disabled="loading || loadingGlobal"
       icon
     >
-      <v-icon :icon="editOpened ? '$close' : '$edit'" />
+      <v-fab-transition>
+        <v-icon v-if="editOpened" icon="$close" />
+        <v-icon v-else icon="$edit" />
+      </v-fab-transition>
       <v-speed-dial
         v-model="editOpened"
         activator="parent"
@@ -106,6 +101,7 @@
         <v-btn
           key="2"
           color="secondary"
+          height="32"
           text="Главы"
           :to="{
             name: '/chapters/[comicId]',
@@ -115,6 +111,7 @@
         <v-btn
           key="1"
           color="secondary"
+          height="32"
           text="Комикс"
           :to="{
             name: '/comics/[id]/edit',

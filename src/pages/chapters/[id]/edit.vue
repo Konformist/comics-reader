@@ -1,7 +1,7 @@
 <template>
-  <v-main scrollable>
-    <v-container class="pa-0 pb-12">
-      <div class="px-4 py-8">
+  <v-main>
+    <v-container class="pa-0 pb-16">
+      <div class="pa-4">
         <v-textarea
           v-model.trim="chapter.name"
           auto-grow
@@ -20,7 +20,7 @@
         />
       </div>
       <v-divider />
-      <div class="px-4 py-8">
+      <div class="pa-4">
         <v-number-input
           v-model.number="pages"
           class="mb-4"
@@ -45,7 +45,6 @@
         <v-number-input
           v-model.number="imagesTemplateStart"
           class="mb-4"
-          control-variant="split"
           label="Начальный ID"
           :min="0"
           type="number"
@@ -60,7 +59,7 @@
         />
       </div>
       <v-divider />
-      <div class="px-4 py-8">
+      <div class="pa-4">
         <v-btn
           class="w-100"
           :disabled="!canLoadImages || loadingGlobal"
@@ -88,7 +87,7 @@
         />
       </div>
       <v-divider />
-      <div class="px-4 py-8">
+      <div class="pa-4">
         <v-data-iterator
           v-model:page="currentPage"
           :items="chapter.pages"
@@ -98,7 +97,6 @@
             <v-pagination
               v-model="currentPage"
               class="mb-4"
-              density="comfortable"
               :length="pageCount"
               @next="nextPage()"
               @prev="prevPage()"
@@ -126,7 +124,6 @@
             <v-pagination
               v-model="currentPage"
               class="mt-4"
-              density="comfortable"
               :length="pageCount"
               @next="nextPage()"
               @prev="prevPage()"

@@ -1,7 +1,7 @@
 <template>
-  <v-main scrollable>
+  <v-main>
     <v-container class="pa-0">
-      <div class="px-4 pt-6 pb-8">
+      <div class="px-4 pt-2 pb-4">
         <v-label
           class="w-100"
           text="Направление прокрутки"
@@ -33,7 +33,6 @@
           <v-switch
             v-model="appStore.settings.autoReading"
             class="ml-auto"
-            color="primary"
             :disabled="appStore.settings.readingMode === 'webtoon'"
             :false-value="false"
             :true-value="true"
@@ -53,7 +52,6 @@
           <v-switch
             v-model="appStore.settings.isCompress"
             class="ml-auto"
-            color="primary"
             :false-value="false"
             :true-value="true"
           />

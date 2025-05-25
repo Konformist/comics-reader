@@ -1,12 +1,13 @@
 <template>
   <v-dialog v-model="opened">
     <v-card>
-      <v-card-title>
+      <v-card-title class="pt-4">
         {{ isCreated ? 'Создание' : 'Редактирование' }}
       </v-card-title>
-      <v-card-item>
+      <v-card-item class="pa-4">
         <v-text-field
           v-model.trim="model"
+          flat
           variant="solo-filled"
         />
       </v-card-item>

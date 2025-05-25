@@ -1,22 +1,26 @@
 <template>
   <v-main>
     <v-container class="pa-0">
-      <v-alert color="error" rounded="0">
-        Осторожно! Опасный функционал!<br>
-        При неправильном использовании можно потерять данные
-      </v-alert>
-      <div class="px-4 py-8">
+      <div class="pa-4">
+        <v-alert color="error" variant="tonal">
+          Осторожно! Опасный функционал!<br>
+          При неправильном использовании можно потерять данные
+        </v-alert>
         <v-btn
-          class="w-100"
+          class="mt-4 w-100"
           color="error"
           text="Бекапы"
           :to="{ name: '/backups' }"
+          variant="tonal"
         />
       </div>
-      <FilesTree
-        :loading="loading"
-        :tree="treeFiles"
-      />
+      <v-divider />
+      <div class="pa-4">
+        <FilesTree
+          :loading="loading"
+          :tree="treeFiles"
+        />
+      </div>
     </v-container>
   </v-main>
 </template>

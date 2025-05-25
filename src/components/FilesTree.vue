@@ -1,7 +1,6 @@
 <template>
   <v-list
-    :class="isChild ? 'pl-4 pa-0' : 'pa-0'"
-    :rounded="rounded"
+    :class="isChild ? 'pl-4' : ''"
     slim
   >
     <v-skeleton-loader
@@ -17,7 +16,10 @@
           v-model="model"
           :item="item"
         />
-        <v-divider v-if="index < tree.length - 1" />
+        <v-divider
+          v-if="index < tree.length - 1"
+          class="my-2 mx-4"
+        />
       </template>
     </template>
   </v-list>
@@ -33,6 +35,5 @@ defineProps<{
   tree: Array<ITreeDirectory | ITreeFile>
   loading?: boolean
   isChild?: boolean
-  rounded?: boolean
 }>();
 </script>

@@ -1,5 +1,5 @@
 <template>
-  <v-main scrollable>
+  <v-main>
     <v-toolbar>
       <v-toolbar-title class="text-subtitle-1">
         {{ comicsStore.comics.length !== comicsFiltered.length ? 'Найдено' : 'Всего' }}: {{ comicsFiltered.length }}
@@ -48,7 +48,6 @@
           <v-pagination
             v-model="comicsPageStore.filters.page"
             class="mt-4"
-            density="comfortable"
             :length="pageCount"
             @next="nextPage()"
             @prev="prevPage()"
@@ -58,10 +57,11 @@
     </v-container>
     <v-bottom-sheet v-model="filtersSheet">
       <v-card>
-        <v-card-item>
+        <v-card-item class="pa-4">
           <v-select
             v-model="comicsPageStore.filters.authors"
             class="mb-4"
+            flat
             :items="authorsStore.authors"
             label="Авторы"
             multiple
@@ -70,6 +70,7 @@
           <v-select
             v-model="comicsPageStore.filters.languages"
             class="mb-4"
+            flat
             :items="languagesStore.languages"
             label="Языки"
             multiple
@@ -78,6 +79,7 @@
           <v-select
             v-model="comicsPageStore.filters.tags"
             class="mb-4"
+            flat
             :items="tagsStore.tags"
             label="Теги"
             multiple
@@ -86,7 +88,6 @@
           <v-btn-toggle
             v-model="comicsPageStore.filters.filling"
             class="w-100"
-            density="comfortable"
             divided
             variant="tonal"
           >

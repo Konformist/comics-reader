@@ -1,5 +1,8 @@
 <template>
-  <v-app-bar :title="($route.meta?.title as string) || ''">
+  <v-app-bar
+    scroll-behavior="collapse"
+    :title="($route.meta?.title as string) || ''"
+  >
     <template #prepend>
       <v-btn
         v-if="$route.meta?.isBack"

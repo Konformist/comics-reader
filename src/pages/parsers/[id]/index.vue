@@ -1,5 +1,5 @@
 <template>
-  <v-main scrollable>
+  <v-main>
     <v-container class="pa-0 pb-16 mb-4">
       <div class="pa-4">
         <h3 class="text-h6">

@@ -1,16 +1,29 @@
 <template>
   <v-card>
-    <template v-if="item.file?.url">
-      <v-img :src="item.file.url" />
-      <v-card-text class="text-body-1">
-        Размер: {{ formatBytes(item.file.size) }}
-      </v-card-text>
-    </template>
-    <v-card-item class="pb-0">
+    <v-card-item class="py-4">
+      <v-img
+        class="mx-auto bg-grey-darken-3"
+        height="300px"
+        rounded="xl"
+        :src="item.file?.url || '/'"
+        width="200px"
+      >
+        <template #error>
+          <div class="w-100 h-100 d-flex align-center justify-center">
+            Нет изображения
+          </div>
+        </template>
+      </v-img>
+    </v-card-item>
+    <v-card-text class="pt-4 text-body-1">
+      Размер: {{ formatBytes(item.file?.size || 0) }}
+    </v-card-text>
+    <v-card-item>
       <v-file-input
         v-model="imageFile"
         accept="image/*"
         :disabled="disabled"
+        flat
         label="Загрузить картинку"
         variant="solo-filled"
       />
@@ -23,6 +36,7 @@
         :autocapitalize="false"
         :autocomplete="false"
         :disabled="disabled"
+        flat
         inputmode="url"
         label="Ссылка на картинку"
         rows="2"

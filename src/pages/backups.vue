@@ -1,16 +1,15 @@
 <template>
   <v-main>
     <v-container class="pa-0">
-      <v-alert
-        color="info"
-        rounded="0"
-        variant="tonal"
-      >
-        При создании или применении бекапа нужно перезапустить приложение
-      </v-alert>
       <div class="px-4 py-8">
+        <v-alert
+          color="info"
+          variant="tonal"
+        >
+          При создании или применении бекапа нужно перезапустить приложение
+        </v-alert>
         <v-btn
-          class="w-100"
+          class="mt-4 w-100"
           :disabled="loadingGlobal || loading"
           text="Создать бекап"
           variant="tonal"
@@ -21,7 +20,6 @@
           v-model="backupPath"
           class="mt-4"
           :loading="loading"
-          rounded
           :tree="backups"
         />
         <v-btn

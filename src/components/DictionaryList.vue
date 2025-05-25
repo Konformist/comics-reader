@@ -9,7 +9,6 @@
   <v-list
     v-else-if="items.length"
     v-model:selected="selected"
-    class="pa-0"
     :items="items"
     select-strategy="single-independent"
     selectable

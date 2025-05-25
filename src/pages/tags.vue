@@ -1,15 +1,15 @@
 <template>
-  <v-main scrollable>
-    <v-container class="pa-0 pb-16 mb-4">
-      <v-toolbar class="px-2">
-        <v-select
-          v-model="sortValue"
-          :chips="false"
-          :disabled="!tagsStore.tags.length"
-          :items="sortItems"
-          label="Сортировать"
-        />
-      </v-toolbar>
+  <v-main>
+    <v-toolbar class="px-2">
+      <v-select
+        v-model="sortValue"
+        :chips="false"
+        :disabled="!tagsStore.tags.length"
+        :items="sortItems"
+        label="Сортировать"
+      />
+    </v-toolbar>
+    <v-container class="pb-16 mb-4">
       <DictionaryList
         :items="sortedTags"
         :loading="loading"

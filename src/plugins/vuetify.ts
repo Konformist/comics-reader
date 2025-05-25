@@ -91,20 +91,10 @@ export default createVuetify({
       dark: {
         dark: true,
         colors: {
-          background: '#122212',
-          surface: '#1D2D1D',
-          'surface-bright': '#FFFFFF',
-          'surface-light': '#122212',
-          'surface-variant': '#424242',
-          'on-surface-variant': '#EEEEEE',
-          primary: '#00A300',
-          'primary-darken-1': '#1F5592',
-          secondary: '#5e1b20',
-          'secondary-darken-1': '#870186',
-          error: '#B00020',
-          info: '#2196F3',
-          success: '#4CAF50',
-          warning: '#FB8C00',
+          background: '#121212',
+          primary: '#00bb00',
+          'on-primary': '#000',
+          secondary: '#770000',
         },
       },
     },
@@ -117,32 +107,56 @@ export default createVuetify({
       app: true,
       size: 'large',
     },
+    VBtnToggle: {
+      color: 'primary',
+    },
+    VAlert: {
+      rounded: 'xl',
+    },
+    VPagination: {
+      rounded: true,
+    },
     VBottomNavigation: {
       elevation: '2',
     },
+    VCard: {
+      rounded: 'xl',
+    },
+    VChip: {
+      rounded: true,
+    },
     VFileInput: {
+      rounded: true,
       prependIcon: '',
       prependInnerIcon: '$download',
+      color: 'primary',
       hideDetails: true,
       variant: 'solo',
     },
     VTextField: {
+      rounded: true,
       clearable: true,
       persistentClear: true,
+      color: 'primary',
       variant: 'solo',
       hideDetails: true,
     },
     VTextarea: {
+      rounded: true,
       clearable: true,
       persistentClear: true,
+      color: 'primary',
       variant: 'solo',
       hideDetails: true,
     },
     VList: {
+      class: ['px-2'],
+      rounded: 'xl',
       itemTitle: 'name',
       itemValue: 'id',
     },
     VListItem: {
+      rounded: 'xl',
       itemTitle: 'name',
       itemValue: 'id',
     },
@@ -171,6 +185,7 @@ export default createVuetify({
     VSwitch: {
       inset: true,
       hideDetails: true,
+      color: 'primary',
     },
   },
 });

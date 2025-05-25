@@ -1,7 +1,7 @@
 <template>
-  <v-main scrollable>
-    <v-container class="pa-0 pb-12">
-      <div class="px-4 py-8">
+  <v-main>
+    <v-container class="pa-0 pb-16">
+      <div class="pa-4">
         <v-text-field
           v-model.trim="parser.name"
           class="mb-4"
@@ -16,7 +16,7 @@
         />
       </div>
       <v-divider />
-      <div class="px-4 py-8">
+      <div class="pa-4">
         <v-textarea
           v-model.trim="parser.titleCSS"
           :autocapitalize="false"
@@ -88,7 +88,7 @@
         />
       </div>
       <v-divider />
-      <div class="px-4 py-8">
+      <div class="pa-4">
         <v-file-input
           accept="application/json"
           label="Добавить файл"
@@ -103,7 +103,7 @@
         />
       </div>
       <v-divider />
-      <div class="px-4 py-8">
+      <div class="pa-4">
         <v-btn
           class="w-100"
           color="error"

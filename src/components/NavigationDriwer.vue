@@ -1,14 +1,14 @@
 <template>
-  <v-navigation-drawer v-model="model">
-    <v-list
-      nav
-      slim
-    >
+  <v-navigation-drawer
+    v-model="model"
+  >
+    <v-list slim>
       <v-list-item
         prepend-icon="$home"
         title="Галерея"
         :to="{ name: '/' }"
       />
+      <v-divider class="mt-2" />
       <v-list-subheader
         title="Справочники"
       />
@@ -32,6 +32,7 @@
         title="Парсеры"
         :to="{ name: '/parsers/' }"
       />
+      <v-divider class="mt-2" />
       <v-list-subheader
         title="Прочее"
       />
@@ -45,6 +46,7 @@
         title="О приложении"
         :to="{ name: '/about' }"
       />
+      <v-divider class="mt-2" />
       <v-list-subheader
         title="Dev"
       />

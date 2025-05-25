@@ -1,14 +1,14 @@
 <template>
-  <v-main scrollable>
-    <v-container class="pa-0">
+  <v-main>
+    <v-container>
       <v-alert
         color="info"
-        rounded="0"
         variant="tonal"
       >
         Парсеры работают с DOM деревом. См. CSS.
       </v-alert>
       <DictionaryList
+        class="mt-4"
         :items="parsersStore.parsers"
         :loading="loading"
         @click-item="$router.push({

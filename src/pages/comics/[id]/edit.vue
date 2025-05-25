@@ -1,5 +1,5 @@
 <template>
-  <v-main scrollable>
+  <v-main>
     <v-container class="pa-0 pb-12">
       <div class="px-4 py-8">
         <v-select

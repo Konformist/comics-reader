@@ -1,50 +1,50 @@
 <template>
   <v-main>
     <v-container class="pa-0 pb-16 mb-4">
-      <!--      <template v-if="comic.cover?.file?.url">-->
       <p class="pt-4">
         <v-skeleton-loader
           v-if="loading"
+          class="mx-auto"
+          height="300"
           type="image"
+          width="200"
         />
         <v-img
           v-else
           class="mx-auto bg-grey-darken-4"
-          height="300px"
+          cover
+          height="300"
           rounded="xl"
-          :src="comic.cover.file?.url || '/'"
-          width="200px"
+          :src="comicsStore.comic.cover.file?.url || '/'"
+          width="200"
         >
           <template #error>
-            <div class="w-100 h-100 d-flex align-center justify-center">
+            <div class="w-100 h-100 d-flex align-center justify-center text-body-2 text-grey-darken-2">
               Нет изображения
             </div>
           </template>
         </v-img>
       </p>
       <v-divider class="my-4" />
-      <h3 class="px-4 pt-4 font-weight-medium">
-        {{ comic.name || '—' }}
-        <v-icon
-          v-if="comic.name"
+      <h3 class="px-4 font-weight-medium">
+        {{ comicsStore.comic.name || '—' }} <v-icon
+          v-if="comicsStore.comic.name"
           icon="$copy"
           size="20"
-          @click="onCopy(comic.name)"
+          @click="onCopy(comicsStore.comic.name)"
         />
       </h3>
-      <v-divider class="my-4" />
-      <template v-if="comic.fromUrl">
+      <template v-if="comicsStore.comic.fromUrl">
+        <v-divider class="my-4" />
         <p class="px-4">
-          <a :href="comic.fromUrl">Ссылка на комикс</a>
-          <v-icon
-            class="ml-2"
+          <a :href="comicsStore.comic.fromUrl">Ссылка на комикс</a> <v-icon
             icon="$copy"
             size="20"
-            @click="onCopy(comic.fromUrl)"
+            @click="onCopy(comicsStore.comic.fromUrl)"
           />
         </p>
-        <v-divider class="my-4" />
       </template>
+      <v-divider class="my-4" />
       <p class="px-4">
         <b class="font-weight-medium">Авторы:</b> {{ authorsChips.length ? authorsChips.map((e) => e.name).join(", ") : '—' }}
       </p>
@@ -52,8 +52,8 @@
       <p class="px-4">
         <b class="font-weight-medium">Язык:</b> {{ languagesChips.length ? languagesChips[0].name : '—' }}
       </p>
-      <v-divider class="my-4" />
       <template v-if="tagsChips.length">
+        <v-divider class="my-4" />
         <p class="px-4 d-flex flex-wrap ga-1 align-center">
           <v-chip
             v-for="item in tagsChips"
@@ -63,10 +63,11 @@
             variant="tonal"
           />
         </p>
-        <v-divider class="my-4" />
       </template>
-      <p class="px-4">
+      <template v-if="chaptersList.length">
+        <v-divider class="my-4" />
         <v-list
+          class="ma-4"
           :items="chaptersList"
           :loading="loading"
           selectable
@@ -82,63 +83,36 @@
             />
           </template>
         </v-list>
-      </p>
+      </template>
     </v-container>
-    <v-fab
-      :disabled="loading || loadingGlobal"
-      icon
-    >
-      <v-fab-transition>
-        <v-icon v-if="editOpened" icon="$close" />
-        <v-icon v-else icon="$edit" />
-      </v-fab-transition>
-      <v-speed-dial
-        v-model="editOpened"
-        activator="parent"
-        location="top right"
-        transition="scale-transition"
-      >
-        <v-btn
-          key="2"
-          color="secondary"
-          height="32"
-          text="Главы"
-          :to="{
-            name: '/chapters/[comicId]',
-            params: { comicId: comic.id },
-          }"
-        />
-        <v-btn
-          key="1"
-          color="secondary"
-          height="32"
-          text="Комикс"
-          :to="{
-            name: '/comics/[id]/edit',
-            params: { id: comic.id },
-          }"
-        />
-      </v-speed-dial>
-    </v-fab>
   </v-main>
+  <v-fab
+    app
+    appear
+    :disabled="loading || loadingGlobal"
+    icon="$edit"
+    :to="{
+      name: '/comics/[id]/edit',
+      params: { id: comicsStore.comic.id },
+    }"
+  />
 </template>
 
 <script lang="ts" setup>
 import { useAuthorsStore } from '@/stores/authors.ts';
+import { useComicsStore } from '@/stores/comics.ts';
 import { useLanguagesStore } from '@/stores/languages.ts';
 import { useTagsStore } from '@/stores/tags.ts';
 import { Clipboard } from '@capacitor/clipboard';
 import { Toast } from '@capacitor/toast';
 import useLoading from '@/composables/useLoading.ts';
-import ComicController from '@/core/entities/comic/ComicController.ts';
-import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import ChapterController from '@/core/entities/chapter/ChapterController.ts';
 import ChapterModel from '@/core/entities/chapter/ChapterModel.ts';
 
 definePage({
   meta: {
+    layout: 'entity',
     title: 'Комикс',
-    isBack: true,
   },
 });
 
@@ -146,6 +120,7 @@ const route = useRoute('/comics/[id]/');
 const router = useRouter();
 const comicId = +route.params.id;
 
+const comicsStore = useComicsStore();
 const tagsStore = useTagsStore();
 const authorsStore = useAuthorsStore();
 const languagesStore = useLanguagesStore();
@@ -156,8 +131,6 @@ const {
   loadingEnd,
   loadingGlobal,
 } = useLoading();
-
-const editOpened = ref(false);
 
 const chapters = ref<ChapterModel[]>([]);
 const chaptersList = computed(() => (
@@ -172,19 +145,16 @@ const loadChapters = async () => {
   chapters.value = await ChapterController.loadAll(comicId);
 };
 
-const comic = ref(new ComicModel());
-const loadComic = async () => {
-  comic.value = await ComicController.load(comicId);
-};
+const loadComic = () => comicsStore.loadComic(comicId);
 
 const languagesChips = computed(() => (
-  languagesStore.languages.filter((e) => comic.value.languageId === e.id)
+  languagesStore.languages.filter((e) => comicsStore.comic.languageId === e.id)
 ));
 const authorsChips = computed(() => (
-  authorsStore.authors.filter((e) => comic.value.authors.includes(e.id))
+  authorsStore.authors.filter((e) => comicsStore.comic.authors.includes(e.id))
 ));
 const tagsChips = computed(() => (
-  tagsStore.tags.filter((e) => comic.value.tags.includes(e.id))
+  tagsStore.tags.filter((e) => comicsStore.comic.tags.includes(e.id))
 ));
 
 const onCopy = async (string: string) => {
@@ -196,7 +166,7 @@ const init = async () => {
   loadingStart();
   await loadComic();
 
-  if (!comic.value.id) {
+  if (!comicsStore.comic.id) {
     router.replace({ name: '/' });
   } else {
     await Promise.all([

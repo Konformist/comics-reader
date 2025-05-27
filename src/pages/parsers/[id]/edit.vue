@@ -114,12 +114,14 @@
         />
       </div>
     </v-container>
-    <v-fab
-      :disabled="loadingGlobal"
-      icon="$save"
-      @click="saveParser()"
-    />
   </v-main>
+  <v-fab
+    app
+    appear
+    :disabled="loadingGlobal"
+    icon="$save"
+    @click="saveParser()"
+  />
 </template>
 
 <script lang="ts" setup>
@@ -133,8 +135,8 @@ import ParserModel from '@/core/entities/parser/ParserModel.ts';
 
 definePage({
   meta: {
+    layout: 'entity',
     title: 'Редактирование парсера',
-    isBack: true,
   },
 });
 

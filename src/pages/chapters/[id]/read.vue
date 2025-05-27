@@ -64,8 +64,8 @@ import ChapterPageRead from '@/components/ChapterPageRead.vue';
 
 definePage({
   meta: {
+    layout: 'entity',
     title: 'Чтение',
-    isBack: true,
   },
 });
 

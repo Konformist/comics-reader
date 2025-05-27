@@ -32,8 +32,8 @@ import type { ITreeDirectory } from '@/plugins/WebApiPlugin.ts';
 
 definePage({
   meta: {
+    layout: 'full',
     title: 'Дебаггинг',
-    isBottomNavigation: true,
   },
 });
 

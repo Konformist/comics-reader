@@ -1,7 +1,7 @@
 <template>
   <v-main>
     <v-container class="pa-0">
-      <div class="px-4 pt-2 pb-4">
+      <div class="pa-4">
         <v-label
           class="w-100"
           text="Направление прокрутки"
@@ -40,6 +40,7 @@
         </v-label>
         <v-number-input
           v-model.number="autoReadingTimeout"
+          class="mt-4"
           :disabled="!appStore.settings.autoReading || appStore.settings.readingMode === 'webtoon'"
           label="До перелистывания"
           :min="0"
@@ -47,7 +48,7 @@
         />
       </div>
       <v-divider />
-      <div class="px-4 pt-4 pb-8">
+      <div class="pa-4">
         <v-label class="w-100" text="Сжатие изображений при загрузке">
           <v-switch
             v-model="appStore.settings.isCompress"
@@ -59,7 +60,9 @@
       </div>
     </v-container>
     <v-fab
-      class="mb-14"
+      app
+      appear
+      class="mb-16"
       icon="$save"
       @click="onSave()"
     />
@@ -74,8 +77,8 @@ const appStore = useAppStore();
 
 definePage({
   meta: {
+    layout: 'full',
     title: 'Настройки',
-    isBottomNavigation: true,
   },
 });
 

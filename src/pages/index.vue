@@ -1,16 +1,55 @@
 <template>
+  <v-app-bar
+    class="rounded-b-xl"
+    flat
+    scroll-behavior="hide"
+  >
+    <v-btn
+      :active="appStore.drawer"
+      icon="$menu"
+      rounded="pill"
+      @click="appStore.drawer = !appStore.drawer"
+    />
+    <v-text-field
+      v-model.trim="comicsPageStore.filters.search"
+      flat
+      placeholder="Поиск..."
+    />
+  </v-app-bar>
   <v-main>
-    <v-toolbar>
-      <v-toolbar-title class="text-subtitle-1">
-        {{ comicsStore.comics.length !== comicsFiltered.length ? 'Найдено' : 'Всего' }}: {{ comicsFiltered.length }}
-      </v-toolbar-title>
-      <v-spacer />
-      <v-btn
-        :active="filtersSheet"
-        prepend-icon="$filter"
-        text="Фильтры"
-        @click="filtersSheet = true"
-      />
+    <v-toolbar
+      class="px-2"
+      color="background"
+      density="comfortable"
+    >
+      <div class="w-100 d-flex" style="overflow-x: auto;">
+        <DropdownButton
+          v-model="comicsPageStore.filters.tags"
+          class="mr-2"
+          :disabled="!tagsStore.tags.length"
+          :items="tagsStore.tags"
+          multiple
+          prepend-icon="$filter"
+          text="Теги"
+        />
+        <DropdownButton
+          v-model="comicsPageStore.filters.authors"
+          class="mr-2"
+          :disabled="!authorsStore.authors.length"
+          :items="authorsStore.authors"
+          multiple
+          prepend-icon="$filter"
+          text="Авторы"
+        />
+        <DropdownButton
+          v-model="comicsPageStore.filters.languages"
+          :disabled="!languagesStore.languages.length"
+          :items="languagesStore.languages"
+          multiple
+          prepend-icon="$filter"
+          text="Языки"
+        />
+      </div>
     </v-toolbar>
     <v-container class="pb-16 mb-4">
       <v-row v-if="loading">
@@ -38,9 +77,13 @@
               v-for="item in items"
               :key="item.raw.id"
               class="pa-2"
-              cols="6"
+              cols="12"
             >
-              <ComicGallery :comic="item.raw" />
+              <ComicGallery
+                :authors="authorsStore.authors"
+                :comic="item.raw"
+                :tags="tagsStore.tags"
+              />
             </v-col>
           </v-row>
         </template>
@@ -55,59 +98,19 @@
         </template>
       </v-data-iterator>
     </v-container>
-    <v-bottom-sheet v-model="filtersSheet">
-      <v-card>
-        <v-card-item class="pa-4">
-          <v-select
-            v-model="comicsPageStore.filters.authors"
-            class="mb-4"
-            flat
-            :items="authorsStore.authors"
-            label="Авторы"
-            multiple
-            variant="solo-filled"
-          />
-          <v-select
-            v-model="comicsPageStore.filters.languages"
-            class="mb-4"
-            flat
-            :items="languagesStore.languages"
-            label="Языки"
-            multiple
-            variant="solo-filled"
-          />
-          <v-select
-            v-model="comicsPageStore.filters.tags"
-            class="mb-4"
-            flat
-            :items="tagsStore.tags"
-            label="Теги"
-            multiple
-            variant="solo-filled"
-          />
-          <v-btn-toggle
-            v-model="comicsPageStore.filters.filling"
-            class="w-100"
-            divided
-            variant="tonal"
-          >
-            <v-btn class="flex-1-0" text="Все" :value="0" />
-            <v-btn class="flex-1-0" text="Заполненные" :value="1" />
-            <v-btn class="flex-1-0" text="Пустые" :value="2" />
-          </v-btn-toggle>
-        </v-card-item>
-      </v-card>
-    </v-bottom-sheet>
-    <v-fab
-      class="mb-14"
-      :disabled="loading || loadingGlobal"
-      icon="$plus"
-      @click="createComic()"
-    />
   </v-main>
+  <v-fab
+    app
+    appear
+    class="mb-16"
+    :disabled="loading || loadingGlobal"
+    icon="$plus"
+    @click="createComic()"
+  />
 </template>
 
 <script lang="ts" setup>
+import { useAppStore } from '@/stores/app.ts';
 import { useAuthorsStore } from '@/stores/authors.ts';
 import { useComicsStore } from '@/stores/comics.ts';
 import { useLanguagesStore } from '@/stores/languages.ts';
@@ -121,12 +124,13 @@ import ComicGallery from '@/components/ComicGallery.vue';
 
 definePage({
   meta: {
+    layout: 'list',
     title: 'Галерея',
-    isBottomNavigation: true,
   },
 });
 
 const router = useRouter();
+const appStore = useAppStore();
 const comicsStore = useComicsStore();
 const comicsPageStore = useComicsPageStore();
 const tagsStore = useTagsStore();
@@ -140,8 +144,9 @@ const {
   loadingGlobal,
 } = useLoading();
 
-const filtersSheet = ref(false);
-
+const filterString = (v: string, s: string) => (
+  v.toLowerCase().includes(s.toLowerCase())
+);
 const filterArrays = <T>(f: T[], s: T[]): boolean => (
   !s.length
   || f.some((e) => s.includes(e))
@@ -155,7 +160,8 @@ const comicsFiltered = computed(() => (
         return false;
       }
 
-      return filterArrays(item.tags, comicsPageStore.filters.tags)
+      return filterString(item.name, comicsPageStore.filters.search)
+        && filterArrays(item.tags, comicsPageStore.filters.tags)
         && filterArrays(item.authors, comicsPageStore.filters.authors)
         && filterArrays([item.languageId], comicsPageStore.filters.languages);
     })

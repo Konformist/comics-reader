@@ -15,7 +15,7 @@
     </template>
   </v-list-item>
   <template v-if="item.type === 'directory' && item.count && opened">
-    <v-divider />
+    <v-divider class="mt-2 mx-4" />
     <FilesTree
       v-model="model"
       is-child

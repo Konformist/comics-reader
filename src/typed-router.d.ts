@@ -22,7 +22,6 @@ declare module 'vue-router/auto-routes' {
     '/about': RouteRecordInfo<'/about', '/about', Record<never, never>, Record<never, never>>,
     '/authors': RouteRecordInfo<'/authors', '/authors', Record<never, never>, Record<never, never>>,
     '/backups': RouteRecordInfo<'/backups', '/backups', Record<never, never>, Record<never, never>>,
-    '/chapters/[comicId]': RouteRecordInfo<'/chapters/[comicId]', '/chapters/:comicId', { comicId: ParamValue<true> }, { comicId: ParamValue<false> }>,
     '/chapters/[id]/edit': RouteRecordInfo<'/chapters/[id]/edit', '/chapters/:id/edit', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/chapters/[id]/read': RouteRecordInfo<'/chapters/[id]/read', '/chapters/:id/read', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/comics/[id]/': RouteRecordInfo<'/comics/[id]/', '/comics/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,

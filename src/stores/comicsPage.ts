@@ -2,6 +2,7 @@ export const useComicsPageStore = defineStore('comicsPage', {
   state: () => ({
     filters: {
       page: 1 as number,
+      search: '',
       authors: [] as number[],
       languages: [] as number[],
       tags: [] as number[],

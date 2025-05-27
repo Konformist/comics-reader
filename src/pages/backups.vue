@@ -100,7 +100,7 @@ import { useTagsStore } from '@/stores/tags.ts';
 
 definePage({
   meta: {
-    isBack: true,
+    layout: 'entity',
     title: 'Бекапы',
   },
 });

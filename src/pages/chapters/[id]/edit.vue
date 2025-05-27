@@ -153,8 +153,8 @@ import ParserController from '@/core/entities/parser/ParserController.ts';
 
 definePage({
   meta: {
+    layout: 'entity',
     title: 'Редактирование главы',
-    isBack: true,
   },
 });
 
@@ -369,8 +369,8 @@ const delChapter = async () => {
     await ChapterController.remove(chapterId);
     Toast.show({ text: 'Глава удалена' });
     router.replace({
-      name: '/chapters/[comicId]',
-      params: { comicId: chapter.value.comicId },
+      name: '/comics/[id]/',
+      params: { id: chapter.value.comicId },
     });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });

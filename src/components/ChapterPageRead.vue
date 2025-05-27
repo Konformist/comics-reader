@@ -8,7 +8,7 @@
   />
   <div
     v-else
-    class="w-100 d-flex justify-center align-center"
+    class="w-100 d-flex justify-center align-center text-body-2 text-grey-darken-2"
     style="min-height: 400px"
   >
     Нет изображения

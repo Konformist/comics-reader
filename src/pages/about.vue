@@ -19,8 +19,8 @@ import { useAppStore } from '@/stores/app.ts';
 
 definePage({
   meta: {
+    layout: 'full',
     title: 'О приложении',
-    isBottomNavigation: true,
   },
 });
 

@@ -9,7 +9,7 @@
         width="200px"
       >
         <template #error>
-          <div class="w-100 h-100 d-flex align-center justify-center">
+          <div class="w-100 h-100 d-flex align-center justify-center text-body-2 text-grey-darken-2">
             Нет изображения
           </div>
         </template>

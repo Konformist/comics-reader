@@ -1,36 +1,44 @@
 <template>
   <v-main>
-    <v-toolbar class="px-2">
-      <v-select
+    <v-toolbar
+      class="px-2"
+      color="background"
+      density="comfortable"
+    >
+      <v-spacer />
+      <DropdownButton
         v-model="sortValue"
-        :chips="false"
         :disabled="!languagesStore.languages.length"
         :items="sortItems"
-        label="Сортировать"
+        prepend-icon="$sort"
+        text="Сортировать"
       />
     </v-toolbar>
     <v-container class="pb-16 mb-4">
       <DictionaryList
+        v-if="sortedLanguages.length"
         :items="sortedLanguages"
         :loading="loading"
         @click-item="clickLanguage($event)"
       />
     </v-container>
-    <DictionaryEditDialog
-      v-model="selectedLanguage.name"
-      v-model:opened="dialog"
-      :disabled="loadingGlobal"
-      :is-created="!selectedLanguage.id"
-      @remove="deleteLanguage()"
-      @save="saveLanguage()"
-    />
-    <v-fab
-      class="mb-14"
-      :disabled="loading"
-      icon="$plus"
-      @click="clickLanguage(0)"
-    />
   </v-main>
+  <DictionaryEditDialog
+    v-model="selectedLanguage.name"
+    v-model:opened="dialog"
+    :disabled="loadingGlobal"
+    :is-created="!selectedLanguage.id"
+    @remove="deleteLanguage()"
+    @save="saveLanguage()"
+  />
+  <v-fab
+    app
+    appear
+    class="mb-16"
+    :disabled="loading"
+    icon="$plus"
+    @click="clickLanguage(0)"
+  />
 </template>
 
 <script setup lang="ts">
@@ -47,8 +55,8 @@ import LanguageModel from '@/core/entities/language/LanguageModel.ts';
 
 definePage({
   meta: {
+    layout: 'full',
     title: 'Языки',
-    isBottomNavigation: true,
   },
 });
 

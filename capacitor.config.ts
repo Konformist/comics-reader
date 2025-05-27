@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'Comics Reader',
   webDir: 'dist',
   zoomEnabled: true,
-  backgroundColor: '#122212',
+  backgroundColor: '#121212',
   android: {
     adjustMarginsForEdgeToEdge: 'auto',
   },

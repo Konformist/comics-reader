@@ -7,6 +7,7 @@ import { defineStore } from 'pinia';
 
 export const useAppStore = defineStore('app', {
   state: () => ({
+    drawer: false,
     frontVersion: version,
     settings: new SettingsModel(),
     info: {

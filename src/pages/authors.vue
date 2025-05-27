@@ -1,54 +1,60 @@
 <template>
   <v-main>
-    <v-toolbar class="px-2">
-      <v-select
+    <v-toolbar
+      class="px-2"
+      color="background"
+      density="comfortable"
+    >
+      <v-spacer />
+      <DropdownButton
         v-model="sortValue"
-        :chips="false"
         :disabled="!authorsStore.authors.length"
         :items="sortItems"
-        label="Сортировать"
+        prepend-icon="$sort"
+        text="Сортировать"
       />
     </v-toolbar>
     <v-container class="pb-16 mb-4">
       <DictionaryList
+        v-if="sortedAuthors.length"
         :items="sortedAuthors"
         :loading="loading"
         @click-item="clickAuthor($event)"
       />
     </v-container>
-    <DictionaryEditDialog
-      v-model="selectedAuthor.name"
-      v-model:opened="dialog"
-      :disabled="loadingGlobal"
-      :is-created="!selectedAuthor.id"
-      @remove="deleteAuthor()"
-      @save="saveAuthor()"
-    />
-    <v-fab
-      class="mb-14"
-      :disabled="loading"
-      icon="$plus"
-      @click="clickAuthor(0)"
-    />
   </v-main>
+  <DictionaryEditDialog
+    v-model="selectedAuthor.name"
+    v-model:opened="dialog"
+    :disabled="loadingGlobal"
+    :is-created="!selectedAuthor.id"
+    @remove="deleteAuthor()"
+    @save="saveAuthor()"
+  />
+  <v-fab
+    app
+    appear
+    class="mb-16"
+    :disabled="loading"
+    icon="$plus"
+    @click="clickAuthor(0)"
+  />
 </template>
 
 <script setup lang="ts">
-import DictionaryEditDialog from '@/components/DictionaryEditDialog.vue';
-import DictionaryList from '@/components/DictionaryList.vue';
+import { Dialog } from '@capacitor/dialog';
+import { Toast } from '@capacitor/toast';
 import useLoading from '@/composables/useLoading.ts';
 import { sortString } from '@/core/utils/array.ts';
 import { useAuthorsStore } from '@/stores/authors.ts';
 import { useComicsStore } from '@/stores/comics.ts';
-import { Dialog } from '@capacitor/dialog';
-import { Toast } from '@capacitor/toast';
 import AuthorController from '@/core/entities/author/AuthorController.ts';
 import AuthorModel from '@/core/entities/author/AuthorModel.ts';
 
 definePage({
   meta: {
+    layout: 'full',
     title: 'Авторы',
-    isBottomNavigation: true,
   },
 });
 

@@ -8,6 +8,7 @@
         Парсеры работают с DOM деревом. См. CSS.
       </v-alert>
       <DictionaryList
+        v-if="parsersStore.parsers.length"
         class="mt-4"
         :items="parsersStore.parsers"
         :loading="loading"
@@ -17,13 +18,15 @@
         })"
       />
     </v-container>
-    <v-fab
-      class="mb-14"
-      :disabled="loadingGlobal"
-      icon="$plus"
-      @click="createParser()"
-    />
   </v-main>
+  <v-fab
+    app
+    appear
+    class="mb-16"
+    :disabled="loadingGlobal"
+    icon="$plus"
+    @click="createParser()"
+  />
 </template>
 
 <script lang="ts" setup>
@@ -35,8 +38,8 @@ import useLoading from '@/composables/useLoading.ts';
 
 definePage({
   meta: {
+    layout: 'full',
     title: 'Парсеры',
-    isBottomNavigation: true,
   },
 });
 

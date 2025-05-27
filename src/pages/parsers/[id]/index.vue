@@ -79,6 +79,8 @@
       </div>
     </v-container>
     <v-fab
+      app
+      appear
       :disabled="loadingGlobal"
       icon="$edit"
       :to="{
@@ -98,8 +100,8 @@ import ParserModel from '@/core/entities/parser/ParserModel.ts';
 
 definePage({
   meta: {
+    layout: 'entity',
     title: 'Парсер',
-    isBack: true,
   },
 });
 

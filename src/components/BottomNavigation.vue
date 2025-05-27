@@ -1,22 +1,44 @@
 <template>
   <v-bottom-navigation
+    class="pa-2 rounded-b-0"
+    color="primary"
+    elevation="4"
     grow
+    height="64"
+    rounded="xl"
     tag="footer"
   >
-    <v-btn :to="{ name: '/' }">
-      <v-icon icon="$home" />
-    </v-btn>
-    <v-btn :to="{ name: '/tags' }">
-      <v-icon icon="$tag" />
-    </v-btn>
-    <v-btn :to="{ name: '/authors' }">
-      <v-icon icon="$author" />
-    </v-btn>
-    <v-btn :to="{ name: '/languages' }">
-      <v-icon icon="$language" />
-    </v-btn>
-    <v-btn :to="{ name: '/settings' }">
-      <v-icon icon="$settings" />
-    </v-btn>
+    <v-btn
+      icon="$home"
+      min-width="0"
+      rounded="xl"
+      :to="{ name: '/' }"
+    />
+    <v-btn
+      icon="$tag"
+      min-width="0"
+      rounded="xl"
+      :to="{ name: '/tags' }"
+    />
+    <v-btn
+      icon="$author"
+      min-width="0"
+      rounded="xl"
+      :to="{ name: '/authors' }"
+    />
+    <v-btn
+      icon="$language"
+      min-width="0"
+      rounded="xl"
+      :to="{ name: '/languages' }"
+    />
+    <v-btn
+      icon="$settings"
+      min-width="0"
+      rounded="xl"
+      :to="{ name: '/settings' }"
+    />
   </v-bottom-navigation>
 </template>
+<script setup lang="ts">
+</script>

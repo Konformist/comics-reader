@@ -1,45 +1,51 @@
 <template>
   <v-main>
-    <v-toolbar class="px-2">
-      <v-select
+    <v-toolbar
+      class="px-2"
+      color="background"
+      density="comfortable"
+    >
+      <v-spacer />
+      <DropdownButton
         v-model="sortValue"
-        :chips="false"
         :disabled="!tagsStore.tags.length"
         :items="sortItems"
-        label="Сортировать"
+        prepend-icon="$sort"
+        text="Сортировать"
       />
     </v-toolbar>
     <v-container class="pb-16 mb-4">
       <DictionaryList
+        v-if="sortedTags.length"
         :items="sortedTags"
         :loading="loading"
         @click-item="clickTag($event)"
       />
     </v-container>
-    <DictionaryEditDialog
-      v-model="selectedTag.name"
-      v-model:opened="dialog"
-      :disabled="loadingGlobal"
-      :is-created="!selectedTag.id"
-      @remove="deleteTag()"
-      @save="saveTag()"
-    />
-    <v-fab
-      class="mb-14"
-      :disabled="loading"
-      icon="$plus"
-      @click="clickTag(0)"
-    />
   </v-main>
+  <DictionaryEditDialog
+    v-model="selectedTag.name"
+    v-model:opened="dialog"
+    :disabled="loadingGlobal"
+    :is-created="!selectedTag.id"
+    @remove="deleteTag()"
+    @save="saveTag()"
+  />
+  <v-fab
+    app
+    appear
+    class="mb-16"
+    :disabled="loading"
+    icon="$plus"
+    @click="clickTag(0)"
+  />
 </template>
 
 <script setup lang="ts">
-import DictionaryEditDialog from '@/components/DictionaryEditDialog.vue';
-import DictionaryList from '@/components/DictionaryList.vue';
-import { useComicsStore } from '@/stores/comics.ts';
-import { useTagsStore } from '@/stores/tags.ts';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
+import { useComicsStore } from '@/stores/comics.ts';
+import { useTagsStore } from '@/stores/tags.ts';
 import { sortString } from '@/core/utils/array.ts';
 import TagController from '@/core/entities/tag/TagController.ts';
 import TagModel from '@/core/entities/tag/TagModel.ts';
@@ -47,8 +53,8 @@ import useLoading from '@/composables/useLoading.ts';
 
 definePage({
   meta: {
+    layout: 'full',
     title: 'Теги',
-    isBottomNavigation: true,
   },
 });
 

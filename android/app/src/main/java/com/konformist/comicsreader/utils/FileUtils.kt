@@ -5,7 +5,6 @@ import android.util.Base64
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
-import android.util.Log
 import java.io.BufferedOutputStream
 import java.io.FileOutputStream
 import java.io.IOException
@@ -45,7 +44,6 @@ class FileUtils {
         outputStreamWriter.close()
         return true
       } catch (e: IOException) {
-        Log.e("FileUtils", e.message.toString())
         return false
       }
     }

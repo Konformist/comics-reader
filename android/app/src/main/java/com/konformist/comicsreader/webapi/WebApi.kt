@@ -3,7 +3,6 @@ package com.konformist.comicsreader.webapi
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Environment
-import android.util.Log
 import androidx.room.Room
 import com.konformist.comicsreader.db.AppDatabase
 import com.konformist.comicsreader.db.DBBackup
@@ -80,8 +79,6 @@ class WebApi(private val context: Context) {
   private val comicSerializer = ComicSerializer(context.filesDir)
 
   private fun <T : Exception> wrappedToError(value: T): JSONObject {
-    Log.d("Error", "${value.message} ${value.stackTrace}")
-
     return JSONObject()
       .put("error", value.message)
   }

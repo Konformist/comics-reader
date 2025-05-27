@@ -6,26 +6,37 @@
           class="w-100"
           text="Направление прокрутки"
         />
-        <v-btn-toggle
-          v-model="appStore.settings.readingMode"
-          class="mt-2 w-100"
-        >
+        <div>
           <v-btn
-            class="flex-1-0"
-            text="Горизонт."
-            value="horizontal"
+            :active="appStore.settings.readingMode === 'vertical'"
+            class="w-100 rounded-t-xl"
+            :color="appStore.settings.readingMode === 'vertical' ? 'primary' : ''"
+            flat
+            :rounded="false"
+            text="Вертикaльно"
+            @click="appStore.settings.readingMode = 'vertical'"
           />
+          <v-divider />
           <v-btn
-            class="flex-1-0"
-            text="Вертик."
-            value="vertical"
+            :active="appStore.settings.readingMode === 'horizontal'"
+            class="w-100 rounded-0"
+            :color="appStore.settings.readingMode === 'horizontal' ? 'primary' : ''"
+            flat
+            :rounded="false"
+            text="Горизонтально"
+            @click="appStore.settings.readingMode = 'horizontal'"
           />
+          <v-divider />
           <v-btn
-            class="flex-1-0"
+            :active="appStore.settings.readingMode === 'webtoon'"
+            class="w-100 rounded-b-xl"
+            :color="appStore.settings.readingMode === 'webtoon' ? 'primary' : ''"
+            flat
+            :rounded="false"
             text="Webtoon"
-            value="webtoon"
+            @click="appStore.settings.readingMode = 'webtoon'"
           />
-        </v-btn-toggle>
+        </div>
         <v-label
           class="mt-4 w-100"
           text="Авто перелистывание"

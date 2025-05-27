@@ -2,7 +2,6 @@
   <v-app-bar
     class="rounded-b-xl"
     flat
-    scroll-behavior="hide"
   >
     <v-btn
       :active="appStore.drawer"

@@ -2,7 +2,6 @@
   <v-app-bar
     class="rounded-b-xl"
     flat
-    scroll-behavior="hide"
     :title="($route.meta?.title as string) || ''"
   >
     <template #prepend>

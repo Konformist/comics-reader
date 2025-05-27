@@ -1,7 +1,7 @@
 package com.konformist.comicsreader.webapi.serializers
 
-import com.konformist.comicsreader.utils.DatesUtils
 import com.konformist.comicsreader.exceptions.ValidationException
+import com.konformist.comicsreader.utils.DatesUtils
 import org.json.JSONArray
 import org.json.JSONObject
 import java.time.LocalDateTime

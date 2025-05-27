@@ -4,12 +4,11 @@ import android.net.Uri
 import android.util.Base64
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.File
 import java.io.BufferedOutputStream
+import java.io.File
 import java.io.FileOutputStream
-import java.io.IOException
 import java.io.FileWriter
-
+import java.io.IOException
 
 
 class FileUtils {

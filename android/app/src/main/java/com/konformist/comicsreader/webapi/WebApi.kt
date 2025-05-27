@@ -37,9 +37,6 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import java.time.LocalDateTime
-import android.util.Base64
-import java.io.BufferedOutputStream
-import java.io.FileOutputStream
 
 class WebApi(private val context: Context) {
   private val db: AppDatabase = Room
@@ -48,7 +45,8 @@ class WebApi(private val context: Context) {
 
   private val dbBackup = DBBackup(context)
 
-  private val downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+  private val downloads =
+    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
 
   private fun getAppName(): String {
     val applicationInfo = context.applicationInfo
@@ -667,7 +665,8 @@ class WebApi(private val context: Context) {
     if (file == "") throw ValidationException("File is empty")
     if (fileName == "") throw ValidationException("FileName is empty")
 
-    val filePath = File("${context.filesDir}${File.separator}${AppDirectory.BACKUPS}${File.separator}${fileName}")
+    val filePath =
+      File("${context.filesDir}${File.separator}${AppDirectory.BACKUPS}${File.separator}${fileName}")
 
     return FileUtils.writeBase64(filePath, file)
   }
@@ -676,8 +675,10 @@ class WebApi(private val context: Context) {
     val fileName = data.optString("fileName", "")
     if (fileName == "") throw ValidationException("FileName is empty")
 
-    val dirFrom = File("${context.filesDir}${File.separator}${AppDirectory.BACKUPS}${File.separator}${fileName}")
-    val dirTo = File("${downloads.path}${File.separator}${getAppName()}${File.separator}${AppDirectory.BACKUPS}${File.separator}${fileName}")
+    val dirFrom =
+      File("${context.filesDir}${File.separator}${AppDirectory.BACKUPS}${File.separator}${fileName}")
+    val dirTo =
+      File("${downloads.path}${File.separator}${getAppName()}${File.separator}${AppDirectory.BACKUPS}${File.separator}${fileName}")
 
     dirFrom.copyTo(target = dirTo, overwrite = true)
 
@@ -685,7 +686,8 @@ class WebApi(private val context: Context) {
   }
 
   private fun setComicsImagesFromDownloads(): Boolean {
-    val fileFrom = File("${downloads.path}${File.separator}${getAppName()}${File.separator}${AppDirectory.COMICS_IMAGES}")
+    val fileFrom =
+      File("${downloads.path}${File.separator}${getAppName()}${File.separator}${AppDirectory.COMICS_IMAGES}")
     val fileTo = File("${context.filesDir}${File.separator}${AppDirectory.COMICS_IMAGES}")
 
     return fileFrom.copyRecursively(target = fileTo, overwrite = true)
@@ -693,7 +695,8 @@ class WebApi(private val context: Context) {
 
   private fun setComicsImagesToDownloads(): Boolean {
     val fileFrom = File("${context.filesDir}${File.separator}${AppDirectory.COMICS_IMAGES}")
-    val fileTo = File("${downloads.path}${File.separator}${getAppName()}${File.separator}${AppDirectory.COMICS_IMAGES}")
+    val fileTo =
+      File("${downloads.path}${File.separator}${getAppName()}${File.separator}${AppDirectory.COMICS_IMAGES}")
 
     return fileFrom.copyRecursively(target = fileTo, overwrite = true)
   }
@@ -705,7 +708,8 @@ class WebApi(private val context: Context) {
     if (file == "") throw ValidationException("File is empty")
     if (fileName == "") throw ValidationException("FileName is empty")
 
-    val filePath = File("${downloads.path}${File.separator}${getAppName()}${File.separator}${fileName}")
+    val filePath =
+      File("${downloads.path}${File.separator}${getAppName()}${File.separator}${fileName}")
 
     val result = FileUtils.write(filePath, file)
     if (!result) throw FilesException("File not written")

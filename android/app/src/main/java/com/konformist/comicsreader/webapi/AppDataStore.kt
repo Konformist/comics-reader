@@ -8,16 +8,19 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.first
 
-class AppDataStore() {
+class AppDataStore {
   companion object {
     lateinit var dataStore: DataStore<Preferences>
 
     /** Авто перелистывание */
     private val AUTO_READING_KEY = booleanPreferencesKey("auto_reading")
+
     /** Таймер для авто перелистывания */
     private val AUTO_READING_TIMEOUT_KEY = intPreferencesKey("auto_reading_timeout")
+
     /** Режим чтения */
     private val READING_MODE_KEY = stringPreferencesKey("reading_mode")
+
     /** Сжимать картинки при загрузке */
     private val IS_COMPRESS_KEY = booleanPreferencesKey("is_compress")
 

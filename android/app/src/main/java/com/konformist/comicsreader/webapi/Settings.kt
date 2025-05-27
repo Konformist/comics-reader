@@ -1,6 +1,6 @@
 package com.konformist.comicsreader.webapi
 
-data class Settings (
+data class Settings(
   /** Авто перелистывание */
   var autoReading: Boolean = false,
   /** Таймер для авто перелистывания */

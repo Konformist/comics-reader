@@ -1,16 +1,9 @@
 package com.konformist.comicsreader.db
 
 import android.content.Context
-import android.util.Log
 import com.konformist.comicsreader.utils.AppDirectory
 import com.konformist.comicsreader.utils.DatesUtils
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
-import java.nio.channels.FileChannel
 import java.time.LocalDate
 
 

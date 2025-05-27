@@ -35,6 +35,7 @@
           :autocapitalize="false"
           :autocomplete="false"
           class="mb-4"
+          :disabled="!comicsStore.comic.parserId"
           inputmode="url"
           label="CSS указатель на название"
           rows="2"
@@ -45,6 +46,7 @@
           :autocapitalize="false"
           :autocomplete="false"
           class="mb-4"
+          :disabled="!comicsStore.comic.parserId"
           inputmode="url"
           label="CSS указатель на картинку"
           rows="2"
@@ -66,6 +68,7 @@
           :autocapitalize="false"
           :autocomplete="false"
           class="mb-4"
+          :disabled="!comicsStore.comic.parserId"
           inputmode="url"
           label="CSS указатель на авторов"
           rows="2"
@@ -76,6 +79,7 @@
           :autocapitalize="false"
           :autocomplete="false"
           class="mb-4"
+          :disabled="!comicsStore.comic.parserId"
           inputmode="url"
           label="CSS указатель на текст авторов"
           rows="2"
@@ -86,6 +90,7 @@
           :autocapitalize="false"
           :autocomplete="false"
           class="mb-4"
+          :disabled="!comicsStore.comic.parserId"
           inputmode="url"
           label="CSS указатель на теги"
           rows="2"
@@ -96,6 +101,7 @@
           :autocapitalize="false"
           :autocomplete="false"
           class="mb-4"
+          :disabled="!comicsStore.comic.parserId"
           inputmode="url"
           label="CSS указатель на текст тегов"
           rows="2"
@@ -167,6 +173,7 @@ const loadComic = () => comicsStore.loadComic(comicId);
 
 const parser = ref(new ParserModel());
 const loadParser = async () => {
+  if (!comicsStore.comic.parserId) return;
   parser.value = await ParserController.load(comicsStore.comic.parserId);
 };
 
@@ -292,8 +299,9 @@ const onLoadInfo = async () => {
     const result = await ParserController.loadComicRaw(comicsStore.comic.fromUrl);
     const parsedComic = parseComic(result, parser.value, comicOverride.value);
 
-    if (!comicsStore.comic.cover.fromUrl && parsedComic.cover)
+    if (!comicsStore.comic.cover.fromUrl && parsedComic.cover) {
       comicsStore.comic.cover.fromUrl = parsedComic.cover;
+    }
 
     if (parsedComic.name) {
       comicsStore.comic.name = parsedComic.name;
@@ -310,26 +318,34 @@ const onLoadInfo = async () => {
       }
     }
 
-    for (const item of parsedComic.authors || []) {
-      const newItem = authorsStore.authors.find((e) => e.name.toLowerCase() === item.toLowerCase());
+    if (parsedComic.authors?.length) {
+      const authors: number[] = [];
+      for (const item of parsedComic.authors) {
+        const newItem = authorsStore.authors.find((e) => e.name.toLowerCase() === item.toLowerCase());
 
-      if (!newItem) {
-        const itemId = await AuthorController.save(new AuthorModel({ name: item }));
-        if (typeof itemId === 'number') comicsStore.comic.authors.push(itemId);
-      } else {
-        comicsStore.comic.authors.push(newItem.id);
+        if (!newItem) {
+          const itemId = await AuthorController.save(new AuthorModel({ name: item }));
+          if (typeof itemId === 'number') authors.push(itemId);
+        } else {
+          authors.push(newItem.id);
+        }
       }
+      comicsStore.comic.authors = authors;
     }
 
-    for (const item of parsedComic.tags || []) {
-      const newItem = tagsStore.tags.find((e) => e.name.toLowerCase() === item.toLowerCase());
+    if (parsedComic.tags?.length) {
+      const tags: number[] = [];
+      for (const item of parsedComic.tags || []) {
+        const newItem = tagsStore.tags.find((e) => e.name.toLowerCase() === item.toLowerCase());
 
-      if (!newItem) {
-        const itemId = await TagController.save(new TagModel({ name: item }));
-        if (typeof itemId === 'number') comicsStore.comic.tags.push(itemId);
-      } else {
-        comicsStore.comic.tags.push(newItem.id);
+        if (!newItem) {
+          const itemId = await TagController.save(new TagModel({ name: item }));
+          if (typeof itemId === 'number') tags.push(itemId);
+        } else {
+          tags.push(newItem.id);
+        }
       }
+      comicsStore.comic.tags = tags;
     }
 
     await saveComic();

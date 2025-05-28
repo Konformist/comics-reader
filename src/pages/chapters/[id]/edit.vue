@@ -108,7 +108,7 @@
                 cols="12"
               >
                 <ChapterPageEdit
-                  v-model:from="item.raw.fromUrl"
+                  v-model:from-url="item.raw.fromUrl"
                   can-delete
                   :disabled="loading || loadingGlobal || !item.raw.id"
                   :size="item.raw.file?.size"

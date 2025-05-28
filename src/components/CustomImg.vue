@@ -1,5 +1,12 @@
 <template>
+  <v-skeleton-loader
+    v-if="loading"
+    class="rounded-xl"
+    :height="height"
+    :width="width"
+  />
   <v-img
+    v-else
     :cover="cover"
     :height="height"
     rounded="xl"
@@ -32,6 +39,7 @@
 
 <script setup lang="ts">
 defineProps<{
+  loading?: boolean
   cover?: boolean
   height?: string | number
   width?: string | number

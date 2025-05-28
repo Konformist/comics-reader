@@ -1,7 +1,7 @@
 <template>
   <v-main>
     <v-toolbar
-      class="px-2"
+      class="px-4"
       color="background"
       density="comfortable"
     >

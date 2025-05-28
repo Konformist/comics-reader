@@ -2,18 +2,11 @@
   <v-main>
     <v-container class="pa-0 pb-16">
       <p class="pa-4">
-        <v-skeleton-loader
-          v-if="loading"
-          class="mx-auto"
-          height="300"
-          type="image"
-          width="200"
-        />
         <CustomImg
-          v-else
           class="mx-auto bg-grey-darken-4"
           cover
           height="300"
+          :loading="loading"
           :src="comicsStore.comic.cover.file?.url"
           width="200"
         />

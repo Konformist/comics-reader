@@ -17,7 +17,7 @@
   </v-app-bar>
   <v-main>
     <v-toolbar
-      class="px-2"
+      class="px-4"
       color="background"
       density="comfortable"
     >
@@ -51,19 +51,16 @@
       </div>
     </v-toolbar>
     <v-container class="pb-16 mb-4">
-      <v-row v-if="loading">
-        <v-col
-          v-for="i in 4"
+      <template v-if="loading">
+        <v-skeleton-loader
+          v-for="i in 2"
           :key="i"
-          class="pa-2"
-          cols="6"
-        >
-          <v-skeleton-loader
-            height="250"
-            type="card"
-          />
-        </v-col>
-      </v-row>
+          class="rounded-xl"
+          :class="i - 1 ? 'mt-4' : ''"
+          height="200"
+          type="card"
+        />
+      </template>
       <v-data-iterator
         v-else
         v-model:page="comicsPageStore.filters.page"
@@ -71,20 +68,14 @@
         items-per-page="20"
       >
         <template #default="{ items }">
-          <v-row>
-            <v-col
-              v-for="item in items"
-              :key="item.raw.id"
-              class="pa-2"
-              cols="12"
-            >
-              <ComicGallery
-                :authors="authorsStore.authors"
-                :comic="item.raw"
-                :tags="tagsStore.tags"
-              />
-            </v-col>
-          </v-row>
+          <ComicGallery
+            v-for="(item, index) in items"
+            :key="item.raw.id"
+            :authors="authorsStore.authors"
+            :class="index ? 'mt-4' : ''"
+            :comic="item.raw"
+            :tags="tagsStore.tags"
+          />
         </template>
         <template #footer="{ pageCount, prevPage, nextPage }">
           <v-pagination

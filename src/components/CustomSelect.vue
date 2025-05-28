@@ -15,8 +15,8 @@
         <v-chip
           v-for="item in chipsShow"
           :key="item.id"
+          append-icon="$delete"
           class="mr-1"
-          closable
           size="small"
           :text="item.name"
           @click.stop="onDelete(item.id)"

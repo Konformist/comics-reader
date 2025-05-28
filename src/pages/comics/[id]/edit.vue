@@ -152,10 +152,6 @@ const frame = ref(1);
 const comicId = +(route.params.id || 0);
 
 const comic = ref(new ComicModel());
-const loadComic = async () => {
-  await comicsStore.loadComic(comicId);
-  comic.value = new ComicModel(comicsStore.comic.getDTO());
-};
 
 const saveComic = async () => {
   await ComicController.save(comic.value);
@@ -172,7 +168,7 @@ const uploadCover = async () => {
     const base64 = await fileToBase64(image.value);
     await ComicCoverController.saveFile(comic.value.id, base64);
     await comicsStore.loadComicsForce();
-    await loadComic();
+    comic.value = new ComicModel(comicsStore.comic.getDTO());
     Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
@@ -189,8 +185,8 @@ const loadByLink = async () => {
     await saveComic();
     const result = await ParserController.loadImageRaw(comic.value.cover.fromUrl);
     await ComicCoverController.saveFile(comic.value.id, result);
-    await loadComic();
     await comicsStore.loadComicsForce();
+    comic.value = new ComicModel(comicsStore.comic.getDTO());
     Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
@@ -275,7 +271,8 @@ const createChapter = async () => {
 onMounted(async () => {
   loadingStart();
 
-  await loadComic();
+  await comicsStore.loadComic(comicId);
+  comic.value = new ComicModel(comicsStore.comic.getDTO());
   if (!comic.value.id) {
     router.replace({ name: '/' });
   } else {

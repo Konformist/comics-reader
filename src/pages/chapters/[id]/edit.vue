@@ -109,8 +109,10 @@
               >
                 <ChapterPageEdit
                   v-model:from="item.raw.fromUrl"
+                  can-delete
                   :disabled="loading || loadingGlobal || !item.raw.id"
-                  :item="item.raw"
+                  :size="item.raw.file?.size"
+                  :src="item.raw.file?.url"
                   @delete="delPage(item.raw)"
                   @download="onLoadImage(item.raw)"
                   @upload="uploadImage(item.raw, $event)"

@@ -359,6 +359,7 @@ const onLoadInfo = async () => {
       comic.value.tags = tags;
     }
 
+    await saveComic();
     await saveComicOverride();
     await Promise.all([
       tagsStore.loadTagsForce(),

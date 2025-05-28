@@ -8,20 +8,21 @@
     </template>
     <template #default="{ isActive }">
       <v-card>
-        <v-card-title class="pt-4">
+        <v-card-title class="pa-4">
           {{ label }}
         </v-card-title>
-        <v-card-item
-          v-if="items && items.length > 10"
-          class="pt-2 px-4"
-        >
-          <v-text-field
-            v-model="search"
-            flat
-            label="Поиск"
-            variant="solo-filled"
-          />
-        </v-card-item>
+        <template v-if="items && items.length > 10">
+          <v-divider />
+          <v-card-item class="pa-4">
+            <v-text-field
+              v-model="search"
+              flat
+              label="Поиск"
+              variant="solo-filled"
+            />
+          </v-card-item>
+        </template>
+        <v-divider />
         <v-list activatable>
           <v-list-item
             v-for="item in filteredItems"
@@ -38,11 +39,12 @@
                 color="primary"
                 hide-details
                 :model-value="itemActive"
-                style="margin: -8px 0"
+                style="margin: -8px 0 -8px -8px"
               />
             </template>
           </v-list-item>
         </v-list>
+        <v-divider />
         <v-card-actions>
           <v-spacer />
           <v-btn

@@ -35,11 +35,9 @@
           :autocapitalize="false"
           :autocomplete="false"
           class="mb-4"
-          :hide-details="false"
           hint="Пример: https://domain.com/12/23/<ID>.jpeg"
           inputmode="url"
           label="Шаблон для автозаполнения"
-          persistent-hint
           rows="2"
         />
         <v-number-input

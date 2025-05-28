@@ -1,22 +1,15 @@
 <template>
   <v-card>
     <v-card-item class="py-4">
-      <v-img
-        class="mx-auto bg-grey-darken-3"
-        height="300px"
-        rounded="xl"
-        :src="item.file?.url || '/'"
-        width="200px"
-      >
-        <template #error>
-          <div class="w-100 h-100 d-flex align-center justify-center text-body-2 text-grey-darken-2">
-            Нет изображения
-          </div>
-        </template>
-      </v-img>
+      <CustomImg
+        class="mx-auto"
+        height="300"
+        :src="src"
+        width="200"
+      />
     </v-card-item>
     <v-card-text class="pt-4 text-body-1">
-      Размер: {{ formatBytes(item.file?.size || 0) }}
+      Размер: {{ formatBytes(size || 0) }}
     </v-card-text>
     <v-card-item>
       <v-file-input
@@ -31,7 +24,7 @@
         Или
       </p>
       <v-textarea
-        v-model.trim="from"
+        v-model.trim="fromUrl"
         auto-grow
         :autocapitalize="false"
         :autocomplete="false"
@@ -45,16 +38,18 @@
     </v-card-item>
     <v-card-actions>
       <v-btn
-        :disabled="(!imageFile && !from) || disabled"
-        text="Загрузить"
-        @click="onLoad()"
-      />
-      <v-btn
+        v-if="canDelete"
         class="ml-auto"
         color="error"
         :disabled="disabled"
         text="Удалить"
         @click="$emit('delete')"
+      />
+      <v-spacer />
+      <v-btn
+        :disabled="(!imageFile && !fromUrl) || disabled"
+        text="Загрузить"
+        @click="onLoad()"
       />
     </v-card-actions>
   </v-card>
@@ -62,18 +57,19 @@
 
 <script setup lang="ts">
 import { formatBytes } from '@/core/utils/format.ts';
-import type ChapterPageModel from '@/core/entities/chapter-page/ChapterPageModel.ts';
 
-const from = defineModel('from', { default: '' });
+const fromUrl = defineModel<string>('fromUrl', { default: '' });
 
 const emit = defineEmits<{
-  (e: 'upload', v: File | File[]): void
+  (e: 'upload', v: File): void
   (e: 'download', v: void): void
   (e: 'delete', v: void): void
 }>();
 
 defineProps<{
-  item: ChapterPageModel
+  size?: number
+  src?: string
+  canDelete?: boolean
   disabled: boolean
 }>();
 
@@ -81,6 +77,6 @@ const imageFile = ref<File | null>(null);
 
 const onLoad = () => {
   if (imageFile.value) emit('upload', imageFile.value);
-  else if (from.value) emit('download');
+  else if (fromUrl.value) emit('download');
 };
 </script>

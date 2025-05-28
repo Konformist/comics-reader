@@ -6,97 +6,57 @@
       :items="tabs"
     />
     <v-container
-      v-if="frame == 1"
-      class="pa-0 pb-12"
+      v-if="frame === 1"
+      class="pa-0 pb-16"
     >
-      <div class="px-4 py-8">
+      <div class="pa-4">
         <v-textarea
-          v-model.trim="comicsStore.comic.name"
+          v-model.trim="comic.name"
           auto-grow
           class="mb-4"
           label="Название"
           rows="2"
         />
         <CustomSelect
-          v-model="comicsStore.comic.languageId"
+          v-model="comic.languageId"
           class="mb-4"
           :items="languagesStore.languages"
           label="Язык"
         />
         <CustomSelect
-          v-model="comicsStore.comic.authors"
+          v-model="comic.authors"
           class="mb-4"
           :items="authorsStore.authors"
           label="Авторы"
           multiple
         />
         <CustomSelect
-          v-model="comicsStore.comic.tags"
+          v-model="comic.tags"
           :items="tagsStore.tags"
           label="Теги"
           multiple
         />
       </div>
       <v-divider />
-      <div class="px-4 py-8">
-        <v-card class="mb-8">
-          <v-img
-            class="mx-auto"
-            cover
-            height="300"
-            rounded="xl"
-            :src="comicsStore.comic.cover.file?.url || '/'"
-            width="200"
-          >
-            <template #error>
-              <div
-                class="w-100 h-100 d-flex align-center justify-center
-                  border-md rounded-xl
-                  text-body-2 text-grey-darken-2"
-              >
-                Нет изображения
-              </div>
-            </template>
-          </v-img>
-          <v-card-text>
-            Размер: {{ formatBytes(comicsStore.comic.cover.file?.size || 0) }}
-          </v-card-text>
-        </v-card>
-        <v-file-input
-          v-model="image"
-          accept="image/*"
-          label="Загрузить картинку"
-        />
-        <p class="my-2">
-          Или
-        </p>
-        <v-textarea
-          v-model.trim="comicsStore.comic.cover.fromUrl"
-          auto-grow
-          :autocapitalize="false"
-          :autocomplete="false"
-          class="mb-4"
-          inputmode="url"
-          label="Ссылка на картинку"
-          rows="2"
-        />
-        <v-btn
-          class="w-100"
-          :disabled="(!image && !comicsStore.comic.cover.fromUrl) || loading || loadingGlobal"
-          text="Загрузить"
-          variant="tonal"
-          @click="onLoadCover()"
+      <div class="pa-4">
+        <ChapterPageEdit
+          v-model:from-url="comic.cover.fromUrl"
+          :disabled="loading || loadingGlobal"
+          :size="comic.cover.file?.size"
+          :src="comic.cover.file?.url"
+          @download="onLoadCover()"
+          @upload="image = $event"
         />
       </div>
       <v-divider />
-      <div class="px-4 py-8">
+      <div class="pa-4">
         <v-btn
           class="mb-4 w-100"
           :disabled="loading || loadingGlobal"
           text="Расширенные настройки"
           :to="{
             name: '/comics/[id]/override-edit',
-            params: { id: comicsStore.comic.id },
+            params: { id: comic.id },
           }"
           variant="tonal"
         />
@@ -111,7 +71,7 @@
       </div>
     </v-container>
     <v-container
-      v-else-if="frame==2"
+      v-else-if="frame===2"
       class="pb-16 mb-4"
     >
       <DictionaryList
@@ -146,6 +106,7 @@
 <script lang="ts" setup>
 import ChapterController from '@/core/entities/chapter/ChapterController.ts';
 import ChapterModel from '@/core/entities/chapter/ChapterModel.ts';
+import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import { useAuthorsStore } from '@/stores/authors.ts';
 import { useComicsStore } from '@/stores/comics.ts';
 import { useLanguagesStore } from '@/stores/languages.ts';
@@ -154,9 +115,6 @@ import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
 import useLoading from '@/composables/useLoading.ts';
 import ComicCoverController from '@/core/entities/comic-cover/ComicCoverController.ts';
-import ComicOverrideController from '@/core/entities/comic-override/ComicOverrideController.ts';
-import ComicOverrideModel from '@/core/entities/comic-override/ComicOverrideModel.ts';
-import { formatBytes } from '@/core/utils/format.ts';
 import { fileToBase64 } from '@/core/utils/image.ts';
 import ComicController from '@/core/entities/comic/ComicController.ts';
 import ParserController from '@/core/entities/parser/ParserController.ts';
@@ -193,15 +151,14 @@ const frame = ref(1);
 
 const comicId = +(route.params.id || 0);
 
-const loadComic = () => comicsStore.loadComic(comicId);
-
-const comicOverride = ref(new ComicOverrideModel());
-const loadComicOverride = async () => {
-  comicOverride.value = await ComicOverrideController.load(comicId);
+const comic = ref(new ComicModel());
+const loadComic = async () => {
+  await comicsStore.loadComic(comicId);
+  comic.value = new ComicModel(comicsStore.comic.getDTO());
 };
 
 const saveComic = async () => {
-  await ComicController.save(comicsStore.comic);
+  await ComicController.save(comic.value);
 };
 
 const image = ref<File | null>(null);
@@ -213,7 +170,7 @@ const uploadCover = async () => {
     loadingGlobalStart();
     await saveComic();
     const base64 = await fileToBase64(image.value);
-    await ComicCoverController.saveFile(comicsStore.comic.id, base64);
+    await ComicCoverController.saveFile(comic.value.id, base64);
     await comicsStore.loadComicsForce();
     await loadComic();
     Toast.show({ text: 'Комикс сохранён' });
@@ -225,13 +182,13 @@ const uploadCover = async () => {
 };
 
 const loadByLink = async () => {
-  if (!comicsStore.comic.cover.fromUrl) return;
+  if (!comic.value.cover.fromUrl) return;
 
   try {
     loadingGlobalStart();
     await saveComic();
-    const result = await ParserController.loadImageRaw(comicsStore.comic.cover.fromUrl);
-    await ComicCoverController.saveFile(comicsStore.comic.id, result);
+    const result = await ParserController.loadImageRaw(comic.value.cover.fromUrl);
+    await ComicCoverController.saveFile(comic.value.id, result);
     await loadComic();
     await comicsStore.loadComicsForce();
     Toast.show({ text: 'Комикс сохранён' });
@@ -244,7 +201,7 @@ const loadByLink = async () => {
 
 const onLoadCover = () => {
   if (image.value) uploadCover();
-  else if (comicsStore.comic.cover.fromUrl) loadByLink();
+  else if (comic.value.cover.fromUrl) loadByLink();
 };
 
 const onSave = async () => {
@@ -270,7 +227,7 @@ const deleteComic = async () => {
 
   try {
     loadingGlobalStart();
-    await ComicController.remove(comicsStore.comic.id);
+    await ComicController.remove(comic.value.id);
     await comicsStore.loadComicsForce();
     Toast.show({ text: 'Комикс удалён' });
     router.replace({ name: '/' });
@@ -319,7 +276,7 @@ onMounted(async () => {
   loadingStart();
 
   await loadComic();
-  if (!comicsStore.comic.id) {
+  if (!comic.value.id) {
     router.replace({ name: '/' });
   } else {
     await Promise.all([
@@ -327,7 +284,6 @@ onMounted(async () => {
       authorsStore.loadAuthors(),
       languagesStore.loadLanguages(),
       loadChapters(),
-      loadComicOverride(),
     ]);
   }
 

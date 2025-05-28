@@ -13,7 +13,7 @@
     />
     <v-progress-linear
       v-if="loadingGlobal"
-      class="position-absolute top-0 left-0 right-0"
+      class="position-fixed top-0 left-0 right-0"
       indeterminate
       style="z-index: 1010"
     />

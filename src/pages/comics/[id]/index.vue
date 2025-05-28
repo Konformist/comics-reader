@@ -1,7 +1,7 @@
 <template>
   <v-main>
-    <v-container class="pa-0 pb-16 mb-4">
-      <p class="pt-4">
+    <v-container class="pa-0 pb-16">
+      <p class="pa-4">
         <v-skeleton-loader
           v-if="loading"
           class="mx-auto"
@@ -9,24 +9,17 @@
           type="image"
           width="200"
         />
-        <v-img
+        <CustomImg
           v-else
           class="mx-auto bg-grey-darken-4"
           cover
           height="300"
-          rounded="xl"
-          :src="comicsStore.comic.cover.file?.url || '/'"
+          :src="comicsStore.comic.cover.file?.url"
           width="200"
-        >
-          <template #error>
-            <div class="w-100 h-100 d-flex align-center justify-center text-body-2 text-grey-darken-2">
-              Нет изображения
-            </div>
-          </template>
-        </v-img>
+        />
       </p>
-      <v-divider class="my-4" />
-      <h3 class="px-4 font-weight-medium">
+      <v-divider />
+      <h3 class="pa-4 font-weight-medium">
         {{ comicsStore.comic.name || '—' }} <v-icon
           v-if="comicsStore.comic.name"
           icon="$copy"
@@ -35,8 +28,8 @@
         />
       </h3>
       <template v-if="comicsStore.comic.fromUrl">
-        <v-divider class="my-4" />
-        <p class="px-4">
+        <v-divider />
+        <p class="pa-4">
           <a :href="comicsStore.comic.fromUrl">Ссылка на комикс</a> <v-icon
             icon="$copy"
             size="20"
@@ -44,17 +37,17 @@
           />
         </p>
       </template>
-      <v-divider class="my-4" />
-      <p class="px-4">
+      <v-divider />
+      <p class="pa-4">
         <b class="font-weight-medium">Авторы:</b> {{ authorsChips.length ? authorsChips.map((e) => e.name).join(", ") : '—' }}
       </p>
-      <v-divider class="my-4" />
-      <p class="px-4">
+      <v-divider />
+      <p class="pa-4">
         <b class="font-weight-medium">Язык:</b> {{ languagesChips.length ? languagesChips[0].name : '—' }}
       </p>
       <template v-if="tagsChips.length">
-        <v-divider class="my-4" />
-        <p class="px-4 d-flex flex-wrap ga-1 align-center">
+        <v-divider />
+        <p class="pa-4 d-flex flex-wrap ga-1 align-center">
           <v-chip
             v-for="item in tagsChips"
             :key="item.id"
@@ -65,7 +58,7 @@
         </p>
       </template>
       <template v-if="chaptersList.length">
-        <v-divider class="my-4" />
+        <v-divider />
         <v-list
           class="ma-4"
           :items="chaptersList"

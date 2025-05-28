@@ -1,9 +1,10 @@
 <template>
   <v-dialog v-model="opened">
     <v-card>
-      <v-card-title class="pt-4">
+      <v-card-title class="pa-4">
         {{ isCreated ? 'Создание' : 'Редактирование' }}
       </v-card-title>
+      <v-divider />
       <v-card-item class="pa-4">
         <v-text-field
           v-model.trim="model"
@@ -11,6 +12,7 @@
           variant="solo-filled"
         />
       </v-card-item>
+      <v-divider />
       <v-card-actions>
         <v-btn
           v-if="!isCreated"

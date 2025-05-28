@@ -1,124 +1,122 @@
 <template>
   <v-main>
-    <v-container class="pa-0 pb-16">
-      <div class="pa-4">
-        <v-alert
-          class="mb-4"
-          color="info"
-          variant="tonal"
-        >
-          Переопределение настроек парсера.<br>
-          Работают с DOM деревом. См. CSS.
-        </v-alert>
-        <CustomSelect
-          v-if="parsersStore.parsers.length"
-          v-model="comicsStore.comic.parserId"
-          class="mb-4"
-          :items="parsersStore.parsers"
-          label="Парсер"
-          @update:model-value="loadParser()"
-        />
-        <v-textarea
-          v-model.trim="comicsStore.comic.fromUrl"
-          auto-grow
-          :autocapitalize="false"
-          :autocomplete="false"
-          class="mb-4"
-          inputmode="url"
-          label="Ссылка на комикс"
-          rows="2"
-          @change="updateParser()"
-        />
-        <v-textarea
-          v-model.trim="keyTitle"
-          auto-grow
-          :autocapitalize="false"
-          :autocomplete="false"
-          class="mb-4"
-          :disabled="!comicsStore.comic.parserId"
-          inputmode="url"
-          label="CSS указатель на название"
-          rows="2"
-        />
-        <v-textarea
-          v-model.trim="keyCover"
-          auto-grow
-          :autocapitalize="false"
-          :autocomplete="false"
-          class="mb-4"
-          :disabled="!comicsStore.comic.parserId"
-          inputmode="url"
-          label="CSS указатель на картинку"
-          rows="2"
-        />
-        <v-textarea
-          v-model.trim="keyLanguage"
-          auto-grow
-          :autocapitalize="false"
-          :autocomplete="false"
-          class="mb-4"
-          :disabled="!comicsStore.comic.parserId"
-          inputmode="url"
-          label="CSS указатель на язык"
-          rows="2"
-        />
-        <v-textarea
-          v-model.trim="keyAuthors"
-          auto-grow
-          :autocapitalize="false"
-          :autocomplete="false"
-          class="mb-4"
-          :disabled="!comicsStore.comic.parserId"
-          inputmode="url"
-          label="CSS указатель на авторов"
-          rows="2"
-        />
-        <v-textarea
-          v-model.trim="keyAuthorsText"
-          auto-grow
-          :autocapitalize="false"
-          :autocomplete="false"
-          class="mb-4"
-          :disabled="!comicsStore.comic.parserId"
-          inputmode="url"
-          label="CSS указатель на текст авторов"
-          rows="2"
-        />
-        <v-textarea
-          v-model.trim="keyTags"
-          auto-grow
-          :autocapitalize="false"
-          :autocomplete="false"
-          class="mb-4"
-          :disabled="!comicsStore.comic.parserId"
-          inputmode="url"
-          label="CSS указатель на теги"
-          rows="2"
-        />
-        <v-textarea
-          v-model.trim="keyTagsText"
-          auto-grow
-          :autocapitalize="false"
-          :autocomplete="false"
-          class="mb-4"
-          :disabled="!comicsStore.comic.parserId"
-          inputmode="url"
-          label="CSS указатель на текст тегов"
-          rows="2"
-        />
-        <v-btn
-          class="w-100"
-          :disabled="!comicsStore.comic.parserId || !comicsStore.comic.fromUrl || loading || loadingGlobal"
-          text="Загрузить"
-          variant="tonal"
-          @click="onLoadInfo()"
-        />
-      </div>
+    <v-container class="pb-16 mb-4">
+      <v-alert
+        class="mb-4"
+        color="info"
+        variant="tonal"
+      >
+        Переопределение настроек парсера.<br>
+        Работают с DOM деревом. См. CSS.
+      </v-alert>
+      <CustomSelect
+        v-if="parsersStore.parsers.length"
+        v-model="comic.parserId"
+        class="mb-4"
+        :items="parsersStore.parsers"
+        label="Парсер"
+        @update:model-value="loadParser()"
+      />
+      <v-textarea
+        v-model.trim="comic.fromUrl"
+        auto-grow
+        :autocapitalize="false"
+        :autocomplete="false"
+        class="mb-4"
+        inputmode="url"
+        label="Ссылка на комикс"
+        rows="2"
+        @change="updateParser()"
+      />
+      <v-textarea
+        v-model.trim="keyTitle"
+        auto-grow
+        :autocapitalize="false"
+        :autocomplete="false"
+        class="mb-4"
+        :disabled="!comic.parserId"
+        inputmode="url"
+        label="CSS указатель на название"
+        rows="2"
+      />
+      <v-textarea
+        v-model.trim="keyCover"
+        auto-grow
+        :autocapitalize="false"
+        :autocomplete="false"
+        class="mb-4"
+        :disabled="!comic.parserId"
+        inputmode="url"
+        label="CSS указатель на картинку"
+        rows="2"
+      />
+      <v-textarea
+        v-model.trim="keyLanguage"
+        auto-grow
+        :autocapitalize="false"
+        :autocomplete="false"
+        class="mb-4"
+        :disabled="!comic.parserId"
+        inputmode="url"
+        label="CSS указатель на язык"
+        rows="2"
+      />
+      <v-textarea
+        v-model.trim="keyAuthors"
+        auto-grow
+        :autocapitalize="false"
+        :autocomplete="false"
+        class="mb-4"
+        :disabled="!comic.parserId"
+        inputmode="url"
+        label="CSS указатель на авторов"
+        rows="2"
+      />
+      <v-textarea
+        v-model.trim="keyAuthorsText"
+        auto-grow
+        :autocapitalize="false"
+        :autocomplete="false"
+        class="mb-4"
+        :disabled="!comic.parserId"
+        inputmode="url"
+        label="CSS указатель на текст авторов"
+        rows="2"
+      />
+      <v-textarea
+        v-model.trim="keyTags"
+        auto-grow
+        :autocapitalize="false"
+        :autocomplete="false"
+        class="mb-4"
+        :disabled="!comic.parserId"
+        inputmode="url"
+        label="CSS указатель на теги"
+        rows="2"
+      />
+      <v-textarea
+        v-model.trim="keyTagsText"
+        auto-grow
+        :autocapitalize="false"
+        :autocomplete="false"
+        class="mb-4"
+        :disabled="!comic.parserId"
+        inputmode="url"
+        label="CSS указатель на текст тегов"
+        rows="2"
+      />
+      <v-btn
+        class="w-100"
+        :disabled="!comic.parserId || !comic.fromUrl || loading || loadingGlobal"
+        text="Загрузить"
+        variant="tonal"
+        @click="onLoadInfo()"
+      />
     </v-container>
     <v-fab
       :disabled="loading || loadingGlobal"
       icon="$save"
-      @click="saveComic()"
+      @click="onSave()"
     />
   </v-main>
 </template>
@@ -129,6 +127,8 @@ import AuthorController from '@/core/entities/author/AuthorController.ts';
 import AuthorModel from '@/core/entities/author/AuthorModel.ts';
 import ComicOverrideController from '@/core/entities/comic-override/ComicOverrideController.ts';
 import ComicOverrideModel from '@/core/entities/comic-override/ComicOverrideModel.ts';
+import ComicController from '@/core/entities/comic/ComicController.ts';
+import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import LanguageController from '@/core/entities/language/LanguageController.ts';
 import LanguageModel from '@/core/entities/language/LanguageModel.ts';
 import ParserController from '@/core/entities/parser/ParserController.ts';
@@ -169,12 +169,12 @@ const {
 
 const comicId = +(route.params.id || 0);
 
-const loadComic = () => comicsStore.loadComic(comicId);
+const comic = ref(new ComicModel());
 
 const parser = ref(new ParserModel());
 const loadParser = async () => {
-  if (!comicsStore.comic.parserId) return;
-  parser.value = await ParserController.load(comicsStore.comic.parserId);
+  if (!comic.value.parserId) return;
+  parser.value = await ParserController.load(comic.value.parserId);
 };
 
 const comicOverride = ref(new ComicOverrideModel());
@@ -183,10 +183,20 @@ const loadComicOverride = async () => {
 };
 
 const saveComic = async () => {
+  await ComicController.save(comic.value);
+  await comicsStore.loadComicsForce();
+  comic.value = new ComicModel(comicsStore.comic.getDTO());
+};
+
+const saveComicOverride = async () => {
+  await ComicOverrideController.save(comicOverride.value);
+};
+
+const onSave = async () => {
   try {
     loadingGlobalStart();
-    await ComicOverrideController.save(comicOverride.value);
-    await loadComicOverride();
+    await saveComic();
+    await saveComicOverride();
     Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
@@ -260,9 +270,10 @@ const keyTagsText = computed({
 
 const init = async () => {
   loadingStart();
-  await loadComic();
+  await comicsStore.loadComic(comicId);
+  comic.value = new ComicModel(comicsStore.comic.getDTO());
 
-  if (!comicsStore.comic.id) {
+  if (!comic.value.id) {
     router.replace({ name: '/' });
   } else {
     await Promise.all([
@@ -281,30 +292,30 @@ const init = async () => {
 init();
 
 const updateParser = () => {
-  if (!comicsStore.comic.fromUrl) return;
+  if (!comic.value.fromUrl) return;
 
-  const item = parsersStore.parsers.find((e) => e.siteUrl && comicsStore.comic.fromUrl.includes(e.siteUrl));
+  const item = parsersStore.parsers.find((e) => e.siteUrl && comic.value.fromUrl.includes(e.siteUrl));
 
   if (!item) return;
 
-  comicsStore.comic.parserId = item.id;
+  comic.value.parserId = item.id;
   loadParser();
 };
 
 const onLoadInfo = async () => {
-  if (!comicsStore.comic.fromUrl || !parser.value) return;
+  if (!comic.value.fromUrl || !parser.value) return;
 
   try {
     loadingGlobalStart();
-    const result = await ParserController.loadComicRaw(comicsStore.comic.fromUrl);
+    const result = await ParserController.loadComicRaw(comic.value.fromUrl);
     const parsedComic = parseComic(result, parser.value, comicOverride.value);
 
-    if (!comicsStore.comic.cover.fromUrl && parsedComic.cover) {
-      comicsStore.comic.cover.fromUrl = parsedComic.cover;
+    if (!comic.value.cover.fromUrl && parsedComic.cover) {
+      comic.value.cover.fromUrl = parsedComic.cover;
     }
 
     if (parsedComic.name) {
-      comicsStore.comic.name = parsedComic.name;
+      comic.value.name = parsedComic.name;
     }
 
     if (parsedComic.language) {
@@ -312,9 +323,9 @@ const onLoadInfo = async () => {
 
       if (!language) {
         const itemId = await LanguageController.save(new LanguageModel({ name: parsedComic.language }));
-        if (typeof itemId === 'number') comicsStore.comic.languageId = itemId;
+        if (typeof itemId === 'number') comic.value.languageId = itemId;
       } else {
-        comicsStore.comic.languageId = language.id;
+        comic.value.languageId = language.id;
       }
     }
 
@@ -330,7 +341,7 @@ const onLoadInfo = async () => {
           authors.push(newItem.id);
         }
       }
-      comicsStore.comic.authors = authors;
+      comic.value.authors = authors;
     }
 
     if (parsedComic.tags?.length) {
@@ -345,20 +356,21 @@ const onLoadInfo = async () => {
           tags.push(newItem.id);
         }
       }
-      comicsStore.comic.tags = tags;
+      comic.value.tags = tags;
     }
 
-    await saveComic();
-    await comicsStore.loadComicsForce();
+    await saveComicOverride();
     await Promise.all([
       tagsStore.loadTagsForce(),
       authorsStore.loadAuthorsForce(),
       languagesStore.loadLanguagesForce(),
-      loadComic(),
+      comicsStore.loadComicsForce(),
+      loadComicOverride(),
     ]);
+    comic.value = new ComicModel(comicsStore.comic.getDTO());
     Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
-    Toast.show({ text: `Комикс не сохранён. Ошибка: ${e}` });
+    Toast.show({ text: `Ошибка: ${e}` });
   } finally {
     loadingGlobalEnd();
   }

@@ -1,18 +1,23 @@
 <template>
   <v-img
-    v-if="item.file?.url"
     v-intersect.once="onRead"
     :max-height="maxHeight"
     :max-width="maxWidth"
-    :src="item.file.url"
-  />
-  <div
-    v-else
-    class="w-100 d-flex justify-center align-center text-body-2 text-grey-darken-2"
-    style="min-height: 400px"
+    :min-height="error || !item.file?.url ? 400 : undefined"
+    :src="item.file?.url"
+    @error="error = true"
   >
-    Нет изображения
-  </div>
+    <template #placeholder>
+      <div class="w-100 h-100 d-flex justify-center align-center text-body-2 text-grey-darken-2">
+        Нет изображения
+      </div>
+    </template>
+    <template #error>
+      <div class="w-100 h-100 d-flex justify-center align-center text-body-2 text-grey-darken-2">
+        Нет изображения
+      </div>
+    </template>
+  </v-img>
 </template>
 
 <script lang="ts" setup>
@@ -27,6 +32,8 @@ const { item } = defineProps<{
   maxWidth?: string
   maxHeight?: string
 }>();
+
+const error = ref(false);
 
 const onRead = (isIntersect: boolean) => {
   if (!item.isRead && isIntersect) emit('read');

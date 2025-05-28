@@ -1,7 +1,7 @@
 <template>
   <v-main>
     <v-container class="pa-0">
-      <div class="px-4 py-8">
+      <div class="pa-4">
         <v-alert
           color="info"
           variant="tonal"
@@ -46,7 +46,7 @@
         />
       </div>
       <v-divider />
-      <div class="px-4 py-8">
+      <div class="pa-4">
         <v-alert color="info" variant="tonal">
           Если есть бекап с таким же именем, он будет заменён загруженным
         </v-alert>
@@ -64,11 +64,11 @@
         />
       </div>
       <v-divider />
-      <div class="px-4 py-8">
+      <div class="pa-4">
         <v-btn
           class="w-100"
           :disabled="loadingGlobal || loading"
-          text="Сохранить изображения в Загрузки"
+          text="Изображения в Загрузки"
           variant="tonal"
           @click="saveImagesToGlobal()"
         />
@@ -76,7 +76,7 @@
           class="mt-4 w-100"
           color="error"
           :disabled="loadingGlobal || loading"
-          text="Загрузить изображения из Загрузок"
+          text="Изображения из Загрузок"
           variant="tonal"
           @click="loadImagesFromGlobal()"
         />

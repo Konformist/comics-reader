@@ -12,6 +12,7 @@ declare module 'vue' {
     ChapterPageEdit: typeof import('./components/ChapterPageEdit.vue')['default']
     ChapterPageRead: typeof import('./components/ChapterPageRead.vue')['default']
     ComicGallery: typeof import('./components/ComicGallery.vue')['default']
+    CustomBtnGroup: typeof import('./components/CustomBtnGroup.vue')['default']
     CustomImg: typeof import('./components/CustomImg.vue')['default']
     CustomListDialog: typeof import('./components/CustomListDialog.vue')['default']
     CustomSelect: typeof import('./components/CustomSelect.vue')['default']

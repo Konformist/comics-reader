@@ -2,41 +2,11 @@
   <v-main>
     <v-container class="pa-0">
       <div class="pa-4">
-        <v-label
-          class="w-100"
-          text="Направление прокрутки"
+        <CustomBtnGroup
+          v-model="appStore.settings.readingMode"
+          :items="items"
+          label="Направление прокрутки"
         />
-        <div>
-          <v-btn
-            :active="appStore.settings.readingMode === 'vertical'"
-            class="w-100 rounded-t-xl"
-            :color="appStore.settings.readingMode === 'vertical' ? 'primary' : ''"
-            flat
-            :rounded="false"
-            text="Вертикaльно"
-            @click="appStore.settings.readingMode = 'vertical'"
-          />
-          <v-divider />
-          <v-btn
-            :active="appStore.settings.readingMode === 'horizontal'"
-            class="w-100 rounded-0"
-            :color="appStore.settings.readingMode === 'horizontal' ? 'primary' : ''"
-            flat
-            :rounded="false"
-            text="Горизонтально"
-            @click="appStore.settings.readingMode = 'horizontal'"
-          />
-          <v-divider />
-          <v-btn
-            :active="appStore.settings.readingMode === 'webtoon'"
-            class="w-100 rounded-b-xl"
-            :color="appStore.settings.readingMode === 'webtoon' ? 'primary' : ''"
-            flat
-            :rounded="false"
-            text="Webtoon"
-            @click="appStore.settings.readingMode = 'webtoon'"
-          />
-        </div>
         <v-label
           class="mt-4 w-100"
           text="Авто перелистывание"
@@ -92,6 +62,12 @@ definePage({
     title: 'Настройки',
   },
 });
+
+const items = [
+  { id: 'vertical', name: 'Вертикальная' },
+  { id: 'horizontal', name: 'Горизонтальная' },
+  { id: 'webtoon', name: 'Webtoon' },
+];
 
 onBeforeUnmount(() => {
   appStore.loadSettings();

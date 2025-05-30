@@ -23,11 +23,9 @@
 <script lang="ts" setup>
 import type ChapterPageModel from '@/core/entities/chapter-page/ChapterPageModel.ts';
 
-const emit = defineEmits<{
-  (e: 'read', v: void): void
-}>();
+const emit = defineEmits<{ (e: 'read', v: void): void }>();
 
-const { item } = defineProps<{
+const { item, maxWidth = undefined, maxHeight = undefined } = defineProps<{
   item: ChapterPageModel
   maxWidth?: string
   maxHeight?: string

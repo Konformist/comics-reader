@@ -83,9 +83,7 @@ export default createVuetify({
       'read': mdiBookOpenPageVariant,
       'triangleDown': mdiTriangleDown,
     },
-    sets: {
-      mdi,
-    },
+    sets: { mdi },
   },
   theme: {
     defaultTheme: 'dark',
@@ -93,43 +91,27 @@ export default createVuetify({
       dark: {
         dark: true,
         colors: {
-          background: '#121212',
-          primary: '#00bb00',
+          'background': '#121212',
+          'primary': '#00bb00',
           'on-primary': '#000',
-          secondary: '#770000',
+          'secondary': '#770000',
         },
       },
     },
   },
   defaults: {
-    VDialog: {
-      scrim: '#121212',
-    },
-    VAppBar: {
-      elevation: '2',
-    },
+    VDialog: { scrim: '#121212' },
+    VAppBar: { elevation: '2' },
     VFab: {
       app: true,
       size: 'large',
     },
-    VBtn: {
-      size: 'large',
-    },
-    VBtnToggle: {
-      color: 'primary',
-    },
-    VAlert: {
-      rounded: 'xl',
-    },
-    VPagination: {
-      rounded: true,
-    },
-    VBottomNavigation: {
-      elevation: '2',
-    },
-    VCard: {
-      rounded: 'xl',
-    },
+    VBtn: { size: 'large' },
+    VBtnToggle: { color: 'primary' },
+    VAlert: { rounded: 'xl' },
+    VPagination: { rounded: true },
+    VBottomNavigation: { elevation: '2' },
+    VCard: { rounded: 'xl' },
     VChip: {
       color: 'primary',
       rounded: true,

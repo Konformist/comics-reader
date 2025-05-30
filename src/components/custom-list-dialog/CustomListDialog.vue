@@ -8,11 +8,13 @@
     </template>
     <template #default="{ isActive }">
       <v-card>
-        <v-card-title class="pa-4">
-          {{ label }}
-        </v-card-title>
-        <template v-if="items && items.length > 10">
+        <template v-if="label">
+          <v-card-title class="pa-4">
+            {{ label }}
+          </v-card-title>
           <v-divider />
+        </template>
+        <template v-if="items && items.length >= 10">
           <v-card-item class="pa-4">
             <v-text-field
               v-model="search"
@@ -21,8 +23,8 @@
               variant="solo-filled"
             />
           </v-card-item>
+          <v-divider />
         </template>
-        <v-divider />
         <v-list activatable>
           <v-list-item
             v-for="item in filteredItems"
@@ -63,8 +65,12 @@ const model = defineModel<number | number[]>({ default: 0 });
 const {
   items = [],
   multiple,
+  label = '',
 } = defineProps<{
-  items?: Array<{ id: number; name: string }>
+  items?: Array<{
+    id: number
+    name: string
+  }>
   multiple?: boolean
   label?: string
 }>();

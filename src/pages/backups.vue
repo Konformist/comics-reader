@@ -47,7 +47,10 @@
       </div>
       <v-divider />
       <div class="pa-4">
-        <v-alert color="info" variant="tonal">
+        <v-alert
+          color="info"
+          variant="tonal"
+        >
           Если есть бекап с таким же именем, он будет заменён загруженным
         </v-alert>
         <v-file-input
@@ -210,9 +213,7 @@ const saveBackupToGlobal = async (): Promise<void> => {
   if (!backupPath.value) return;
 
   try {
-    await Api.api('file/backups/downloads', {
-      fileName: backupPath.value.name,
-    });
+    await Api.api('file/backups/downloads', { fileName: backupPath.value.name });
     Toast.show({ text: 'Бекап сохранен в Загрузки' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });

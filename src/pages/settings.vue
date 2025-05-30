@@ -30,7 +30,10 @@
       </div>
       <v-divider />
       <div class="pa-4">
-        <v-label class="w-100" text="Сжатие изображений при загрузке">
+        <v-label
+          class="w-100"
+          text="Сжатие изображений при загрузке"
+        >
           <v-switch
             v-model="appStore.settings.isCompress"
             class="ml-auto"
@@ -64,9 +67,18 @@ definePage({
 });
 
 const items = [
-  { id: 'vertical', name: 'Вертикальная' },
-  { id: 'horizontal', name: 'Горизонтальная' },
-  { id: 'webtoon', name: 'Webtoon' },
+  {
+    id: 'vertical',
+    name: 'Вертикальная',
+  },
+  {
+    id: 'horizontal',
+    name: 'Горизонтальная',
+  },
+  {
+    id: 'webtoon',
+    name: 'Webtoon',
+  },
 ];
 
 onBeforeUnmount(() => {

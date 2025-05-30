@@ -13,7 +13,10 @@
         :src="comic.cover?.file?.url"
         width="140"
       />
-      <div class="flex-1-1 py-4" style="min-width: 0">
+      <div
+        class="flex-1-1 py-4"
+        style="min-width: 0"
+      >
         <v-card-text class="py-1 text-body-1">
           <div
             class="text-ellipsis"

@@ -21,7 +21,10 @@
       color="background"
       density="comfortable"
     >
-      <div class="w-100 d-flex" style="overflow-x: auto;">
+      <div
+        class="w-100 d-flex"
+        style="overflow-x: auto;"
+      >
         <DropdownButton
           v-model="comicsPageStore.filters.tags"
           class="mr-2"

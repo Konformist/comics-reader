@@ -30,7 +30,7 @@
 <script setup lang="ts">
 const model = defineModel<string>({ default: '' });
 
-const { items = [] } = defineProps<{
+const { items = [], label = '' } = defineProps<{
   label?: string
   items?: Array<{
     id: string

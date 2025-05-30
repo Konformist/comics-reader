@@ -30,9 +30,7 @@ import { formatBytes } from '@/core/utils/format.ts';
 
 const model = defineModel<ITreeFile>();
 
-const { item } = defineProps<{
-  item: ITreeDirectory | ITreeFile
-}>();
+const { item } = defineProps<{ item: ITreeDirectory | ITreeFile }>();
 
 const opened = ref(false);
 

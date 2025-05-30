@@ -28,9 +28,7 @@
 </template>
 
 <script setup lang="ts">
-defineEmits<{
-  (e: 'click-item', v: number): void
-}>();
+defineEmits<{ (e: 'click-item', v: number): void }>();
 defineProps<{
   loading?: boolean
   items: Array<{

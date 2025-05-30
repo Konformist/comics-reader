@@ -31,7 +31,10 @@ export default class WebApiPluginFake {
   comicIds = faker.helpers.uniqueArray(this.uniqArrInt(1, this.COMIC_COUNT), this.COMIC_COUNT);
 
   uniqArrInt(min: number, max: number) {
-    return () => faker.number.int({ min, max });
+    return () => faker.number.int({
+      min,
+      max,
+    });
   }
 
   getParserId() {
@@ -57,7 +60,10 @@ export default class WebApiPluginFake {
   }
 
   getParsers(): IParserDTO[] {
-    return faker.helpers.arrayElements(this.parserIds, { min: 1, max: this.PARSER_COUNT })
+    return faker.helpers.arrayElements(this.parserIds, {
+      min: 1,
+      max: this.PARSER_COUNT,
+    })
       .map((e) => this.getParser({ id: e }));
   }
 
@@ -75,7 +81,10 @@ export default class WebApiPluginFake {
   }
 
   getLanguages = (): ILanguageDTO[] => (
-    faker.helpers.arrayElements(this.languageIds, { min: 1, max: this.LANGUAGE_COUNT })
+    faker.helpers.arrayElements(this.languageIds, {
+      min: 1,
+      max: this.LANGUAGE_COUNT,
+    })
       .map((e) => this.getLanguage({ id: e }))
   );
 
@@ -93,7 +102,10 @@ export default class WebApiPluginFake {
   }
 
   getTags(): ITagDTO[] {
-    return faker.helpers.arrayElements(this.tagIds, { min: 1, max: this.TAG_COUNT })
+    return faker.helpers.arrayElements(this.tagIds, {
+      min: 1,
+      max: this.TAG_COUNT,
+    })
       .map((e) => this.getTag({ id: e }));
   }
 
@@ -111,7 +123,10 @@ export default class WebApiPluginFake {
   }
 
   getAuthors(): IAuthorDTO[] {
-    return faker.helpers.arrayElements(this.authorIds, { min: 1, max: this.AUTHOR_COUNT })
+    return faker.helpers.arrayElements(this.authorIds, {
+      min: 1,
+      max: this.AUTHOR_COUNT,
+    })
       .map((e) => this.getAuthor({ id: e }));
   }
 
@@ -154,18 +169,32 @@ export default class WebApiPluginFake {
       id: override?.id || this.getComicId(),
       cdate: '',
       mdate: '',
-      name: faker.word.words({ count: { min: 1, max: 10 } }),
+      name: faker.word.words({
+        count: {
+          min: 1,
+          max: 10,
+        },
+      }),
       parserId: this.getParserId(),
       fromUrl: faker.internet.url(),
       languageId: this.getLanguageId(),
-      authors: faker.helpers.arrayElements(this.authorIds, { min: 1, max: this.AUTHOR_COUNT }),
-      tags: faker.helpers.arrayElements(this.tagIds, { min: 1, max: this.TAG_COUNT }),
+      authors: faker.helpers.arrayElements(this.authorIds, {
+        min: 1,
+        max: this.AUTHOR_COUNT,
+      }),
+      tags: faker.helpers.arrayElements(this.tagIds, {
+        min: 1,
+        max: this.TAG_COUNT,
+      }),
       cover: this.getComicCover(),
     };
   }
 
   getComics(): IComicDTO[] {
-    return faker.helpers.arrayElements(this.comicIds, { min: 1, max: this.COMIC_COUNT })
+    return faker.helpers.arrayElements(this.comicIds, {
+      min: 1,
+      max: this.COMIC_COUNT,
+    })
       .map((e) => this.getComic({ id: e }));
   }
 
@@ -188,7 +217,10 @@ export default class WebApiPluginFake {
       min: 1,
       max: this.CHAPTER_PAGE_COUNT,
     })
-      .map((e) => this.getChapterPage({ id: e, chapterId }));
+      .map((e) => this.getChapterPage({
+        id: e,
+        chapterId,
+      }));
   }
 
   getChapterId() {
@@ -207,7 +239,13 @@ export default class WebApiPluginFake {
     };
   };
   getChapters = (comicId: number): IChapterDTO[] => (
-    faker.helpers.arrayElements(this.chapterIds, { min: 1, max: this.CHAPTER_COUNT })
-      .map((e) => this.getChapter({ id: e, comicId }))
+    faker.helpers.arrayElements(this.chapterIds, {
+      min: 1,
+      max: this.CHAPTER_COUNT,
+    })
+      .map((e) => this.getChapter({
+        id: e,
+        comicId,
+      }))
   );
 }

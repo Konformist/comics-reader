@@ -144,8 +144,14 @@ const {
 } = useLoading();
 
 const tabs = [
-  { value: 1, text: 'Комикс' },
-  { value: 2, text: 'Главы' },
+  {
+    value: 1,
+    text: 'Комикс',
+  },
+  {
+    value: 2,
+    text: 'Главы',
+  },
 ];
 const frame = ref(1);
 

@@ -1,9 +1,7 @@
 import WebApiPluginFake from '@/plugins/WebApiPluginFake.ts';
 import { registerPlugin, WebPlugin } from '@capacitor/core';
 
-interface IApiError {
-  error: string
-}
+interface IApiError { error: string }
 
 export type TReaderDirection = 'vertical' | 'horizontal' | 'webtoon';
 
@@ -40,17 +38,11 @@ export interface ITreeDirectory {
   childes: Array<ITreeDirectory | ITreeFile>
 }
 
-export interface ITagDTO extends DBDates {
-  name: string
-}
+export interface ITagDTO extends DBDates {name: string}
 
-export interface IAuthorDTO extends DBDates {
-  name: string
-}
+export interface IAuthorDTO extends DBDates {name: string}
 
-export interface ILanguageDTO extends DBDates {
-  name: string
-}
+export interface ILanguageDTO extends DBDates {name: string}
 
 export interface IParserDTO extends DBDates {
   name: string
@@ -342,14 +334,20 @@ export interface IApi {
 }
 
 interface IWebApiPlugin {
-  api<K extends keyof IApi>(options: { path: K, body?: IApi[K]['request'] }): Promise<{ result: IApi[K]['response'] } | IApiError>
+  api<K extends keyof IApi>(options: {
+    path: K
+    body?: IApi[K]['request']
+  }): Promise<{ result: IApi[K]['response'] } | IApiError>
 }
 
 class WebApiPlugin extends WebPlugin implements IWebApiPlugin {
   fake: WebApiPluginFake = new WebApiPluginFake();
 
   // eslint-disable-next-line complexity
-  async api<K extends keyof IApi>(options: { path: K, body: IApi[K]['request'] }): Promise<{ result: IApi[K]['response'] } | IApiError> {
+  async api<K extends keyof IApi>(options: {
+    path: K
+    body: IApi[K]['request']
+  }): Promise<{ result: IApi[K]['response'] } | IApiError> {
     let result: IApi[K]['response'] = true;
 
     console.log(options.path, options.body);

@@ -2,7 +2,10 @@
   <v-main>
     <v-container class="pa-0">
       <div class="pa-4">
-        <v-alert color="error" variant="tonal">
+        <v-alert
+          color="error"
+          variant="tonal"
+        >
           Осторожно! Опасный функционал!<br>
           При неправильном использовании можно потерять данные
         </v-alert>

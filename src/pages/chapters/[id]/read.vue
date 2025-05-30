@@ -75,7 +75,10 @@ const appStore = useAppStore();
 
 const autoPlay = computed(() => (
   appStore.settings.autoReading
-    ? { delay: appStore.settings.autoReadingTimeout, stopOnLastSlide: true }
+    ? {
+      delay: appStore.settings.autoReadingTimeout,
+      stopOnLastSlide: true,
+    }
     : false
 ));
 

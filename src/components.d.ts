@@ -8,13 +8,13 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    BottomNavigation: typeof import('./components/BottomNavigation.vue')['default']
+    BottomNavigation: typeof import('./components/bottom-navigation/BottomNavigation.vue')['default']
     ChapterPageEdit: typeof import('./components/ChapterPageEdit.vue')['default']
     ChapterPageRead: typeof import('./components/ChapterPageRead.vue')['default']
     ComicGallery: typeof import('./components/ComicGallery.vue')['default']
     CustomBtnGroup: typeof import('./components/CustomBtnGroup.vue')['default']
-    CustomImg: typeof import('./components/CustomImg.vue')['default']
-    CustomListDialog: typeof import('./components/CustomListDialog.vue')['default']
+    CustomImg: typeof import('./components/custom-img/CustomImg.vue')['default']
+    CustomListDialog: typeof import('./components/custom-list-dialog/CustomListDialog.vue')['default']
     CustomSelect: typeof import('./components/CustomSelect.vue')['default']
     DictionaryEditDialog: typeof import('./components/DictionaryEditDialog.vue')['default']
     DictionaryList: typeof import('./components/DictionaryList.vue')['default']

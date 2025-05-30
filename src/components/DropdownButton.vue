@@ -32,12 +32,16 @@
 const model = defineModel<number | number[]>({ default: 0 });
 
 const {
-  text,
+  text = '',
   items = [],
   multiple,
+  prependIcon = '',
 } = defineProps<{
   prependIcon?: string
-  items?: Array<{ id: number; name: string }>
+  items?: Array<{
+    id: number
+    name: string
+  }>
   text?: string
   multiple?: boolean
 }>();

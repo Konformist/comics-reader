@@ -6,16 +6,10 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   zoomEnabled: true,
   backgroundColor: '#121212',
-  android: {
-    adjustMarginsForEdgeToEdge: 'auto',
-  },
+  android: { adjustMarginsForEdgeToEdge: 'auto' },
   plugins: {
-    Keyboard: {
-      resizeOnFullScreen: true,
-    },
-    CapacitorHttp: {
-      enabled: true,
-    },
+    Keyboard: { resizeOnFullScreen: true },
+    CapacitorHttp: { enabled: true },
   },
 };
 

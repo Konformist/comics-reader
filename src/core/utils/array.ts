@@ -1,5 +1,3 @@
-export const dedupe = (v: string[]) => ([...(new Set(v))]);
-
 export const sortString = (a: string, b: string) => {
   const f = a.toLowerCase();
   const s = b.toLowerCase();

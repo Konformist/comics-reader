@@ -23,7 +23,9 @@
               @click="onCopy(parser.siteUrl)"
             />
           </template>
-          <template v-else>—</template>
+          <template v-else>
+            —
+          </template>
         </p>
       </div>
       <v-divider />

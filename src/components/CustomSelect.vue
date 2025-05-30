@@ -45,8 +45,14 @@ const SHOW_COUNT = 2;
 
 const model = defineModel<number | number[]>({ default: 0 });
 
-const { items = [], multiple } = defineProps<{
-  items?: Array<{ id: number; name: string }>
+const {
+  items = [],
+  multiple, label = '',
+} = defineProps<{
+  items?: Array<{
+    id: number
+    name: string
+  }>
   multiple?: boolean
   label?: string
 }>();

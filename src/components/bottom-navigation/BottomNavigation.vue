@@ -40,5 +40,3 @@
     />
   </v-bottom-navigation>
 </template>
-<script setup lang="ts">
-</script>

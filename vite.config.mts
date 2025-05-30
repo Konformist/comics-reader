@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 // Plugins
 import AutoImport from 'unplugin-auto-import/vite';
 import Components from 'unplugin-vue-components/vite';
@@ -19,51 +20,40 @@ export default defineConfig(({ mode }) => {
   Object.assign(process.env, env);
 
   return {
+    test: {
+      globals: true,
+      environment: 'jsdom',
+      server: { deps: { inline: ['vuetify'] } },
+    },
     build: {
       cssCodeSplit: false,
-      rollupOptions: {
-        output: {
-          manualChunks: (id) => (id.includes('node_modules') ? 'vendor' : 'index'),
-        },
-      },
+      rollupOptions: { output: { manualChunks: (id) => (id.includes('node_modules') ? 'vendor' : 'index') } },
     },
     esbuild: { legalComments: 'none' },
     plugins: [
-      VueRouter({
-        dts: 'src/typed-router.d.ts',
-      }),
+      VueRouter({ dts: 'src/typed-router.d.ts' }),
       Layouts(),
       AutoImport({
         imports: [
           'vue',
           VueRouterAutoImports,
-          {
-            'pinia': ['defineStore', 'storeToRefs'],
-          },
+          { pinia: ['defineStore', 'storeToRefs'] },
         ],
         dts: 'src/auto-imports.d.ts',
-        eslintrc: {
-          enabled: true,
-        },
+        eslintrc: { enabled: true },
         vueTemplate: true,
       }),
-      Components({
-        dts: 'src/components.d.ts',
-      }),
+      Components({ dts: 'src/components.d.ts' }),
       Vue({
         template: {
           transformAssetUrls,
-          compilerOptions: {
-            isCustomElement: (tag) => ['swiper-container', 'swiper-slide'].includes(tag),
-          },
+          compilerOptions: { isCustomElement: (tag) => ['swiper-container', 'swiper-slide'].includes(tag) },
         },
       }),
       // https://github.com/vuetifyjs/vuetify-loader/tree/master/packages/vite-plugin#readme
       Vuetify({
         autoImport: true,
-        styles: {
-          configFile: 'src/styles/settings.scss',
-        },
+        styles: { configFile: 'src/styles/settings.scss' },
       }),
       Fonts({
         fontsource: {
@@ -97,6 +87,7 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url)),
+        'tests': fileURLToPath(new URL('./tests', import.meta.url)),
       },
       extensions: [
         '.js',
@@ -131,12 +122,8 @@ export default defineConfig(({ mode }) => {
     },
     css: {
       preprocessorOptions: {
-        sass: {
-          api: 'modern-compiler',
-        },
-        scss: {
-          api: 'modern-compiler',
-        },
+        sass: { api: 'modern-compiler' },
+        scss: { api: 'modern-compiler' },
       },
     },
   };

@@ -16,7 +16,10 @@ class WebApiPlugin : Plugin() {
   override fun load() {
     super.load()
     if (context.checkSelfPermission(Manifest.permission.MANAGE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-      activity.requestPermissions(arrayOf(Manifest.permission.MANAGE_EXTERNAL_STORAGE), PackageManager.PERMISSION_GRANTED)
+      activity.requestPermissions(
+        arrayOf(Manifest.permission.MANAGE_EXTERNAL_STORAGE),
+        PackageManager.PERMISSION_GRANTED
+      )
     }
     webApi = WebApi(context)
   }

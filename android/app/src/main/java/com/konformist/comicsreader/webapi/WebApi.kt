@@ -4,8 +4,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.os.Environment
 import androidx.room.Room
+import com.konformist.comicsreader.AppBackup
 import com.konformist.comicsreader.db.AppDatabase
-import com.konformist.comicsreader.db.DBBackup
 import com.konformist.comicsreader.db.appfile.AppFileCreate
 import com.konformist.comicsreader.db.appfile.AppFileDelete
 import com.konformist.comicsreader.db.chapter.ChapterDelete
@@ -36,6 +36,7 @@ import kotlinx.coroutines.runBlocking
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.io.IOException
 import java.time.LocalDateTime
 
 class WebApi(private val context: Context) {
@@ -43,7 +44,7 @@ class WebApi(private val context: Context) {
     .databaseBuilder(context, AppDatabase::class.java, AppDatabase.DATABASE_NAME)
     .build()
 
-  private val dbBackup = DBBackup(context)
+  private val dbBackup = AppBackup(context)
 
   private val downloads =
     Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
@@ -219,18 +220,20 @@ class WebApi(private val context: Context) {
 
   @Throws(FilesException::class)
   private fun createComicDirectory(path: String) {
-    val dirOut = File("${context.filesDir}/${AppDirectory.COMICS_IMAGES}/${path}")
+    val dirOut =
+      File("${context.filesDir}${File.separator}${AppDirectory.COMICS_IMAGES}${File.separator}${path}")
     if (dirOut.exists()) return
     val result = dirOut.mkdirs()
-    if (!result) throw FilesException("Directory not created ${AppDirectory.COMICS_IMAGES}/${path}")
+    if (!result) throw FilesException("Directory not created ${AppDirectory.COMICS_IMAGES}${File.separator}${path}")
   }
 
   @Throws(FilesException::class)
   private fun deleteComicDirectory(path: String) {
-    val dirOut = File("${context.filesDir}/${AppDirectory.COMICS_IMAGES}/${path}")
+    val dirOut =
+      File("${context.filesDir}${File.separator}${AppDirectory.COMICS_IMAGES}${File.separator}${path}")
     if (dirOut.exists()) return
     val result = dirOut.delete()
-    if (!result) throw FilesException("Directory not deleted ${AppDirectory.COMICS_IMAGES}/${path}")
+    if (!result) throw FilesException("Directory not deleted ${AppDirectory.COMICS_IMAGES}${File.separator}${path}")
   }
 
   private fun getTagsAll(): JSONArray {
@@ -659,16 +662,17 @@ class WebApi(private val context: Context) {
   }
 
   private fun setBackupsUpload(data: JSONObject): Boolean {
-    val file = data.optString("file", "")
     val fileName = data.optString("fileName", "")
 
-    if (file == "") throw ValidationException("File is empty")
     if (fileName == "") throw ValidationException("FileName is empty")
 
     val filePath =
       File("${context.filesDir}${File.separator}${AppDirectory.BACKUPS}${File.separator}${fileName}")
+    val fileIn =
+      File("${downloads.path}${File.separator}${fileName}")
+    fileIn.copyRecursively(target = filePath, overwrite = true)
 
-    return FileUtils.writeBase64(filePath, file)
+    return true
   }
 
   private fun setBackupsToDownloads(data: JSONObject): Boolean {
@@ -678,27 +682,15 @@ class WebApi(private val context: Context) {
     val dirFrom =
       File("${context.filesDir}${File.separator}${AppDirectory.BACKUPS}${File.separator}${fileName}")
     val dirTo =
-      File("${downloads.path}${File.separator}${getAppName()}${File.separator}${AppDirectory.BACKUPS}${File.separator}${fileName}")
+      File("${downloads.path}${File.separator}${getAppName()}${File.separator}${fileName}")
 
     dirFrom.copyTo(target = dirTo, overwrite = true)
 
     return true
   }
 
-  private fun setComicsImagesFromDownloads(): Boolean {
-    val fileFrom =
-      File("${downloads.path}${File.separator}${getAppName()}${File.separator}${AppDirectory.COMICS_IMAGES}")
-    val fileTo = File("${context.filesDir}${File.separator}${AppDirectory.COMICS_IMAGES}")
-
-    return fileFrom.copyRecursively(target = fileTo, overwrite = true)
-  }
-
-  private fun setComicsImagesToDownloads(): Boolean {
-    val fileFrom = File("${context.filesDir}${File.separator}${AppDirectory.COMICS_IMAGES}")
-    val fileTo =
-      File("${downloads.path}${File.separator}${getAppName()}${File.separator}${AppDirectory.COMICS_IMAGES}")
-
-    return fileFrom.copyRecursively(target = fileTo, overwrite = true)
+  private fun getDownloadsTree(): JSONObject {
+    return FileUtils.tree(downloads)
   }
 
   private fun setFileToDownloads(data: JSONObject): Boolean {
@@ -765,11 +757,10 @@ class WebApi(private val context: Context) {
           Query.FILE_CHAPTER_PAGE_DEL -> delChapterPageFile(data)
           Query.FILE_COMIC_IMAGES_TREE -> getComicImagesTree()
           Query.FILE_BACKUPS_TREE -> getBackupsTree()
+          Query.FILE_DOWNLOADS_TREE -> getDownloadsTree()
           Query.FILE_FILE_DOWNLOADS -> setFileToDownloads(data)
           Query.FILE_BACKUPS_DOWNLOADS -> setBackupsToDownloads(data)
           Query.FILE_BACKUPS_UPLOAD -> setBackupsUpload(data)
-          Query.FILE_COMICS_IMAGES_DOWNLOADS -> setComicsImagesToDownloads()
-          Query.FILE_COMICS_IMAGES_UPLOAD -> setComicsImagesFromDownloads()
           Query.SETTINGS_SETTINGS_GET -> getSettings()
           Query.SETTINGS_SETTINGS_SET -> setSettings(data)
           Query.BACKUP_BACKUP_ADD -> addBackup()
@@ -779,6 +770,8 @@ class WebApi(private val context: Context) {
         }
       )
     } catch (e: Exception) {
+      return wrappedToError(e)
+    } catch (e: IOException) {
       return wrappedToError(e)
     } catch (e: FilesException) {
       return wrappedToError(e)

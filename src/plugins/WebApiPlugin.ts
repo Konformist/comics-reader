@@ -285,6 +285,10 @@ export interface IApi {
     request: object
     response: ITreeDirectory
   }
+  'file/downloads/tree': {
+    request: object
+    response: ITreeDirectory
+  }
   'file/file/downloads': {
     request: {
       fileName: string
@@ -292,23 +296,12 @@ export interface IApi {
     }
     response: boolean
   }
-  'file/comics-images/downloads': {
-    request: object
-    response: boolean
-  }
-  'file/comics-images/upload': {
-    request: object
-    response: boolean
-  }
   'file/backups/downloads': {
     request: { fileName: string }
     response: boolean
   }
   'file/backups/upload': {
-    request: {
-      fileName: string
-      file: string
-    }
+    request: { fileName: string }
     response: boolean
   }
   'settings/settings/get': {

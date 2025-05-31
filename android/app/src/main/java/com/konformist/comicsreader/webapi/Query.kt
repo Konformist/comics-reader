@@ -54,12 +54,11 @@ class Query {
 
     const val FILE_COMIC_IMAGES_TREE = "file/comics-images/tree"
     const val FILE_BACKUPS_TREE = "file/backups/tree"
+    const val FILE_DOWNLOADS_TREE = "file/downloads/tree"
 
     const val FILE_FILE_DOWNLOADS = "file/file/downloads"
     const val FILE_BACKUPS_DOWNLOADS = "file/backups/downloads"
     const val FILE_BACKUPS_UPLOAD = "file/backups/upload"
-    const val FILE_COMICS_IMAGES_DOWNLOADS = "file/comics-images/downloads"
-    const val FILE_COMICS_IMAGES_UPLOAD = "file/comics-images/upload"
 
     const val SETTINGS_SETTINGS_GET = "settings/settings/get"
     const val SETTINGS_SETTINGS_SET = "settings/settings/set"

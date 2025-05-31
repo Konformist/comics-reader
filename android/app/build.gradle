@@ -40,6 +40,7 @@ repositories {
 }
 
 dependencies {
+    implementation 'org.apache.commons:commons-compress:1.27.1'
     implementation "androidx.datastore:datastore-preferences:$datastore"
 
     implementation("androidx.room:room-runtime:$roomVersion")

@@ -16,11 +16,11 @@
           @click="addBackup()"
         />
         <FilesTree
-          v-if="backups.length"
+          v-if="backupsTree.length"
           v-model="backupPath"
           class="mt-4"
           :loading="loading"
-          :tree="backups"
+          :tree="backupsTree"
         />
         <v-btn
           class="mt-4 w-100"
@@ -51,37 +51,22 @@
           color="info"
           variant="tonal"
         >
-          Если есть бекап с таким же именем, он будет заменён загруженным
+          Если есть бекап с таким же именем, он будет заменён<br>
+          Файл будет загружен из папки Загрузки
         </v-alert>
-        <v-file-input
+        <FilesTree
+          v-if="downloadsTree.length"
           v-model="backupFile"
           class="mt-4"
-          label="Файл бекапа"
+          :loading="loading"
+          :tree="downloadsTree"
         />
         <v-btn
           class="mt-4 w-100"
           :disabled="!backupFile || loadingGlobal || loading"
-          text="Сохранить бекап"
+          text="Загрузить бекап"
           variant="tonal"
           @click="loadBackup()"
-        />
-      </div>
-      <v-divider />
-      <div class="pa-4">
-        <v-btn
-          class="w-100"
-          :disabled="loadingGlobal || loading"
-          text="Изображения в Загрузки"
-          variant="tonal"
-          @click="saveImagesToGlobal()"
-        />
-        <v-btn
-          class="mt-4 w-100"
-          color="error"
-          :disabled="loadingGlobal || loading"
-          text="Изображения из Загрузок"
-          variant="tonal"
-          @click="loadImagesFromGlobal()"
         />
       </div>
     </v-container>
@@ -89,7 +74,6 @@
 </template>
 
 <script setup lang="ts">
-import { fileToBase64 } from '@/core/utils/image.ts';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
 import Api from '@/core/api/Api.ts';
@@ -123,11 +107,21 @@ const {
   loadingGlobalEnd,
 } = useLoading();
 
-const backups = ref<ITreeDirectory[]>([]);
+const downloadsTree = ref<ITreeDirectory[]>([]);
+
+const loadDownloadsTree = async () => {
+  loadingStart();
+  downloadsTree.value = [await Api.api('file/downloads/tree')];
+  loadingEnd();
+};
+
+loadDownloadsTree();
+
+const backupsTree = ref<ITreeDirectory[]>([]);
 
 const loadBackupsTree = async () => {
   loadingStart();
-  backups.value = [await Api.api('file/backups/tree')];
+  backupsTree.value = [await Api.api('file/backups/tree')];
   loadingEnd();
 };
 
@@ -180,26 +174,25 @@ const delBackup = async () => {
   if (!value) return;
 
   try {
+    loadingGlobalStart();
     await Api.api('backup/backup/del', { fileName: backupPath.value.name });
     await loadBackupsTree();
     Toast.show({ text: 'Бекап удалён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
+  } finally {
+    loadingGlobalEnd();
   }
 };
 
-const backupFile = ref<File>();
+const backupFile = ref<ITreeFile>();
 
 const loadBackup = async () => {
   if (!backupFile.value) return;
 
   try {
     loadingGlobalStart();
-    const result = await fileToBase64(backupFile.value);
-    await Api.api('file/backups/upload', {
-      fileName: backupFile.value.name,
-      file: result,
-    });
+    await Api.api('file/backups/upload', { fileName: backupFile.value.name });
     await loadBackupsTree();
     Toast.show({ text: 'Данные получены' });
   } catch (e) {
@@ -213,32 +206,9 @@ const saveBackupToGlobal = async (): Promise<void> => {
   if (!backupPath.value) return;
 
   try {
+    loadingGlobalStart();
     await Api.api('file/backups/downloads', { fileName: backupPath.value.name });
     Toast.show({ text: 'Бекап сохранен в Загрузки' });
-  } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
-  } finally {
-    loadingGlobalEnd();
-  }
-};
-
-const saveImagesToGlobal = async () => {
-  try {
-    loadingGlobalStart();
-    await Api.api('file/comics-images/downloads');
-    Toast.show({ text: 'Картинки сохранены в Загрузки' });
-  } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
-  } finally {
-    loadingGlobalEnd();
-  }
-};
-
-const loadImagesFromGlobal = async () => {
-  try {
-    loadingGlobalStart();
-    await Api.api('file/comics-images/upload');
-    Toast.show({ text: 'Картинки загружены из Загрузок' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {

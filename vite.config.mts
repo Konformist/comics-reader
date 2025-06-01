@@ -99,27 +99,7 @@ export default defineConfig(({ mode }) => {
         '.vue',
       ],
     },
-    server: {
-      port: 3000,
-      proxy: {
-        '/test-url': {
-          target: process.env.VITE_TEST_SITE,
-          changeOrigin: true,
-          followRedirects: true,
-          rewrite(path: string) {
-            return path.replace('/test-url', '');
-          },
-        },
-        '/test-image-url': {
-          target: process.env.VITE_TEST_IMAGE_SITE,
-          changeOrigin: true,
-          followRedirects: true,
-          rewrite(path: string) {
-            return path.replace('/test-image-url', '');
-          },
-        },
-      },
-    },
+    server: { port: 3000 },
     css: {
       preprocessorOptions: {
         sass: { api: 'modern-compiler' },

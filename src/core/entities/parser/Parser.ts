@@ -107,14 +107,14 @@ export default class Parser {
     return (pageDOM.querySelector<HTMLImageElement>(this.parseInfo.pagesImageCSS)?.src || '');
   }
 
-  async parse(comicUrl: string): Promise<IParsedComicData> {
-    const comicRaw = await ParserController.loadComicRaw(comicUrl);
+  async parse(comicUrl: string, cookie: string = ''): Promise<IParsedComicData> {
+    const comicRaw = await ParserController.loadHTMLRaw(comicUrl, cookie);
     const comicData = this.parseComic(comicRaw);
 
     if (this.parseInfo.pagesCSS) {
       for (const chapter of comicData.chapters) {
         const chapterRaw = chapter.fromUrl
-          ? await ParserController.loadComicRaw(chapter.fromUrl)
+          ? await ParserController.loadHTMLRaw(chapter.fromUrl, cookie)
           : comicRaw;
         const pagesCount = this.parseChapterPagesCount(chapterRaw);
         if (pagesCount <= chapter.pages.length) continue;
@@ -138,7 +138,7 @@ export default class Parser {
 
         const pages: string[] = [];
         for (let j = 0; j < chapter.pages.length; j++) {
-          const pageRaw = await ParserController.loadComicRaw(urlPattern);
+          const pageRaw = await ParserController.loadHTMLRaw(urlPattern, cookie);
           const pageImage = this.parseChapterPageImage(pageRaw);
           pages.push(pageImage);
           await sleep(Math.random());

@@ -105,6 +105,16 @@
         label="CSS указатель на текст тегов"
         rows="2"
       />
+      <v-textarea
+        v-model="cookie"
+        auto-grow
+        :autocapitalize="false"
+        :autocomplete="false"
+        class="mb-4"
+        inputmode="url"
+        label="Cookie"
+        rows="2"
+      />
       <v-btn
         class="w-100"
         :disabled="!comic.parserId || !comic.fromUrl || loading || loadingGlobal"
@@ -168,6 +178,7 @@ const {
 } = useLoading();
 
 const comicId = +(route.params.id || 0);
+const cookie = ref('');
 
 const comic = ref(new ComicModel());
 
@@ -310,7 +321,7 @@ const onLoadInfo = async () => {
     const newComic = new ComicModel(comic.value.getDTO());
     const parserUtil = new Parser();
     parserUtil.setParseInfo(parser.value, comicOverride.value);
-    const result = await parserUtil.parse(comic.value.fromUrl);
+    const result = await parserUtil.parse(comic.value.fromUrl, cookie.value);
 
     const oldTags = tagsStore.tags.map((e) => e.name.toLowerCase());
     const saveTags = result.tags.filter((e) => oldTags.includes(e.toLowerCase()));

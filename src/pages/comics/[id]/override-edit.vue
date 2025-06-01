@@ -307,7 +307,7 @@ const onLoadInfo = async () => {
 
   try {
     loadingGlobalStart();
-    const newComic = new ComicModel();
+    const newComic = new ComicModel(comic.value.getDTO());
     const parserUtil = new Parser();
     parserUtil.setParseInfo(parser.value, comicOverride.value);
     const result = await parserUtil.parse(comic.value.fromUrl);

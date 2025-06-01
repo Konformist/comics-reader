@@ -5,6 +5,7 @@ import sleep from '@/core/utils/sleep.ts';
 import type { IParseData } from '@/plugins/WebApiPlugin';
 import type ParserModel from '@/core/entities/parser/ParserModel.ts';
 import type ComicOverrideModel from '@/core/entities/comic-override/ComicOverrideModel.ts';
+import { Toast } from '@capacitor/toast';
 
 export default class Parser {
   static PAGE_ID = '<PAGE_ID>';
@@ -111,15 +112,17 @@ export default class Parser {
     const comicRaw = await ParserController.loadComicRaw(comicUrl);
     const comicData = this.parseComic(comicRaw);
 
-    for (const chapter of comicData.chapters) {
-      const chapterRaw = chapter.fromUrl
-        ? await ParserController.loadComicRaw(chapter.fromUrl)
-        : comicRaw;
-      const pagesCount = this.parseChapterPagesCount(chapterRaw);
-      if (pagesCount <= chapter.pages.length) continue;
+    if (this.parseInfo.pagesCSS) {
+      for (const chapter of comicData.chapters) {
+        const chapterRaw = chapter.fromUrl
+          ? await ParserController.loadComicRaw(chapter.fromUrl)
+          : comicRaw;
+        const pagesCount = this.parseChapterPagesCount(chapterRaw);
+        if (pagesCount <= chapter.pages.length) continue;
 
-      for (let i = 0; i < pagesCount - chapter.pages.length; i++) {
-        chapter.pages.push('');
+        for (let i = 0; i < pagesCount - chapter.pages.length; i++) {
+          chapter.pages.push('');
+        }
       }
     }
 

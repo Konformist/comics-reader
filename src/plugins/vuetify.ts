@@ -37,7 +37,7 @@ import {
   mdiPencil,
   mdiPlus, mdiSort,
   mdiTag,
-  mdiTranslate, mdiTriangleDown,
+  mdiTranslate, mdiTriangleDown, mdiTune,
   mdiViewDashboard,
   mdiViewList,
 } from '@mdi/js';
@@ -66,6 +66,7 @@ export default createVuetify({
       'file-code': mdiFileCode,
       'file': mdiFile,
       'settings': mdiCog,
+      'tune': mdiTune,
       'download': mdiDownload,
       'copy': mdiContentCopy,
       'menu': mdiMenu,
@@ -101,6 +102,7 @@ export default createVuetify({
   },
   defaults: {
     VDialog: { scrim: '#121212' },
+    VBottomSheet: { scrim: '#121212' },
     VAppBar: { elevation: '2' },
     VFab: {
       app: true,

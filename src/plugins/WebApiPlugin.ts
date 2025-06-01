@@ -408,12 +408,7 @@ class WebApiPlugin extends WebPlugin implements IWebApiPlugin {
         childes: [],
       }; break;
       case 'file/file/downloads': result = true; break;
-      case 'settings/settings/get': result = {
-        autoReading: false,
-        autoReadingTimeout: 20,
-        isCompress: true,
-        readingMode: 'vertical',
-      }; break;
+      case 'settings/settings/get': result = this.fake.getSettings(); break;
       case 'settings/settings/set': result = true; break;
       case 'backup/backup/add': result = true; break;
       case 'backup/backup/del': result = true; break;

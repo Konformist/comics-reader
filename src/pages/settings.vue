@@ -4,7 +4,7 @@
       <div class="pa-4">
         <CustomBtnGroup
           v-model="appStore.settings.readingMode"
-          :items="items"
+          :items="settingsDirectionItems"
           label="Направление прокрутки"
         />
         <v-label
@@ -20,7 +20,7 @@
           />
         </v-label>
         <v-number-input
-          v-model.number="autoReadingTimeout"
+          v-model.number="appStore.settings.readingTimeoutSec"
           class="mt-4"
           :disabled="!appStore.settings.autoReading || appStore.settings.readingMode === 'webtoon'"
           label="До перелистывания"
@@ -48,14 +48,14 @@
       appear
       class="mb-16"
       icon="$save"
-      @click="onSave()"
+      @click="appStore.saveSettings()"
     />
   </v-main>
 </template>
 
 <script setup lang="ts">
+import { settingsDirectionItems } from '@/core/entities/settings/settingsUtils.ts';
 import { useAppStore } from '@/stores/app.ts';
-import { Toast } from '@capacitor/toast';
 
 const appStore = useAppStore();
 
@@ -66,32 +66,7 @@ definePage({
   },
 });
 
-const items = [
-  {
-    id: 'vertical',
-    name: 'Вертикальная',
-  },
-  {
-    id: 'horizontal',
-    name: 'Горизонтальная',
-  },
-  {
-    id: 'webtoon',
-    name: 'Webtoon',
-  },
-];
-
 onBeforeUnmount(() => {
   appStore.loadSettings();
 });
-
-const autoReadingTimeout = computed({
-  get: () => appStore.settings.autoReadingTimeout / 1000,
-  set: (val) => appStore.settings.autoReadingTimeout = val * 1000,
-});
-
-const onSave = async () => {
-  await appStore.saveSettings();
-  Toast.show({ text: 'Настройки сохранены' });
-};
 </script>

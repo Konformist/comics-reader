@@ -18,6 +18,14 @@ export default class SettingsModel extends Entity<ISettingsDTO> implements ISett
     }
   }
 
+  get readingTimeoutSec() {
+    return this.autoReadingTimeout / 1000;
+  }
+
+  set readingTimeoutSec(val) {
+    this.autoReadingTimeout = val * 1000;
+  }
+
   getDTO(): ISettingsDTO {
     return {
       autoReading: this.autoReading,

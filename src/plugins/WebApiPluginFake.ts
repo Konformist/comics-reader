@@ -6,7 +6,7 @@ import type {
   IComicDTO,
   IComicOverrideDTO,
   ILanguageDTO,
-  IParserDTO,
+  IParserDTO, ISettingsDTO,
   ITagDTO,
 } from '@/plugins/WebApiPlugin.ts';
 import { faker } from '@faker-js/faker';
@@ -143,7 +143,15 @@ export default class WebApiPluginFake {
     return {
       id: this.getComicCoverId(),
       fromUrl: faker.internet.url(),
-      file: null,
+      file: {
+        id: 0,
+        cdate: '',
+        mdate: '',
+        name: '',
+        size: faker.number.int(),
+        path: faker.image.url(),
+        mime: '',
+      },
     };
   }
 
@@ -222,7 +230,15 @@ export default class WebApiPluginFake {
       chapterId: override?.chapterId || this.getChapterId(),
       fromUrl: faker.internet.url(),
       isRead: faker.helpers.arrayElement([true, false]),
-      file: null,
+      file: {
+        id: 0,
+        cdate: '',
+        mdate: '',
+        name: '',
+        size: faker.number.int(),
+        path: faker.image.url(),
+        mime: '',
+      },
     };
   }
 
@@ -252,6 +268,7 @@ export default class WebApiPluginFake {
       pages: this.getChapterPages(chapterId),
     };
   };
+
   getChapters = (comicId: number): IChapterDTO[] => (
     faker.helpers.arrayElements(this.chapterIds, {
       min: 1,
@@ -262,4 +279,13 @@ export default class WebApiPluginFake {
         comicId,
       }))
   );
+
+  getSettings(): ISettingsDTO {
+    return {
+      autoReading: true,
+      autoReadingTimeout: 3000,
+      isCompress: true,
+      readingMode: 'vertical',
+    };
+  }
 }

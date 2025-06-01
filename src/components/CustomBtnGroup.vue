@@ -9,9 +9,10 @@
       v-for="(item, index) in items"
       :key="item.id"
     >
-      <v-divider v-if="index" />
+      <v-divider v-if="index && !border" />
       <v-btn
         :active="model === item.id"
+        :border="border"
         class="w-100 rounded-0"
         :class="{
           'rounded-t-xl': index === 0,
@@ -30,7 +31,8 @@
 <script setup lang="ts">
 const model = defineModel<string>({ default: '' });
 
-const { items = [], label = '' } = defineProps<{
+defineProps<{
+  border?: boolean
   label?: string
   items?: Array<{
     id: string

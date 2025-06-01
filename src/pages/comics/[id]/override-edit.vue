@@ -333,21 +333,21 @@ const onLoadInfo = async () => {
     const result = await parserUtil.parse(comic.value.fromUrl, cookie.value);
 
     const oldTags = tagsStore.tags.map((e) => e.name.toLowerCase());
-    const saveTags = result.tags.filter((e) => !oldTags.includes(e.toLowerCase()));
+    const saveTags = result.tags.filter((e) => e && !oldTags.includes(e.toLowerCase()));
 
     for (const item of saveTags) {
       await TagController.save(new TagModel({ name: item }));
     }
 
     const oldAuthors = authorsStore.authors.map((e) => e.name.toLowerCase());
-    const saveAuthors = result.authors.filter((e) => !oldAuthors.includes(e.toLowerCase()));
+    const saveAuthors = result.authors.filter((e) => e && !oldAuthors.includes(e.toLowerCase()));
 
     for (const item of saveAuthors) {
       await AuthorController.save(new AuthorModel({ name: item }));
     }
 
     const oldLanguages = languagesStore.languages.map((e) => e.name.toLowerCase());
-    const saveLanguages = [result.language].filter((e) => !oldLanguages.includes(e.toLowerCase()));
+    const saveLanguages = [result.language].filter((e) => e && !oldLanguages.includes(e.toLowerCase()));
 
     for (const item of saveLanguages) {
       await LanguageController.save(new LanguageModel({ name: item }));

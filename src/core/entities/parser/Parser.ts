@@ -108,16 +108,27 @@ export default class Parser {
     return parseImage(pageDOM, this.parseInfo.pagesImageCSS) || '';
   }
 
+  private normalizeUrl(url: string, domain: string): string {
+    if (url.includes('http://') || url.includes('https://')) return url;
+
+    let newDomain = domain;
+    if (!newDomain.endsWith('/')) newDomain += '/';
+    if (!newDomain.includes('http://') && !newDomain.includes('https://')) newDomain = `https://${newDomain}`;
+    let newUrl = url;
+    if (newUrl.startsWith('/')) newUrl = url.slice(1);
+    return `${newDomain}${newUrl}`;
+  }
+
   async parse(comicUrl: string, cookie: string = ''): Promise<IParsedComicData> {
-    const comicRaw = await ParserController.loadHTMLRaw(comicUrl, cookie);
+    const comicRaw = cleanHTML(await ParserController.loadHTMLRaw(comicUrl, cookie));
     const comicData = this.parseComic(comicRaw);
     const domain = getDomain(comicUrl);
 
     if (this.parseInfo.pagesCSS) {
       for (const chapter of comicData.chapters) {
-        const chapterUrl = (!chapter.fromUrl.includes('http://') && !chapter.fromUrl.includes('https://')) ? `${domain}/${chapter.fromUrl}` : chapter.fromUrl;
+        const chapterUrl = this.normalizeUrl(chapter.fromUrl, domain);
         const chapterRaw = chapter.fromUrl
-          ? await ParserController.loadHTMLRaw(chapterUrl, cookie)
+          ? cleanHTML(await ParserController.loadHTMLRaw(chapterUrl, cookie))
           : comicRaw;
         const pagesCount = this.parseChapterPagesCount(chapterRaw);
         if (pagesCount <= chapter.pages.length) continue;
@@ -137,17 +148,11 @@ export default class Parser {
         const pageUrlPattern = this.parseInfo.pagesTemplateUrl.startsWith('/')
           ? this.parseInfo.pagesTemplateUrl.replace('/', '')
           : this.parseInfo.pagesTemplateUrl;
-        let urlPattern = `${parentUrlPattern}${pageUrlPattern}`.replace(Parser.PAGE_ID, (i + 1).toString());
-
-        if (!urlPattern.includes('http://') && !urlPattern.includes('https://')) {
-          urlPattern = urlPattern.startsWith('/')
-            ? `${domain}${urlPattern}`
-            : `${domain}/${urlPattern}`;
-        }
 
         const pages: string[] = [];
         for (let j = 0; j < chapter.pages.length; j++) {
-          const pageRaw = await ParserController.loadHTMLRaw(urlPattern, cookie);
+          const urlPattern = this.normalizeUrl(`${parentUrlPattern}${pageUrlPattern}`.replace(Parser.PAGE_ID, (i + 1).toString()), domain);
+          const pageRaw = cleanHTML(await ParserController.loadHTMLRaw(urlPattern, cookie));
           const pageImage = this.parseChapterPageImage(pageRaw);
           pages.push(pageImage);
           await sleep(Math.random());

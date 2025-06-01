@@ -6,7 +6,13 @@ export const cleanHTML = (value: string): string => (
 );
 
 const cleanStr = (str: string): string => (
-  str.trim().replaceAll(/\s+/g, ' ')
+  str
+    .trim()
+    .replaceAll(/\s+/g, ' ')
+    .replace('http://localhost/', '')
+    .replace('http://127.0.0.1/', '')
+    .replace('https://localhost/', '')
+    .replace('https://127.0.0.1/', '')
 );
 
 export const parseString = (data: HTMLElement, item?: string) => (

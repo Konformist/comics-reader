@@ -49,13 +49,18 @@ export default class WebApiPluginFake {
       name: faker.word.words(1),
       siteUrl: faker.internet.url(),
       titleCSS: '',
+      annotationCSS: '',
       coverCSS: '',
-      pagesCSS: '',
       authorsCSS: '',
       authorsTextCSS: '',
       languageCSS: '',
       tagsCSS: '',
       tagsTextCSS: '',
+      chaptersCSS: '',
+      chaptersTitleCSS: '',
+      pagesTemplateUrl: '',
+      pagesCSS: '',
+      pagesImageCSS: '',
     };
   }
 
@@ -150,13 +155,18 @@ export default class WebApiPluginFake {
     return {
       id: this.getComicOverrideId(),
       titleCSS: '',
+      annotationCSS: '',
       coverCSS: '',
-      pagesCSS: '',
+      authorsCSS: '',
+      authorsTextCSS: '',
       languageCSS: '',
       tagsCSS: '',
       tagsTextCSS: '',
-      authorsCSS: '',
-      authorsTextCSS: '',
+      chaptersCSS: '',
+      chaptersTitleCSS: '',
+      pagesTemplateUrl: '',
+      pagesCSS: '',
+      pagesImageCSS: '',
     };
   }
 
@@ -174,6 +184,10 @@ export default class WebApiPluginFake {
           min: 1,
           max: 10,
         },
+      }),
+      annotation: faker.lorem.paragraphs({
+        min: 1,
+        max: 10,
       }),
       parserId: this.getParserId(),
       fromUrl: faker.internet.url(),

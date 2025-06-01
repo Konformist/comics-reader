@@ -131,9 +131,9 @@ import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import LanguageController from '@/core/entities/language/LanguageController.ts';
 import LanguageModel from '@/core/entities/language/LanguageModel.ts';
+import Parser from '@/core/entities/parser/Parser.ts';
 import ParserController from '@/core/entities/parser/ParserController.ts';
 import ParserModel from '@/core/entities/parser/ParserModel.ts';
-import { parseComic } from '@/core/entities/parser/parseUtils.ts';
 import TagController from '@/core/entities/tag/TagController.ts';
 import TagModel from '@/core/entities/tag/TagModel.ts';
 import { useAuthorsStore } from '@/stores/authors.ts';
@@ -307,64 +307,61 @@ const onLoadInfo = async () => {
 
   try {
     loadingGlobalStart();
-    const result = await ParserController.loadComicRaw(comic.value.fromUrl);
-    const parsedComic = parseComic(result, parser.value, comicOverride.value);
+    const newComic = new ComicModel();
+    const parserUtil = new Parser();
+    parserUtil.setParseInfo(parser.value, comicOverride.value);
+    const result = await parserUtil.parse(comic.value.fromUrl);
 
-    if (!comic.value.cover.fromUrl && parsedComic.cover) {
-      comic.value.cover.fromUrl = parsedComic.cover;
+    const oldTags = tagsStore.tags.map((e) => e.name.toLowerCase());
+    const saveTags = result.tags.filter((e) => oldTags.includes(e.toLowerCase()));
+
+    for (const item of saveTags) {
+      await TagController.save(new TagModel({ name: item }));
     }
 
-    if (parsedComic.name) {
-      comic.value.name = parsedComic.name;
+    const oldAuthors = authorsStore.authors.map((e) => e.name.toLowerCase());
+    const saveAuthors = result.authors.filter((e) => oldAuthors.includes(e.toLowerCase()));
+
+    for (const item of saveAuthors) {
+      await AuthorController.save(new AuthorModel({ name: item }));
     }
 
-    if (parsedComic.language) {
-      const language = languagesStore.languages.find((e) => e.name.toLowerCase() === parsedComic.language?.toLowerCase());
+    const oldLanguages = languagesStore.languages.map((e) => e.name.toLowerCase());
+    const saveLanguages = [result.language].filter((e) => oldLanguages.includes(e.toLowerCase()));
 
-      if (!language) {
-        const itemId = await LanguageController.save(new LanguageModel({ name: parsedComic.language }));
-        if (typeof itemId === 'number') comic.value.languageId = itemId;
-      } else {
-        comic.value.languageId = language.id;
-      }
+    for (const item of saveLanguages) {
+      await LanguageController.save(new LanguageModel({ name: item }));
     }
 
-    if (parsedComic.authors?.length) {
-      const authors: number[] = [];
-      for (const item of parsedComic.authors) {
-        const newItem = authorsStore.authors.find((e) => e.name.toLowerCase() === item.toLowerCase());
-
-        if (!newItem) {
-          const itemId = await AuthorController.save(new AuthorModel({ name: item }));
-          if (typeof itemId === 'number') authors.push(itemId);
-        } else {
-          authors.push(newItem.id);
-        }
-      }
-      comic.value.authors = authors;
-    }
-
-    if (parsedComic.tags?.length) {
-      const tags: number[] = [];
-      for (const item of parsedComic.tags || []) {
-        const newItem = tagsStore.tags.find((e) => e.name.toLowerCase() === item.toLowerCase());
-
-        if (!newItem) {
-          const itemId = await TagController.save(new TagModel({ name: item }));
-          if (typeof itemId === 'number') tags.push(itemId);
-        } else {
-          tags.push(newItem.id);
-        }
-      }
-      comic.value.tags = tags;
-    }
-
-    await saveComic();
-    await saveComicOverride();
     await Promise.all([
       tagsStore.loadTagsForce(),
       authorsStore.loadAuthorsForce(),
       languagesStore.loadLanguagesForce(),
+    ]);
+
+    newComic.name = result.name || comic.value.name;
+    newComic.annotation = result.annotation || comic.value.annotation;
+    newComic.cover.fromUrl = result.cover || comic.value.cover.fromUrl;
+
+    const language = languagesStore.languages.find((e) => e.name.toLowerCase() === result.language.toLowerCase());
+    newComic.languageId = language?.id || comic.value.languageId;
+
+    const newTags = result.tags.map((e) => e.toLowerCase());
+    const tags = tagsStore.tags
+      .filter((e) => newTags.includes(e.name.toLowerCase()))
+      .map((e) => e.id);
+    newComic.tags = tags.length ? tags : comic.value.tags;
+
+    const newAuthors = result.authors.map((e) => e.toLowerCase());
+    const authors = authorsStore.authors
+      .filter((e) => newAuthors.includes(e.name.toLowerCase()))
+      .map((e) => e.id);
+    newComic.authors = authors.length ? authors : comic.value.authors;
+    comic.value = new ComicModel(newComic.getDTO());
+
+    await saveComic();
+    await saveComicOverride();
+    await Promise.all([
       comicsStore.loadComicsForce(),
       loadComicOverride(),
     ]);

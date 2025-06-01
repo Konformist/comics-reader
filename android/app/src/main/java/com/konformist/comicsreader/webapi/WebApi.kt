@@ -98,13 +98,18 @@ class WebApi(private val context: Context) {
       ComicOverrideCreate(
         comicId = comicId,
         titleCSS = "",
+        annotationCSS = "",
         coverCSS = "",
-        pagesCSS = "",
         authorsCSS = "",
         authorsTextCSS = "",
         languageCSS = "",
         tagsCSS = "",
         tagsTextCSS = "",
+        chaptersCSS = "",
+        chaptersTitleCSS = "",
+        pagesCSS = "",
+        pagesTemplateUrl = "",
+        pagesImageCSS = "",
       )
     )
     if (rowId == 0.toLong()) throw DatabaseException("Comic override not created")

@@ -13,8 +13,11 @@ data class Comic(
 
   /* Парсер */
   @ColumnInfo(name = "parser_id", defaultValue = "0") val parserId: Long?,
+
   /* Ссылка на источник */
   @ColumnInfo(name = "from_url", defaultValue = "") val fromUrl: String?,
+  /* Аннотация */
+  @ColumnInfo(defaultValue = "") val annotation: String?,
   /* ID языка */
   @ColumnInfo(name = "language_id", defaultValue = "0") val languageId: Long?,
   /** ID тегов */

@@ -14,14 +14,19 @@ class ParserSerializer : Serializer<Parser>() {
     return ParserCreate(
       name = value.optString("name", ""),
       siteUrl = value.optString("siteUrl", ""),
-      titleCSS = value.optString("titleCSS", ""),
-      coverCSS = value.optString("coverCSS", ""),
-      pagesCSS = value.optString("pagesCSS", ""),
-      authorsCSS = value.optString("authorsCSS", ""),
-      authorsTextCSS = value.optString("authorsTextCSS", ""),
-      languageCSS = value.optString("languageCSS", ""),
-      tagsCSS = value.optString("tagsCSS", ""),
-      tagsTextCSS = value.optString("tagsTextCSS", ""),
+      titleCSS = value.optString("titleCSS"),
+      annotationCSS = value.optString("annotationCSS"),
+      coverCSS = value.optString("coverCSS"),
+      authorsCSS = value.optString("authorsCSS"),
+      authorsTextCSS = value.optString("authorsTextCSS"),
+      languageCSS = value.optString("languageCSS"),
+      tagsCSS = value.optString("tagsCSS"),
+      tagsTextCSS = value.optString("tagsTextCSS"),
+      chaptersCSS = value.optString("chaptersCSS"),
+      chaptersTitleCSS = value.optString("chaptersTitleCSS"),
+      pagesTemplateUrl = value.optString("pagesTemplateUrl"),
+      pagesCSS = value.optString("pagesCSS"),
+      pagesImageCSS = value.optString("pagesImageCSS"),
     )
   }
 
@@ -37,14 +42,19 @@ class ParserSerializer : Serializer<Parser>() {
       mdate = getMDate(),
       name = name,
       siteUrl = value.optString("siteUrl", ""),
-      titleCSS = value.optString("titleCSS", ""),
-      coverCSS = value.optString("coverCSS", ""),
-      pagesCSS = value.optString("pagesCSS", ""),
-      authorsCSS = value.optString("authorsCSS", ""),
-      authorsTextCSS = value.optString("authorsTextCSS", ""),
-      languageCSS = value.optString("languageCSS", ""),
-      tagsCSS = value.optString("tagsCSS", ""),
-      tagsTextCSS = value.optString("tagsTextCSS", ""),
+      titleCSS = value.optString("titleCSS"),
+      annotationCSS = value.optString("annotationCSS"),
+      coverCSS = value.optString("coverCSS"),
+      authorsCSS = value.optString("authorsCSS"),
+      authorsTextCSS = value.optString("authorsTextCSS"),
+      languageCSS = value.optString("languageCSS"),
+      tagsCSS = value.optString("tagsCSS"),
+      tagsTextCSS = value.optString("tagsTextCSS"),
+      chaptersCSS = value.optString("chaptersCSS"),
+      chaptersTitleCSS = value.optString("chaptersTitleCSS"),
+      pagesTemplateUrl = value.optString("pagesTemplateUrl"),
+      pagesCSS = value.optString("pagesCSS"),
+      pagesImageCSS = value.optString("pagesImageCSS"),
     )
   }
 
@@ -65,13 +75,18 @@ class ParserSerializer : Serializer<Parser>() {
     data.put("name", item.name)
     data.put("siteUrl", item.siteUrl)
     data.put("titleCSS", item.titleCSS)
+    data.put("annotationCSS", item.annotationCSS)
     data.put("coverCSS", item.coverCSS)
-    data.put("pagesCSS", item.pagesCSS)
     data.put("authorsCSS", item.authorsCSS)
     data.put("authorsTextCSS", item.authorsTextCSS)
     data.put("languageCSS", item.languageCSS)
     data.put("tagsCSS", item.tagsCSS)
     data.put("tagsTextCSS", item.tagsTextCSS)
+    data.put("chaptersCSS", item.chaptersCSS)
+    data.put("chaptersTitleCSS", item.chaptersTitleCSS)
+    data.put("pagesTemplateUrl", item.pagesTemplateUrl)
+    data.put("pagesCSS", item.pagesCSS)
+    data.put("pagesImageCSS", item.pagesImageCSS)
 
     return data
   }

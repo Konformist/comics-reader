@@ -6,22 +6,19 @@ data class ParserUpdate(
   val id: Long,
   val mdate: String,
   val name: String,
-  /** Ссылка на сайт */
   @ColumnInfo(name = "site_url") val siteUrl: String?,
-  /** CSS указатель на название */
+
   @ColumnInfo(name = "title_css") override val titleCSS: String?,
-  /** CSS указатель на изображение */
+  @ColumnInfo(name = "annotation_css") override val annotationCSS: String?,
   @ColumnInfo(name = "cover_css") override val coverCSS: String?,
-  /** CSS указатель на страницы */
-  @ColumnInfo(name = "pages_css") override val pagesCSS: String?,
-  /** CSS указатель на авторов */
   @ColumnInfo(name = "authors_css") override val authorsCSS: String?,
-  /** CSS указатель на текст авторов */
-  @ColumnInfo(name = "authors_text_css") override val authorsTextCSS: String?,
-  /** CSS указатель на текст язык */
+  @ColumnInfo(name = "authorsText_css") override val authorsTextCSS: String?,
   @ColumnInfo(name = "language_css") override val languageCSS: String?,
-  /** CSS указатель на теги */
   @ColumnInfo(name = "tags_css") override val tagsCSS: String?,
-  /** CSS указатель на текст тегов */
   @ColumnInfo(name = "tags_text_css") override val tagsTextCSS: String?,
+  @ColumnInfo(name = "chapters_css") override val chaptersCSS: String?,
+  @ColumnInfo(name = "chapters_title_css") override val chaptersTitleCSS: String?,
+  @ColumnInfo(name = "pages_template_url") override val pagesTemplateUrl: String?,
+  @ColumnInfo(name = "pages_css") override val pagesCSS: String?,
+  @ColumnInfo(name = "pages_image_css") override val pagesImageCSS: String?,
 ) : ParserData

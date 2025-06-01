@@ -4,11 +4,11 @@ interface ParserData {
   /** CSS указатель на название */
   val titleCSS: String?
 
+  /** CSS аннотации */
+  val annotationCSS: String?
+
   /** CSS указатель на изображение */
   val coverCSS: String?
-
-  /** CSS указатель на страницы */
-  val pagesCSS: String?
 
   /** CSS указатель на авторов */
   val authorsCSS: String?
@@ -24,4 +24,19 @@ interface ParserData {
 
   /** CSS указатель на текст тегов */
   val tagsTextCSS: String?
+
+  /** CSS указатель на главы */
+  val chaptersCSS: String?
+
+  /** CSS указатель на названия главы */
+  val chaptersTitleCSS: String?
+
+  /** Шаблон страницы */
+  val pagesTemplateUrl: String?
+
+  /** CSS указатель на страницы */
+  val pagesCSS: String?
+
+  /** CSS указатель на изображение страницы */
+  val pagesImageCSS: String?
 }

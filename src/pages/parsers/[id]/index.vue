@@ -37,6 +37,12 @@
           {{ parser.titleCSS || '—' }}
         </p>
         <h3 class="mt-4 text-h6">
+          CSS указатель на аннотацию
+        </h3>
+        <p class="text-body-1">
+          {{ parser.annotationCSS || '—' }}
+        </p>
+        <h3 class="mt-4 text-h6">
           CSS указатель на изображение
         </h3>
         <p class="text-body-1">
@@ -55,7 +61,7 @@
           {{ parser.authorsTextCSS || '—' }}
         </p>
         <h3 class="mt-4 text-h6">
-          CSS указатель на текст язык
+          CSS указатель на язык
         </h3>
         <p class="text-body-1">
           {{ parser.languageCSS || '—' }}
@@ -72,11 +78,38 @@
         <p class="text-body-1">
           {{ parser.tagsTextCSS || '—' }}
         </p>
+      </div>
+      <v-divider />
+      <div class="pa-4">
+        <h3 class="text-h6">
+          CSS указатель на главы
+        </h3>
+        <p class="text-body-1">
+          {{ parser.chaptersCSS || '—' }}
+        </p>
+        <h3 class="mt-4 text-h6">
+          CSS указатель на название главы
+        </h3>
+        <p class="text-body-1">
+          {{ parser.chaptersTitleCSS || '—' }}
+        </p>
+        <h3 class="mt-4 text-h6">
+          Шаблон ссылок для страниц
+        </h3>
+        <p class="text-body-1">
+          {{ parser.pagesTemplateUrl || '—' }}
+        </p>
         <h3 class="mt-4 text-h6">
           CSS указатель на страницы
         </h3>
         <p class="text-body-1">
           {{ parser.pagesCSS || '—' }}
+        </p>
+        <h3 class="mt-4 text-h6">
+          CSS указатель на изображение страницы
+        </h3>
+        <p class="text-body-1">
+          {{ parser.pagesImageCSS || '—' }}
         </p>
       </div>
     </v-container>

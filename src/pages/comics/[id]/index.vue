@@ -30,6 +30,12 @@
           />
         </p>
       </template>
+      <template v-if="comicsStore.comic.annotation">
+        <v-divider />
+        <p class="pa-4">
+          {{ comicsStore.comic.annotation }}
+        </p>
+      </template>
       <v-divider />
       <p class="pa-4">
         <b class="font-weight-medium">Авторы:</b> {{ authorsChips.length ? authorsChips.map((e) => e.name).join(", ") : '—' }}

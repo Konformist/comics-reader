@@ -27,6 +27,15 @@
           rows="2"
         />
         <v-textarea
+          v-model.trim="parser.annotationCSS"
+          :autocapitalize="false"
+          :autocomplete="false"
+          class="mb-4"
+          inputmode="url"
+          label="CSS указатель на аннотацию"
+          rows="2"
+        />
+        <v-textarea
           v-model.trim="parser.coverCSS"
           :autocapitalize="false"
           :autocomplete="false"
@@ -74,16 +83,54 @@
           v-model.trim="parser.tagsTextCSS"
           :autocapitalize="false"
           :autocomplete="false"
-          class="mb-4"
           inputmode="url"
           label="CSS указатель на текст тегов"
+        />
+      </div>
+      <v-divider />
+      <div class="pa-4">
+        <v-textarea
+          v-model.trim="parser.chaptersCSS"
+          :autocapitalize="false"
+          :autocomplete="false"
+          class="mb-4"
+          inputmode="url"
+          label="CSS указатель на главы"
+          rows="2"
+        />
+        <v-textarea
+          v-model.trim="parser.chaptersTitleCSS"
+          :autocapitalize="false"
+          :autocomplete="false"
+          class="mb-4"
+          inputmode="url"
+          label="CSS указатель на название главы"
+          rows="2"
+        />
+        <v-textarea
+          v-model.trim="parser.pagesTemplateUrl"
+          :autocapitalize="false"
+          :autocomplete="false"
+          class="mb-4"
+          inputmode="url"
+          label="Шаблон ссылок для страниц"
+          rows="2"
         />
         <v-textarea
           v-model.trim="parser.pagesCSS"
           :autocapitalize="false"
           :autocomplete="false"
+          class="mb-4"
           inputmode="url"
           label="CSS указатель на страницы"
+          rows="2"
+        />
+        <v-textarea
+          v-model.trim="parser.pagesImageCSS"
+          :autocapitalize="false"
+          :autocomplete="false"
+          inputmode="url"
+          label="CSS указатель на изображение страницы"
           rows="2"
         />
       </div>
@@ -91,7 +138,7 @@
       <div class="pa-4">
         <v-file-input
           accept="application/json"
-          label="Добавить файл"
+          label="Загрузить конфигурацию"
           @update:model-value="setParser($event)"
         />
         <v-btn

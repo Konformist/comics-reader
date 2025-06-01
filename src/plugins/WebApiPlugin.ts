@@ -44,17 +44,25 @@ export interface IAuthorDTO extends DBDates {name: string}
 
 export interface ILanguageDTO extends DBDates {name: string}
 
-export interface IParserDTO extends DBDates {
-  name: string
-  siteUrl: string
+export interface IParseData {
   titleCSS: string
+  annotationCSS: string
   coverCSS: string
-  pagesCSS: string
   authorsCSS: string
   authorsTextCSS: string
   languageCSS: string
   tagsCSS: string
   tagsTextCSS: string
+  chaptersCSS: string
+  chaptersTitleCSS: string
+  pagesTemplateUrl: string
+  pagesCSS: string
+  pagesImageCSS: string
+}
+
+export interface IParserDTO extends DBDates, IParseData {
+  name: string
+  siteUrl: string
 }
 
 export interface IFileDTO extends DBDates {
@@ -70,22 +78,13 @@ export interface IComicCoverDTO {
   file: IFileDTO | null
 }
 
-export interface IComicOverrideDTO {
-  id: number
-  titleCSS: string
-  coverCSS: string
-  pagesCSS: string
-  languageCSS: string
-  tagsCSS: string
-  tagsTextCSS: string
-  authorsCSS: string
-  authorsTextCSS: string
-}
+export interface IComicOverrideDTO extends IParseData {id: number}
 
 export interface IComicDTO extends DBDates {
   name: string
   parserId: number
   fromUrl: string
+  annotation: string
   languageId: number
   authors: number[]
   tags: number[]

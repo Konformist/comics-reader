@@ -9,6 +9,7 @@ export default class ComicModel extends Entity<IComicDTO> implements IComicDTO {
   name: string;
   parserId: number;
   fromUrl: string;
+  annotation: string;
   languageId: number;
   authors: number[];
   tags: number[];
@@ -23,6 +24,7 @@ export default class ComicModel extends Entity<IComicDTO> implements IComicDTO {
     this.name = dto?.name ?? '';
     this.parserId = dto?.parserId ?? 0;
     this.fromUrl = dto?.fromUrl ?? '';
+    this.annotation = dto?.annotation ?? '';
     this.languageId = dto?.languageId ?? 0;
     this.authors = dto?.authors ?? [];
     this.tags = dto?.tags ?? [];
@@ -44,6 +46,7 @@ export default class ComicModel extends Entity<IComicDTO> implements IComicDTO {
       name: this.name,
       parserId: this.parserId,
       fromUrl: this.fromUrl,
+      annotation: this.annotation,
       languageId: this.languageId,
       authors: [...this.authors],
       tags: [...this.tags],

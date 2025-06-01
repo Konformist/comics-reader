@@ -5,7 +5,14 @@ import org.json.JSONArray
 
 class Converters {
   @TypeConverter
-  fun fromArrayString(value: String): List<Long> {
+  fun fromListLong(value: List<Long>): String {
+    val result = JSONArray()
+    for (item in value) result.put(item)
+    return result.toString()
+  }
+
+  @TypeConverter
+  fun toListLong(value: String): List<Long> {
     val result = arrayListOf<Long>()
     val data = JSONArray(value)
 
@@ -14,16 +21,5 @@ class Converters {
     }
 
     return result
-  }
-
-  @TypeConverter
-  fun toArrayString(list: List<Long>): String {
-    val result = JSONArray()
-
-    for (item in list) {
-      result.put(item)
-    }
-
-    return list.toString()
   }
 }

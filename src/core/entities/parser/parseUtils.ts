@@ -2,7 +2,7 @@ import type ComicOverrideModel from '@/core/entities/comic-override/ComicOverrid
 import type ParserModel from '@/core/entities/parser/ParserModel.ts';
 import type { IParsedComic } from '@/core/entities/parser/ParserTypes.ts';
 
-const cleanHTML = (value: string): string => (
+export const cleanHTML = (value: string): string => (
   value
     .replaceAll(/<head>(?:.|\n|\t)*?<\/head>/gm, '')
     .replaceAll(/<style.*?>(?:.|\n|\t)*?<\/style>/gm, '')
@@ -13,13 +13,13 @@ const cleanStr = (str: string): string => (
   str.trim().replaceAll(/\s+/g, ' ')
 );
 
-const parseString = (data: HTMLElement, item?: string) => (
+export const parseString = (data: HTMLElement, item?: string) => (
   item
     ? cleanStr(data.querySelector(item)?.textContent || '')
     : ''
 );
 
-const parseArray = (data: HTMLElement, item?: string, itemText?: string): string[] => {
+export const parseArray = (data: HTMLElement, item?: string, itemText?: string): string[] => {
   if (!item) return [];
 
   return [...data.querySelectorAll<HTMLElement>(item)].map((e) => (
@@ -29,7 +29,7 @@ const parseArray = (data: HTMLElement, item?: string, itemText?: string): string
   ));
 };
 
-const parseImage = (data: HTMLElement, item: string) => (
+export const parseImage = (data: HTMLElement, item: string) => (
   item
     ? data.querySelector<HTMLImageElement>(item)?.src || ''
     : ''

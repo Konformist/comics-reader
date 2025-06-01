@@ -1,5 +1,6 @@
 package com.konformist.comicsreader.db
 
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
@@ -25,7 +26,7 @@ import com.konformist.comicsreader.db.tag.Tag
 import com.konformist.comicsreader.db.tag.TagDao
 
 @Database(
-  version = 1,
+  version = 2,
   entities = [
     Comic::class,
     ComicCover::class,
@@ -38,6 +39,7 @@ import com.konformist.comicsreader.db.tag.TagDao
     Tag::class,
     AppFile::class
   ],
+  autoMigrations = [AutoMigration(from = 1, to = 2)]
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {

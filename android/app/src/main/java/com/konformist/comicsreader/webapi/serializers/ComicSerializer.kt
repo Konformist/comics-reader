@@ -18,6 +18,7 @@ class ComicSerializer(filesDir: File) : Serializer<ComicLite>() {
       name = value.optString("name", ""),
       parserId = value.optLong("parserId", 0),
       fromUrl = value.optString("fromUrl", ""),
+      annotation = value.optString("annotation", ""),
       languageId = value.optLong("languageId", 0),
       authors = listFromJSONArray(value.optJSONArray("authors")),
       tags = listFromJSONArray(value.optJSONArray("tags")),
@@ -35,6 +36,7 @@ class ComicSerializer(filesDir: File) : Serializer<ComicLite>() {
       name = value.optString("name", ""),
       parserId = value.optLong("parserId", 0),
       fromUrl = value.optString("fromUrl", ""),
+      annotation = value.optString("annotation", ""),
       languageId = value.optLong("languageId", 0),
       authors = listFromJSONArray(value.optJSONArray("authors")),
       tags = listFromJSONArray(value.optJSONArray("tags")),
@@ -58,6 +60,7 @@ class ComicSerializer(filesDir: File) : Serializer<ComicLite>() {
     data.put("name", item.comic.name)
     data.put("parserId", item.comic.parserId)
     data.put("fromUrl", item.comic.fromUrl)
+    data.put("annotation", item.comic.annotation)
     data.put("languageId", item.comic.languageId)
     data.put("authors", listToJSONArray(item.comic.authors))
     data.put("tags", listToJSONArray(item.comic.tags))

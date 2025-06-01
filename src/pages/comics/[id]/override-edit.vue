@@ -135,6 +135,10 @@
 import useLoading from '@/composables/useLoading.ts';
 import AuthorController from '@/core/entities/author/AuthorController.ts';
 import AuthorModel from '@/core/entities/author/AuthorModel.ts';
+import ChapterPageController from '@/core/entities/chapter-page/ChapterPageController.ts';
+import ChapterPageModel from '@/core/entities/chapter-page/ChapterPageModel.ts';
+import ChapterController from '@/core/entities/chapter/ChapterController.ts';
+import ChapterModel from '@/core/entities/chapter/ChapterModel.ts';
 import ComicOverrideController from '@/core/entities/comic-override/ComicOverrideController.ts';
 import ComicOverrideModel from '@/core/entities/comic-override/ComicOverrideModel.ts';
 import ComicController from '@/core/entities/comic/ComicController.ts';
@@ -181,6 +185,11 @@ const comicId = +(route.params.id || 0);
 const cookie = ref('');
 
 const comic = ref(new ComicModel());
+const saveComic = async () => {
+  await ComicController.save(comic.value);
+  await comicsStore.loadComicsForce();
+  comic.value = new ComicModel(comicsStore.comic.getDTO());
+};
 
 const parser = ref(new ParserModel());
 const loadParser = async () => {
@@ -193,14 +202,13 @@ const loadComicOverride = async () => {
   comicOverride.value = await ComicOverrideController.load(comicId);
 };
 
-const saveComic = async () => {
-  await ComicController.save(comic.value);
-  await comicsStore.loadComicsForce();
-  comic.value = new ComicModel(comicsStore.comic.getDTO());
-};
-
 const saveComicOverride = async () => {
   await ComicOverrideController.save(comicOverride.value);
+};
+
+const chapters = ref<ChapterModel[]>([]);
+const loadChapters = async () => {
+  chapters.value = await ChapterController.loadAll(comicId);
 };
 
 const onSave = async () => {
@@ -293,6 +301,7 @@ const init = async () => {
       authorsStore.loadAuthors(),
       languagesStore.loadLanguages(),
       loadComicOverride(),
+      loadChapters(),
       loadParser(),
     ]);
   }
@@ -349,6 +358,33 @@ const onLoadInfo = async () => {
       authorsStore.loadAuthorsForce(),
       languagesStore.loadLanguagesForce(),
     ]);
+
+    for (let i = 0; i < result.chapters.length; i++) {
+      const newChapter = result.chapters[i];
+      const chapter = chapters.value[i];
+
+      const chapterId = chapter?.id
+        ? chapter.id
+        : await ChapterController.save(new ChapterModel({
+          name: newChapter.name,
+          comicId,
+        }));
+
+      for (let j = 0; j < newChapter.pages.length; j++) {
+        const newPage = newChapter.pages[j];
+        const page = chapter?.pages[j];
+
+        if (page) {
+          page.fromUrl = newPage || page.fromUrl;
+          await ChapterPageController.save(page);
+        } else if (typeof chapterId === 'number') {
+          await ChapterPageController.save(new ChapterPageModel({
+            fromUrl: newPage,
+            chapterId,
+          }));
+        }
+      }
+    }
 
     newComic.name = result.name || comic.value.name;
     newComic.annotation = result.annotation || comic.value.annotation;

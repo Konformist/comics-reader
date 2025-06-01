@@ -15,7 +15,7 @@ export const parseString = (data: HTMLElement, item?: string) => (
     : ''
 );
 
-export const parseArray = (data: HTMLElement, item?: string, itemText?: string): string[] => {
+export const parseStringArray = (data: HTMLElement, item?: string, itemText?: string): string[] => {
   if (!item) return [];
 
   return [...data.querySelectorAll<HTMLElement>(item)].map((e) => (
@@ -28,5 +28,11 @@ export const parseArray = (data: HTMLElement, item?: string, itemText?: string):
 export const parseImage = (data: HTMLElement, item: string) => (
   item
     ? data.querySelector<HTMLImageElement>(item)?.src || ''
+    : ''
+);
+
+export const parseLink = (data: HTMLElement, item?: string) => (
+  item
+    ? cleanStr(data.querySelector<HTMLLinkElement>(item)?.href || '')
     : ''
 );

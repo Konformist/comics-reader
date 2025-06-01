@@ -1,6 +1,6 @@
 import ParserController from '@/core/entities/parser/ParserController.ts';
 import type { IParsedChapterData, IParsedComicData } from '@/core/entities/parser/ParserTypes.ts';
-import { cleanHTML, parseArray, parseImage, parseString } from '@/core/entities/parser/parseUtils.ts';
+import { cleanHTML, parseImage, parseLink, parseString, parseStringArray } from '@/core/entities/parser/parseUtils.ts';
 import sleep from '@/core/utils/sleep.ts';
 import type { IParseData } from '@/plugins/WebApiPlugin';
 import type ParserModel from '@/core/entities/parser/ParserModel.ts';
@@ -61,19 +61,19 @@ export default class Parser {
     result.annotation = parseString(comicDOM, this.parseInfo.annotationCSS);
     result.cover = parseImage(comicDOM, this.parseInfo.coverCSS);
     result.language = parseString(comicDOM, this.parseInfo.languageCSS);
-    result.tags = parseArray(comicDOM, this.parseInfo.tagsCSS, this.parseInfo.tagsTextCSS);
-    result.authors = parseArray(comicDOM, this.parseInfo.authorsCSS, this.parseInfo.authorsTextCSS);
+    result.tags = parseStringArray(comicDOM, this.parseInfo.tagsCSS, this.parseInfo.tagsTextCSS);
+    result.authors = parseStringArray(comicDOM, this.parseInfo.authorsCSS, this.parseInfo.authorsTextCSS);
 
     const chapters: IParsedChapterData[] = [];
     result.chapters = chapters;
 
     if (this.parseInfo.chaptersCSS) {
-      comicDOM.querySelectorAll(this.parseInfo.chaptersCSS).forEach((e) => {
-        const pagesCount = +(e.querySelector(this.parseInfo.pagesCSS)?.textContent || 0);
+      comicDOM.querySelectorAll<HTMLElement>(this.parseInfo.chaptersCSS).forEach((e) => {
+        const pagesCount = +(parseString(e, this.parseInfo.pagesCSS) || 0);
 
         chapters.push({
-          name: e.querySelector(this.parseInfo.chaptersTitleCSS)?.textContent || '',
-          fromUrl: e.querySelector<HTMLLinkElement>('a')?.href || '',
+          name: parseString(e, this.parseInfo.chaptersTitleCSS),
+          fromUrl: parseLink(e, 'a'),
           pages: (new Array(pagesCount)).fill(''),
         });
       });
@@ -95,7 +95,7 @@ export default class Parser {
       .parseFromString(cleaned, 'text/html')
       .body;
 
-    return +(chapterDOM.querySelector(this.parseInfo.pagesCSS)?.textContent || 0);
+    return +(parseString(chapterDOM, this.parseInfo.pagesCSS) || 0);
   }
 
   private parseChapterPageImage(pageRaw: string): string {
@@ -104,7 +104,7 @@ export default class Parser {
       .parseFromString(cleaned, 'text/html')
       .body;
 
-    return (pageDOM.querySelector<HTMLImageElement>(this.parseInfo.pagesImageCSS)?.src || '');
+    return parseImage(pageDOM, this.parseInfo.pagesImageCSS) || '';
   }
 
   async parse(comicUrl: string, cookie: string = ''): Promise<IParsedComicData> {

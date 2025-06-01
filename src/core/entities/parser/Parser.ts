@@ -5,7 +5,6 @@ import sleep from '@/core/utils/sleep.ts';
 import type { IParseData } from '@/plugins/WebApiPlugin';
 import type ParserModel from '@/core/entities/parser/ParserModel.ts';
 import type ComicOverrideModel from '@/core/entities/comic-override/ComicOverrideModel.ts';
-import { Toast } from '@capacitor/toast';
 
 export default class Parser {
   static PAGE_ID = '<PAGE_ID>';
@@ -127,17 +126,18 @@ export default class Parser {
     }
 
     if (this.parseInfo.pagesImageCSS && this.parseInfo.pagesTemplateUrl) {
-      for (const chapter of comicData.chapters) {
+      for (let i = 0; i < comicData.chapters.length; i++){
+        const chapter = comicData.chapters[i];
         const parentUrlPattern = (chapter.fromUrl || comicUrl).endsWith('/')
           ? (chapter.fromUrl || comicUrl)
           : `${(chapter.fromUrl || comicUrl)}/`;
         const pageUrlPattern = this.parseInfo.pagesTemplateUrl.startsWith('/')
           ? this.parseInfo.pagesTemplateUrl.replace('/', '')
           : this.parseInfo.pagesTemplateUrl;
-        const urlPattern = `${parentUrlPattern}${pageUrlPattern}`;
+        const urlPattern = `${parentUrlPattern}${pageUrlPattern}`.replace(Parser.PAGE_ID, (i + 1).toString());
 
         const pages: string[] = [];
-        for (let i = 0; i < chapter.pages.length; i++) {
+        for (let j = 0; j < chapter.pages.length; j++) {
           const pageRaw = await ParserController.loadComicRaw(urlPattern);
           const pageImage = this.parseChapterPageImage(pageRaw);
           pages.push(pageImage);

@@ -20,8 +20,8 @@ android {
         applicationId = "com.konformist.comicsreader"
         minSdk = 34
         targetSdk = 35
-        versionCode = 10
-        versionName = "1.4.4"
+        versionCode = 11
+        versionName = "1.4.5"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         androidResources {
             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

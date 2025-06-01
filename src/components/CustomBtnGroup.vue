@@ -16,7 +16,7 @@
         class="w-100 rounded-0"
         :class="{
           'rounded-t-xl': index === 0,
-          'rounded-b-xl': index === (items.length - 1),
+          'rounded-b-xl': index === (items?.length ? items?.length - 1 : 0),
         }"
         :color="model === item.id ? 'primary' : ''"
         flat

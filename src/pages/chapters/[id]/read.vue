@@ -76,10 +76,9 @@
       <swiper-container
         centered-slides
         class="w-100"
+        free-mode
         :initial-slide="currentPage"
-        lazy
-        :slides-offset-after="2"
-        :slides-offset-before="2"
+        :modules="[FreeMode]"
         slides-per-view="auto"
       >
         <swiper-slide
@@ -161,7 +160,7 @@ import { KeepAwake } from '@capacitor-community/keep-awake';
 import { Capacitor } from '@capacitor/core';
 import { StatusBar } from '@capacitor/status-bar';
 import { Toast } from '@capacitor/toast';
-import { Autoplay } from 'swiper/modules';
+import { Autoplay, FreeMode } from 'swiper/modules';
 import { register } from 'swiper/element';
 import type { SwiperContainer, SwiperSlide } from 'swiper/element';
 import { useAppStore } from '@/stores/app.ts';

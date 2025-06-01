@@ -111,11 +111,13 @@ export default class Parser {
   async parse(comicUrl: string, cookie: string = ''): Promise<IParsedComicData> {
     const comicRaw = await ParserController.loadHTMLRaw(comicUrl, cookie);
     const comicData = this.parseComic(comicRaw);
+    const domain = getDomain(comicUrl);
 
     if (this.parseInfo.pagesCSS) {
       for (const chapter of comicData.chapters) {
+        const chapterUrl = (!chapter.fromUrl.includes('http://') && !chapter.fromUrl.includes('https://')) ? `${domain}/${chapter.fromUrl}` : chapter.fromUrl;
         const chapterRaw = chapter.fromUrl
-          ? await ParserController.loadHTMLRaw(chapter.fromUrl, cookie)
+          ? await ParserController.loadHTMLRaw(chapterUrl, cookie)
           : comicRaw;
         const pagesCount = this.parseChapterPagesCount(chapterRaw);
         if (pagesCount <= chapter.pages.length) continue;
@@ -127,8 +129,6 @@ export default class Parser {
     }
 
     if (this.parseInfo.pagesImageCSS && this.parseInfo.pagesTemplateUrl) {
-      const domain = getDomain(comicUrl);
-
       for (let i = 0; i < comicData.chapters.length; i++){
         const chapter = comicData.chapters[i];
         const parentUrlPattern = (chapter.fromUrl || comicUrl).endsWith('/')
@@ -139,7 +139,7 @@ export default class Parser {
           : this.parseInfo.pagesTemplateUrl;
         let urlPattern = `${parentUrlPattern}${pageUrlPattern}`.replace(Parser.PAGE_ID, (i + 1).toString());
 
-        if (!urlPattern.includes(domain)) {
+        if (!urlPattern.includes('http://') && !urlPattern.includes('https://')) {
           urlPattern = urlPattern.startsWith('/')
             ? `${domain}${urlPattern}`
             : `${domain}/${urlPattern}`;

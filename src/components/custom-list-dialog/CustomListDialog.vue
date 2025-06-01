@@ -21,6 +21,7 @@
               flat
               label="Поиск"
               variant="solo-filled"
+              @click:clear="search = ''"
             />
           </v-card-item>
           <v-divider />
@@ -48,6 +49,11 @@
         </v-list>
         <v-divider />
         <v-card-actions>
+          <v-btn
+            :active="selected"
+            text="Выбранные"
+            @click="selected = !selected"
+          />
           <v-spacer />
           <v-btn
             text="Закрыть"
@@ -76,13 +82,16 @@ const {
 }>();
 
 const search = ref('');
-
-const filteredItems = computed(() => (
-  items.filter((e) => e.name.toLowerCase().includes(search.value.toLowerCase()))
-));
+const selected = ref(false);
 
 const modelArray = computed<number[]>(() => (
   Array.isArray(model.value) ? model.value : [model.value]
+));
+
+const filteredItems = computed(() => (
+  items
+    .filter((e) => !selected.value || modelArray.value.includes(e.id))
+    .filter((e) => e.name.toLowerCase().includes(search.value.toLowerCase()))
 ));
 
 const toggleModel = (id: number) => {

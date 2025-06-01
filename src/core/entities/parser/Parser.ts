@@ -2,6 +2,7 @@ import ParserController from '@/core/entities/parser/ParserController.ts';
 import type { IParsedChapterData, IParsedComicData } from '@/core/entities/parser/ParserTypes.ts';
 import { cleanHTML, parseImage, parseLink, parseString, parseStringArray } from '@/core/entities/parser/parseUtils.ts';
 import sleep from '@/core/utils/sleep.ts';
+import { getDomain } from '@/core/utils/urlUtils.ts';
 import type { IParseData } from '@/plugins/WebApiPlugin';
 import type ParserModel from '@/core/entities/parser/ParserModel.ts';
 import type ComicOverrideModel from '@/core/entities/comic-override/ComicOverrideModel.ts';
@@ -126,6 +127,8 @@ export default class Parser {
     }
 
     if (this.parseInfo.pagesImageCSS && this.parseInfo.pagesTemplateUrl) {
+      const domain = getDomain(comicUrl);
+
       for (let i = 0; i < comicData.chapters.length; i++){
         const chapter = comicData.chapters[i];
         const parentUrlPattern = (chapter.fromUrl || comicUrl).endsWith('/')
@@ -134,7 +137,13 @@ export default class Parser {
         const pageUrlPattern = this.parseInfo.pagesTemplateUrl.startsWith('/')
           ? this.parseInfo.pagesTemplateUrl.replace('/', '')
           : this.parseInfo.pagesTemplateUrl;
-        const urlPattern = `${parentUrlPattern}${pageUrlPattern}`.replace(Parser.PAGE_ID, (i + 1).toString());
+        let urlPattern = `${parentUrlPattern}${pageUrlPattern}`.replace(Parser.PAGE_ID, (i + 1).toString());
+
+        if (!urlPattern.includes(domain)) {
+          urlPattern = urlPattern.startsWith('/')
+            ? `${domain}${urlPattern}`
+            : `${domain}/${urlPattern}`;
+        }
 
         const pages: string[] = [];
         for (let j = 0; j < chapter.pages.length; j++) {

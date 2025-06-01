@@ -1,6 +1,7 @@
 import Api from '@/core/api/Api.ts';
 import ParserModel from '@/core/entities/parser/ParserModel.ts';
 import { fileToBase64 } from '@/core/utils/image.ts';
+import { getDomain } from '@/core/utils/urlUtils.ts';
 import { CapacitorHttp } from '@capacitor/core';
 
 export default class ParserController {
@@ -25,7 +26,6 @@ export default class ParserController {
   }
 
   static async loadHTMLRaw(url: string, cookie: string = ''): Promise<string> {
-    const domain = url.match(/^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?[^:/\n?]+/img);
     const result = await CapacitorHttp.get({
       url,
       headers: {
@@ -33,7 +33,7 @@ export default class ParserController {
         'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
         'Cookie': cookie,
         'Priority': 'u=0, i',
-        'Referer': domain ? domain[0] : url,
+        'Referer': getDomain(url) || url,
         'sec-ch-ua': '"Chromium";v="136", "Google Chrome";v="136", "Not.A/Brand";v="99"',
         'sec-ch-ua-arch': '"x86"',
         'sec-ch-ua-bitness': '"64"',

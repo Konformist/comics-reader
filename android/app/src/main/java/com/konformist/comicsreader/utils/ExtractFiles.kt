@@ -29,7 +29,7 @@ class ExtractFiles {
         }
       } else {
         val parent = f.parentFile
-        if (!parent.isDirectory && !parent.mkdirs()) {
+        if (parent == null || (!parent.isDirectory && !parent.mkdirs())) {
           throw IOException("failed to create directory $parent")
         }
         val outFile = FileOutputStream(f)

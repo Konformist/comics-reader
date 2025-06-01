@@ -1,0 +1,580 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "af35a8d1315060509c10453f6eba1a29",
+    "entities": [
+      {
+        "tableName": "comics",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cdate` TEXT NOT NULL DEFAULT (datetime('now')), `mdate` TEXT NOT NULL DEFAULT (datetime('now')), `name` TEXT NOT NULL DEFAULT '', `parser_id` INTEGER DEFAULT 0, `from_url` TEXT DEFAULT '', `language_id` INTEGER DEFAULT 0, `tags` TEXT DEFAULT '[]', `authors` TEXT DEFAULT '[]')",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cdate",
+            "columnName": "cdate",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "(datetime('now'))"
+          },
+          {
+            "fieldPath": "mdate",
+            "columnName": "mdate",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "(datetime('now'))"
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "parserId",
+            "columnName": "parser_id",
+            "affinity": "INTEGER",
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "fromUrl",
+            "columnName": "from_url",
+            "affinity": "TEXT",
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "languageId",
+            "columnName": "language_id",
+            "affinity": "INTEGER",
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "tags",
+            "columnName": "tags",
+            "affinity": "TEXT",
+            "defaultValue": "'[]'"
+          },
+          {
+            "fieldPath": "authors",
+            "columnName": "authors",
+            "affinity": "TEXT",
+            "defaultValue": "'[]'"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "comic_covers",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cdate` TEXT NOT NULL DEFAULT (datetime('now')), `mdate` TEXT NOT NULL DEFAULT (datetime('now')), `comic_id` INTEGER NOT NULL, `file_id` INTEGER DEFAULT 0, `from_url` TEXT DEFAULT '')",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cdate",
+            "columnName": "cdate",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "(datetime('now'))"
+          },
+          {
+            "fieldPath": "mdate",
+            "columnName": "mdate",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "(datetime('now'))"
+          },
+          {
+            "fieldPath": "comicId",
+            "columnName": "comic_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fileId",
+            "columnName": "file_id",
+            "affinity": "INTEGER",
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "fromUrl",
+            "columnName": "from_url",
+            "affinity": "TEXT",
+            "defaultValue": "''"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "comic_overrides",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cdate` TEXT NOT NULL DEFAULT (datetime('now')), `mdate` TEXT NOT NULL DEFAULT (datetime('now')), `comic_id` INTEGER NOT NULL, `title_css` TEXT DEFAULT '', `cover_css` TEXT DEFAULT '', `authors_css` TEXT DEFAULT '', `authors_text_css` TEXT DEFAULT '', `language_css` TEXT DEFAULT '', `tags_css` TEXT DEFAULT '', `tags_text_css` TEXT DEFAULT '', `pages_css` TEXT DEFAULT '')",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cdate",
+            "columnName": "cdate",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "(datetime('now'))"
+          },
+          {
+            "fieldPath": "mdate",
+            "columnName": "mdate",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "(datetime('now'))"
+          },
+          {
+            "fieldPath": "comicId",
+            "columnName": "comic_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "titleCSS",
+            "columnName": "title_css",
+            "affinity": "TEXT",
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "coverCSS",
+            "columnName": "cover_css",
+            "affinity": "TEXT",
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "authorsCSS",
+            "columnName": "authors_css",
+            "affinity": "TEXT",
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "authorsTextCSS",
+            "columnName": "authors_text_css",
+            "affinity": "TEXT",
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "languageCSS",
+            "columnName": "language_css",
+            "affinity": "TEXT",
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "tagsCSS",
+            "columnName": "tags_css",
+            "affinity": "TEXT",
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "tagsTextCSS",
+            "columnName": "tags_text_css",
+            "affinity": "TEXT",
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "pagesCSS",
+            "columnName": "pages_css",
+            "affinity": "TEXT",
+            "defaultValue": "''"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "chapters",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cdate` TEXT NOT NULL DEFAULT (datetime('now')), `mdate` TEXT NOT NULL DEFAULT (datetime('now')), `name` TEXT DEFAULT '', `comic_id` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cdate",
+            "columnName": "cdate",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "(datetime('now'))"
+          },
+          {
+            "fieldPath": "mdate",
+            "columnName": "mdate",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "(datetime('now'))"
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "comicId",
+            "columnName": "comic_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "chapter_pages",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cdate` TEXT NOT NULL DEFAULT (datetime('now')), `mdate` TEXT NOT NULL DEFAULT (datetime('now')), `chapter_id` INTEGER NOT NULL, `is_read` INTEGER DEFAULT 0, `file_id` INTEGER DEFAULT 0, `from_url` TEXT DEFAULT '')",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cdate",
+            "columnName": "cdate",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "(datetime('now'))"
+          },
+          {
+            "fieldPath": "mdate",
+            "columnName": "mdate",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "(datetime('now'))"
+          },
+          {
+            "fieldPath": "chapterId",
+            "columnName": "chapter_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isRead",
+            "columnName": "is_read",
+            "affinity": "INTEGER",
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "fileId",
+            "columnName": "file_id",
+            "affinity": "INTEGER",
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "fromUrl",
+            "columnName": "from_url",
+            "affinity": "TEXT",
+            "defaultValue": "''"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "parsers",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cdate` TEXT NOT NULL DEFAULT (datetime('now')), `mdate` TEXT NOT NULL DEFAULT (datetime('now')), `name` TEXT NOT NULL, `site_url` TEXT DEFAULT '', `title_css` TEXT DEFAULT '', `cover_css` TEXT DEFAULT '', `authors_css` TEXT DEFAULT '', `authors_text_css` TEXT DEFAULT '', `language_css` TEXT DEFAULT '', `tags_css` TEXT DEFAULT '', `tags_text_css` TEXT DEFAULT '', `pages_css` TEXT DEFAULT '')",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cdate",
+            "columnName": "cdate",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "(datetime('now'))"
+          },
+          {
+            "fieldPath": "mdate",
+            "columnName": "mdate",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "(datetime('now'))"
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "siteUrl",
+            "columnName": "site_url",
+            "affinity": "TEXT",
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "titleCSS",
+            "columnName": "title_css",
+            "affinity": "TEXT",
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "coverCSS",
+            "columnName": "cover_css",
+            "affinity": "TEXT",
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "authorsCSS",
+            "columnName": "authors_css",
+            "affinity": "TEXT",
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "authorsTextCSS",
+            "columnName": "authors_text_css",
+            "affinity": "TEXT",
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "languageCSS",
+            "columnName": "language_css",
+            "affinity": "TEXT",
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "tagsCSS",
+            "columnName": "tags_css",
+            "affinity": "TEXT",
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "tagsTextCSS",
+            "columnName": "tags_text_css",
+            "affinity": "TEXT",
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "pagesCSS",
+            "columnName": "pages_css",
+            "affinity": "TEXT",
+            "defaultValue": "''"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "languages",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cdate` TEXT NOT NULL DEFAULT (datetime('now')), `mdate` TEXT NOT NULL DEFAULT (datetime('now')), `name` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cdate",
+            "columnName": "cdate",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "(datetime('now'))"
+          },
+          {
+            "fieldPath": "mdate",
+            "columnName": "mdate",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "(datetime('now'))"
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "authors",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cdate` TEXT NOT NULL DEFAULT (datetime('now')), `mdate` TEXT NOT NULL DEFAULT (datetime('now')), `name` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cdate",
+            "columnName": "cdate",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "(datetime('now'))"
+          },
+          {
+            "fieldPath": "mdate",
+            "columnName": "mdate",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "(datetime('now'))"
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "tags",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cdate` TEXT NOT NULL DEFAULT (datetime('now')), `mdate` TEXT NOT NULL DEFAULT (datetime('now')), `name` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cdate",
+            "columnName": "cdate",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "(datetime('now'))"
+          },
+          {
+            "fieldPath": "mdate",
+            "columnName": "mdate",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "(datetime('now'))"
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "files",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cdate` TEXT NOT NULL DEFAULT (datetime('now')), `mdate` TEXT NOT NULL DEFAULT (datetime('now')), `name` TEXT NOT NULL, `mime` TEXT NOT NULL, `size` INTEGER NOT NULL, `path` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cdate",
+            "columnName": "cdate",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "(datetime('now'))"
+          },
+          {
+            "fieldPath": "mdate",
+            "columnName": "mdate",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "(datetime('now'))"
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mime",
+            "columnName": "mime",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "size",
+            "columnName": "size",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "path",
+            "columnName": "path",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'af35a8d1315060509c10453f6eba1a29')"
+    ]
+  }
+}

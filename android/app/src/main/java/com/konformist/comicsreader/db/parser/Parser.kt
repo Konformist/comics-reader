@@ -18,7 +18,7 @@ data class Parser(
   @ColumnInfo(name = "annotation_css", defaultValue = "") override val annotationCSS: String?,
   @ColumnInfo(name = "cover_css", defaultValue = "") override val coverCSS: String?,
   @ColumnInfo(name = "authors_css", defaultValue = "") override val authorsCSS: String?,
-  @ColumnInfo(name = "authorsText_css", defaultValue = "") override val authorsTextCSS: String?,
+  @ColumnInfo(name = "authors_text_css", defaultValue = "") override val authorsTextCSS: String?,
   @ColumnInfo(name = "language_css", defaultValue = "") override val languageCSS: String?,
   @ColumnInfo(name = "tags_css", defaultValue = "") override val tagsCSS: String?,
   @ColumnInfo(name = "tags_text_css", defaultValue = "") override val tagsTextCSS: String?,

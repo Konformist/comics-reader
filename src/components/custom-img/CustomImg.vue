@@ -13,10 +13,7 @@
     :src="src"
     :width="width"
   >
-    <template
-      v-if="!src"
-      #placeholder
-    >
+    <template #placeholder>
       <div
         class="w-100 h-100 d-flex align-center justify-center
           border-md rounded-xl

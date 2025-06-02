@@ -4,6 +4,7 @@
       v-model="frame"
       grow
       :items="tabs"
+      @update:model-value="onMove()"
     />
     <v-container
       v-if="frame === 1"
@@ -15,6 +16,13 @@
           auto-grow
           class="mb-4"
           label="Название"
+          rows="2"
+        />
+        <v-textarea
+          v-model.trim="comic.annotation"
+          auto-grow
+          class="mb-4"
+          label="Аннотация"
           rows="2"
         />
         <CustomSelect
@@ -78,7 +86,7 @@
         v-if="chaptersList.length"
         :items="chaptersList"
         :loading="loading"
-        @click-item="$router.push({
+        @click-item="router.push({
           name: '/chapters/[id]/edit',
           params: { id: $event }
         })"
@@ -143,6 +151,8 @@ const {
   loadingGlobalEnd,
 } = useLoading();
 
+const comicId = +(route.params.id || 0);
+
 const tabs = [
   {
     value: 1,
@@ -153,9 +163,15 @@ const tabs = [
     text: 'Главы',
   },
 ];
-const frame = ref(1);
 
-const comicId = +(route.params.id || 0);
+const frame = ref(+(route.query.frame || 1));
+const onMove = () => {
+  router.replace({
+    name: '/comics/[id]/edit',
+    params: { id: comicId },
+    query: { frame: frame.value },
+  });
+};
 
 const comic = ref(new ComicModel());
 

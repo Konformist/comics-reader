@@ -162,6 +162,7 @@ const deleteAuthor = async () => {
     loadingGlobalStart();
     await AuthorController.remove(selectedAuthor.value.id);
     await authorsStore.loadAuthorsForce();
+    dialog.value = false;
     Toast.show({ text: 'Автор удалён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });

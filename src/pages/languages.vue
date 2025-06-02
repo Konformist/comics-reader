@@ -164,6 +164,7 @@ const deleteLanguage = async () => {
     loadingGlobalStart();
     await LanguageController.remove(selectedLanguage.value.id);
     await languagesStore.loadLanguagesForce();
+    dialog.value = false;
     Toast.show({ text: 'Язык удалён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });

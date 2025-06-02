@@ -63,7 +63,7 @@
           :items="chaptersList"
           :loading="loading"
           selectable
-          @click:select="$router.push({
+          @click:select="router.push({
             name: '/chapters/[id]/read',
             params: { id: $event.id as number },
           })"

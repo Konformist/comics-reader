@@ -7,7 +7,7 @@
       <v-btn
         icon="$arrow-left"
         rounded="pill"
-        @click="$router.back()"
+        @click="router.back()"
       />
     </template>
     <template #append>
@@ -150,6 +150,18 @@
     :max="chapter.pages.length - 1"
     :model-value="currentPage"
   />
+  <v-fab
+    v-if="currentPage === chapter.pages.length - 1"
+    app
+    appear
+    append-icon="$arrow-right"
+    :disabled="!nextChapterId"
+    text="Продолжить"
+    :to="{
+      name: '/chapters/[id]/read',
+      params: { id: nextChapterId }
+    }"
+  />
 </template>
 
 <script lang="ts" setup>
@@ -178,6 +190,20 @@ definePage({
 const route = useRoute('/chapters/[id]/read');
 const router = useRouter();
 const appStore = useAppStore();
+
+const comicId = +(route.query.comic || 0);
+const chapterId = ref(+(route.params.id || 0));
+
+const chapters = ref<ChapterModel[]>([]);
+
+const nextChapterId = computed(() => {
+  const index = chapters.value.findIndex((chapter) => chapter.id === chapterId.value);
+  return chapters.value[index + 1]?.id;
+});
+
+const loadChapters = async () => {
+  chapters.value = await ChapterController.loadAll(comicId);
+};
 
 const swiperRef = ref<SwiperContainer>();
 
@@ -227,14 +253,22 @@ const saveSettings = async () => {
 
 register();
 
-const chapterId = +(route.params.id || 0);
-
 const chapter = ref<ChapterModel>(new ChapterModel());
 const loadChapter = async () => {
-  chapter.value = await ChapterController.load(chapterId);
+  chapter.value = await ChapterController.load(chapterId.value);
 };
 
 const mounted = ref(false);
+
+watch(
+  () => route.params.id,
+  (val) => {
+    chapterId.value = +val;
+    loadChapter();
+    loadChapters();
+    swiperRef.value?.swiper.slideTo(0);
+  },
+);
 
 onMounted(async () => {
   await loadChapter();
@@ -243,6 +277,8 @@ onMounted(async () => {
     router.replace({ name: '/' });
     return;
   }
+
+  loadChapters();
 
   if ((await KeepAwake.isSupported()).isSupported) {
     await KeepAwake.keepAwake();

@@ -4,7 +4,7 @@ import stylistic from '@stylistic/eslint-plugin';
 import vuetifyPlugin from 'eslint-config-vuetify/index.ts.mjs';
 
 export default defineConfig([
-  { ignores: ['**/android/**'] },
+  { ignores: ['**/android/**', '**/dist/**'] },
   ...vuetifyPlugin,
   ...pluginVue.configs['flat/recommended'],
   {

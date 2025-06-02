@@ -1,13 +1,6 @@
 <template>
   <v-app>
-    <router-view v-slot="{ Component, route }">
-      <keep-alive :include="['/']">
-        <component
-          :is="Component"
-          :key="route"
-        />
-      </keep-alive>
-    </router-view>
+    <router-view />
     <NavigationDrawer
       v-model="appStore.drawer"
     />

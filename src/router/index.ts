@@ -33,4 +33,8 @@ router.isReady().then(() => {
   localStorage.removeItem('vuetify:dynamic-reload');
 });
 
+router.beforeResolve(() => {
+  window.scrollTo( 0, 0 );
+});
+
 export default router;

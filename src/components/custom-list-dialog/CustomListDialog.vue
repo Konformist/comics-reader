@@ -66,6 +66,8 @@
 </template>
 
 <script setup lang="ts">
+import { sortString } from '@/core/utils/array.ts';
+
 const model = defineModel<number | number[]>({ default: 0 });
 
 const {
@@ -92,6 +94,7 @@ const filteredItems = computed(() => (
   items
     .filter((e) => !selected.value || modelArray.value.includes(e.id))
     .filter((e) => e.name.toLowerCase().includes(search.value.toLowerCase()))
+    .sort((a,b) => sortString(a.name,b.name))
 ));
 
 const toggleModel = (id: number) => {

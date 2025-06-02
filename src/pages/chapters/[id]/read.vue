@@ -49,6 +49,7 @@
         }"
         class="h-100"
         :direction="appStore.settings.readingMode"
+        :initial-slide="currentPage"
         lazy
         :modules="[Autoplay]"
       >
@@ -190,7 +191,7 @@ const route = useRoute('/chapters/[id]/read');
 const router = useRouter();
 const appStore = useAppStore();
 
-const comicId = +(route.query.comic || 0);
+const comicId = +(route.query?.comic || 0);
 const chapterId = ref(+(route.params.id || 0));
 
 const chapters = ref<ChapterModel[]>([]);
@@ -207,7 +208,7 @@ const loadChapters = async () => {
 const swiperRef = ref<SwiperContainer>();
 
 const showPages = ref(false);
-const currentPage = ref(0);
+const currentPage = ref(+(route.query?.page || 0));
 
 const swiperStop = () => {
   if (swiperRef.value) swiperRef.value.swiper.autoplay.stop();

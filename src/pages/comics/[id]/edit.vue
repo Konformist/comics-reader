@@ -262,6 +262,7 @@ const chaptersList = computed(() => (
   chapters.value.map((e, i) => ({
     id: e.id,
     name: e.name || `Глава ${i + 1}`,
+    count: `${e.pages.reduce((a,c) => a + (c.file ? 1 : 0), 0)} / ${e.pages.length}`,
   }))
 ));
 

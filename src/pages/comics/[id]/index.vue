@@ -59,21 +59,31 @@
       <template v-if="chaptersList.length">
         <v-divider />
         <v-list
+          activable
           class="ma-4"
-          :items="chaptersList"
-          :loading="loading"
-          selectable
-          @click:select="router.push({
-            name: '/chapters/[id]/read',
-            params: { id: $event.id as number },
-          })"
         >
-          <template #append="{ item }">
-            <v-icon
-              :color="item.isRead ? 'success' : ''"
-              icon="$read"
-            />
-          </template>
+          <v-list-item
+            v-for="chapter in chaptersList"
+            :key="chapter.id"
+            :title="chapter.name"
+            :to="{
+              name: '/chapters/[id]/read',
+              params: { id: chapter.id },
+              query: { comic: comicId, page: chapter.readLast },
+            }"
+          >
+            <template #append>
+              <v-list-item-subtitle
+                class="mr-4"
+              >
+                {{ chapter.read }} / {{ chapter.total }}
+              </v-list-item-subtitle>
+              <v-icon
+                :color="chapter.read === chapter.total ? 'success' : ''"
+                icon="$read"
+              />
+            </template>
+          </v-list-item>
         </v-list>
       </template>
     </v-container>
@@ -129,7 +139,9 @@ const chaptersList = computed(() => (
   chapters.value.map((e, i) => ({
     id: e.id,
     name: e.name || `Глава ${i + 1}`,
-    isRead: e.pages.length && e.pages.every((e) => e.isRead),
+    readLast: e.pages.findIndex((e) => !e.isRead),
+    read: e.pages.filter((e) => e.isRead).length,
+    total: e.pages.length,
   }))
 ));
 

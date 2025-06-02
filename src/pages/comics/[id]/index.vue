@@ -66,11 +66,11 @@
             v-for="chapter in chaptersList"
             :key="chapter.id"
             :title="chapter.name"
-            :to="{
+            :to="chapter.total ? {
               name: '/chapters/[id]/read',
               params: { id: chapter.id },
               query: { comic: comicId, page: chapter.readLast },
-            }"
+            } : undefined"
           >
             <template #append>
               <v-list-item-subtitle

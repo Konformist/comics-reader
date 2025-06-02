@@ -33,7 +33,7 @@ defineProps<{
   loading?: boolean
   items: Array<{
     id: number
-    count?: number
+    count?: number | string
     name: string
   }>
 }>();

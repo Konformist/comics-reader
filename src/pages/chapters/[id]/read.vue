@@ -151,11 +151,10 @@
     :model-value="currentPage"
   />
   <v-fab
-    v-if="currentPage === chapter.pages.length - 1"
+    v-if="nextChapterId && currentPage === chapter.pages.length - 1"
     app
     appear
     append-icon="$arrow-right"
-    :disabled="!nextChapterId"
     text="Продолжить"
     :to="{
       name: '/chapters/[id]/read',

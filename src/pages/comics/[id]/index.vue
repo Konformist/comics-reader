@@ -79,7 +79,7 @@
                 {{ chapter.read }} / {{ chapter.total }}
               </v-list-item-subtitle>
               <v-icon
-                :color="chapter.read === chapter.total ? 'success' : ''"
+                :color="chapter.total && chapter.read === chapter.total ? 'success' : ''"
                 icon="$read"
               />
             </template>

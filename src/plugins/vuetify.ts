@@ -37,7 +37,7 @@ import {
   mdiPencil,
   mdiPlus, mdiSort,
   mdiTag,
-  mdiTranslate, mdiTriangleDown, mdiTune,
+  mdiTranslate, mdiTriangleDown,
   mdiViewDashboard,
   mdiViewList,
 } from '@mdi/js';
@@ -66,7 +66,6 @@ export default createVuetify({
       'file-code': mdiFileCode,
       'file': mdiFile,
       'settings': mdiCog,
-      'tune': mdiTune,
       'download': mdiDownload,
       'copy': mdiContentCopy,
       'menu': mdiMenu,

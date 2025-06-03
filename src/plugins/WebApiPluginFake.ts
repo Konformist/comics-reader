@@ -17,7 +17,7 @@ export default class WebApiPluginFake {
   AUTHOR_COUNT = 10;
   PARSER_COUNT = 10;
   CHAPTER_COUNT = 10;
-  CHAPTER_PAGE_COUNT = 100;
+  CHAPTER_PAGE_COUNT = 10;
   COMIC_COUNT = 200;
 
   languageIds = faker.helpers.uniqueArray(this.uniqArrInt(1, this.LANGUAGE_COUNT), this.LANGUAGE_COUNT);
@@ -244,7 +244,7 @@ export default class WebApiPluginFake {
 
   getChapterPages(chapterId: number): IChapterPageDTO[] {
     return faker.helpers.arrayElements(this.chapterPageIds, {
-      min: 1,
+      min: 5,
       max: this.CHAPTER_PAGE_COUNT,
     })
       .map((e) => this.getChapterPage({
@@ -263,7 +263,12 @@ export default class WebApiPluginFake {
       id: chapterId,
       cdate: '',
       mdate: '',
-      name: '',
+      name: faker.word.words({
+        count: {
+          min: 1,
+          max: 3,
+        },
+      }),
       comicId: override?.comicId || this.getComicId(),
       pages: this.getChapterPages(chapterId),
     };
@@ -285,7 +290,7 @@ export default class WebApiPluginFake {
       autoReading: true,
       autoReadingTimeout: 3000,
       isCompress: true,
-      readingMode: 'vertical',
+      readingMode: 'webtoon',
     };
   }
 }

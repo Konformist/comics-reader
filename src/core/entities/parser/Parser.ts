@@ -2,7 +2,7 @@ import ParserController from '@/core/entities/parser/ParserController.ts';
 import type { IParsedChapterData, IParsedComicData } from '@/core/entities/parser/ParserTypes.ts';
 import { cleanHTML, parseImage, parseLink, parseString, parseStringArray } from '@/core/entities/parser/parseUtils.ts';
 import sleep from '@/core/utils/sleep.ts';
-import { getDomain } from '@/core/utils/urlUtils.ts';
+import { getDomain, resolveUrl } from '@/core/utils/urlUtils.ts';
 import type { IParseData } from '@/plugins/WebApiPlugin';
 import type ParserModel from '@/core/entities/parser/ParserModel.ts';
 import type ComicOverrideModel from '@/core/entities/comic-override/ComicOverrideModel.ts';
@@ -108,17 +108,6 @@ export default class Parser {
     return parseImage(pageDOM, this.parseInfo.pagesImageCSS) || '';
   }
 
-  private normalizeUrl(url: string, domain: string): string {
-    if (url.includes('http://') || url.includes('https://')) return url;
-
-    let newDomain = domain;
-    if (!newDomain.endsWith('/')) newDomain += '/';
-    if (!newDomain.includes('http://') && !newDomain.includes('https://')) newDomain = `https://${newDomain}`;
-    let newUrl = url;
-    if (newUrl.startsWith('/')) newUrl = url.slice(1);
-    return `${newDomain}${newUrl}`;
-  }
-
   async parse(comicUrl: string, cookie: string = ''): Promise<IParsedComicData> {
     const comicRaw = cleanHTML(await ParserController.loadHTMLRaw(comicUrl, cookie));
     const comicData = this.parseComic(comicRaw);
@@ -126,7 +115,8 @@ export default class Parser {
 
     if (this.parseInfo.pagesCSS) {
       for (const chapter of comicData.chapters) {
-        const chapterUrl = this.normalizeUrl(chapter.fromUrl, domain);
+        const chapterUrl = resolveUrl(chapter.fromUrl, comicUrl);
+        if (!chapterUrl) continue;
         const chapterRaw = chapter.fromUrl
           ? cleanHTML(await ParserController.loadHTMLRaw(chapterUrl, cookie))
           : comicRaw;
@@ -142,16 +132,13 @@ export default class Parser {
     if (this.parseInfo.pagesImageCSS && this.parseInfo.pagesTemplateUrl) {
       for (let i = 0; i < comicData.chapters.length; i++){
         const chapter = comicData.chapters[i];
-        const parentUrlPattern = (chapter.fromUrl || comicUrl).endsWith('/')
-          ? (chapter.fromUrl || comicUrl)
-          : `${(chapter.fromUrl || comicUrl)}/`;
-        const pageUrlPattern = this.parseInfo.pagesTemplateUrl.startsWith('/')
-          ? this.parseInfo.pagesTemplateUrl.replace('/', '')
-          : this.parseInfo.pagesTemplateUrl;
+        const parentUrlPattern = chapter.fromUrl || comicUrl;
+        const pageUrlPattern = this.parseInfo.pagesTemplateUrl;
 
         const pages: string[] = [];
         for (let j = 0; j < chapter.pages.length; j++) {
-          const urlPattern = this.normalizeUrl(`${parentUrlPattern}${pageUrlPattern}`.replace(Parser.PAGE_ID, (i + 1).toString()), domain);
+          const urlPattern = resolveUrl(`${parentUrlPattern}${pageUrlPattern}`.replace(Parser.PAGE_ID, (i + 1).toString()), domain);
+          if (!urlPattern) continue;
           const pageRaw = cleanHTML(await ParserController.loadHTMLRaw(urlPattern, cookie));
           const pageImage = this.parseChapterPageImage(pageRaw);
           pages.push(pageImage);

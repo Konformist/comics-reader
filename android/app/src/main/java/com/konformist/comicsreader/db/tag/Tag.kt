@@ -3,7 +3,9 @@ package com.konformist.comicsreader.db.tag
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Entity(tableName = "tags")
 data class Tag(
   @PrimaryKey(autoGenerate = true) val id: Long,

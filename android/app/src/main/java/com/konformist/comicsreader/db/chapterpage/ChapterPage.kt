@@ -3,7 +3,9 @@ package com.konformist.comicsreader.db.chapterpage
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Entity(tableName = "chapter_pages")
 data class ChapterPage(
   @PrimaryKey(autoGenerate = true) val id: Long,

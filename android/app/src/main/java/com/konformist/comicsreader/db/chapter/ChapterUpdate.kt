@@ -1,9 +1,10 @@
 package com.konformist.comicsreader.db.chapter
 
-import androidx.room.ColumnInfo
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class ChapterUpdate(
   val id: Long,
   val mdate: String,
-  @ColumnInfo val name: String?,
+  val name: String?,
 )

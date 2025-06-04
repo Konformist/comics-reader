@@ -2,7 +2,9 @@ package com.konformist.comicsreader.db.comicoverride
 
 import androidx.room.ColumnInfo
 import com.konformist.comicsreader.db.parser.ParserData
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class ComicOverrideUpdate(
   val id: Long,
   val mdate: String,

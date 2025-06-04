@@ -3,7 +3,9 @@ package com.konformist.comicsreader.db.language
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Entity(tableName = "languages")
 data class Language(
   @PrimaryKey(autoGenerate = true) val id: Long,

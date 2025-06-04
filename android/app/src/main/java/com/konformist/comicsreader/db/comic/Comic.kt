@@ -3,7 +3,9 @@ package com.konformist.comicsreader.db.comic
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Entity(tableName = "comics")
 data class Comic(
   @PrimaryKey(autoGenerate = true) val id: Long,

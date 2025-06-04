@@ -17,5 +17,9 @@ class DatesUtils {
     fun dateFormatted(value: LocalDate): String {
       return value.format(formatterDate)
     }
+
+    fun nowFormatted(): String {
+      return dateTimeFormatted(LocalDateTime.now())
+    }
   }
 }

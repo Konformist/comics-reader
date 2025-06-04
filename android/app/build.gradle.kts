@@ -1,4 +1,5 @@
 plugins {
+    id("org.jetbrains.kotlin.plugin.serialization")
     id("com.android.application")
     id("com.google.devtools.ksp")
     id("org.jetbrains.kotlin.android")
@@ -50,6 +51,7 @@ repositories {
 }
 
 dependencies {
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
     implementation("org.apache.commons:commons-compress:1.27.1")
     implementation("androidx.datastore:datastore-preferences:1.1.7")
 

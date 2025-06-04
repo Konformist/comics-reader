@@ -8,14 +8,38 @@ import com.konformist.comicsreader.AppBackup
 import com.konformist.comicsreader.db.AppDatabase
 import com.konformist.comicsreader.db.appfile.AppFileCreate
 import com.konformist.comicsreader.db.appfile.AppFileDelete
+import com.konformist.comicsreader.db.author.Author
+import com.konformist.comicsreader.db.author.AuthorCreate
+import com.konformist.comicsreader.db.author.AuthorDelete
+import com.konformist.comicsreader.db.author.AuthorUpdate
+import com.konformist.comicsreader.db.chapter.ChapterCreate
 import com.konformist.comicsreader.db.chapter.ChapterDelete
+import com.konformist.comicsreader.db.chapter.ChapterUpdate
+import com.konformist.comicsreader.db.chapterpage.ChapterPageCreate
 import com.konformist.comicsreader.db.chapterpage.ChapterPageDelete
 import com.konformist.comicsreader.db.chapterpage.ChapterPageUpdate
+import com.konformist.comicsreader.db.comic.ComicCreate
+import com.konformist.comicsreader.db.comic.ComicDelete
+import com.konformist.comicsreader.db.comic.ComicUpdate
 import com.konformist.comicsreader.db.comiccover.ComicCoverCreate
 import com.konformist.comicsreader.db.comiccover.ComicCoverDelete
 import com.konformist.comicsreader.db.comiccover.ComicCoverUpdate
+import com.konformist.comicsreader.db.comicoverride.ComicOverride
 import com.konformist.comicsreader.db.comicoverride.ComicOverrideCreate
 import com.konformist.comicsreader.db.comicoverride.ComicOverrideDelete
+import com.konformist.comicsreader.db.comicoverride.ComicOverrideUpdate
+import com.konformist.comicsreader.db.language.Language
+import com.konformist.comicsreader.db.language.LanguageCreate
+import com.konformist.comicsreader.db.language.LanguageDelete
+import com.konformist.comicsreader.db.language.LanguageUpdate
+import com.konformist.comicsreader.db.parser.Parser
+import com.konformist.comicsreader.db.parser.ParserCreate
+import com.konformist.comicsreader.db.parser.ParserDelete
+import com.konformist.comicsreader.db.parser.ParserUpdate
+import com.konformist.comicsreader.db.tag.Tag
+import com.konformist.comicsreader.db.tag.TagCreate
+import com.konformist.comicsreader.db.tag.TagDelete
+import com.konformist.comicsreader.db.tag.TagUpdate
 import com.konformist.comicsreader.exceptions.DatabaseException
 import com.konformist.comicsreader.exceptions.FilesException
 import com.konformist.comicsreader.exceptions.ValidationException
@@ -23,21 +47,15 @@ import com.konformist.comicsreader.utils.AppDirectory
 import com.konformist.comicsreader.utils.DatesUtils
 import com.konformist.comicsreader.utils.FileUtils
 import com.konformist.comicsreader.utils.ImageUtils
-import com.konformist.comicsreader.webapi.serializers.AuthorSerializer
 import com.konformist.comicsreader.webapi.serializers.ChapterPageSerializer
 import com.konformist.comicsreader.webapi.serializers.ChapterSerializer
-import com.konformist.comicsreader.webapi.serializers.ComicCoverSerializer
-import com.konformist.comicsreader.webapi.serializers.ComicOverrideSerializer
 import com.konformist.comicsreader.webapi.serializers.ComicSerializer
-import com.konformist.comicsreader.webapi.serializers.LanguageSerializer
-import com.konformist.comicsreader.webapi.serializers.ParserSerializer
-import com.konformist.comicsreader.webapi.serializers.TagSerializer
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import java.io.IOException
-import java.time.LocalDateTime
 
 class WebApi(private val context: Context) {
   private val db: AppDatabase = Room
@@ -56,6 +74,8 @@ class WebApi(private val context: Context) {
     else context.getString(stringId)
   }
 
+  private val jsonIgnore = Json { ignoreUnknownKeys = true }
+
   private val tagDao = db.tagDao()
   private val authorDao = db.authorDao()
   private val languageDao = db.languageDao()
@@ -66,16 +86,6 @@ class WebApi(private val context: Context) {
   private val chapterDao = db.chapterDao()
   private val chapterPageDao = db.chapterPageDao()
   private val comicDao = db.comicDao()
-
-  private val tagSerializer = TagSerializer()
-  private val authorSerializer = AuthorSerializer()
-  private val languageSerializer = LanguageSerializer()
-  private val parserSerializer = ParserSerializer()
-  private val chapterSerializer = ChapterSerializer(context.filesDir)
-  private val chapterPageSerializer = ChapterPageSerializer(context.filesDir)
-  private val comicCoverSerializer = ComicCoverSerializer(context.filesDir)
-  private val comicOverrideSerializer = ComicOverrideSerializer()
-  private val comicSerializer = ComicSerializer(context.filesDir)
 
   private fun <T : Exception> wrappedToError(value: T): JSONObject {
     return JSONObject()
@@ -133,6 +143,7 @@ class WebApi(private val context: Context) {
         fromUrl = "",
       )
     )
+
     if (rowId == 0.toLong()) throw DatabaseException("Comic cover not created")
   }
 
@@ -242,141 +253,170 @@ class WebApi(private val context: Context) {
   }
 
   private fun getTagsAll(): JSONArray {
-    return tagSerializer.toJSONArray(tagDao.readAll())
+    return JSONArray(Json.encodeToString<List<Tag>>(tagDao.readAll()))
   }
 
   private fun getTag(data: JSONObject): JSONObject {
     val rowId = data.optLong("id", 0)
     checkRowId(rowId)
-    return tagSerializer.toJSON(tagDao.read(rowId))
+
+    return JSONObject(Json.encodeToString<Tag>(tagDao.read(rowId)))
   }
 
   private fun addTag(data: JSONObject): Long {
-    val rowId = tagDao.create(tagSerializer.createFromJSON(data))
+    val rowId = tagDao.create(jsonIgnore.decodeFromString<TagCreate>(data.toString()))
     if (rowId == 0.toLong()) throw DatabaseException("Tag not created")
     return rowId
   }
 
   private fun setTag(data: JSONObject): Boolean {
-    val count = tagDao.update(tagSerializer.updateFromJSON(data))
+    val rowId = data.optLong("id", 0)
+    checkRowId(rowId)
+
+    data.put("mdate", DatesUtils.nowFormatted())
+    val count = tagDao.update(jsonIgnore.decodeFromString<TagUpdate>(data.toString()))
     if (count == 0) throw DatabaseException("Tag not updated")
     return true
   }
 
   private fun delTag(data: JSONObject): Boolean {
-    val count = tagDao.delete(tagSerializer.deleteFromJSON(data))
+    val rowId = data.optLong("id", 0)
+    checkRowId(rowId)
+
+    val count = tagDao.delete(jsonIgnore.decodeFromString<TagDelete>(data.toString()))
     if (count == 0) throw DatabaseException("Tag not deleted")
     return true
   }
 
   private fun getAuthorsAll(): JSONArray {
-    return authorSerializer.toJSONArray(authorDao.readAll())
+    return JSONArray(Json.encodeToString<List<Author>>(authorDao.readAll()))
   }
 
   private fun getAuthor(data: JSONObject): JSONObject {
     val rowId = data.optLong("id", 0)
     checkRowId(rowId)
 
-    return authorSerializer.toJSON(authorDao.read(rowId))
+    return JSONObject(Json.encodeToString<Author>(authorDao.read(rowId)))
   }
 
   private fun addAuthor(data: JSONObject): Long {
-    val rowId = authorDao.create(authorSerializer.createFromJSON(data))
+    val rowId = authorDao.create(jsonIgnore.decodeFromString<AuthorCreate>(data.toString()))
     if (rowId == 0.toLong()) throw DatabaseException("Author not created")
 
     return rowId
   }
 
   private fun setAuthor(data: JSONObject): Boolean {
-    val count = authorDao.update(authorSerializer.updateFromJSON(data))
+    val rowId = data.optLong("id", 0)
+    checkRowId(rowId)
+
+    data.put("mdate", DatesUtils.nowFormatted())
+    val count = authorDao.update(jsonIgnore.decodeFromString<AuthorUpdate>(data.toString()))
     if (count == 0) throw DatabaseException("Author not updated")
     return true
   }
 
   private fun delAuthor(data: JSONObject): Boolean {
-    val count = authorDao.delete(authorSerializer.deleteFromJSON(data))
+    val rowId = data.optLong("id", 0)
+    checkRowId(rowId)
+
+    val count = authorDao.delete(jsonIgnore.decodeFromString<AuthorDelete>(data.toString()))
     if (count == 0) throw DatabaseException("Author not deleted")
 
     return true
   }
 
   private fun getLanguagesAll(): JSONArray {
-    return languageSerializer.toJSONArray(languageDao.readAll())
+    return JSONArray(Json.encodeToString<List<Language>>(languageDao.readAll()))
   }
 
   private fun getLanguage(data: JSONObject): JSONObject {
     val rowId = data.optLong("id", 0)
     checkRowId(rowId)
 
-    return languageSerializer.toJSON(languageDao.read(rowId))
+    return JSONObject(Json.encodeToString<Language>(languageDao.read(rowId)))
   }
 
   private fun addLanguage(data: JSONObject): Long {
-    val rowId = languageDao.create(languageSerializer.createFromJSON(data))
+    val rowId = languageDao.create(jsonIgnore.decodeFromString<LanguageCreate>(data.toString()))
     if (rowId == 0.toLong()) throw DatabaseException("Language not created")
 
     return rowId
   }
 
   private fun setLanguage(data: JSONObject): Boolean {
-    val count = languageDao.update(languageSerializer.updateFromJSON(data))
+    val rowId = data.optLong("id", 0)
+    checkRowId(rowId)
+
+    data.put("mdate", DatesUtils.nowFormatted())
+    val count = languageDao.update(jsonIgnore.decodeFromString<LanguageUpdate>(data.toString()))
     if (count == 0) throw DatabaseException("Language not updated")
 
     return true
   }
 
   private fun delLanguage(data: JSONObject): Boolean {
-    val count = languageDao.delete(languageSerializer.deleteFromJSON(data))
+    val rowId = data.optLong("id", 0)
+    checkRowId(rowId)
+
+    val count = languageDao.delete(jsonIgnore.decodeFromString<LanguageDelete>(data.toString()))
     if (count == 0) throw DatabaseException("Language not deleted")
 
     return true
   }
 
   private fun getParsersAll(): JSONArray {
-    return parserSerializer.toJSONArray(parserDao.readAll())
+    return JSONArray(Json.encodeToString<List<Parser>>(parserDao.readAll()))
   }
 
   private fun getParser(data: JSONObject): JSONObject {
     val rowId = data.optLong("id", 0)
     checkRowId(rowId)
 
-    return parserSerializer.toJSON(parserDao.read(rowId))
+    return JSONObject(Json.encodeToString<Parser>(parserDao.read(rowId)))
   }
 
   private fun addParser(data: JSONObject): Long {
-    val rowId = parserDao.create(parserSerializer.createFromJSON(data))
+    val rowId = parserDao.create(jsonIgnore.decodeFromString<ParserCreate>(data.toString()))
     if (rowId == 0.toLong()) throw DatabaseException("Parser not created")
 
     return rowId
   }
 
   private fun setParser(data: JSONObject): Boolean {
-    val count = parserDao.update(parserSerializer.updateFromJSON(data))
+    val rowId = data.optLong("id", 0)
+    checkRowId(rowId)
+
+    data.put("mdate", DatesUtils.nowFormatted())
+    val count = parserDao.update(jsonIgnore.decodeFromString<ParserUpdate>(data.toString()))
     if (count == 0) throw DatabaseException("Parser not updated")
 
     return true
   }
 
   private fun delParser(data: JSONObject): Boolean {
-    val count = parserDao.delete(parserSerializer.deleteFromJSON(data))
+    val rowId = data.optLong("id", 0)
+    checkRowId(rowId)
+
+    val count = parserDao.delete(jsonIgnore.decodeFromString<ParserDelete>(data.toString()))
     if (count == 0) throw DatabaseException("Parser not deleted")
 
     return true
   }
 
   private fun getComicsAll(): JSONArray {
-    return comicSerializer.toJSONArray(comicDao.readLiteAll())
+    return ComicSerializer.toJSONArray(comicDao.readLiteAll(), context.filesDir)
   }
 
   private fun getComic(data: JSONObject): JSONObject {
     val rowId = data.optLong("id", 0)
     checkRowId(rowId)
 
-    return comicSerializer.toJSON(comicDao.readLite(rowId))
+    return ComicSerializer.toJSON(comicDao.readLite(rowId), context.filesDir)
   }
 
   private fun addComic(data: JSONObject): Long {
-    val rowId = comicDao.create(comicSerializer.createFromJSON(data))
+    val rowId = comicDao.create(jsonIgnore.decodeFromString<ComicCreate>(data.toString()))
     if (rowId == 0.toLong()) throw DatabaseException("Comic not created")
 
     createCover(rowId)
@@ -386,21 +426,26 @@ class WebApi(private val context: Context) {
     return rowId
   }
 
+  private fun setCover(data: JSONObject): Boolean {
+    val rowId = data.optLong("id")
+    checkRowId(rowId)
+
+    val cover = comicCoverDao.read(rowId)
+    data.put("mdate", DatesUtils.nowFormatted())
+    data.put("fileId", cover.fileId)
+    updateCover(jsonIgnore.decodeFromString<ComicCoverUpdate>(data.toString()))
+    return true
+  }
+
   private fun setComic(data: JSONObject): Boolean {
-    val comicId = data.getLong("id")
-    checkRowId(comicId)
+    val rowId = data.getLong("id")
+    checkRowId(rowId)
 
     val coverJSON = data.optJSONObject("cover")
+    if (coverJSON != null) setCover(coverJSON)
 
-    // TODO вынести обновление отдельно
-    if (coverJSON != null) {
-      val coverId = coverJSON.optLong("id")
-      val cover = comicCoverDao.read(coverId)
-      coverJSON.put("fileId", cover.fileId)
-      updateCover(comicCoverSerializer.updateFromJSON(coverJSON))
-    }
-
-    val count = comicDao.update(comicSerializer.updateFromJSON(data))
+    data.put("mdate", DatesUtils.nowFormatted())
+    val count = comicDao.update(jsonIgnore.decodeFromString<ComicUpdate>(data.toString()))
     if (count == 0) throw DatabaseException("Comic not updated")
 
     return true
@@ -414,10 +459,10 @@ class WebApi(private val context: Context) {
     deleteComicOverride(id)
 
     val chapters = chapterDao.readByComicAll(id)
-    for (chapter in chapters) deleteChapter(chapter.id)
+    chapters.forEach { chapter -> deleteChapter(chapter.id) }
     deleteComicDirectory(id.toString())
 
-    val count = comicDao.delete(comicSerializer.deleteFromJSON(data))
+    val count = comicDao.delete(jsonIgnore.decodeFromString<ComicDelete>(data.toString()))
     if (count == 0) throw DatabaseException("Comic not deleted")
 
     return true
@@ -427,11 +472,15 @@ class WebApi(private val context: Context) {
     val rowId = data.optLong("comicId", 0)
     checkRowId(rowId)
 
-    return comicOverrideSerializer.toJSON(comicOverrideDao.readByComic(rowId))
+    return JSONObject(Json.encodeToString<ComicOverride>(comicOverrideDao.readByComic(rowId)))
   }
 
   private fun setComicOverride(data: JSONObject): Boolean {
-    val count = comicOverrideDao.update(comicOverrideSerializer.updateFromJSON(data))
+    val rowId = data.optLong("comicId", 0)
+    checkRowId(rowId)
+
+    data.put("mdate", DatesUtils.nowFormatted())
+    val count = comicOverrideDao.update(jsonIgnore.decodeFromString<ComicOverrideUpdate>(data.toString()))
     if (count == 0) throw DatabaseException("Comic override not updated")
 
     return true
@@ -454,7 +503,7 @@ class WebApi(private val context: Context) {
     val count = comicCoverDao.update(
       ComicCoverUpdate(
         id = cover.id,
-        mdate = DatesUtils.dateTimeFormatted(LocalDateTime.now()),
+        mdate = DatesUtils.nowFormatted(),
         fromUrl = cover.fromUrl,
         fileId = rowId
       )
@@ -472,7 +521,7 @@ class WebApi(private val context: Context) {
     val count = comicCoverDao.update(
       ComicCoverUpdate(
         id = cover.id,
-        mdate = DatesUtils.dateTimeFormatted(LocalDateTime.now()),
+        mdate = DatesUtils.nowFormatted(),
         fromUrl = cover.fromUrl,
         fileId = 0,
       )
@@ -484,29 +533,37 @@ class WebApi(private val context: Context) {
 
   private fun getChaptersAll(data: JSONObject): JSONArray {
     val comicId = data.getLong("comicId")
-    checkRowId(comicId)
-    return chapterSerializer.toJSONArray(
-      chapterDao.readWithPagesByComicAll(comicId)
+    checkRowId(comicId, "comicId")
+
+    return ChapterSerializer.toJSONArray(
+      chapterDao.readWithPagesByComicAll(comicId),
+      context.filesDir,
     )
   }
 
   private fun getChapter(data: JSONObject): JSONObject {
     val rowId = data.optLong("id", 0)
     checkRowId(rowId)
-    return chapterSerializer.toJSON(
-      chapterDao.readWithPages(rowId)
+
+    return ChapterSerializer.toJSON(
+      chapterDao.readWithPages(rowId),
+      context.filesDir,
     )
   }
 
   private fun addChapter(data: JSONObject): Long {
-    val rowId = chapterDao.create(chapterSerializer.createFromJSON(data))
+    val rowId = chapterDao.create(jsonIgnore.decodeFromString<ChapterCreate>(data.toString()))
     if (rowId == 0.toLong()) throw DatabaseException("Chapter not created")
 
     return rowId
   }
 
   private fun setChapter(data: JSONObject): Boolean {
-    val count = chapterDao.update(chapterSerializer.updateFromJSON(data))
+    val rowId = data.optLong("id", 0)
+    checkRowId(rowId)
+
+    data.put("mdate", DatesUtils.nowFormatted())
+    val count = chapterDao.update(jsonIgnore.decodeFromString<ChapterUpdate>(data.toString()))
     if (count == 0) throw DatabaseException("Chapter not updated")
 
     return true
@@ -515,29 +572,33 @@ class WebApi(private val context: Context) {
   private fun delChapter(data: JSONObject): Boolean {
     val id = data.getLong("id")
     checkRowId(id)
-    deleteChapter(id)
 
+    deleteChapter(id)
     return true
   }
 
   private fun getChapterPagesAll(data: JSONObject): JSONArray {
     val chapterId = data.getLong("chapterId")
     checkRowId(chapterId)
-    return chapterPageSerializer.toJSONArray(
-      chapterPageDao.readByChapterAll(chapterId)
+
+    return ChapterPageSerializer.toJSONArray(
+      chapterPageDao.readByChapterAll(chapterId),
+      context.filesDir
     )
   }
 
   private fun getChapterPage(data: JSONObject): JSONObject {
     val rowId = data.optLong("id", 0)
     checkRowId(rowId)
-    return chapterPageSerializer.toJSON(
-      chapterPageDao.readWithFile(rowId)
+
+    return ChapterPageSerializer.toJSON(
+      chapterPageDao.readWithFile(rowId),
+      context.filesDir
     )
   }
 
   private fun addChapterPage(data: JSONObject): Long {
-    val rowId = chapterPageDao.create(chapterPageSerializer.createFromJSON(data))
+    val rowId = chapterPageDao.create(jsonIgnore.decodeFromString<ChapterPageCreate>(data.toString()))
     if (rowId == 0.toLong()) throw DatabaseException("Chapter page not created")
 
     return rowId
@@ -546,10 +607,12 @@ class WebApi(private val context: Context) {
   private fun setChapterPage(data: JSONObject): Boolean {
     val chapterPageId = data.getLong("id")
     checkRowId(chapterPageId)
+
     val chapterPage = chapterPageDao.read(chapterPageId)
     data.put("fileId", chapterPage.fileId)
+    data.put("mdate", DatesUtils.nowFormatted())
 
-    val count = chapterPageDao.update(chapterPageSerializer.updateFromJSON(data))
+    val count = chapterPageDao.update(jsonIgnore.decodeFromString<ChapterPageUpdate>(data.toString()))
     if (count == 0) throw DatabaseException("Chapter not updated")
 
     return true
@@ -558,8 +621,8 @@ class WebApi(private val context: Context) {
   private fun delChapterPage(data: JSONObject): Boolean {
     val id = data.getLong("id")
     checkRowId(id)
-    deleteChapterPage(id)
 
+    deleteChapterPage(id)
     return true
   }
 
@@ -579,7 +642,7 @@ class WebApi(private val context: Context) {
 
     val newPageFile = ChapterPageUpdate(
       id = chapterPage.id,
-      mdate = DatesUtils.dateTimeFormatted(LocalDateTime.now()),
+      mdate = DatesUtils.nowFormatted(),
       fromUrl = chapterPage.fromUrl,
       fileId = rowId,
       isRead = chapterPage.isRead,
@@ -601,7 +664,7 @@ class WebApi(private val context: Context) {
     val count = chapterPageDao.update(
       ChapterPageUpdate(
         id = page.id,
-        mdate = DatesUtils.dateTimeFormatted(LocalDateTime.now()),
+        mdate = DatesUtils.nowFormatted(),
         fromUrl = page.fromUrl,
         fileId = 0,
         isRead = page.isRead,
@@ -715,74 +778,69 @@ class WebApi(private val context: Context) {
 
   fun api(query: String, data: JSONObject? = JSONObject()): JSONObject {
     try {
-      if (data == null) throw ValidationException("Body is null")
+      // Если data null, выбрасываем исключение
+      data ?: throw ValidationException("Body is null")
 
-      return wrappedToResult(
-        when (query) {
-          Query.TAG_TAG_LIST -> getTagsAll()
-          Query.TAG_TAG_GET -> getTag(data)
-          Query.TAG_TAG_ADD -> addTag(data)
-          Query.TAG_TAG_SET -> setTag(data)
-          Query.TAG_TAG_DEL -> delTag(data)
-          Query.AUTHOR_AUTHOR_LIST -> getAuthorsAll()
-          Query.AUTHOR_AUTHOR_GET -> getAuthor(data)
-          Query.AUTHOR_AUTHOR_ADD -> addAuthor(data)
-          Query.AUTHOR_AUTHOR_SET -> setAuthor(data)
-          Query.AUTHOR_AUTHOR_DEL -> delAuthor(data)
-          Query.LANGUAGE_LANGUAGE_LIST -> getLanguagesAll()
-          Query.LANGUAGE_LANGUAGE_GET -> getLanguage(data)
-          Query.LANGUAGE_LANGUAGE_ADD -> addLanguage(data)
-          Query.LANGUAGE_LANGUAGE_SET -> setLanguage(data)
-          Query.LANGUAGE_LANGUAGE_DEL -> delLanguage(data)
-          Query.PARSER_PARSER_LIST -> getParsersAll()
-          Query.PARSER_PARSER_GET -> getParser(data)
-          Query.PARSER_PARSER_ADD -> addParser(data)
-          Query.PARSER_PARSER_SET -> setParser(data)
-          Query.PARSER_PARSER_DEL -> delParser(data)
-          Query.COMIC_COMIC_LIST -> getComicsAll()
-          Query.COMIC_COMIC_GET -> getComic(data)
-          Query.COMIC_COMIC_ADD -> addComic(data)
-          Query.COMIC_COMIC_SET -> setComic(data)
-          Query.COMIC_COMIC_DEL -> delComic(data)
-          Query.COMIC_OVERRIDE_GET -> getComicOverride(data)
-          Query.COMIC_OVERRIDE_SET -> setComicOverride(data)
-          Query.CHAPTER_CHAPTER_LIST -> getChaptersAll(data)
-          Query.CHAPTER_CHAPTER_GET -> getChapter(data)
-          Query.CHAPTER_CHAPTER_ADD -> addChapter(data)
-          Query.CHAPTER_CHAPTER_SET -> setChapter(data)
-          Query.CHAPTER_CHAPTER_DEL -> delChapter(data)
-          Query.CHAPTER_PAGE_LIST -> getChapterPagesAll(data)
-          Query.CHAPTER_PAGE_GET -> getChapterPage(data)
-          Query.CHAPTER_PAGE_ADD -> addChapterPage(data)
-          Query.CHAPTER_PAGE_SET -> setChapterPage(data)
-          Query.CHAPTER_PAGE_DEL -> delChapterPage(data)
-          Query.FILE_COMIC_COVER_ADD -> addCoverFile(data)
-          Query.FILE_COMIC_COVER_DEL -> delCoverFile(data)
-          Query.FILE_CHAPTER_PAGE_ADD -> addChapterPageFile(data)
-          Query.FILE_CHAPTER_PAGE_DEL -> delChapterPageFile(data)
-          Query.FILE_COMIC_IMAGES_TREE -> getComicImagesTree()
-          Query.FILE_BACKUPS_TREE -> getBackupsTree()
-          Query.FILE_DOWNLOADS_TREE -> getDownloadsTree()
-          Query.FILE_FILE_DOWNLOADS -> setFileToDownloads(data)
-          Query.FILE_BACKUPS_DOWNLOADS -> setBackupsToDownloads(data)
-          Query.FILE_BACKUPS_UPLOAD -> setBackupsUpload(data)
-          Query.SETTINGS_SETTINGS_GET -> getSettings()
-          Query.SETTINGS_SETTINGS_SET -> setSettings(data)
-          Query.BACKUP_BACKUP_ADD -> addBackup()
-          Query.BACKUP_BACKUP_DEL -> delBackup(data)
-          Query.BACKUP_BACKUP_RESTORE -> restoreBackup(data)
-          else -> throw Exception("Not implemented")
-        }
+      // Создаем Map с ассоциациями между запросами и методами
+      val actions: Map<String, (JSONObject) -> Any> = mapOf(
+        Query.TAG_TAG_LIST to { getTagsAll() },
+        Query.TAG_TAG_GET to { getTag(data) },
+        Query.TAG_TAG_ADD to { addTag(data) },
+        Query.TAG_TAG_SET to { setTag(data) },
+        Query.TAG_TAG_DEL to { delTag(data) },
+        Query.AUTHOR_AUTHOR_LIST to { getAuthorsAll() },
+        Query.AUTHOR_AUTHOR_GET to { getAuthor(data) },
+        Query.AUTHOR_AUTHOR_ADD to { addAuthor(data) },
+        Query.AUTHOR_AUTHOR_SET to { setAuthor(data) },
+        Query.AUTHOR_AUTHOR_DEL to { delAuthor(data) },
+        Query.LANGUAGE_LANGUAGE_LIST to { getLanguagesAll() },
+        Query.LANGUAGE_LANGUAGE_GET to { getLanguage(data) },
+        Query.LANGUAGE_LANGUAGE_ADD to { addLanguage(data) },
+        Query.LANGUAGE_LANGUAGE_SET to { setLanguage(data) },
+        Query.LANGUAGE_LANGUAGE_DEL to { delLanguage(data) },
+        Query.PARSER_PARSER_LIST to { getParsersAll() },
+        Query.PARSER_PARSER_GET to { getParser(data) },
+        Query.PARSER_PARSER_ADD to { addParser(data) },
+        Query.PARSER_PARSER_SET to { setParser(data) },
+        Query.PARSER_PARSER_DEL to { delParser(data) },
+        Query.COMIC_COMIC_LIST to { getComicsAll() },
+        Query.COMIC_COMIC_GET to { getComic(data) },
+        Query.COMIC_COMIC_ADD to { addComic(data) },
+        Query.COMIC_COMIC_SET to { setComic(data) },
+        Query.COMIC_COMIC_DEL to { delComic(data) },
+        Query.COMIC_OVERRIDE_GET to { getComicOverride(data) },
+        Query.COMIC_OVERRIDE_SET to { setComicOverride(data) },
+        Query.CHAPTER_CHAPTER_LIST to { getChaptersAll(data) },
+        Query.CHAPTER_CHAPTER_GET to { getChapter(data) },
+        Query.CHAPTER_CHAPTER_ADD to { addChapter(data) },
+        Query.CHAPTER_CHAPTER_SET to { setChapter(data) },
+        Query.CHAPTER_CHAPTER_DEL to { delChapter(data) },
+        Query.CHAPTER_PAGE_LIST to { getChapterPagesAll(data) },
+        Query.CHAPTER_PAGE_GET to { getChapterPage(data) },
+        Query.CHAPTER_PAGE_ADD to { addChapterPage(data) },
+        Query.CHAPTER_PAGE_SET to { setChapterPage(data) },
+        Query.CHAPTER_PAGE_DEL to { delChapterPage(data) },
+        Query.FILE_COMIC_COVER_ADD to { addCoverFile(data) },
+        Query.FILE_COMIC_COVER_DEL to { delCoverFile(data) },
+        Query.FILE_CHAPTER_PAGE_ADD to { addChapterPageFile(data) },
+        Query.FILE_CHAPTER_PAGE_DEL to { delChapterPageFile(data) },
+        Query.FILE_COMIC_IMAGES_TREE to { getComicImagesTree() },
+        Query.FILE_BACKUPS_TREE to { getBackupsTree() },
+        Query.FILE_DOWNLOADS_TREE to { getDownloadsTree() },
+        Query.FILE_FILE_DOWNLOADS to { setFileToDownloads(data) },
+        Query.FILE_BACKUPS_DOWNLOADS to { setBackupsToDownloads(data) },
+        Query.FILE_BACKUPS_UPLOAD to { setBackupsUpload(data) },
+        Query.SETTINGS_SETTINGS_GET to { getSettings() },
+        Query.SETTINGS_SETTINGS_SET to { setSettings(data) },
+        Query.BACKUP_BACKUP_ADD to { addBackup() },
+        Query.BACKUP_BACKUP_DEL to { delBackup(data) },
+        Query.BACKUP_BACKUP_RESTORE to { restoreBackup(data) }
       )
+
+      // Выполнение нужной операции, если запрос найден в map
+      val action = actions[query] ?: throw Exception("Not implemented")
+      return wrappedToResult(action.invoke(data))
     } catch (e: Exception) {
-      return wrappedToError(e)
-    } catch (e: IOException) {
-      return wrappedToError(e)
-    } catch (e: FilesException) {
-      return wrappedToError(e)
-    } catch (e: ValidationException) {
-      return wrappedToError(e)
-    } catch (e: DatabaseException) {
       return wrappedToError(e)
     }
   }

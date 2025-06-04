@@ -1,7 +1,9 @@
 package com.konformist.comicsreader.db.comic
 
 import androidx.room.ColumnInfo
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class ComicCreate(
   val name: String,
 

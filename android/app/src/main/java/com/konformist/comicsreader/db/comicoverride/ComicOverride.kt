@@ -4,7 +4,9 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.konformist.comicsreader.db.parser.ParserData
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Entity(tableName = "comic_overrides")
 data class ComicOverride(
   @PrimaryKey(autoGenerate = true) val id: Long,

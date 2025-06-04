@@ -1,7 +1,9 @@
 package com.konformist.comicsreader.db.parser
 
 import androidx.room.ColumnInfo
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class ParserUpdate(
   val id: Long,
   val mdate: String,

@@ -1,7 +1,9 @@
 package com.konformist.comicsreader.db.comiccover
 
 import androidx.room.ColumnInfo
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class ComicCoverUpdate(
   val id: Long,
   val mdate: String,

@@ -1,67 +1,25 @@
 package com.konformist.comicsreader.webapi.serializers
 
-import com.konformist.comicsreader.db.chapterpage.ChapterPageCreate
-import com.konformist.comicsreader.db.chapterpage.ChapterPageUpdate
 import com.konformist.comicsreader.db.chapterpage.ChapterPageWithFile
-import com.konformist.comicsreader.exceptions.ValidationException
+import kotlinx.serialization.json.Json
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 
-class ChapterPageSerializer(filesDir: File) : Serializer<ChapterPageWithFile>() {
-  private val fileSerializer = FileSerializer(filesDir)
-
-  @Throws(ValidationException::class)
-  override fun createFromJSON(value: JSONObject): ChapterPageCreate {
-    val chapterId = value.optLong("chapterId", 0)
-    if (chapterId == 0.toLong()) throw ValidationException("chapterId")
-
-    return ChapterPageCreate(
-      chapterId = chapterId,
-      fileId = value.optLong("fileId", 0),
-      fromUrl = value.optString("fromUrl", ""),
-    )
-  }
-
-  @Throws(ValidationException::class)
-  override fun updateFromJSON(value: JSONObject): ChapterPageUpdate {
-    val id = value.optLong("id", 0)
-    if (id == 0.toLong()) throw ValidationException("id")
-
-    return ChapterPageUpdate(
-      id = id,
-      mdate = getMDate(),
-      fileId = value.optLong("fileId", 0),
-      fromUrl = value.optString("fromUrl", ""),
-      isRead = value.optBoolean("isRead", false),
-    )
-  }
-
-  @Throws(ValidationException::class)
-  override fun deleteFromJSON(value: JSONObject) {
-  }
-
-  override fun toJSON(item: ChapterPageWithFile): JSONObject {
-    val data = JSONObject()
-
-    data.put("id", item.page.id)
-    data.put("chapterId", item.page.chapterId)
-    data.put("fromUrl", item.page.fromUrl)
-    data.put("isRead", item.page.isRead)
-
-    if (item.file == null) data.put("file", null)
-    else data.put("file", fileSerializer.toJSON(item.file))
-
-    return data
-  }
-
-  override fun toJSONArray(items: List<ChapterPageWithFile>): JSONArray {
-    val result = JSONArray()
-
-    for (i in items.indices) {
-      result.put(i, toJSON(items[i]))
+class ChapterPageSerializer {
+  companion object {
+    fun toJSON(item: ChapterPageWithFile, filesDir: File): JSONObject {
+      return JSONObject(Json.encodeToString(item.page)).apply {
+        put("file", item.file?.let { FileSerializer.toJSON(it, filesDir) })
+      }
     }
 
-    return result
+    fun toJSONArray(items: List<ChapterPageWithFile>, filesDir: File): JSONArray {
+      return JSONArray().apply {
+        items.forEachIndexed { index, item ->
+          put(index, toJSON(item, filesDir))
+        }
+      }
+    }
   }
 }

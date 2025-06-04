@@ -2,7 +2,11 @@ package com.konformist.comicsreader.webapi
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Environment
+import android.util.Log
+import androidx.core.net.toFile
+import androidx.core.net.toUri
 import androidx.room.Room
 import com.konformist.comicsreader.AppBackup
 import com.konformist.comicsreader.db.AppDatabase
@@ -55,16 +59,19 @@ import kotlinx.serialization.json.Json
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.io.FileInputStream
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.deleteRecursively
 
 class WebApi(private val context: Context) {
   private val db: AppDatabase = Room
     .databaseBuilder(context, AppDatabase::class.java, AppDatabase.DATABASE_NAME)
     .build()
 
-  private val dbBackup = AppBackup(context)
-
   private val downloads =
     Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+  private val documents =
+    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
 
   private fun getAppName(): String {
     val applicationInfo = context.applicationInfo
@@ -72,6 +79,8 @@ class WebApi(private val context: Context) {
     return if (stringId == 0) applicationInfo.nonLocalizedLabel.toString()
     else context.getString(stringId)
   }
+
+  private val dbBackup = AppBackup(getAppName(), context)
 
   private val jsonIgnore = Json { ignoreUnknownKeys = true }
 
@@ -706,61 +715,36 @@ class WebApi(private val context: Context) {
   }
 
   private fun addBackup(): Boolean {
-    dbBackup.backup(db)
-    return true
-  }
-
-  private fun delBackup(data: JSONObject): Boolean {
-    val fileName = data.optString("fileName", "")
-    if (fileName == "") throw ValidationException("fileName is empty")
-    val filePath =
-      File("${context.filesDir}${File.separator}${AppDirectory.BACKUPS}${File.separator}${fileName}")
-    if (!filePath.exists()) throw FilesException("File not found")
-    filePath.delete()
-    return true
+    return dbBackup.backup(db)
   }
 
   private fun restoreBackup(data: JSONObject): Boolean {
-    val fileName = data.optString("fileName", "").trim()
-    if (fileName == "") throw ValidationException("fileName is empty")
-    dbBackup.restore(db, fileName)
-    return true
+    val uriStr = data.optString("uri", "")
+    if (uriStr.isBlank()) throw ValidationException("Uri is empty")
+    val path = context.contentResolver
+      .openFileDescriptor(uriStr.toUri(), "r") ?: return false
+
+    return dbBackup.restore(db, FileInputStream(path.fileDescriptor))
   }
 
+  // @TODO Deprecated
   private fun getBackupsTree(): JSONObject {
     return FileUtils.tree(File("${context.filesDir}${File.separator}${AppDirectory.BACKUPS}"))
   }
 
-  private fun setBackupsUpload(data: JSONObject): Boolean {
-    val fileName = data.optString("fileName", "")
+  @OptIn(ExperimentalPathApi::class)
+  private fun migrate(): Boolean {
+    val dirFrom = File("${context.filesDir}${File.separator}${AppDirectory.BACKUPS}")
+    if (dirFrom.exists()) {
+      val dirTo =
+        File("${documents.path}${File.separator}${getAppName()}${File.separator}${AppDirectory.BACKUPS}")
 
-    if (fileName == "") throw ValidationException("FileName is empty")
-
-    val filePath =
-      File("${context.filesDir}${File.separator}${AppDirectory.BACKUPS}${File.separator}${fileName}")
-    val fileIn =
-      File("${downloads.path}${File.separator}${fileName}")
-    fileIn.copyRecursively(target = filePath, overwrite = true)
-
-    return true
-  }
-
-  private fun setBackupsToDownloads(data: JSONObject): Boolean {
-    val fileName = data.optString("fileName", "")
-    if (fileName == "") throw ValidationException("FileName is empty")
-
-    val dirFrom =
-      File("${context.filesDir}${File.separator}${AppDirectory.BACKUPS}${File.separator}${fileName}")
-    val dirTo =
-      File("${downloads.path}${File.separator}${getAppName()}${File.separator}${fileName}")
-
-    dirFrom.copyTo(target = dirTo, overwrite = true)
+      if (!dirTo.exists()) dirTo.mkdirs()
+      dirFrom.copyRecursively(target = dirTo, overwrite = true)
+      dirFrom.toPath().deleteRecursively()
+    }
 
     return true
-  }
-
-  private fun getDownloadsTree(): JSONObject {
-    return FileUtils.tree(downloads)
   }
 
   private fun setFileToDownloads(data: JSONObject): Boolean {
@@ -826,23 +810,21 @@ class WebApi(private val context: Context) {
         Query.FILE_COMIC_COVER_DEL to { delCoverFile(data) },
         Query.FILE_CHAPTER_PAGE_ADD to { addChapterPageFile(data) },
         Query.FILE_CHAPTER_PAGE_DEL to { delChapterPageFile(data) },
-        Query.FILE_COMIC_IMAGES_TREE to { getComicImagesTree() },
+        Query.FILE_COMICS_IMAGES_TREE to { getComicImagesTree() },
         Query.FILE_BACKUPS_TREE to { getBackupsTree() },
-        Query.FILE_DOWNLOADS_TREE to { getDownloadsTree() },
         Query.FILE_FILE_DOWNLOADS to { setFileToDownloads(data) },
-        Query.FILE_BACKUPS_DOWNLOADS to { setBackupsToDownloads(data) },
-        Query.FILE_BACKUPS_UPLOAD to { setBackupsUpload(data) },
         Query.SETTINGS_SETTINGS_GET to { getSettings() },
         Query.SETTINGS_SETTINGS_SET to { setSettings(data) },
         Query.BACKUP_BACKUP_ADD to { addBackup() },
-        Query.BACKUP_BACKUP_DEL to { delBackup(data) },
-        Query.BACKUP_BACKUP_RESTORE to { restoreBackup(data) }
+        Query.BACKUP_BACKUP_RESTORE to { restoreBackup(data) },
+        Query.DATA_DATA_MIGRATE to { migrate() }
       )
 
       // Выполнение нужной операции, если запрос найден в map
       val action = actions[query] ?: throw Exception("Not implemented")
       return wrappedToResult(action.invoke(data))
     } catch (e: Exception) {
+      Log.d("Api Error", e.toString())
       return wrappedToError(e)
     }
   }

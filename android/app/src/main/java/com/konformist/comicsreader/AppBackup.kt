@@ -1,64 +1,91 @@
 package com.konformist.comicsreader
 
 import android.content.Context
+import android.net.Uri
+import android.os.Environment
 import com.konformist.comicsreader.db.AppDatabase
 import com.konformist.comicsreader.utils.AppDirectory
 import com.konformist.comicsreader.utils.ArchiveUtils
 import com.konformist.comicsreader.utils.DatesUtils
 import java.io.File
+import java.io.InputStream
 import java.time.LocalDate
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.deleteRecursively
 
 
-class AppBackup(private val context: Context) {
+class AppBackup(private val appName: String, context: Context) {
   private val backupFileName = "backup-db"
-  private val tmpDir = File("${context.cacheDir}${File.separator}tmp")
+  private val documentsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
 
-  fun backup(db: AppDatabase) {
-    if (tmpDir.exists()) tmpDir.delete()
-    tmpDir.mkdirs()
+  private val comicsPath = File("${context.filesDir}${File.separator}${AppDirectory.COMICS_IMAGES}")
+  private val dbFile = context.getDatabasePath(AppDatabase.DATABASE_NAME)
 
-    db.close()
+  private val dirTmp = File("${context.cacheDir}${File.separator}tmp")
+  private val backupTmp = File("${dirTmp}${File.separator}${backupFileName}")
+  private val comicsTmp = File("${dirTmp}${File.separator}${AppDirectory.COMICS_IMAGES}")
 
-    val dbFile = context.getDatabasePath(AppDatabase.DATABASE_NAME)
-    val saveFilePath = File("${tmpDir}${File.separator}${backupFileName}")
-    dbFile.copyTo(target = saveFilePath, overwrite = true)
-
-    val tarFile = File("${tmpDir}${File.separator}backup.tar")
-    if (!tarFile.exists()) tarFile.createNewFile()
-    val compress = ArchiveUtils.compressFactory()
-    compress.addFile(saveFilePath)
-    compress.addFile(File("${context.filesDir}${File.separator}${AppDirectory.COMICS_IMAGES}"))
-    compress.compress(tarFile)
-
-    val backupFile = File(
-      "${context.filesDir}${File.separator}${AppDirectory.BACKUPS}${File.separator}backup-${
-        DatesUtils.dateFormatted(LocalDate.now())
-      }.tar"
-    )
-    tarFile.copyTo(target = backupFile, overwrite = true)
-    tmpDir.delete()
+  @OptIn(ExperimentalPathApi::class)
+  private fun deleteTmpDir() {
+    if (dirTmp.exists()) dirTmp.toPath().deleteRecursively()
   }
 
-  fun restore(db: AppDatabase, path: String) {
-    if (tmpDir.exists()) tmpDir.delete()
-    tmpDir.mkdirs()
-
-    val tarFile =
-      File("${context.filesDir}${File.separator}${AppDirectory.BACKUPS}${File.separator}${path}")
-    if (!tarFile.exists()) tarFile.createNewFile()
-    val extract = ArchiveUtils.extractFactory()
-    extract.extract(tarFile, tmpDir)
+  fun backup(db: AppDatabase): Boolean {
+    if (dirTmp.exists()) deleteTmpDir()
+    dirTmp.mkdirs()
 
     db.close()
+    dbFile.copyTo(target = backupTmp, overwrite = true)
 
-    val newDB = File("${tmpDir}${File.separator}${backupFileName}")
-    val oldDB: File = context.getDatabasePath(AppDatabase.DATABASE_NAME)
-    newDB.copyTo(target = oldDB, overwrite = true)
+    val backupsDir = File("${documentsDir}${File.separator}${appName}${File.separator}${AppDirectory.BACKUPS}")
+    if (!backupsDir.exists()) backupsDir.mkdirs()
 
-    val oldComics = File("${context.filesDir}${File.separator}${AppDirectory.COMICS_IMAGES}")
-    val newComics = File("${tmpDir}${File.separator}${AppDirectory.COMICS_IMAGES}")
-    newComics.copyRecursively(target = oldComics, overwrite = true)
+    val backupFile = File("${backupsDir}${File.separator}backup-${DatesUtils.dateFormatted(LocalDate.now())}.tar")
+    if (!backupFile.exists()) backupFile.createNewFile()
 
-    tmpDir.delete()
+    val compress = ArchiveUtils.compressFactory()
+    compress.addFile(backupTmp)
+    compress.addFile(comicsPath)
+    compress.compress(backupFile)
+
+    deleteTmpDir()
+    return true
+  }
+
+  fun restore(db: AppDatabase, tarFile: InputStream): Boolean {
+    if (dirTmp.exists()) deleteTmpDir()
+    dirTmp.mkdirs()
+
+    val extract = ArchiveUtils.extractFactory()
+    extract.extract(tarFile, dirTmp)
+
+    if (!backupTmp.exists() || !comicsTmp.exists()) return false
+    db.close()
+    backupTmp.copyTo(target = dbFile, overwrite = true)
+
+    if (!comicsPath.exists()) comicsPath.mkdirs()
+    comicsTmp.copyRecursively(target = comicsPath, overwrite = true)
+
+    deleteTmpDir()
+    return true
+  }
+
+  fun restore(db: AppDatabase, tarFile: File): Boolean {
+    if (dirTmp.exists()) deleteTmpDir()
+    dirTmp.mkdirs()
+
+    if (!tarFile.exists()) return false
+    val extract = ArchiveUtils.extractFactory()
+    extract.extract(tarFile, dirTmp)
+
+    if (!backupTmp.exists() || !comicsTmp.exists()) return false
+    db.close()
+    backupTmp.copyTo(target = dbFile, overwrite = true)
+
+    if (!comicsPath.exists()) comicsPath.mkdirs()
+    comicsTmp.copyRecursively(target = comicsPath, overwrite = true)
+
+    deleteTmpDir()
+    return true
   }
 }

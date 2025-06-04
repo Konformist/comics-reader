@@ -1,5 +1,5 @@
 import WebApiPluginFake from '@/plugins/WebApiPluginFake.ts';
-import { registerPlugin, WebPlugin } from '@capacitor/core';
+import { type PluginListenerHandle, registerPlugin, WebPlugin } from '@capacitor/core';
 
 interface IApiError { error: string }
 
@@ -284,23 +284,11 @@ export interface IApi {
     request: object
     response: ITreeDirectory
   }
-  'file/downloads/tree': {
-    request: object
-    response: ITreeDirectory
-  }
   'file/file/downloads': {
     request: {
       fileName: string
       file: string
     }
-    response: boolean
-  }
-  'file/backups/downloads': {
-    request: { fileName: string }
-    response: boolean
-  }
-  'file/backups/upload': {
-    request: { fileName: string }
     response: boolean
   }
   'settings/settings/get': {
@@ -315,12 +303,12 @@ export interface IApi {
     request: object
     response: boolean
   }
-  'backup/backup/del': {
-    request: { fileName: string }
+  'backup/backup/restore': {
+    request: object
     response: boolean
   }
-  'backup/backup/restore': {
-    request: { fileName: string }
+  'data/data/migrate': {
+    request: object
     response: boolean
   }
 }
@@ -330,6 +318,15 @@ interface IWebApiPlugin {
     path: K
     body?: IApi[K]['request']
   }): Promise<{ result: IApi[K]['response'] } | IApiError>
+
+  /** Listens for screen orientation changes. */
+  addListener(
+    eventName: 'filePick',
+    listenerFunc: (data: { result: boolean }) => void,
+  ): Promise<PluginListenerHandle>
+
+  /** Removes all listeners */
+  removeAllListeners(): Promise<void>
 }
 
 class WebApiPlugin extends WebPlugin implements IWebApiPlugin {
@@ -411,7 +408,6 @@ class WebApiPlugin extends WebPlugin implements IWebApiPlugin {
       case 'settings/settings/get': result = this.fake.getSettings(); break;
       case 'settings/settings/set': result = true; break;
       case 'backup/backup/add': result = true; break;
-      case 'backup/backup/del': result = true; break;
       case 'backup/backup/restore': result = true; break;
       default: break;
     }

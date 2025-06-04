@@ -55,7 +55,6 @@ import kotlinx.serialization.json.Json
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
-import java.io.IOException
 
 class WebApi(private val context: Context) {
   private val db: AppDatabase = Room
@@ -480,7 +479,8 @@ class WebApi(private val context: Context) {
     checkRowId(rowId)
 
     data.put("mdate", DatesUtils.nowFormatted())
-    val count = comicOverrideDao.update(jsonIgnore.decodeFromString<ComicOverrideUpdate>(data.toString()))
+    val count =
+      comicOverrideDao.update(jsonIgnore.decodeFromString<ComicOverrideUpdate>(data.toString()))
     if (count == 0) throw DatabaseException("Comic override not updated")
 
     return true
@@ -598,7 +598,8 @@ class WebApi(private val context: Context) {
   }
 
   private fun addChapterPage(data: JSONObject): Long {
-    val rowId = chapterPageDao.create(jsonIgnore.decodeFromString<ChapterPageCreate>(data.toString()))
+    val rowId =
+      chapterPageDao.create(jsonIgnore.decodeFromString<ChapterPageCreate>(data.toString()))
     if (rowId == 0.toLong()) throw DatabaseException("Chapter page not created")
 
     return rowId
@@ -612,7 +613,8 @@ class WebApi(private val context: Context) {
     data.put("fileId", chapterPage.fileId)
     data.put("mdate", DatesUtils.nowFormatted())
 
-    val count = chapterPageDao.update(jsonIgnore.decodeFromString<ChapterPageUpdate>(data.toString()))
+    val count =
+      chapterPageDao.update(jsonIgnore.decodeFromString<ChapterPageUpdate>(data.toString()))
     if (count == 0) throw DatabaseException("Chapter not updated")
 
     return true

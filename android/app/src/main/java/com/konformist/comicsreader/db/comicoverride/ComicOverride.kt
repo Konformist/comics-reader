@@ -25,8 +25,14 @@ data class ComicOverride(
   @ColumnInfo(name = "tags_css", defaultValue = "") override val tagsCSS: String?,
   @ColumnInfo(name = "tags_text_css", defaultValue = "") override val tagsTextCSS: String?,
   @ColumnInfo(name = "chapters_css", defaultValue = "") override val chaptersCSS: String?,
-  @ColumnInfo(name = "chapters_title_css", defaultValue = "") override val chaptersTitleCSS: String?,
-  @ColumnInfo(name = "pages_template_url", defaultValue = "") override val pagesTemplateUrl: String?,
+  @ColumnInfo(
+    name = "chapters_title_css",
+    defaultValue = ""
+  ) override val chaptersTitleCSS: String?,
+  @ColumnInfo(
+    name = "pages_template_url",
+    defaultValue = ""
+  ) override val pagesTemplateUrl: String?,
   @ColumnInfo(name = "pages_css", defaultValue = "") override val pagesCSS: String?,
   @ColumnInfo(name = "pages_image_css", defaultValue = "") override val pagesImageCSS: String?,
 ) : ParserData

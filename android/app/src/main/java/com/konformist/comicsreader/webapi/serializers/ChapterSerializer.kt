@@ -1,10 +1,7 @@
 package com.konformist.comicsreader.webapi.serializers
 
 import com.konformist.comicsreader.db.chapter.Chapter
-import com.konformist.comicsreader.db.chapter.ChapterCreate
-import com.konformist.comicsreader.db.chapter.ChapterUpdate
 import com.konformist.comicsreader.db.chapter.ChapterWithPages
-import com.konformist.comicsreader.exceptions.ValidationException
 import kotlinx.serialization.json.Json
 import org.json.JSONArray
 import org.json.JSONObject

@@ -8,7 +8,7 @@ data class ChapterPageCreate(
   /* ID главы */
   @ColumnInfo(name = "chapter_id") val chapterId: Long,
   /* ID привязанного файла */
-  @ColumnInfo(name = "file_id") val fileId: Long?,
+  @ColumnInfo(name = "file_id") val fileId: Long? = 0L,
   /* Ссылка на источник */
-  @ColumnInfo(name = "from_url") val fromUrl: String?,
+  @ColumnInfo(name = "from_url") val fromUrl: String? = "",
 )

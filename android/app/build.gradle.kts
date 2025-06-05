@@ -21,8 +21,8 @@ android {
         applicationId = "com.konformist.comicsreader"
         minSdk = 34
         targetSdk = 35
-        versionCode = 12
-        versionName = "1.4.6"
+        versionCode = 13
+        versionName = "1.4.7"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         androidResources {
             localeFilters.addAll(listOf("en", "ru"))

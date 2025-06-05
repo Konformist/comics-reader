@@ -2,32 +2,17 @@ package com.konformist.comicsreader.utils
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.util.Base64
 import java.io.File
 import java.io.FileOutputStream
+import androidx.core.graphics.scale
 
 class ImageUtils {
   companion object {
     private const val SIZE_ZERO = 0
 
-    fun write(filePath: File, bitmap: Bitmap, quality: Int = 100) {
-      var outStream: FileOutputStream? = null
-
-      try {
-        outStream = FileOutputStream(filePath)
-        bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, quality, outStream)
-      } finally {
-        if (outStream != null) {
-          outStream.flush()
-          outStream.close()
-        }
-      }
-    }
-
-    fun base64ToBitmap(value: String): Bitmap {
-      val cleanedImage = FileUtils.cleanBase64(value)
-      val decodedBytes: ByteArray = Base64.decode(cleanedImage, Base64.DEFAULT)
-      return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+    fun writeStream(filePath: FileOutputStream, bitmap: Bitmap, quality: Int = 100) {
+      bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, quality, filePath)
+      filePath.close()
     }
 
     /**
@@ -57,13 +42,9 @@ class ImageUtils {
         maxHeightFloat / imgHeightFloat
       }
 
-      write(
-        file, Bitmap.createScaledBitmap(
-          bitmap,
-          (imgWidthFloat * coef).toInt(),
-          (imgHeightFloat * coef).toInt(),
-          true
-        )
+      writeStream(
+        FileOutputStream(file),
+        bitmap.scale((imgWidthFloat * coef).toInt(), (imgHeightFloat * coef).toInt()),
       )
 
       return true

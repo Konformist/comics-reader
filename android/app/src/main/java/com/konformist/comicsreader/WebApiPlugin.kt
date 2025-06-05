@@ -1,7 +1,6 @@
 package com.konformist.comicsreader
 
 import android.content.Intent
-import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -23,6 +22,7 @@ import org.json.JSONObject
 class WebApiPlugin : Plugin() {
   private lateinit var webApi: WebApi
   private var queryPath: String = ""
+  private var methodCall: PluginCall? = null
 
   // Инициализация ActivityResultLauncher для получения результата
   private lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
@@ -38,11 +38,13 @@ class WebApiPlugin : Plugin() {
     ) { value ->
       GlobalScope.launch(Dispatchers.IO) {
         val uri = if (value.resultCode == AppCompatActivity.RESULT_OK) value.data?.data else null
-        val data = JSONObject().put("uri", uri)
-        val result = webApi.api(queryPath, data)
+        val data = methodCall?.data?.optJSONObject("body")?.put("uri", uri)
+        val result = if (uri != null && data != null) webApi.api(queryPath, data)
+        else JSONObject().put("result", false)
 
         withContext(Dispatchers.Main) {
-          notifyListeners("filePick", JSObject.fromJSONObject(result))
+          methodCall?.resolve(JSObject.fromJSONObject(result))
+          methodCall = null
         }
       }
     }
@@ -59,13 +61,25 @@ class WebApiPlugin : Plugin() {
     val path = call.data.optString("path", "")
     val body = call.data.optJSONObject("body")
 
-    if (path == Query.BACKUP_BACKUP_RESTORE) {
-      queryPath = path
-      pickFile("application/x-tar")
-      val result = JSONObject().apply { put("result", true) }
-      call.resolve(JSObject.fromJSONObject(result))
-    } else {
-      call.resolve(JSObject.fromJSONObject(webApi.api(path, body)))
+    when (path) {
+      Query.BACKUP_BACKUP_RESTORE -> {
+        queryPath = path
+        methodCall = call
+        pickFile("application/x-tar")
+      }
+      Query.FILE_COMIC_COVER_ADD -> {
+        queryPath = path
+        methodCall = call
+        pickFile("image/*")
+      }
+      Query.FILE_CHAPTER_PAGE_ADD -> {
+        queryPath = path
+        methodCall = call
+        pickFile("image/*")
+      }
+      else -> {
+        call.resolve(JSObject.fromJSONObject(webApi.api(path, body)))
+      }
     }
   }
 }

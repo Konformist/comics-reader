@@ -8,16 +8,16 @@ import java.io.File
 
 class ChapterPageSerializer {
   companion object {
-    fun toJSON(item: ChapterPageWithFile, filesDir: File): JSONObject {
+    fun toJSON(item: ChapterPageWithFile): JSONObject {
       return JSONObject(Json.encodeToString(item.page)).apply {
-        put("file", item.file?.let { FileSerializer.toJSON(it, filesDir) })
+        put("file", item.file?.let { FileSerializer.toJSON(it) })
       }
     }
 
-    fun toJSONArray(items: List<ChapterPageWithFile>, filesDir: File): JSONArray {
+    fun toJSONArray(items: List<ChapterPageWithFile>): JSONArray {
       return JSONArray().apply {
         items.forEachIndexed { index, item ->
-          put(index, toJSON(item, filesDir))
+          put(index, toJSON(item))
         }
       }
     }

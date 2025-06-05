@@ -8,12 +8,11 @@ import java.io.File
 
 class FileSerializer {
   companion object {
-    fun toJSON(item: AppFile, filesDir: File): JSONObject {
+    fun toJSON(item: AppFile): JSONObject {
       return JSONObject(Json.encodeToString(item)).apply {
-        put(
-          "path", if (item.path.isEmpty()) item.path
-          else Uri.fromFile(File("${filesDir.path}${File.separator}${item.path}")).path
-        )
+        val path = if (item.path.isBlank()) item.path
+        else Uri.fromFile(File(item.path)).path
+        put("path", path)
       }
     }
   }

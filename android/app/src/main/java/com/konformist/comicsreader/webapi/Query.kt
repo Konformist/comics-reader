@@ -47,14 +47,14 @@ class Query {
     const val CHAPTER_PAGE_SET = "chapter/page/set"
     const val CHAPTER_PAGE_DEL = "chapter/page/del"
 
+    const val FILE_COMIC_COVER_DOWNLOAD = "file/comic-cover/download"
     const val FILE_COMIC_COVER_ADD = "file/comic-cover/add"
     const val FILE_COMIC_COVER_DEL = "file/comic-cover/del"
+    const val FILE_CHAPTER_PAGE_DOWNLOAD = "file/chapter-page/download"
     const val FILE_CHAPTER_PAGE_ADD = "file/chapter-page/add"
     const val FILE_CHAPTER_PAGE_DEL = "file/chapter-page/del"
 
-    const val FILE_COMICS_IMAGES_TREE = "file/comics-images/tree"
-    const val FILE_BACKUPS_TREE = "file/backups/tree"
-
+    const val FILE_FILES_TREE = "file/files/tree"
     const val FILE_FILE_DOWNLOADS = "file/file/downloads"
 
     const val SETTINGS_SETTINGS_GET = "settings/settings/get"
@@ -63,6 +63,7 @@ class Query {
     const val BACKUP_BACKUP_ADD = "backup/backup/add"
     const val BACKUP_BACKUP_RESTORE = "backup/backup/restore"
 
+    const val PARSER_HTML_DOWNLOAD = "parser/html/download"
     const val DATA_DATA_MIGRATE = "data/data/migrate"
   }
 }

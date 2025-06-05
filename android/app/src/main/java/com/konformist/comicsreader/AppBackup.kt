@@ -1,7 +1,6 @@
 package com.konformist.comicsreader
 
 import android.content.Context
-import android.net.Uri
 import android.os.Environment
 import com.konformist.comicsreader.db.AppDatabase
 import com.konformist.comicsreader.utils.AppDirectory
@@ -10,8 +9,6 @@ import com.konformist.comicsreader.utils.DatesUtils
 import java.io.File
 import java.io.InputStream
 import java.time.LocalDate
-import kotlin.io.path.ExperimentalPathApi
-import kotlin.io.path.deleteRecursively
 
 
 class AppBackup(private val appName: String, context: Context) {
@@ -25,9 +22,8 @@ class AppBackup(private val appName: String, context: Context) {
   private val backupTmp = File("${dirTmp}${File.separator}${backupFileName}")
   private val comicsTmp = File("${dirTmp}${File.separator}${AppDirectory.COMICS_IMAGES}")
 
-  @OptIn(ExperimentalPathApi::class)
   private fun deleteTmpDir() {
-    if (dirTmp.exists()) dirTmp.toPath().deleteRecursively()
+    if (dirTmp.exists()) dirTmp.deleteRecursively()
   }
 
   fun backup(db: AppDatabase): Boolean {

@@ -9,15 +9,15 @@ import java.io.File
 
 class ChapterSerializer {
   companion object {
-    fun toJSON(item: ChapterWithPages, filesDir: File): JSONObject {
+    fun toJSON(item: ChapterWithPages): JSONObject {
       return JSONObject(Json.encodeToString<Chapter>(item.chapter)).apply {
-        put("pages", ChapterPageSerializer.toJSONArray(item.pages, filesDir))
+        put("pages", ChapterPageSerializer.toJSONArray(item.pages))
       }
     }
 
-    fun toJSONArray(items: List<ChapterWithPages>, filesDir: File): JSONArray {
+    fun toJSONArray(items: List<ChapterWithPages>): JSONArray {
       return JSONArray().apply {
-        items.forEachIndexed { index, item -> put(index, toJSON(items[index], filesDir)) }
+        items.forEachIndexed { index, item -> put(index, toJSON(items[index])) }
       }
     }
   }

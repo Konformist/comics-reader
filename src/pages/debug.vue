@@ -44,7 +44,7 @@
 <script setup lang="ts">
 import useLoading from '@/composables/useLoading.ts';
 import Api from '@/core/api/Api.ts';
-import WebApi, { type ITreeDirectory } from '@/plugins/WebApiPlugin.ts';
+import type { ITreeDirectory } from '@/plugins/WebApiPlugin.ts';
 import { useAuthorsStore } from '@/stores/authors.ts';
 import { useComicsStore } from '@/stores/comics.ts';
 import { useLanguagesStore } from '@/stores/languages.ts';
@@ -78,8 +78,7 @@ const treeFiles = ref<ITreeDirectory[]>([]);
 
 const loadTreeFiles = async () => {
   loadingStart();
-  treeFiles.value.push(await Api.api('file/comics-images/tree'));
-  treeFiles.value.push(await Api.api('file/backups/tree'));
+  treeFiles.value = await Api.api('file/files/tree');
   loadingEnd();
 };
 
@@ -101,14 +100,6 @@ const restoreBackup = async () => {
   try {
     loadingGlobalStart();
     await Api.api('backup/backup/restore');
-  } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
-    loadingGlobalEnd();
-  }
-};
-
-const pickHandler = WebApi.addListener('filePick', async (data) => {
-  if (data.result) {
     await Promise.all([
       comicsStore.loadComicsForce(),
       tagsStore.loadTagsForce(),
@@ -116,21 +107,14 @@ const pickHandler = WebApi.addListener('filePick', async (data) => {
       languagesStore.loadLanguagesForce(),
       parsersStore.loadParsersForce(),
     ]);
+    loadTreeFiles();
     Toast.show({ text: 'Данные восстановлены' });
-  } else {
-    Toast.show({ text: 'Не удалось восстановить данные' });
-  }
-
-  loadingGlobalEnd();
-});
-
-onBeforeUnmount(async () => {
-  (await pickHandler).remove();
-  if (loadingGlobal.value) {
+  } catch (e) {
+    Toast.show({ text: `Ошибка: ${e}` });
+  } finally {
     loadingGlobalEnd();
-    Toast.show({ text: 'Не удалось восстановить данные' });
   }
-});
+};
 
 const migrate = async () => {
   try {

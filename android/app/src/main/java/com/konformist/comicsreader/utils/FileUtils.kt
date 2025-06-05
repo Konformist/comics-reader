@@ -1,34 +1,49 @@
 package com.konformist.comicsreader.utils
 
 import android.net.Uri
-import android.util.Base64
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.FileWriter
 import java.io.IOException
-
+import java.io.InputStream
 
 class FileUtils {
   companion object {
-    fun cleanBase64(value: String): String {
-      return value
-        .replace("data:image/jpeg;base64,", "")
-        .replace("data:image/webp;base64,", "")
-        .replace("data:image/png;base64,", "")
-        .replace("data:image/gif;base64,", "")
-        .replace("data:application/octet-stream;base64,", "")
+    fun getExtensionFromMime(mimeType: String?): String {
+      if (mimeType == null) return "bin" // Если MIME не найден, даём расширение по умолчанию
+
+      return when (mimeType) {
+        "image/jpeg" -> "jpg"
+        "image/webp" -> "webp"
+        "image/png" -> "png"
+        "image/gif" -> "gif"
+        else -> "bin" // Для всех других типов возвращаем расширение по умолчанию
+      }
     }
 
-    fun writeBase64(fileOut: File, data: String): Boolean {
-      val decodedFile = Base64.decode(cleanBase64(data), Base64.DEFAULT)
-      val fileOutStream = FileOutputStream(fileOut)
-      val bufferedOutputStream = BufferedOutputStream(fileOutStream)
-      bufferedOutputStream.write(decodedFile)
+    fun getMimeFromExtension(extension: String?): String {
+      if (extension == null) return "" // Если MIME не найден, даём расширение по умолчанию
 
-      return true
+      return when (extension) {
+        "jpg" -> "image/jpeg"
+        "webp" -> "image/webp"
+        "png" -> "image/png"
+        "gif" -> "image/gif"
+        else -> "" // Для всех других типов возвращаем расширение по умолчанию
+      }
+    }
+
+    fun writeStream(outputStream: FileOutputStream, inputStream: InputStream) {
+      val buffer = ByteArray(4096)
+      var bytesRead: Int
+      while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+        outputStream.write(buffer, 0, bytesRead)
+      }
+
+      inputStream.close()
+      outputStream.close()
     }
 
     fun write(file: File, data: String): Boolean {

@@ -52,8 +52,8 @@
           :disabled="loading || loadingGlobal"
           :size="comic.cover.file?.size"
           :src="comic.cover.file?.url"
-          @download="onLoadCover()"
-          @upload="image = $event"
+          @download="loadByLink()"
+          @pick="uploadCover()"
         />
       </div>
       <v-divider />
@@ -123,9 +123,7 @@ import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
 import useLoading from '@/composables/useLoading.ts';
 import ComicCoverController from '@/core/entities/comic-cover/ComicCoverController.ts';
-import { fileToBase64 } from '@/core/utils/image.ts';
 import ComicController from '@/core/entities/comic/ComicController.ts';
-import ParserController from '@/core/entities/parser/ParserController.ts';
 
 definePage({
   meta: {
@@ -179,16 +177,11 @@ const saveComic = async () => {
   await ComicController.save(comic.value);
 };
 
-const image = ref<File | null>(null);
-
 const uploadCover = async () => {
-  if (!image.value) return;
-
   try {
     loadingGlobalStart();
     await saveComic();
-    const base64 = await fileToBase64(image.value);
-    await ComicCoverController.saveFile(comic.value.id, base64);
+    await ComicCoverController.saveFile(comic.value.id);
     await comicsStore.loadComicsForce();
     comic.value = new ComicModel(comicsStore.comic.getDTO());
     Toast.show({ text: 'Комикс сохранён' });
@@ -205,8 +198,7 @@ const loadByLink = async () => {
   try {
     loadingGlobalStart();
     await saveComic();
-    const result = await ParserController.loadImageRaw(comic.value.cover.fromUrl);
-    await ComicCoverController.saveFile(comic.value.id, result);
+    await ComicCoverController.downloadFile(comic.value.id, comic.value.cover.fromUrl);
     await comicsStore.loadComicsForce();
     comic.value = new ComicModel(comicsStore.comic.getDTO());
     Toast.show({ text: 'Комикс сохранён' });
@@ -217,16 +209,12 @@ const loadByLink = async () => {
   }
 };
 
-const onLoadCover = () => {
-  if (image.value) uploadCover();
-  else if (comic.value.cover.fromUrl) loadByLink();
-};
-
 const onSave = async () => {
   try {
     loadingGlobalStart();
     await saveComic();
     await comicsStore.loadComicsForce();
+    comic.value = new ComicModel(comicsStore.comic.getDTO());
     Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
@@ -273,9 +261,7 @@ const loadChapters = async () => {
 const createChapter = async () => {
   try {
     loadingGlobalStart();
-    const chapterId = await ChapterController.save(
-      new ChapterModel({ comicId }),
-    );
+    const chapterId = await ChapterController.save(new ChapterModel({ comicId }));
 
     if (!chapterId) return;
 

@@ -115,7 +115,7 @@
                   :src="item.raw.file?.url"
                   @delete="delPage(item.raw)"
                   @download="onLoadImage(item.raw)"
-                  @upload="uploadImage(item.raw, $event)"
+                  @pick="uploadImage(item.raw)"
                 />
               </v-col>
             </v-row>
@@ -144,12 +144,10 @@
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
 import useLoading from '@/composables/useLoading.ts';
-import { fileToBase64 } from '@/core/utils/image.ts';
 import ChapterPageController from '@/core/entities/chapter-page/ChapterPageController.ts';
 import type ChapterPageModel from '@/core/entities/chapter-page/ChapterPageModel.ts';
 import ChapterController from '@/core/entities/chapter/ChapterController.ts';
 import ChapterModel from '@/core/entities/chapter/ChapterModel.ts';
-import ParserController from '@/core/entities/parser/ParserController.ts';
 
 definePage({
   meta: {
@@ -245,14 +243,11 @@ const onSave = async () => {
   }
 };
 
-const uploadImage = async (item: ChapterPageModel, event: File | File[]) => {
-  if (!event || Array.isArray(event)) return;
-
+const uploadImage = async (item: ChapterPageModel) => {
   try {
     loadingGlobalStart();
     await saveChapter();
-    const base64 = await fileToBase64(event);
-    await ChapterPageController.saveFile(item.id, base64);
+    await ChapterPageController.saveFile(item.id);
     await loadChapter();
     Toast.show({ text: 'Глава сохранена' });
   } catch (e) {
@@ -267,8 +262,8 @@ const onLoadImage = async (item: ChapterPageModel) => {
 
   try {
     loadingGlobalStart();
-    const result = await ParserController.loadImageRaw(item.fromUrl);
-    await ChapterPageController.saveFile(item.id, result);
+    await saveChapter();
+    await ChapterPageController.downloadFile(item.id, item.fromUrl);
     await loadChapter();
     Toast.show({ text: 'Глава сохранена' });
   } catch (e) {
@@ -291,8 +286,7 @@ const onLoadImages = async (force: boolean = false) => {
   try {
     for (const item of chapter.value.pages) {
       if (item.fromUrl && (!item.file || force)) {
-        const result = await ParserController.loadImageRaw(item.fromUrl);
-        await ChapterPageController.saveFile(item.id, result);
+        await ChapterPageController.downloadFile(item.id, item.fromUrl);
       }
     }
   } catch (e) {

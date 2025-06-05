@@ -7,10 +7,7 @@ const config: CapacitorConfig = {
   zoomEnabled: true,
   backgroundColor: '#121212',
   android: { adjustMarginsForEdgeToEdge: 'auto' },
-  plugins: {
-    Keyboard: { resizeOnFullScreen: true },
-    CapacitorHttp: { enabled: true },
-  },
+  plugins: { Keyboard: { resizeOnFullScreen: true } },
 };
 
 export default config;

@@ -12,15 +12,14 @@
       Размер: {{ formatBytes(size || 0) }}
     </v-card-text>
     <v-card-item>
-      <v-file-input
-        v-model="imageFile"
-        accept="image/*"
+      <v-btn
+        class="w-100"
         :disabled="disabled"
-        flat
-        label="Загрузить картинку"
-        variant="solo-filled"
+        text="Выбрать изображение"
+        variant="tonal"
+        @click="$emit('pick')"
       />
-      <p class="my-4">
+      <p class="my-2">
         Или
       </p>
       <v-textarea
@@ -47,9 +46,9 @@
       />
       <v-spacer />
       <v-btn
-        :disabled="(!imageFile && !fromUrl) || disabled"
+        :disabled="disabled"
         text="Загрузить"
-        @click="onLoad()"
+        @click="$emit('download')"
       />
     </v-card-actions>
   </v-card>
@@ -60,8 +59,8 @@ import { formatBytes } from '@/core/utils/format.ts';
 
 const fromUrl = defineModel<string>('fromUrl', { default: '' });
 
-const emit = defineEmits<{
-  (e: 'upload', v: File): void
+defineEmits<{
+  (e: 'pick', v: void): void
   (e: 'download', v: void): void
   (e: 'delete', v: void): void
 }>();
@@ -72,11 +71,4 @@ defineProps<{
   canDelete?: boolean
   disabled: boolean
 }>();
-
-const imageFile = ref<File | null>(null);
-
-const onLoad = () => {
-  if (imageFile.value) emit('upload', imageFile.value);
-  else if (fromUrl.value) emit('download');
-};
 </script>

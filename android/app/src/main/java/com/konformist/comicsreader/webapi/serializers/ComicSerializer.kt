@@ -9,16 +9,16 @@ import java.io.File
 
 class ComicSerializer {
   companion object {
-    fun toJSON(item: ComicLite, filesDir: File): JSONObject {
+    fun toJSON(item: ComicLite): JSONObject {
       return JSONObject(Json.encodeToString<Comic>(item.comic)).apply {
-        put("cover", item.cover?.let { ComicCoverSerializer.toJSON(it, filesDir) })
+        put("cover", item.cover?.let { ComicCoverSerializer.toJSON(it) })
       }
     }
 
-    fun toJSONArray(items: List<ComicLite>, filesDir: File): JSONArray {
+    fun toJSONArray(items: List<ComicLite>): JSONArray {
       return JSONArray().apply {
         items.forEachIndexed { index, item ->
-          put(index, toJSON(item, filesDir))
+          put(index, toJSON(item))
         }
       }
     }

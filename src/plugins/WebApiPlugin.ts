@@ -254,35 +254,39 @@ export interface IApi {
     request: { id: number }
     response: boolean
   }
-  'file/comic-cover/add': {
+  'file/comic-cover/download': {
     request: {
       comicId: number
-      file: string
+      link: string
     }
+    response: number
+  }
+  'file/comic-cover/add': {
+    request: { comicId: number }
     response: number
   }
   'file/comic-cover/del': {
     request: { comicId: number }
     response: boolean
   }
-  'file/chapter-page/add': {
+  'file/chapter-page/download': {
     request: {
       chapterPageId: number
-      file: string
+      link: string
     }
+    response: number
+  }
+  'file/chapter-page/add': {
+    request: { chapterPageId: number }
     response: number
   }
   'file/chapter-page/del': {
     request: { chapterPageId: number }
     response: boolean
   }
-  'file/comics-images/tree': {
+  'file/files/tree': {
     request: object
-    response: ITreeDirectory
-  }
-  'file/backups/tree': {
-    request: object
-    response: ITreeDirectory
+    response: ITreeDirectory[]
   }
   'file/file/downloads': {
     request: {
@@ -306,6 +310,13 @@ export interface IApi {
   'backup/backup/restore': {
     request: object
     response: boolean
+  }
+  'parser/html/download': {
+    request: {
+      url: string
+      cookie?: string
+    }
+    response: string
   }
   'data/data/migrate': {
     request: object
@@ -388,27 +399,24 @@ class WebApiPlugin extends WebPlugin implements IWebApiPlugin {
       case 'chapter/page/add': result = this.fake.getChapterPageId(); break;
       case 'chapter/page/set': result = true; break;
       case 'chapter/page/del': result = true; break;
+      case 'file/comic-cover/download': result = 1; break;
       case 'file/comic-cover/add': result = 1; break;
       case 'file/comic-cover/del': result = true; break;
+      case 'file/chapter-page/download': result = 1; break;
       case 'file/chapter-page/add': result = 1; break;
       case 'file/chapter-page/del': result = true; break;
-      case 'file/comics-images/tree': result = {
+      case 'file/files/tree': result = [{
         type: 'directory',
-        name: 'comic-images',
+        name: 'files',
         count: 0,
         childes: [],
-      }; break;
-      case 'file/backups/tree': result = {
-        type: 'directory',
-        name: 'backups',
-        count: 0,
-        childes: [],
-      }; break;
+      }]; break;
       case 'file/file/downloads': result = true; break;
       case 'settings/settings/get': result = this.fake.getSettings(); break;
       case 'settings/settings/set': result = true; break;
       case 'backup/backup/add': result = true; break;
       case 'backup/backup/restore': result = true; break;
+      case 'parser/html/download': result = ''; break;
       default: break;
     }
 

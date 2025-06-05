@@ -8,9 +8,9 @@ import java.io.File
 
 class ComicCoverSerializer {
   companion object {
-    fun toJSON(item: ComicCoverWithFile, filesDir: File): JSONObject {
+    fun toJSON(item: ComicCoverWithFile): JSONObject {
       return JSONObject(Json.encodeToString<ComicCover>(item.cover)).apply {
-        put("file", item.file?.let { FileSerializer.toJSON(it, filesDir) })
+        put("file", item.file?.let { FileSerializer.toJSON(it) })
       }
     }
   }

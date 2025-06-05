@@ -2,9 +2,9 @@ package com.konformist.comicsreader.utils
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import androidx.core.graphics.scale
 import java.io.File
 import java.io.FileOutputStream
-import androidx.core.graphics.scale
 
 class ImageUtils {
   companion object {

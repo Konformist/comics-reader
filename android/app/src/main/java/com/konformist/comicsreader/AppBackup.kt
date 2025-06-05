@@ -13,7 +13,8 @@ import java.time.LocalDate
 
 class AppBackup(private val appName: String, context: Context) {
   private val backupFileName = "backup-db"
-  private val documentsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
+  private val documentsDir =
+    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
 
   private val comicsPath = File("${context.filesDir}${File.separator}${AppDirectory.COMICS_IMAGES}")
   private val dbFile = context.getDatabasePath(AppDatabase.DATABASE_NAME)
@@ -33,10 +34,12 @@ class AppBackup(private val appName: String, context: Context) {
     db.close()
     dbFile.copyTo(target = backupTmp, overwrite = true)
 
-    val backupsDir = File("${documentsDir}${File.separator}${appName}${File.separator}${AppDirectory.BACKUPS}")
+    val backupsDir =
+      File("${documentsDir}${File.separator}${appName}${File.separator}${AppDirectory.BACKUPS}")
     if (!backupsDir.exists()) backupsDir.mkdirs()
 
-    val backupFile = File("${backupsDir}${File.separator}backup-${DatesUtils.dateFormatted(LocalDate.now())}.tar")
+    val backupFile =
+      File("${backupsDir}${File.separator}backup-${DatesUtils.dateFormatted(LocalDate.now())}.tar")
     if (!backupFile.exists()) backupFile.createNewFile()
 
     val compress = ArchiveUtils.compressFactory()

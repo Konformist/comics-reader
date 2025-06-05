@@ -5,7 +5,6 @@ import com.konformist.comicsreader.db.chapter.ChapterWithPages
 import kotlinx.serialization.json.Json
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.File
 
 class ChapterSerializer {
   companion object {

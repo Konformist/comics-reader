@@ -45,7 +45,6 @@ import com.konformist.comicsreader.db.tag.TagCreate
 import com.konformist.comicsreader.db.tag.TagDelete
 import com.konformist.comicsreader.db.tag.TagUpdate
 import com.konformist.comicsreader.exceptions.DatabaseException
-import com.konformist.comicsreader.exceptions.FilesException
 import com.konformist.comicsreader.exceptions.ValidationException
 import com.konformist.comicsreader.utils.AppDirectory
 import com.konformist.comicsreader.utils.DatesUtils
@@ -537,7 +536,10 @@ class WebApi(private val context: Context) {
     else uriStr.substring(lastDotIndex + 1) // No extension found
 
     val path = context.contentResolver.openFileDescriptor(uriStr.toUri(), "r") ?: return 0L
-    val rowId = createComicImage(FileUtils.getMimeFromExtension(extension), FileInputStream(path.fileDescriptor))
+    val rowId = createComicImage(
+      FileUtils.getMimeFromExtension(extension),
+      FileInputStream(path.fileDescriptor)
+    )
     path.close()
 
     val count = comicCoverDao.update(
@@ -712,16 +714,21 @@ class WebApi(private val context: Context) {
     else uriStr.substring(lastDotIndex + 1) // No extension found
 
     val path = context.contentResolver.openFileDescriptor(uriStr.toUri(), "r") ?: return 0L
-    val rowId = createComicImage(FileUtils.getMimeFromExtension(extension), FileInputStream(path.fileDescriptor))
+    val rowId = createComicImage(
+      FileUtils.getMimeFromExtension(extension),
+      FileInputStream(path.fileDescriptor)
+    )
     path.close()
 
-    val count = chapterPageDao.update(ChapterPageUpdate(
-      id = chapterPage.id,
-      mdate = DatesUtils.nowFormatted(),
-      fromUrl = chapterPage.fromUrl,
-      fileId = rowId,
-      isRead = chapterPage.isRead,
-    ))
+    val count = chapterPageDao.update(
+      ChapterPageUpdate(
+        id = chapterPage.id,
+        mdate = DatesUtils.nowFormatted(),
+        fromUrl = chapterPage.fromUrl,
+        fileId = rowId,
+        isRead = chapterPage.isRead,
+      )
+    )
     Validation.dbUpdate(count, "ChapterPage")
 
     return rowId
@@ -819,16 +826,25 @@ class WebApi(private val context: Context) {
     val urlObj = URL(url)
     val connection = urlObj.openConnection() as HttpURLConnection
     connection.requestMethod = "GET"
-    connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36")
+    connection.setRequestProperty(
+      "User-Agent",
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+    )
     connection.setRequestProperty("Accept-Language", "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7")
     connection.setRequestProperty("Cookie", cookie)
     connection.setRequestProperty("Priority", "u=0, i")
     connection.setRequestProperty("Referer", "${urlObj.protocol}://${urlObj.host}")
-    connection.setRequestProperty("sec-ch-ua", "\"Chromium\";v=\"136\", \"Google Chrome\";v=\"136\", \"Not.A/Brand\";v=\"99\"")
+    connection.setRequestProperty(
+      "sec-ch-ua",
+      "\"Chromium\";v=\"136\", \"Google Chrome\";v=\"136\", \"Not.A/Brand\";v=\"99\""
+    )
     connection.setRequestProperty("sec-ch-ua-arch", "\"x86\"")
     connection.setRequestProperty("sec-ch-ua-bitness", "\"64\"")
     connection.setRequestProperty("sec-ch-ua-full-version", "\"136.0.7103.114\"")
-    connection.setRequestProperty("sec-ch-ua-full-version-list", "\"Chromium\";v=\"136.0.7103.114\", \"Google Chrome\";v=\"136.0.7103.114\", \"Not.A/Brand\";v=\"99.0.0.0\"")
+    connection.setRequestProperty(
+      "sec-ch-ua-full-version-list",
+      "\"Chromium\";v=\"136.0.7103.114\", \"Google Chrome\";v=\"136.0.7103.114\", \"Not.A/Brand\";v=\"99.0.0.0\""
+    )
     connection.setRequestProperty("sec-ch-ua-mobile", "?0")
     connection.setRequestProperty("sec-ch-ua-model", "\"\"")
     connection.setRequestProperty("sec-ch-ua-platform", "\"Windows\"")
@@ -862,17 +878,20 @@ class WebApi(private val context: Context) {
     files.forEach { file ->
       val pathFrom = File("${context.filesDir}${File.separator}${file.path}")
       val fileName = "${file.id}.${FileUtils.getExtensionFromMime(file.mime)}"
-      val pathTo = File("${context.filesDir}${File.separator}${AppDirectory.COMICS_IMAGES}${File.separator}${fileName}")
+      val pathTo =
+        File("${context.filesDir}${File.separator}${AppDirectory.COMICS_IMAGES}${File.separator}${fileName}")
 
       pathFrom.renameTo(pathTo)
-      appFileDao.update(AppFileUpdate(
-        id = file.id,
-        mdate = DatesUtils.nowFormatted(),
-        name = fileName,
-        mime = file.mime,
-        size = file.size,
-        path = pathTo.path,
-      ))
+      appFileDao.update(
+        AppFileUpdate(
+          id = file.id,
+          mdate = DatesUtils.nowFormatted(),
+          name = fileName,
+          mime = file.mime,
+          size = file.size,
+          path = pathTo.path,
+        )
+      )
     }
 
     val comicsDir = File("${context.filesDir}${File.separator}${AppDirectory.COMICS_IMAGES}")

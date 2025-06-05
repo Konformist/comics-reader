@@ -67,16 +67,19 @@ class WebApiPlugin : Plugin() {
         methodCall = call
         pickFile("application/x-tar")
       }
+
       Query.FILE_COMIC_COVER_ADD -> {
         queryPath = path
         methodCall = call
         pickFile("image/*")
       }
+
       Query.FILE_CHAPTER_PAGE_ADD -> {
         queryPath = path
         methodCall = call
         pickFile("image/*")
       }
+
       else -> {
         call.resolve(JSObject.fromJSONObject(webApi.api(path, body)))
       }

@@ -5,7 +5,6 @@ import com.konformist.comicsreader.db.comic.ComicLite
 import kotlinx.serialization.json.Json
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.File
 
 class ComicSerializer {
   companion object {

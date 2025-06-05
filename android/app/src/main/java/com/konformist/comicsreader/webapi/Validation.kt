@@ -1,9 +1,9 @@
 package com.konformist.comicsreader.webapi
 
-import com.konformist.comicsreader.exceptions.ValidationException
 import androidx.core.net.toUri
 import com.konformist.comicsreader.exceptions.DatabaseException
 import com.konformist.comicsreader.exceptions.FilesException
+import com.konformist.comicsreader.exceptions.ValidationException
 import java.io.File
 
 class Validation {
@@ -50,13 +50,13 @@ class Validation {
     }
 
     fun fileCreate(result: Boolean, file: File) {
-      if (result) return;
+      if (result) return
       if (file.isDirectory) throw FilesException("Directory \"$file\" not created")
       else throw FilesException("File \"$file\" not created")
     }
 
     fun fileDelete(result: Boolean, file: File) {
-      if (result) return;
+      if (result) return
       if (file.isDirectory) throw FilesException("Directory \"$file\" not deleted")
       else throw FilesException("File \"$file\" not deleted")
     }

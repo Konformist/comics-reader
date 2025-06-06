@@ -41,9 +41,6 @@ class FileUtils {
       while (inputStream.read(buffer).also { bytesRead = it } != -1) {
         outputStream.write(buffer, 0, bytesRead)
       }
-
-      inputStream.close()
-      outputStream.close()
     }
 
     fun write(file: File, data: String): Boolean {
@@ -62,6 +59,7 @@ class FileUtils {
       }
     }
 
+    // @TODO Нужен DTO
     fun tree(path: File): JSONObject {
       val result = JSONObject()
 

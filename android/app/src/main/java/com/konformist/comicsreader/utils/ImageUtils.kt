@@ -12,7 +12,6 @@ class ImageUtils {
 
     fun writeStream(filePath: FileOutputStream, bitmap: Bitmap, quality: Int = 100) {
       bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, quality, filePath)
-      filePath.close()
     }
 
     /**
@@ -42,10 +41,14 @@ class ImageUtils {
         maxHeightFloat / imgHeightFloat
       }
 
-      writeStream(
-        FileOutputStream(file),
-        bitmap.scale((imgWidthFloat * coef).toInt(), (imgHeightFloat * coef).toInt()),
-      )
+      FileOutputStream(file).use { item ->
+        writeStream(
+          item,
+          bitmap.scale((imgWidthFloat * coef).toInt(), (imgHeightFloat * coef).toInt()),
+        )
+      }
+
+      bitmap.recycle()
 
       return true
     }

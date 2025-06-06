@@ -2,12 +2,12 @@ package com.konformist.comicsreader.utils
 
 class ArchiveUtils {
   companion object {
-    fun compressFactory(): CompressFiles {
-      return CompressFiles()
+    fun compressFactory(): ArchiveCompressor {
+      return ArchiveCompressor()
     }
 
-    fun extractFactory(): ExtractFiles {
-      return ExtractFiles()
+    fun extractFactory(): ArchiveExtractor {
+      return ArchiveExtractor()
     }
   }
 }

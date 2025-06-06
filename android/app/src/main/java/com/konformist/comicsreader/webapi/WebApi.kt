@@ -47,6 +47,8 @@ import com.konformist.comicsreader.db.tag.TagUpdate
 import com.konformist.comicsreader.exceptions.DatabaseException
 import com.konformist.comicsreader.exceptions.ValidationException
 import com.konformist.comicsreader.utils.AppDirectory
+import com.konformist.comicsreader.utils.ArchiveUtils
+import com.konformist.comicsreader.utils.ArchiveFormat
 import com.konformist.comicsreader.utils.DatesUtils
 import com.konformist.comicsreader.utils.FileUtils
 import com.konformist.comicsreader.utils.ImageUtils
@@ -72,10 +74,16 @@ class WebApi(private val context: Context) {
     .databaseBuilder(context, AppDatabase::class.java, AppDatabase.DATABASE_NAME)
     .build()
 
+  private val comicsImagesDir =
+    File("${context.filesDir}${File.separator}${AppDirectory.COMICS_IMAGES}")
+
   private val downloads =
     Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
   private val documents =
     Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
+
+  private val downloadsApp = File("$downloads${File.separator}${getAppName()}")
+  private val documentsApp = File("$documents${File.separator}${getAppName()}")
 
   private fun getAppName(): String {
     val applicationInfo = context.applicationInfo
@@ -84,7 +92,7 @@ class WebApi(private val context: Context) {
     else context.getString(stringId)
   }
 
-  private val dbBackup = AppBackup(getAppName(), context)
+  private val dbBackup = AppBackup(documentsApp, comicsImagesDir, context)
 
   private val tagDao = db.tagDao()
   private val authorDao = db.authorDao()
@@ -202,20 +210,24 @@ class WebApi(private val context: Context) {
     )
     Validation.dbCreate(rowId, "AppFile")
 
-    val dirOut = File("${context.filesDir}${File.separator}${AppDirectory.COMICS_IMAGES}")
-    if (!dirOut.exists()) dirOut.mkdirs()
+    if (!comicsImagesDir.exists()) comicsImagesDir.mkdirs()
 
     val extension = if (AppDataStore.settings.isCompress) "webp"
     else FileUtils.getExtensionFromMime(mime)
 
-    val fileOut = File("${dirOut.path}${File.separator}${rowId}.${extension}")
+    val fileOut = File("${comicsImagesDir}${File.separator}${rowId}.${extension}")
 
     try {
       if (AppDataStore.settings.isCompress) {
         val decodedImage: Bitmap = BitmapFactory.decodeStream(file)
-        ImageUtils.writeStream(FileOutputStream(fileOut), decodedImage, 80)
+        FileOutputStream(fileOut).use { item ->
+          ImageUtils.writeStream(item, decodedImage, 80)
+        }
+        decodedImage.recycle()
       } else {
-        FileUtils.writeStream(FileOutputStream(fileOut), file)
+        FileOutputStream(fileOut).use { item ->
+          FileUtils.writeStream(item, file)
+        }
       }
 
       val count = appFileDao.update(
@@ -465,6 +477,45 @@ class WebApi(private val context: Context) {
     return true
   }
 
+  private fun uploadComic(data: JSONObject): Boolean {
+    val id = data.optLong("id")
+    Validation.id(id, "id")
+
+    val dirTmp = File("${context.cacheDir}${File.separator}comic-tmp")
+    if (dirTmp.exists()) dirTmp.deleteRecursively()
+    dirTmp.mkdirs()
+
+    val comic = comicDao.read(id)
+    val chapters = chapterDao.readWithPagesByComicAll(id)
+
+    val compress = ArchiveUtils.compressFactory()
+    val chaptersLength = chapters.size.toString().length
+
+    chapters.forEachIndexed { index, chapter ->
+      val chapterDirName = String.format("%0${chaptersLength}d", index + 1)
+      val chapterDir = File("$dirTmp${File.separator}$chapterDirName")
+      chapterDir.mkdirs()
+      compress.addFile(chapterDir)
+      val pagesLength = chapter.pages.size.toString().length
+
+      chapter.pages.forEachIndexed { iPage, page ->
+        if (page.file != null) {
+          val fileFrom = File(page.file.path)
+          val fileToName = "${String.format("%0${pagesLength}d", iPage + 1)}.${fileFrom.extension}"
+          val fileTo = File("$chapterDir${File.separator}$fileToName")
+          fileFrom.copyTo(target = fileTo)
+        }
+      }
+    }
+
+    val outFile = File("$downloadsApp${File.separator}${comic.name}.cbz")
+    if (!outFile.parentFile.exists()) outFile.parentFile.mkdirs()
+    compress.compress(outFile, ArchiveFormat.ZIP)
+    dirTmp.deleteRecursively()
+
+    return true
+  }
+
   private fun getComicOverride(data: JSONObject): JSONObject {
     val rowId = data.optLong("comicId")
     Validation.id(rowId, "id")
@@ -506,6 +557,8 @@ class WebApi(private val context: Context) {
     val mimeType = connection.contentType
 
     val rowId = createComicImage(mimeType, connection.inputStream)
+    connection.inputStream.close()
+    connection.disconnect()
     val count = comicCoverDao.update(
       ComicCoverUpdate(
         id = cover.id,
@@ -536,10 +589,12 @@ class WebApi(private val context: Context) {
     else uriStr.substring(lastDotIndex + 1) // No extension found
 
     val path = context.contentResolver.openFileDescriptor(uriStr.toUri(), "r") ?: return 0L
+    val inputStream = FileInputStream(path.fileDescriptor)
     val rowId = createComicImage(
       FileUtils.getMimeFromExtension(extension),
-      FileInputStream(path.fileDescriptor)
+      inputStream
     )
+    inputStream.close()
     path.close()
 
     val count = comicCoverDao.update(
@@ -683,6 +738,9 @@ class WebApi(private val context: Context) {
     val mimeType = connection.contentType
 
     val rowId = createComicImage(mimeType, connection.inputStream)
+    connection.inputStream.close()
+    connection.disconnect()
+
     val count = chapterPageDao.update(
       ChapterPageUpdate(
         id = chapterPage.id,
@@ -714,10 +772,12 @@ class WebApi(private val context: Context) {
     else uriStr.substring(lastDotIndex + 1) // No extension found
 
     val path = context.contentResolver.openFileDescriptor(uriStr.toUri(), "r") ?: return 0L
+    val fileInputStream = FileInputStream(path.fileDescriptor)
     val rowId = createComicImage(
       FileUtils.getMimeFromExtension(extension),
-      FileInputStream(path.fileDescriptor)
+      fileInputStream,
     )
+    fileInputStream.close()
     path.close()
 
     val count = chapterPageDao.update(
@@ -789,8 +849,13 @@ class WebApi(private val context: Context) {
 
     val path = context.contentResolver
       .openFileDescriptor(uriStr.toUri(), "r") ?: return false
+    val fileInputStream = FileInputStream(path.fileDescriptor)
 
-    return dbBackup.restore(db, FileInputStream(path.fileDescriptor))
+    val result = dbBackup.restore(db, fileInputStream)
+    fileInputStream.close()
+    path.close()
+
+    return result
   }
 
   private fun getFilesTree(): JSONArray {
@@ -809,8 +874,7 @@ class WebApi(private val context: Context) {
     val fileName = data.optString("fileName", "")
     Validation.string(fileName, "fileName")
 
-    val filePath =
-      File("${downloads.path}${File.separator}${getAppName()}${File.separator}${fileName}")
+    val filePath = File("${downloadsApp}${File.separator}${fileName}")
 
     val result = FileUtils.write(filePath, file)
     Validation.fileCreate(result, filePath)
@@ -861,7 +925,8 @@ class WebApi(private val context: Context) {
 
     // Читаем входной поток
     val inputStream = connection.inputStream
-    val reader = BufferedReader(InputStreamReader(inputStream))
+    val inputStreamReader = InputStreamReader(inputStream)
+    val reader = BufferedReader(inputStreamReader)
     val stringBuilder = StringBuilder()
 
     var line: String?
@@ -869,34 +934,16 @@ class WebApi(private val context: Context) {
       stringBuilder.append(line)
     }
 
+    reader.close()
+    inputStreamReader.close()
+    inputStream.close()
+    connection.inputStream.close()
+    connection.disconnect()
+
     return stringBuilder.toString()
   }
 
   private fun migrate(): Boolean {
-    val files = appFileDao.readAll()
-
-    files.forEach { file ->
-      val pathFrom = File("${context.filesDir}${File.separator}${file.path}")
-      val fileName = "${file.id}.${FileUtils.getExtensionFromMime(file.mime)}"
-      val pathTo =
-        File("${context.filesDir}${File.separator}${AppDirectory.COMICS_IMAGES}${File.separator}${fileName}")
-
-      pathFrom.renameTo(pathTo)
-      appFileDao.update(
-        AppFileUpdate(
-          id = file.id,
-          mdate = DatesUtils.nowFormatted(),
-          name = fileName,
-          mime = file.mime,
-          size = file.size,
-          path = pathTo.path,
-        )
-      )
-    }
-
-    val comicsDir = File("${context.filesDir}${File.separator}${AppDirectory.COMICS_IMAGES}")
-    comicsDir.listFiles()?.forEach { file -> if (file.isDirectory) file.deleteRecursively() }
-
     return true
   }
 
@@ -932,6 +979,7 @@ class WebApi(private val context: Context) {
         Query.COMIC_COMIC_ADD to { addComic(data) },
         Query.COMIC_COMIC_SET to { setComic(data) },
         Query.COMIC_COMIC_DEL to { delComic(data) },
+        Query.COMIC_COMIC_UPLOAD to { uploadComic(data) },
         Query.COMIC_OVERRIDE_GET to { getComicOverride(data) },
         Query.COMIC_OVERRIDE_SET to { setComicOverride(data) },
         Query.CHAPTER_CHAPTER_LIST to { getChaptersAll(data) },

@@ -1,22 +1,23 @@
 package com.konformist.comicsreader
 
 import android.content.Context
-import android.os.Environment
 import com.konformist.comicsreader.db.AppDatabase
 import com.konformist.comicsreader.utils.AppDirectory
 import com.konformist.comicsreader.utils.ArchiveUtils
+import com.konformist.comicsreader.utils.ArchiveCompressor
+import com.konformist.comicsreader.utils.ArchiveFormat
 import com.konformist.comicsreader.utils.DatesUtils
 import java.io.File
 import java.io.InputStream
 import java.time.LocalDate
 
 
-class AppBackup(private val appName: String, context: Context) {
+class AppBackup(
+  private val documentsApp: File,
+  private val comicsImagesDir: File,
+  context: Context,
+) {
   private val backupFileName = "backup-db"
-  private val documentsDir =
-    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
-
-  private val comicsPath = File("${context.filesDir}${File.separator}${AppDirectory.COMICS_IMAGES}")
   private val dbFile = context.getDatabasePath(AppDatabase.DATABASE_NAME)
 
   private val dirTmp = File("${context.cacheDir}${File.separator}tmp")
@@ -34,8 +35,7 @@ class AppBackup(private val appName: String, context: Context) {
     db.close()
     dbFile.copyTo(target = backupTmp, overwrite = true)
 
-    val backupsDir =
-      File("${documentsDir}${File.separator}${appName}${File.separator}${AppDirectory.BACKUPS}")
+    val backupsDir = File("${documentsApp}${File.separator}${AppDirectory.BACKUPS}")
     if (!backupsDir.exists()) backupsDir.mkdirs()
 
     val backupFile =
@@ -44,8 +44,8 @@ class AppBackup(private val appName: String, context: Context) {
 
     val compress = ArchiveUtils.compressFactory()
     compress.addFile(backupTmp)
-    compress.addFile(comicsPath)
-    compress.compress(backupFile)
+    compress.addFile(comicsImagesDir)
+    compress.compress(backupFile, ArchiveFormat.TAR)
 
     deleteTmpDir()
     return true
@@ -56,33 +56,14 @@ class AppBackup(private val appName: String, context: Context) {
     dirTmp.mkdirs()
 
     val extract = ArchiveUtils.extractFactory()
-    extract.extract(tarFile, dirTmp)
+    extract.extract(tarFile, ArchiveFormat.TAR, dirTmp)
 
     if (!backupTmp.exists() || !comicsTmp.exists()) return false
     db.close()
     backupTmp.copyTo(target = dbFile, overwrite = true)
 
-    if (!comicsPath.exists()) comicsPath.mkdirs()
-    comicsTmp.copyRecursively(target = comicsPath, overwrite = true)
-
-    deleteTmpDir()
-    return true
-  }
-
-  fun restore(db: AppDatabase, tarFile: File): Boolean {
-    if (dirTmp.exists()) deleteTmpDir()
-    dirTmp.mkdirs()
-
-    if (!tarFile.exists()) return false
-    val extract = ArchiveUtils.extractFactory()
-    extract.extract(tarFile, dirTmp)
-
-    if (!backupTmp.exists() || !comicsTmp.exists()) return false
-    db.close()
-    backupTmp.copyTo(target = dbFile, overwrite = true)
-
-    if (!comicsPath.exists()) comicsPath.mkdirs()
-    comicsTmp.copyRecursively(target = comicsPath, overwrite = true)
+    if (!comicsImagesDir.exists()) comicsImagesDir.mkdirs()
+    comicsTmp.copyRecursively(target = comicsImagesDir, overwrite = true)
 
     deleteTmpDir()
     return true

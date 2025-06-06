@@ -41,10 +41,11 @@ class ArchiveCompressor {
 
   fun compress(archiveOut: File, format: ArchiveFormat) {
     return FileOutputStream(archiveOut).use { outStream ->
-      val archiveOutStream =  when (format) {
+      val archiveOutStream = when (format) {
         ArchiveFormat.TAR -> TarArchiveOutputStream(outStream).apply {
           setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_STAR)
         }
+
         ArchiveFormat.ZIP -> ZipArchiveOutputStream(outStream).apply {
           setLevel(Deflater.BEST_COMPRESSION)
         }

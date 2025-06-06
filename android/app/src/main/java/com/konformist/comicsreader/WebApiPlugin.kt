@@ -68,6 +68,12 @@ class WebApiPlugin : Plugin() {
         pickFile("application/x-tar")
       }
 
+      Query.COMIC_ARCHIVE_ADD -> {
+        queryPath = path
+        methodCall = call
+        pickFile("application/*")
+      }
+
       Query.FILE_COMIC_COVER_ADD -> {
         queryPath = path
         methodCall = call

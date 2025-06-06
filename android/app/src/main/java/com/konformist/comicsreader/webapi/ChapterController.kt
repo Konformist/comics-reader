@@ -86,8 +86,9 @@ class ChapterController(
 
   @Throws(DatabaseException::class)
   fun deletePage(page: ChapterPage): Boolean {
-    if (page.fileId != null && page.fileId != 0L)
+    if (page.fileId != null && page.fileId != 0L) {
       filesController.deleteImage(page.fileId)
+    }
 
     val count = chapterPageDao.delete(ChapterPageDelete(id = page.id))
     Validation.dbDelete(count, "ChapterPage")
@@ -117,7 +118,6 @@ class ChapterController(
   @Throws(DatabaseException::class)
   fun delete(chapter: Chapter): Boolean {
     val row = chapterDao.readWithPages(chapter.id)
-
     row.pages.forEach { page -> deletePage(page.page) }
 
     val count = chapterDao.delete(ChapterDelete(id = chapter.id))

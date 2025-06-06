@@ -12,7 +12,7 @@ interface AppFileDao {
   fun readAll(): List<AppFile>
 
   @Query("SELECT * FROM files WHERE id = :id")
-  fun read(id: Long): AppFile
+  fun read(id: Long): AppFile?
 
   @Insert(entity = AppFile::class)
   fun create(item: AppFileCreate): Long

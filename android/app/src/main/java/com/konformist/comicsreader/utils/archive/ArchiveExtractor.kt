@@ -14,7 +14,11 @@ import java.io.InputStream
 class ArchiveExtractor {
   // Основной метод для извлечения файлов из архива
   @Throws(IOException::class)
-  private fun extractFromArchive(archiveIn: InputStream, type: ArchiveFormat, outputDir: File): Boolean {
+  private fun extractFromArchive(
+    archiveIn: InputStream,
+    type: ArchiveFormat,
+    outputDir: File
+  ): Boolean {
     val archiveStream = when (type) {
       ArchiveFormat.TAR -> TarArchiveInputStream(BufferedInputStream(archiveIn))
       ArchiveFormat.ZIP -> ZipArchiveInputStream(BufferedInputStream(archiveIn))

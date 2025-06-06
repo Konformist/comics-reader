@@ -16,19 +16,19 @@ import java.io.InputStream
 
 class AppFilesController(
   private val appFileDao: AppFileDao,
-  private val filesDir: File,
   private val comicsImagesDir: File,
 ) {
   @Throws(DatabaseException::class)
-  fun deleteImage(id: Long?) {
-    if (id == null || id == 0L) return
-    val row = appFileDao.read(id)
+  fun deleteImage(id: Long?): Boolean {
+    if (id == null || id == 0L) return false
+    val row = appFileDao.read(id) ?: return false
 
-    val fileOut = File("${filesDir}/${row.path}")
+    val fileOut = File(row.path)
     if (fileOut.exists()) fileOut.delete()
 
     val count = appFileDao.delete(AppFileDelete(id = row.id))
     Validation.dbDelete(count, "AppFile")
+    return true
   }
 
   @Throws(DatabaseException::class)

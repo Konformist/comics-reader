@@ -9,10 +9,10 @@ import androidx.room.Update
 @Dao
 interface ComicCoverDao {
   @Query("SELECT * FROM comic_covers WHERE comic_id = :comicId")
-  fun readByComic(comicId: Long): ComicCover
+  fun readByComic(comicId: Long): ComicCover?
 
   @Query("SELECT * FROM comic_covers WHERE id = :id")
-  fun read(id: Long): ComicCover
+  fun read(id: Long): ComicCover?
 
   @Insert(entity = ComicCover::class)
   fun create(item: ComicCoverCreate): Long

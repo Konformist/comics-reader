@@ -27,6 +27,13 @@ class ComicController(
   private val filesController: AppFilesController,
   private val chapterController: ChapterController,
 ) {
+  companion object {
+    const val FORMAT_CBZ = "cbz"
+    const val FORMAT_CBT = "cbt"
+    const val FORMAT_ZIP = "zip"
+    const val FORMAT_TAR = "tar"
+  }
+
   @Throws(DatabaseException::class)
   fun createCoverFile(cover: ComicCover, mime: String, file: InputStream): Long {
     if (cover.fileId != null && cover.fileId != 0L)
@@ -190,10 +197,10 @@ class ComicController(
   @Throws(DatabaseException::class)
   fun delete(comic: ComicDelete): Boolean {
     val cover = comicCoverDao.readByComic(comic.id)
-    deleteCover(cover)
+    if (cover != null) deleteCover(cover)
 
     val override = comicOverrideDao.readByComic(comic.id)
-    deleteOverride(override)
+    if (override != null) deleteOverride(override)
 
     val chapters = chapterDao.readByComicAll(comic.id)
     chapters.forEach { chapter -> chapterController.delete(chapter) }

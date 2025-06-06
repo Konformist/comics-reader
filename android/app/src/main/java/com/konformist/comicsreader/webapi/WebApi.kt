@@ -34,12 +34,13 @@ import com.konformist.comicsreader.db.tag.TagCreate
 import com.konformist.comicsreader.db.tag.TagDelete
 import com.konformist.comicsreader.db.tag.TagUpdate
 import com.konformist.comicsreader.exceptions.DatabaseException
+import com.konformist.comicsreader.exceptions.FilesException
 import com.konformist.comicsreader.exceptions.ValidationException
 import com.konformist.comicsreader.utils.AppDirectory
-import com.konformist.comicsreader.utils.archive.ArchiveUtils
-import com.konformist.comicsreader.utils.archive.ArchiveFormat
 import com.konformist.comicsreader.utils.DatesUtils
 import com.konformist.comicsreader.utils.FileUtils
+import com.konformist.comicsreader.utils.archive.ArchiveFormat
+import com.konformist.comicsreader.utils.archive.ArchiveUtils
 import com.konformist.comicsreader.webapi.serializers.ChapterPageSerializer
 import com.konformist.comicsreader.webapi.serializers.ChapterSerializer
 import com.konformist.comicsreader.webapi.serializers.ComicSerializer
@@ -80,20 +81,19 @@ class WebApi(private val context: Context) {
 
   private val dbBackup = AppBackup(documentsApp, comicsImagesDir, context)
 
-  private val tagDao = db.tagDao()
   private val authorDao = db.authorDao()
   private val languageDao = db.languageDao()
   private val parserDao = db.parserDao()
-  private val appFileDao = db.appFileDao()
   private val comicOverrideDao = db.comicOverrideDao()
   private val comicCoverDao = db.comicCoverDao()
   private val chapterDao = db.chapterDao()
   private val chapterPageDao = db.chapterPageDao()
   private val comicDao = db.comicDao()
 
+  private val tagController = TagController(db.tagDao())
+
   private val filesController = AppFilesController(
-    appFileDao,
-    context.filesDir,
+    db.appFileDao(),
     comicsImagesDir,
   )
   private val chapterController = ChapterController(
@@ -121,40 +121,46 @@ class WebApi(private val context: Context) {
   }
 
   private fun getTagsAll(): JSONArray {
-    return JSONArray(Json.encodeToString<List<Tag>>(tagDao.readAll()))
+    return JSONArray(
+      Json.encodeToString<List<Tag>>(tagController.readAll())
+    )
   }
 
+  @Throws(ValidationException::class)
   private fun getTag(data: JSONObject): JSONObject {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
 
-    return JSONObject(Json.encodeToString<Tag>(tagDao.read(rowId)))
+    return JSONObject(
+      Json.encodeToString<Tag>(tagController.read(rowId))
+    )
   }
 
+  @Throws(DatabaseException::class)
   private fun addTag(data: JSONObject): Long {
-    val rowId = tagDao.create(jsonIgnore.decodeFromString<TagCreate>(data.toString()))
-    Validation.dbCreate(rowId, "Tag")
-
-    return rowId
+    return tagController.create(
+      jsonIgnore.decodeFromString<TagCreate>(data.toString())
+    )
   }
 
+  @Throws(ValidationException::class, DatabaseException::class)
   private fun setTag(data: JSONObject): Boolean {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
 
-    data.put("mdate", DatesUtils.nowFormatted())
-    val count = tagDao.update(jsonIgnore.decodeFromString<TagUpdate>(data.toString()))
-    Validation.dbUpdate(count, "Tag")
-    return true
+    return tagController.update(
+      jsonIgnore.decodeFromString<TagUpdate>(data.toString())
+    )
   }
 
+  @Throws(ValidationException::class, DatabaseException::class)
   private fun delTag(data: JSONObject): Boolean {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
 
-    val count = tagDao.delete(jsonIgnore.decodeFromString<TagDelete>(data.toString()))
-    Validation.dbDelete(count, "Tag")
-    return true
+    return tagController.delete(
+      jsonIgnore.decodeFromString<TagDelete>(data.toString())
+    )
   }
 
   private fun getAuthorsAll(): JSONArray {
@@ -340,19 +346,107 @@ class WebApi(private val context: Context) {
       }
     }
 
-    val outFile = File("$downloadsApp${File.separator}${comic.name}.cbz")
-    if (!outFile.parentFile.exists()) outFile.parentFile.mkdirs()
+    val outFile = File("$downloadsApp${File.separator}${comic.name}.${ComicController.FORMAT_CBZ}")
+    val parent = outFile.parentFile ?: return false
+    if (!parent.exists()) parent.mkdirs()
     compress.compress(outFile, ArchiveFormat.ZIP)
     dirTmp.deleteRecursively()
 
     return true
   }
 
+  @Throws(ValidationException::class, FilesException::class)
+  private fun addComicArchive(data: JSONObject): Long {
+    val uriStr = data.optString("uri")
+    Validation.uri(uriStr, "uri")
+
+    val lastDotIndex = uriStr.lastIndexOf('.')
+    val extension = if (lastDotIndex == -1 || lastDotIndex >= uriStr.length - 1) ""
+    else uriStr.substring(lastDotIndex + 1) // No extension found
+
+    if (extension.isBlank())
+      throw FilesException("Unknown extension $extension")
+
+    val archiveFormat = when (extension) {
+      ComicController.FORMAT_CBZ -> ArchiveFormat.ZIP
+      ComicController.FORMAT_ZIP -> ArchiveFormat.ZIP
+      ComicController.FORMAT_CBT -> ArchiveFormat.TAR
+      ComicController.FORMAT_TAR -> ArchiveFormat.TAR
+      else -> throw FilesException("Unknown extension $extension")
+    }
+
+    val path = context.contentResolver.openFileDescriptor(uriStr.toUri(), "r") ?: return 0L
+    val outStream = File("${context.cacheDir}${File.separator}comic-tmp")
+    outStream.mkdirs()
+    val inputStream = FileInputStream(path.fileDescriptor)
+
+    val extractor = ArchiveUtils.extractFactory()
+    extractor.extract(inputStream, archiveFormat, outStream)
+
+    val comicId = comicController.create(
+      ComicCreate(
+        name = "New Comic",
+        parserId = null,
+        fromUrl = null,
+        annotation = null,
+        languageId = null,
+        tags = null,
+        authors = null,
+      )
+    )
+
+    val listFiles = outStream.listFiles() ?: throw FilesException("No files")
+
+    if (listFiles[0].isFile) {
+      val chapterId = chapterController.create(
+        ChapterCreate(name = "", comicId = comicId)
+      )
+
+      listFiles.forEach { file ->
+        val pageId = chapterController.createPage(
+          ChapterPageCreate(chapterId = chapterId)
+        )
+        val page = chapterPageDao.read(pageId)
+        chapterController.createPageFile(
+          page,
+          FileUtils.getMimeFromExtension(file.extension),
+          FileInputStream(file),
+        )
+      }
+    } else {
+      listFiles.forEach { directory ->
+        val files = directory.listFiles()
+
+        if (files != null) {
+          val chapterId = chapterController.create(
+            ChapterCreate(name = directory.name, comicId = comicId)
+          )
+          files.forEach { file ->
+            val pageId = chapterController.createPage(
+              ChapterPageCreate(chapterId = chapterId)
+            )
+            val page = chapterPageDao.read(pageId)
+            chapterController.createPageFile(
+              page,
+              FileUtils.getMimeFromExtension(file.extension),
+              FileInputStream(file),
+            )
+          }
+        }
+      }
+    }
+
+    return comicId
+  }
+
+  @Throws(ValidationException::class)
   private fun getComicOverride(data: JSONObject): JSONObject {
     val rowId = data.optLong("comicId")
-    Validation.id(rowId, "id")
+    Validation.id(rowId, "comicId")
 
-    return JSONObject(Json.encodeToString<ComicOverride>(comicOverrideDao.readByComic(rowId)))
+    val row = comicOverrideDao.readByComic(rowId)
+    return if (row == null) JSONObject()
+    else JSONObject(Json.encodeToString<ComicOverride>(row))
   }
 
   @Throws(ValidationException::class, DatabaseException::class)
@@ -370,7 +464,7 @@ class WebApi(private val context: Context) {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
 
-    val cover = comicCoverDao.read(rowId)
+    val cover = comicCoverDao.read(rowId) ?: return false
     data.put("fileId", cover.fileId)
 
     return comicController.updateCover(
@@ -396,7 +490,7 @@ class WebApi(private val context: Context) {
     // Получаем MIME тип из заголовков
     val mimeType = connection.contentType
 
-    val cover = comicCoverDao.readByComic(comicId)
+    val cover = comicCoverDao.readByComic(comicId) ?: return 0L
     val result = comicController.createCoverFile(
       cover,
       mimeType,
@@ -424,7 +518,7 @@ class WebApi(private val context: Context) {
     val path = context.contentResolver.openFileDescriptor(uriStr.toUri(), "r") ?: return 0L
     val inputStream = FileInputStream(path.fileDescriptor)
 
-    val cover = comicCoverDao.readByComic(comicId)
+    val cover = comicCoverDao.readByComic(comicId) ?: return 0L
     val result = comicController.createCoverFile(
       cover,
       FileUtils.getMimeFromExtension(extension),
@@ -442,7 +536,7 @@ class WebApi(private val context: Context) {
     val comicId = data.optLong("comicId")
     Validation.id(comicId, "comicId")
 
-    val cover = comicCoverDao.readByComic(comicId)
+    val cover = comicCoverDao.readByComic(comicId) ?: return false
     return comicController.deleteCoverFile(cover)
   }
 
@@ -765,6 +859,7 @@ class WebApi(private val context: Context) {
         Query.COMIC_COMIC_SET to { setComic(data) },
         Query.COMIC_COMIC_DEL to { delComic(data) },
         Query.COMIC_COMIC_UPLOAD to { uploadComic(data) },
+        Query.COMIC_ARCHIVE_ADD to { addComicArchive(data) },
         Query.COMIC_OVERRIDE_GET to { getComicOverride(data) },
         Query.COMIC_OVERRIDE_SET to { setComicOverride(data) },
         Query.CHAPTER_CHAPTER_LIST to { getChaptersAll(data) },

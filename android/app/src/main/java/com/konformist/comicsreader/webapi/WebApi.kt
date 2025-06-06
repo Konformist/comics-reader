@@ -1,36 +1,25 @@
 package com.konformist.comicsreader.webapi
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Environment
 import android.util.Log
 import androidx.core.net.toUri
 import androidx.room.Room
 import com.konformist.comicsreader.AppBackup
 import com.konformist.comicsreader.db.AppDatabase
-import com.konformist.comicsreader.db.appfile.AppFileCreate
-import com.konformist.comicsreader.db.appfile.AppFileDelete
-import com.konformist.comicsreader.db.appfile.AppFileUpdate
 import com.konformist.comicsreader.db.author.Author
 import com.konformist.comicsreader.db.author.AuthorCreate
 import com.konformist.comicsreader.db.author.AuthorDelete
 import com.konformist.comicsreader.db.author.AuthorUpdate
 import com.konformist.comicsreader.db.chapter.ChapterCreate
-import com.konformist.comicsreader.db.chapter.ChapterDelete
 import com.konformist.comicsreader.db.chapter.ChapterUpdate
 import com.konformist.comicsreader.db.chapterpage.ChapterPageCreate
-import com.konformist.comicsreader.db.chapterpage.ChapterPageDelete
 import com.konformist.comicsreader.db.chapterpage.ChapterPageUpdate
 import com.konformist.comicsreader.db.comic.ComicCreate
 import com.konformist.comicsreader.db.comic.ComicDelete
 import com.konformist.comicsreader.db.comic.ComicUpdate
-import com.konformist.comicsreader.db.comiccover.ComicCoverCreate
-import com.konformist.comicsreader.db.comiccover.ComicCoverDelete
 import com.konformist.comicsreader.db.comiccover.ComicCoverUpdate
 import com.konformist.comicsreader.db.comicoverride.ComicOverride
-import com.konformist.comicsreader.db.comicoverride.ComicOverrideCreate
-import com.konformist.comicsreader.db.comicoverride.ComicOverrideDelete
 import com.konformist.comicsreader.db.comicoverride.ComicOverrideUpdate
 import com.konformist.comicsreader.db.language.Language
 import com.konformist.comicsreader.db.language.LanguageCreate
@@ -51,7 +40,6 @@ import com.konformist.comicsreader.utils.archive.ArchiveUtils
 import com.konformist.comicsreader.utils.archive.ArchiveFormat
 import com.konformist.comicsreader.utils.DatesUtils
 import com.konformist.comicsreader.utils.FileUtils
-import com.konformist.comicsreader.utils.ImageUtils
 import com.konformist.comicsreader.webapi.serializers.ChapterPageSerializer
 import com.konformist.comicsreader.webapi.serializers.ChapterSerializer
 import com.konformist.comicsreader.webapi.serializers.ComicSerializer
@@ -62,8 +50,6 @@ import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.io.InputStream
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
@@ -105,6 +91,25 @@ class WebApi(private val context: Context) {
   private val chapterPageDao = db.chapterPageDao()
   private val comicDao = db.comicDao()
 
+  private val filesController = AppFilesController(
+    appFileDao,
+    context.filesDir,
+    comicsImagesDir,
+  )
+  private val chapterController = ChapterController(
+    chapterDao,
+    chapterPageDao,
+    filesController,
+  )
+  private val comicController = ComicController(
+    comicCoverDao,
+    comicOverrideDao,
+    comicDao,
+    chapterDao,
+    filesController,
+    chapterController,
+  )
+
   private fun <T : Exception> wrappedToError(value: T): JSONObject {
     return JSONObject()
       .put("error", value.message)
@@ -113,153 +118,6 @@ class WebApi(private val context: Context) {
   private fun wrappedToResult(value: Any): JSONObject {
     return JSONObject()
       .put("result", value)
-  }
-
-  @Throws(DatabaseException::class)
-  private fun createComicOverride(comicId: Long): Long {
-    val rowId = comicOverrideDao.create(
-      ComicOverrideCreate(
-        comicId = comicId,
-        titleCSS = "",
-        annotationCSS = "",
-        coverCSS = "",
-        authorsCSS = "",
-        authorsTextCSS = "",
-        languageCSS = "",
-        tagsCSS = "",
-        tagsTextCSS = "",
-        chaptersCSS = "",
-        chaptersTitleCSS = "",
-        pagesCSS = "",
-        pagesTemplateUrl = "",
-        pagesImageCSS = "",
-      )
-    )
-    Validation.dbCreate(rowId, "ComicOverride")
-
-    return rowId
-  }
-
-  @Throws(DatabaseException::class)
-  private fun deleteComicOverride(comicId: Long) {
-    val row = comicOverrideDao.readByComic(comicId)
-
-    val count = comicOverrideDao.delete(ComicOverrideDelete(id = row.id))
-    Validation.dbDelete(count, "ComicOverride")
-  }
-
-  @Throws(DatabaseException::class)
-  private fun createCover(comicId: Long) {
-    val rowId = comicCoverDao.create(
-      ComicCoverCreate(
-        comicId = comicId,
-        fileId = 0,
-        fromUrl = "",
-      )
-    )
-
-    Validation.dbCreate(rowId, "ComicCover")
-  }
-
-  @Throws(DatabaseException::class)
-  private fun updateCover(cover: ComicCoverUpdate) {
-    val count = comicCoverDao.update(cover)
-    Validation.dbUpdate(count, "ComicCover")
-  }
-
-  @Throws(DatabaseException::class)
-  private fun deleteCover(comicId: Long) {
-    val row = comicCoverDao.readByComic(comicId)
-
-    if (row.fileId != null && row.fileId != 0.toLong())
-      deleteImage(row.fileId)
-
-    val count = comicCoverDao.delete(ComicCoverDelete(id = row.id))
-    Validation.dbDelete(count, "ComicCover")
-  }
-
-  @Throws(DatabaseException::class)
-  private fun deleteChapter(chapterId: Long) {
-    val row = chapterDao.readWithPages(chapterId)
-
-    val pages = chapterPageDao.readByChapterAll(chapterId)
-    for (page in pages) deleteChapterPage(page.page.id)
-
-    val count = chapterDao.delete(ChapterDelete(id = row.chapter.id))
-    Validation.dbDelete(count, "Chapter")
-  }
-
-  @Throws(DatabaseException::class)
-  private fun deleteChapterPage(id: Long) {
-    val row = chapterPageDao.read(id)
-    if (row.fileId != 0.toLong()) deleteImage(row.fileId)
-
-    val count = chapterPageDao.delete(ChapterPageDelete(id = id))
-    Validation.dbDelete(count, "ChapterPage")
-  }
-
-  @Throws(DatabaseException::class)
-  private fun createComicImage(mime: String, file: InputStream): Long {
-    val rowId = appFileDao.create(
-      AppFileCreate(
-        name = "",
-        mime = "",
-        size = 0,
-        path = "",
-      )
-    )
-    Validation.dbCreate(rowId, "AppFile")
-
-    if (!comicsImagesDir.exists()) comicsImagesDir.mkdirs()
-
-    val extension = if (AppDataStore.settings.isCompress) "webp"
-    else FileUtils.getExtensionFromMime(mime)
-
-    val fileOut = File("${comicsImagesDir}${File.separator}${rowId}.${extension}")
-
-    try {
-      if (AppDataStore.settings.isCompress) {
-        val decodedImage: Bitmap = BitmapFactory.decodeStream(file)
-        FileOutputStream(fileOut).use { item ->
-          ImageUtils.writeStream(item, decodedImage, 80)
-        }
-        decodedImage.recycle()
-      } else {
-        FileOutputStream(fileOut).use { item ->
-          FileUtils.writeStream(item, file)
-        }
-      }
-
-      val count = appFileDao.update(
-        AppFileUpdate(
-          id = rowId,
-          mdate = DatesUtils.nowFormatted(),
-          name = fileOut.name,
-          mime = mime,
-          size = fileOut.length(),
-          path = fileOut.path,
-        )
-      )
-      Validation.dbUpdate(count, "AppFile")
-
-      return rowId
-    } catch (e: Error) {
-      if (fileOut.exists()) fileOut.delete()
-      appFileDao.delete(AppFileDelete(id = rowId))
-      throw e
-    }
-  }
-
-  @Throws(DatabaseException::class)
-  private fun deleteImage(id: Long?) {
-    if (id == null || id == 0L) return
-    val row = appFileDao.read(id)
-
-    val fileOut = File("${context.filesDir}/${row.path}")
-    if (fileOut.exists()) fileOut.delete()
-
-    val count = appFileDao.delete(AppFileDelete(id = row.id))
-    Validation.dbDelete(count, "AppFile")
   }
 
   private fun getTagsAll(): JSONArray {
@@ -426,27 +284,13 @@ class WebApi(private val context: Context) {
     return ComicSerializer.toJSON(comicDao.readLite(rowId))
   }
 
+  @Throws(DatabaseException::class)
   private fun addComic(data: JSONObject): Long {
-    val rowId = comicDao.create(jsonIgnore.decodeFromString<ComicCreate>(data.toString()))
-    Validation.dbCreate(rowId, "Comic")
-
-    createCover(rowId)
-    createComicOverride(rowId)
-
-    return rowId
+    val comic = jsonIgnore.decodeFromString<ComicCreate>(data.toString())
+    return comicController.create(comic)
   }
 
-  private fun setCover(data: JSONObject): Boolean {
-    val rowId = data.optLong("id")
-    Validation.id(rowId, "id")
-
-    val cover = comicCoverDao.read(rowId)
-    data.put("mdate", DatesUtils.nowFormatted())
-    data.put("fileId", cover.fileId)
-    updateCover(jsonIgnore.decodeFromString<ComicCoverUpdate>(data.toString()))
-    return true
-  }
-
+  @Throws(ValidationException::class, DatabaseException::class)
   private fun setComic(data: JSONObject): Boolean {
     val rowId = data.getLong("id")
     Validation.id(rowId, "id")
@@ -454,27 +298,15 @@ class WebApi(private val context: Context) {
     val coverJSON = data.optJSONObject("cover")
     if (coverJSON != null) setCover(coverJSON)
 
-    data.put("mdate", DatesUtils.nowFormatted())
-    val count = comicDao.update(jsonIgnore.decodeFromString<ComicUpdate>(data.toString()))
-    Validation.dbUpdate(count, "Comic")
-
-    return true
+    return comicController.update(jsonIgnore.decodeFromString<ComicUpdate>(data.toString()))
   }
 
+  @Throws(ValidationException::class, DatabaseException::class)
   private fun delComic(data: JSONObject): Boolean {
     val rowId = data.getLong("id")
     Validation.id(rowId, "id")
 
-    deleteCover(rowId)
-    deleteComicOverride(rowId)
-
-    val chapters = chapterDao.readByComicAll(rowId)
-    chapters.forEach { chapter -> deleteChapter(chapter.id) }
-
-    val count = comicDao.delete(jsonIgnore.decodeFromString<ComicDelete>(data.toString()))
-    Validation.dbDelete(count, "Comic")
-
-    return true
+    return comicController.delete(jsonIgnore.decodeFromString<ComicDelete>(data.toString()))
   }
 
   private fun uploadComic(data: JSONObject): Boolean {
@@ -523,18 +355,30 @@ class WebApi(private val context: Context) {
     return JSONObject(Json.encodeToString<ComicOverride>(comicOverrideDao.readByComic(rowId)))
   }
 
+  @Throws(ValidationException::class, DatabaseException::class)
   private fun setComicOverride(data: JSONObject): Boolean {
     val comicId = data.optLong("comicId")
     Validation.id(comicId, "comicId")
 
-    data.put("mdate", DatesUtils.nowFormatted())
-    val count =
-      comicOverrideDao.update(jsonIgnore.decodeFromString<ComicOverrideUpdate>(data.toString()))
-    Validation.dbUpdate(count, "ComicOverride")
-
-    return true
+    return comicController.updateOverride(
+      jsonIgnore.decodeFromString<ComicOverrideUpdate>(data.toString())
+    )
   }
 
+  @Throws(ValidationException::class, DatabaseException::class)
+  private fun setCover(data: JSONObject): Boolean {
+    val rowId = data.optLong("id")
+    Validation.id(rowId, "id")
+
+    val cover = comicCoverDao.read(rowId)
+    data.put("fileId", cover.fileId)
+
+    return comicController.updateCover(
+      jsonIgnore.decodeFromString<ComicCoverUpdate>(data.toString())
+    )
+  }
+
+  @Throws(ValidationException::class, DatabaseException::class)
   private fun downloadCoverFile(data: JSONObject): Long {
     val comicId = data.optLong("comicId")
     Validation.id(comicId, "comicId")
@@ -542,10 +386,6 @@ class WebApi(private val context: Context) {
     val link = data.optString("link", "")
     Validation.link(link, "link")
 
-    val cover = comicCoverDao.readByComic(comicId)
-    if (cover.fileId != null && cover.fileId != 0.toLong())
-      deleteImage(cover.fileId)
-
     val connection = URL(link).openConnection() as HttpURLConnection
     connection.requestMethod = "GET"
     connection.connect()
@@ -556,22 +396,20 @@ class WebApi(private val context: Context) {
     // Получаем MIME тип из заголовков
     val mimeType = connection.contentType
 
-    val rowId = createComicImage(mimeType, connection.inputStream)
+    val cover = comicCoverDao.readByComic(comicId)
+    val result = comicController.createCoverFile(
+      cover,
+      mimeType,
+      connection.inputStream,
+    )
+
     connection.inputStream.close()
     connection.disconnect()
-    val count = comicCoverDao.update(
-      ComicCoverUpdate(
-        id = cover.id,
-        mdate = DatesUtils.nowFormatted(),
-        fromUrl = cover.fromUrl,
-        fileId = rowId
-      )
-    )
-    Validation.dbUpdate(count, "ComicCover")
 
-    return rowId
+    return result
   }
 
+  @Throws(ValidationException::class, DatabaseException::class)
   private fun addCoverFile(data: JSONObject): Long {
     val comicId = data.optLong("comicId")
     Validation.id(comicId, "comicId")
@@ -579,57 +417,36 @@ class WebApi(private val context: Context) {
     val uriStr = data.optString("uri")
     Validation.uri(uriStr, "uri")
 
-    val cover = comicCoverDao.readByComic(comicId)
-
-    if (cover.fileId != null && cover.fileId != 0.toLong())
-      deleteImage(cover.fileId)
-
     val lastDotIndex = uriStr.lastIndexOf('.')
     val extension = if (lastDotIndex == -1 || lastDotIndex >= uriStr.length - 1) ""
     else uriStr.substring(lastDotIndex + 1) // No extension found
 
     val path = context.contentResolver.openFileDescriptor(uriStr.toUri(), "r") ?: return 0L
     val inputStream = FileInputStream(path.fileDescriptor)
-    val rowId = createComicImage(
+
+    val cover = comicCoverDao.readByComic(comicId)
+    val result = comicController.createCoverFile(
+      cover,
       FileUtils.getMimeFromExtension(extension),
-      inputStream
+      inputStream,
     )
+
     inputStream.close()
     path.close()
 
-    val count = comicCoverDao.update(
-      ComicCoverUpdate(
-        id = cover.id,
-        mdate = DatesUtils.nowFormatted(),
-        fromUrl = cover.fromUrl,
-        fileId = rowId
-      )
-    )
-    Validation.dbUpdate(count, "ComicCover")
-
-    return rowId
+    return result
   }
 
+  @Throws(ValidationException::class, DatabaseException::class)
   private fun delCoverFile(data: JSONObject): Boolean {
     val comicId = data.optLong("comicId")
     Validation.id(comicId, "comicId")
 
     val cover = comicCoverDao.readByComic(comicId)
-    deleteImage(cover.fileId)
-
-    val count = comicCoverDao.update(
-      ComicCoverUpdate(
-        id = cover.id,
-        mdate = DatesUtils.nowFormatted(),
-        fromUrl = cover.fromUrl,
-        fileId = 0,
-      )
-    )
-    Validation.dbUpdate(count, "ComicCover")
-
-    return true
+    return comicController.deleteCoverFile(cover)
   }
 
+  @Throws(ValidationException::class)
   private fun getChaptersAll(data: JSONObject): JSONArray {
     val comicId = data.getLong("comicId")
     Validation.id(comicId, "comicId")
@@ -637,6 +454,7 @@ class WebApi(private val context: Context) {
     return ChapterSerializer.toJSONArray(chapterDao.readWithPagesByComicAll(comicId))
   }
 
+  @Throws(ValidationException::class)
   private fun getChapter(data: JSONObject): JSONObject {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
@@ -644,32 +462,33 @@ class WebApi(private val context: Context) {
     return ChapterSerializer.toJSON(chapterDao.readWithPages(rowId))
   }
 
+  @Throws(ValidationException::class, DatabaseException::class)
   private fun addChapter(data: JSONObject): Long {
-    val rowId = chapterDao.create(jsonIgnore.decodeFromString<ChapterCreate>(data.toString()))
-    Validation.dbCreate(rowId, "Chapter")
-
-    return rowId
+    return chapterController.create(
+      jsonIgnore.decodeFromString<ChapterCreate>(data.toString())
+    )
   }
 
+  @Throws(ValidationException::class, DatabaseException::class)
   private fun setChapter(data: JSONObject): Boolean {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
 
-    data.put("mdate", DatesUtils.nowFormatted())
-    val count = chapterDao.update(jsonIgnore.decodeFromString<ChapterUpdate>(data.toString()))
-    Validation.dbUpdate(count, "Chapter")
-
-    return true
+    return chapterController.update(
+      jsonIgnore.decodeFromString<ChapterUpdate>(data.toString())
+    )
   }
 
+  @Throws(ValidationException::class, DatabaseException::class)
   private fun delChapter(data: JSONObject): Boolean {
     val rowId = data.getLong("id")
     Validation.id(rowId, "id")
 
-    deleteChapter(rowId)
-    return true
+    val chapter = chapterDao.read(rowId)
+    return chapterController.delete(chapter)
   }
 
+  @Throws(ValidationException::class)
   private fun getChapterPagesAll(data: JSONObject): JSONArray {
     val chapterId = data.getLong("chapterId")
     Validation.id(chapterId, "chapterId")
@@ -677,6 +496,7 @@ class WebApi(private val context: Context) {
     return ChapterPageSerializer.toJSONArray(chapterPageDao.readByChapterAll(chapterId))
   }
 
+  @Throws(ValidationException::class)
   private fun getChapterPage(data: JSONObject): JSONObject {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
@@ -684,48 +504,42 @@ class WebApi(private val context: Context) {
     return ChapterPageSerializer.toJSON(chapterPageDao.readWithFile(rowId))
   }
 
+  @Throws(ValidationException::class, DatabaseException::class)
   private fun addChapterPage(data: JSONObject): Long {
-    val rowId =
-      chapterPageDao.create(jsonIgnore.decodeFromString<ChapterPageCreate>(data.toString()))
-    Validation.dbCreate(rowId, "ChapterPage")
-
-    return rowId
+    return chapterController.createPage(
+      jsonIgnore.decodeFromString<ChapterPageCreate>(data.toString())
+    )
   }
 
+  @Throws(ValidationException::class, DatabaseException::class)
   private fun setChapterPage(data: JSONObject): Boolean {
     val rowId = data.getLong("id")
     Validation.id(rowId, "id")
 
     val chapterPage = chapterPageDao.read(rowId)
     data.put("fileId", chapterPage.fileId)
-    data.put("mdate", DatesUtils.nowFormatted())
 
-    val count =
-      chapterPageDao.update(jsonIgnore.decodeFromString<ChapterPageUpdate>(data.toString()))
-    Validation.dbUpdate(count, "ChapterPage")
-
-    return true
+    return chapterController.updatePage(
+      jsonIgnore.decodeFromString<ChapterPageUpdate>(data.toString())
+    )
   }
 
+  @Throws(ValidationException::class, DatabaseException::class)
   private fun delChapterPage(data: JSONObject): Boolean {
     val rowId = data.getLong("id")
     Validation.id(rowId, "id")
 
-    deleteChapterPage(rowId)
-    return true
+    val page = chapterPageDao.read(rowId)
+    return chapterController.deletePage(page)
   }
 
+  @Throws(ValidationException::class, DatabaseException::class)
   private fun downloadChapterPageFile(data: JSONObject): Long {
     val chapterPageId = data.optLong("chapterPageId")
     Validation.id(chapterPageId, "chapterPageId")
 
     val link = data.optString("link", "")
     Validation.link(link, "link")
-
-    val chapterPage = chapterPageDao.read(chapterPageId)
-
-    if (chapterPage.fileId != null && chapterPage.fileId != 0.toLong())
-      deleteImage(chapterPage.fileId)
 
     val connection = URL(link).openConnection() as HttpURLConnection
     connection.requestMethod = "GET"
@@ -737,24 +551,20 @@ class WebApi(private val context: Context) {
     // Получаем MIME тип из заголовков
     val mimeType = connection.contentType
 
-    val rowId = createComicImage(mimeType, connection.inputStream)
+    val chapterPage = chapterPageDao.read(chapterPageId)
+    val result = chapterController.createPageFile(
+      chapterPage,
+      mimeType,
+      connection.inputStream,
+    )
+
     connection.inputStream.close()
     connection.disconnect()
 
-    val count = chapterPageDao.update(
-      ChapterPageUpdate(
-        id = chapterPage.id,
-        mdate = DatesUtils.nowFormatted(),
-        fromUrl = chapterPage.fromUrl,
-        fileId = rowId,
-        isRead = chapterPage.isRead,
-      )
-    )
-    Validation.dbUpdate(count, "ComicCover")
-
-    return rowId
+    return result
   }
 
+  @Throws(ValidationException::class, DatabaseException::class)
   private fun addChapterPageFile(data: JSONObject): Long {
     val chapterPageId = data.optLong("chapterPageId")
     Validation.id(chapterPageId, "chapterPageId")
@@ -762,58 +572,33 @@ class WebApi(private val context: Context) {
     val uriStr = data.optString("uri")
     Validation.uri(uriStr, "uri")
 
-    val chapterPage = chapterPageDao.read(chapterPageId)
-
-    if (chapterPage.fileId != null && chapterPage.fileId != 0.toLong())
-      deleteImage(chapterPage.fileId)
-
     val lastDotIndex = uriStr.lastIndexOf('.')
     val extension = if (lastDotIndex == -1 || lastDotIndex >= uriStr.length - 1) ""
     else uriStr.substring(lastDotIndex + 1) // No extension found
 
     val path = context.contentResolver.openFileDescriptor(uriStr.toUri(), "r") ?: return 0L
     val fileInputStream = FileInputStream(path.fileDescriptor)
-    val rowId = createComicImage(
+
+    val chapterPage = chapterPageDao.read(chapterPageId)
+    val result = chapterController.createPageFile(
+      chapterPage,
       FileUtils.getMimeFromExtension(extension),
       fileInputStream,
     )
+
     fileInputStream.close()
     path.close()
 
-    val count = chapterPageDao.update(
-      ChapterPageUpdate(
-        id = chapterPage.id,
-        mdate = DatesUtils.nowFormatted(),
-        fromUrl = chapterPage.fromUrl,
-        fileId = rowId,
-        isRead = chapterPage.isRead,
-      )
-    )
-    Validation.dbUpdate(count, "ChapterPage")
-
-    return rowId
+    return result
   }
 
+  @Throws(ValidationException::class, DatabaseException::class)
   private fun delChapterPageFile(data: JSONObject): Boolean {
     val chapterPageId = data.optLong("chapterPageId")
     Validation.id(chapterPageId, "chapterPageId")
 
     val page = chapterPageDao.read(chapterPageId)
-    deleteImage(page.fileId)
-
-    val count = chapterPageDao.update(
-      ChapterPageUpdate(
-        id = page.id,
-        mdate = DatesUtils.nowFormatted(),
-        fromUrl = page.fromUrl,
-        fileId = 0,
-        isRead = page.isRead,
-      )
-    )
-
-    Validation.dbUpdate(count, "ChapterPage")
-
-    return true
+    return chapterController.deletePageFile(page)
   }
 
   private fun getSettings(): JSONObject {

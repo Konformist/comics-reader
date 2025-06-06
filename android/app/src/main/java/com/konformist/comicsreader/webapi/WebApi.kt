@@ -47,8 +47,8 @@ import com.konformist.comicsreader.db.tag.TagUpdate
 import com.konformist.comicsreader.exceptions.DatabaseException
 import com.konformist.comicsreader.exceptions.ValidationException
 import com.konformist.comicsreader.utils.AppDirectory
-import com.konformist.comicsreader.utils.ArchiveUtils
-import com.konformist.comicsreader.utils.ArchiveFormat
+import com.konformist.comicsreader.utils.archive.ArchiveUtils
+import com.konformist.comicsreader.utils.archive.ArchiveFormat
 import com.konformist.comicsreader.utils.DatesUtils
 import com.konformist.comicsreader.utils.FileUtils
 import com.konformist.comicsreader.utils.ImageUtils

@@ -1,4 +1,4 @@
-package com.konformist.comicsreader.utils
+package com.konformist.comicsreader.utils.archive
 
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream

@@ -3,9 +3,8 @@ package com.konformist.comicsreader
 import android.content.Context
 import com.konformist.comicsreader.db.AppDatabase
 import com.konformist.comicsreader.utils.AppDirectory
-import com.konformist.comicsreader.utils.ArchiveUtils
-import com.konformist.comicsreader.utils.ArchiveCompressor
-import com.konformist.comicsreader.utils.ArchiveFormat
+import com.konformist.comicsreader.utils.archive.ArchiveUtils
+import com.konformist.comicsreader.utils.archive.ArchiveFormat
 import com.konformist.comicsreader.utils.DatesUtils
 import java.io.File
 import java.io.InputStream

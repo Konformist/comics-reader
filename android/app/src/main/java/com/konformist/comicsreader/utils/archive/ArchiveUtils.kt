@@ -1,4 +1,4 @@
-package com.konformist.comicsreader.utils
+package com.konformist.comicsreader.utils.archive
 
 class ArchiveUtils {
   companion object {

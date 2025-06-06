@@ -21,4 +21,8 @@ export default class ComicController {
   static remove(id: number) {
     return Api.api('comic/comic/del', { id });
   }
+
+  static upload(id: number) {
+    return Api.api('comic/comic/upload', { id });
+  }
 }

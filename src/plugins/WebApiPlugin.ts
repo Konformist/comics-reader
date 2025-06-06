@@ -206,6 +206,10 @@ export interface IApi {
     request: { id: number }
     response: boolean
   }
+  'comic/comic/upload': {
+    request: { id: number }
+    response: boolean
+  }
   'comic/override/get': {
     request: { comicId: number }
     response: IComicOverrideDTO

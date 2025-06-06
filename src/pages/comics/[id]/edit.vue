@@ -61,6 +61,13 @@
         <v-btn
           class="mb-4 w-100"
           :disabled="loading || loadingGlobal"
+          text="Сохранить в Загрузки"
+          variant="tonal"
+          @click="uploadComic()"
+        />
+        <v-btn
+          class="mb-4 w-100"
+          :disabled="loading || loadingGlobal"
           text="Расширенные настройки"
           :to="{
             name: '/comics/[id]/override-edit',
@@ -175,6 +182,19 @@ const comic = ref(new ComicModel());
 
 const saveComic = async () => {
   await ComicController.save(comic.value);
+};
+
+const uploadComic = async () => {
+  try {
+    loadingGlobalStart();
+    await saveComic();
+    await ComicController.upload(comic.value.id);
+    Toast.show({ text: 'Комикс сохранён в Загрузки' });
+  } catch (e) {
+    Toast.show({ text: `Ошибка: ${e}` });
+  } finally {
+    loadingGlobalEnd();
+  }
 };
 
 const uploadCover = async () => {

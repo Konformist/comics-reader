@@ -72,13 +72,12 @@ export interface IFileDTO extends DBDates {
   mime: string
 }
 
-export interface IComicCoverDTO {
-  id: number
+export interface IComicCoverDTO extends DBDates {
   fromUrl: string
   file: IFileDTO | null
 }
 
-export interface IComicOverrideDTO extends IParseData {id: number}
+export interface IComicOverrideDTO extends DBDates, IParseData {}
 
 export interface IComicDTO extends DBDates {
   name: string
@@ -91,8 +90,7 @@ export interface IComicDTO extends DBDates {
   cover: IComicCoverDTO | null
 }
 
-export interface IChapterPageDTO {
-  id: number
+export interface IChapterPageDTO extends DBDates {
   chapterId: number
   fromUrl: string
   isRead: boolean
@@ -208,6 +206,10 @@ export interface IApi {
   }
   'comic/comic/upload': {
     request: { id: number }
+    response: boolean
+  }
+  'comic/archive/add': {
+    request: object
     response: boolean
   }
   'comic/override/get': {

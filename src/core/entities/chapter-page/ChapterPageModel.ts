@@ -4,6 +4,8 @@ import FileModel from '@/core/entities/file/FileModel.ts';
 
 export default class ChapterPageModel extends Entity<IChapterPageDTO> implements IChapterPageDTO {
   id: number;
+  cdate: string;
+  mdate: string;
   chapterId: number;
   fromUrl: string;
   isRead: boolean;
@@ -13,6 +15,8 @@ export default class ChapterPageModel extends Entity<IChapterPageDTO> implements
     super();
 
     this.id = dto?.id ?? 0;
+    this.cdate = dto?.cdate ?? '';
+    this.mdate = dto?.mdate ?? '';
     this.chapterId = dto?.chapterId ?? 0;
     this.fromUrl = dto?.fromUrl ?? '';
     this.isRead = dto?.isRead ?? false;
@@ -22,6 +26,8 @@ export default class ChapterPageModel extends Entity<IChapterPageDTO> implements
   getDTO(): IChapterPageDTO {
     return {
       id: this.id,
+      cdate: this.cdate,
+      mdate: this.mdate,
       chapterId: this.chapterId,
       fromUrl: this.fromUrl,
       isRead: this.isRead,

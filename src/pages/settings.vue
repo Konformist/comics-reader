@@ -41,12 +41,19 @@
             :true-value="true"
           />
         </v-label>
+        <v-btn
+          class="mt-4 w-100"
+          :disabled="loadingGlobal"
+          text="Загрузить комикс"
+          @click="getComicArchive()"
+        />
       </div>
     </v-container>
     <v-fab
       app
       appear
       class="mb-16"
+      :disabled="loadingGlobal"
       icon="$save"
       @click="appStore.saveSettings()"
     />
@@ -54,10 +61,15 @@
 </template>
 
 <script setup lang="ts">
+import useLoading from '@/composables/useLoading.ts';
+import Api from '@/core/api/Api.ts';
 import { settingsDirectionItems } from '@/core/entities/settings/settingsUtils.ts';
 import { useAppStore } from '@/stores/app.ts';
+import { useComicsStore } from '@/stores/comics.ts';
+import { Toast } from '@capacitor/toast';
 
 const appStore = useAppStore();
+const comicsStore = useComicsStore();
 
 definePage({
   meta: {
@@ -69,4 +81,23 @@ definePage({
 onBeforeUnmount(() => {
   appStore.loadSettings();
 });
+
+const {
+  loadingGlobal,
+  loadingGlobalStart,
+  loadingGlobalEnd,
+} = useLoading();
+
+const getComicArchive = async () => {
+  try {
+    loadingGlobalStart();
+    await Api.api('comic/archive/add');
+    await comicsStore.loadComicsForce();
+    Toast.show({ text: 'Комикс успешно загружен' });
+  } catch (e) {
+    Toast.show({ text: `Ошибка: ${e}` });
+  } finally {
+    loadingGlobalEnd();
+  }
+};
 </script>

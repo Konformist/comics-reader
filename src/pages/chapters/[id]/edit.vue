@@ -12,7 +12,7 @@
         <v-btn
           class="w-100"
           color="error"
-          :disabled="!chapter.pages.length || loadingGlobal"
+          :disabled="loadingGlobal"
           :loading="loading"
           text="Удалить главу"
           variant="tonal"

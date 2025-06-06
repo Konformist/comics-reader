@@ -142,6 +142,8 @@ export default class WebApiPluginFake {
   getComicCover(): IComicCoverDTO {
     return {
       id: this.getComicCoverId(),
+      cdate: '',
+      mdate: '',
       fromUrl: faker.internet.url(),
       file: {
         id: 0,
@@ -162,6 +164,8 @@ export default class WebApiPluginFake {
   getComicOverride(): IComicOverrideDTO {
     return {
       id: this.getComicOverrideId(),
+      cdate: '',
+      mdate: '',
       titleCSS: '',
       annotationCSS: '',
       coverCSS: '',
@@ -227,6 +231,8 @@ export default class WebApiPluginFake {
   getChapterPage(override?: Partial<IChapterPageDTO>): IChapterPageDTO {
     return {
       id: override?.id || this.getChapterPageId(),
+      cdate: '',
+      mdate: '',
       chapterId: override?.chapterId || this.getChapterId(),
       fromUrl: faker.internet.url(),
       isRead: faker.helpers.arrayElement([true, false]),

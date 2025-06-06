@@ -3,6 +3,8 @@ import type { IComicOverrideDTO } from '@/plugins/WebApiPlugin.ts';
 
 export default class ComicOverrideModel extends Entity<IComicOverrideDTO> implements IComicOverrideDTO {
   id: number;
+  cdate: string;
+  mdate: string;
   titleCSS: string;
   annotationCSS: string;
   coverCSS: string;
@@ -17,10 +19,13 @@ export default class ComicOverrideModel extends Entity<IComicOverrideDTO> implem
   pagesCSS: string;
   pagesImageCSS: string;
 
+  // eslint-disable-next-line complexity
   constructor(dto?: Partial<IComicOverrideDTO>) {
     super();
 
     this.id = dto?.id ?? 0;
+    this.cdate = dto?.cdate ?? '';
+    this.mdate = dto?.mdate ?? '';
     this.titleCSS = dto?.titleCSS ?? '';
     this.annotationCSS = dto?.annotationCSS ?? '';
     this.coverCSS = dto?.coverCSS ?? '';
@@ -39,6 +44,8 @@ export default class ComicOverrideModel extends Entity<IComicOverrideDTO> implem
   getDTO(): IComicOverrideDTO {
     return {
       id: this.id,
+      cdate: this.cdate,
+      mdate: this.mdate,
       titleCSS: this.titleCSS,
       annotationCSS: this.annotationCSS,
       coverCSS: this.coverCSS,

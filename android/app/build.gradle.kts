@@ -52,21 +52,24 @@ repositories {
 }
 
 dependencies {
+    val roomVer = "2.7.1"
+
+    implementation("org.jsoup:jsoup:1.17.2")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
     implementation("org.apache.commons:commons-compress:1.27.1")
     implementation("androidx.datastore:datastore-preferences:1.1.7")
 
-    implementation("androidx.room:room-runtime:2.7.1")
+    implementation("androidx.room:room-runtime:$roomVer")
     // If this project uses any Kotlin source, use Kotlin Symbol Processing (KSP)
     // See Add the KSP plugin to your project
-    ksp("androidx.room:room-compiler:2.7.1")
+    ksp("androidx.room:room-compiler:$roomVer")
     // optional - Test helpers
-    testImplementation("androidx.room:room-testing:2.7.1")
+    testImplementation("androidx.room:room-testing:$roomVer")
     // optional - Kotlin Extensions and Coroutines support for Room
-    implementation("androidx.room:room-ktx:2.7.1")
+    implementation("androidx.room:room-ktx:$roomVer")
 
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
-    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("androidx.coordinatorlayout:coordinatorlayout:1.3.0")
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation(project(":capacitor-android"))

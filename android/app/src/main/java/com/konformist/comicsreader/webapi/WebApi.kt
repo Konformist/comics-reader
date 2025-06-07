@@ -3,7 +3,6 @@ package com.konformist.comicsreader.webapi
 import android.util.Log
 import androidx.core.net.toUri
 import androidx.room.Room
-import com.getcapacitor.util.JSONUtils
 import com.konformist.comicsreader.App
 import com.konformist.comicsreader.AppBackup
 import com.konformist.comicsreader.db.AppDatabase
@@ -25,7 +24,7 @@ import com.konformist.comicsreader.db.language.Language
 import com.konformist.comicsreader.db.language.LanguageCreate
 import com.konformist.comicsreader.db.language.LanguageDelete
 import com.konformist.comicsreader.db.language.LanguageUpdate
-import com.konformist.comicsreader.db.parser.Parser
+import com.konformist.comicsreader.db.parser.ParserConfig
 import com.konformist.comicsreader.db.parser.ParserCreate
 import com.konformist.comicsreader.db.parser.ParserDelete
 import com.konformist.comicsreader.db.parser.ParserUpdate
@@ -51,7 +50,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.json.JSONArray
 import org.json.JSONObject
-import org.json.JSONStringer
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileInputStream
@@ -206,7 +204,7 @@ class WebApi {
   }
 
   private fun getParsersAll(): String {
-    return Json.encodeToString<List<Parser>>(parserController.readAll())
+    return Json.encodeToString<List<ParserConfig>>(parserController.readAll())
   }
 
   @Throws(ValidationException::class)
@@ -214,7 +212,7 @@ class WebApi {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
 
-    return Json.encodeToString<Parser>(parserController.read(rowId))
+    return Json.encodeToString<ParserConfig>(parserController.read(rowId))
   }
 
   @Throws(DatabaseException::class)

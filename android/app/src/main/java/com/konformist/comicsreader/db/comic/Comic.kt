@@ -11,19 +11,19 @@ data class Comic(
   @PrimaryKey(autoGenerate = true) val id: Long,
   @ColumnInfo(defaultValue = "(datetime('now'))") val cdate: String,
   @ColumnInfo(defaultValue = "(datetime('now'))") val mdate: String,
-  @ColumnInfo(defaultValue = "") val name: String,
+  @ColumnInfo(defaultValue = "") var name: String,
 
   /* Парсер */
-  @ColumnInfo(name = "parser_id", defaultValue = "0") val parserId: Long?,
+  @ColumnInfo(name = "parser_id", defaultValue = "0") var parserId: Long? = 0L,
 
   /* Ссылка на источник */
-  @ColumnInfo(name = "from_url", defaultValue = "") val fromUrl: String?,
+  @ColumnInfo(name = "from_url", defaultValue = "") var fromUrl: String? = "",
   /* Аннотация */
-  @ColumnInfo(defaultValue = "") val annotation: String?,
+  @ColumnInfo(defaultValue = "") var annotation: String? = "",
   /* ID языка */
-  @ColumnInfo(name = "language_id", defaultValue = "0") val languageId: Long?,
+  @ColumnInfo(name = "language_id", defaultValue = "0") var languageId: Long? = 0L,
   /** ID тегов */
-  @ColumnInfo(defaultValue = "[]") val tags: List<Long>?,
+  @ColumnInfo(defaultValue = "[]") var tags: List<Long>? = listOf(),
   /** ID авторов */
-  @ColumnInfo(defaultValue = "[]") val authors: List<Long>?,
+  @ColumnInfo(defaultValue = "[]") var authors: List<Long>? = listOf(),
 )

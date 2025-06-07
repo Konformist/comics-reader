@@ -20,7 +20,7 @@ import com.konformist.comicsreader.db.comicoverride.ComicOverride
 import com.konformist.comicsreader.db.comicoverride.ComicOverrideDao
 import com.konformist.comicsreader.db.language.Language
 import com.konformist.comicsreader.db.language.LanguageDao
-import com.konformist.comicsreader.db.parser.Parser
+import com.konformist.comicsreader.db.parser.ParserConfig
 import com.konformist.comicsreader.db.parser.ParserDao
 import com.konformist.comicsreader.db.tag.Tag
 import com.konformist.comicsreader.db.tag.TagDao
@@ -33,7 +33,7 @@ import com.konformist.comicsreader.db.tag.TagDao
     ComicOverride::class,
     Chapter::class,
     ChapterPage::class,
-    Parser::class,
+    ParserConfig::class,
     Language::class,
     Author::class,
     Tag::class,

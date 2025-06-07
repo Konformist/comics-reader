@@ -13,9 +13,9 @@ data class ComicCover(
   @ColumnInfo(defaultValue = "(datetime('now'))") val mdate: String,
 
   /* ID комикса */
-  @ColumnInfo(name = "comic_id") val comicId: Long,
+  @ColumnInfo(name = "comic_id") var comicId: Long,
   /* ID привязанного файла */
-  @ColumnInfo(name = "file_id", defaultValue = "0") val fileId: Long?,
+  @ColumnInfo(name = "file_id", defaultValue = "0") var fileId: Long? = 0L,
   /* Ссылка на источник */
-  @ColumnInfo(name = "from_url", defaultValue = "") val fromUrl: String?,
+  @ColumnInfo(name = "from_url", defaultValue = "") var fromUrl: String? = "",
 )

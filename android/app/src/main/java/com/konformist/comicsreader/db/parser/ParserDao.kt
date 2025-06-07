@@ -9,17 +9,17 @@ import androidx.room.Update
 @Dao
 interface ParserDao {
   @Query("SELECT * FROM parsers")
-  fun readAll(): List<Parser>
+  fun readAll(): List<ParserConfig>
 
   @Query("SELECT * FROM parsers WHERE id = :id")
-  fun read(id: Long): Parser
+  fun read(id: Long): ParserConfig
 
-  @Insert(entity = Parser::class)
+  @Insert(entity = ParserConfig::class)
   fun create(item: ParserCreate): Long
 
-  @Update(entity = Parser::class)
+  @Update(entity = ParserConfig::class)
   fun update(item: ParserUpdate): Int
 
-  @Delete(entity = Parser::class)
+  @Delete(entity = ParserConfig::class)
   fun delete(item: ParserDelete): Int
 }

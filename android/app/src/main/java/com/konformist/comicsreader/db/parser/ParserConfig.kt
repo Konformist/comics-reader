@@ -5,9 +5,10 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 
+// TODO сделать миграцию на parser_configs
 @Serializable
 @Entity(tableName = "parsers")
-data class Parser(
+data class ParserConfig(
   @PrimaryKey(autoGenerate = true) val id: Long,
   @ColumnInfo(defaultValue = "(datetime('now'))") val cdate: String,
   @ColumnInfo(defaultValue = "(datetime('now'))") val mdate: String,

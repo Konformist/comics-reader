@@ -3,10 +3,10 @@ package com.konformist.comicsreader.webapi
 import android.util.Log
 import androidx.core.net.toUri
 import androidx.room.Room
+import com.getcapacitor.util.JSONUtils
 import com.konformist.comicsreader.App
 import com.konformist.comicsreader.AppBackup
 import com.konformist.comicsreader.db.AppDatabase
-import com.konformist.comicsreader.db.appfile.AppFileUpdate
 import com.konformist.comicsreader.db.author.Author
 import com.konformist.comicsreader.db.author.AuthorCreate
 import com.konformist.comicsreader.db.author.AuthorDelete
@@ -51,6 +51,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.json.JSONArray
 import org.json.JSONObject
+import org.json.JSONStringer
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileInputStream
@@ -89,7 +90,7 @@ class WebApi {
   )
 
   fun <T : Exception> wrappedToError(value: T): String {
-    return """{"error": ${value.message}}"""
+    return """{"error": "${value.message}"}"""
   }
 
   fun wrappedToResult(value: Any?): String {
@@ -331,12 +332,8 @@ class WebApi {
     val link = data.optString("link", "")
     Validation.link(link, "link")
 
-    val connection = URL(link).openConnection() as HttpURLConnection
-    connection.requestMethod = "GET"
-    connection.connect()
-
-    if (connection.responseCode != 200)
-      throw Exception("Error connection: ${connection.responseCode}")
+    val cookie = data.optString("cookie", "")
+    val connection = getConnection(URL(link), cookie)
 
     // Получаем MIME тип из заголовков
     val mimeType = connection.contentType
@@ -474,12 +471,8 @@ class WebApi {
     val link = data.optString("link", "")
     Validation.link(link, "link")
 
-    val connection = URL(link).openConnection() as HttpURLConnection
-    connection.requestMethod = "GET"
-    connection.connect()
-
-    if (connection.responseCode != 200)
-      throw Exception("Error connection: ${connection.responseCode}")
+    val cookie = data.optString("cookie", "")
+    val connection = getConnection(URL(link), cookie)
 
     // Получаем MIME тип из заголовков
     val mimeType = connection.contentType
@@ -596,23 +589,19 @@ class WebApi {
     return true
   }
 
-  private fun downloadHTML(data: JSONObject): String {
-    val url = data.optString("url", "")
-    Validation.link(url, "url")
-    val cookie = data.optString("cookie", "")
-
-    // Создаем URL объект и открываем соединение
-    val urlObj = URL(url)
-    val connection = urlObj.openConnection() as HttpURLConnection
+  private fun getConnection(url: URL, cookie: String? = ""): HttpURLConnection {
+    val connection = url.openConnection() as HttpURLConnection
     connection.requestMethod = "GET"
+
+    if (!cookie.isNullOrBlank()) connection.setRequestProperty("Cookie", cookie)
+
     connection.setRequestProperty(
       "User-Agent",
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
     )
     connection.setRequestProperty("Accept-Language", "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7")
-    connection.setRequestProperty("Cookie", cookie)
     connection.setRequestProperty("Priority", "u=0, i")
-    connection.setRequestProperty("Referer", "${urlObj.protocol}://${urlObj.host}")
+    connection.setRequestProperty("Referer", "${url.protocol}://${url.host}")
     connection.setRequestProperty(
       "sec-ch-ua",
       "\"Chromium\";v=\"136\", \"Google Chrome\";v=\"136\", \"Not.A/Brand\";v=\"99\""
@@ -638,6 +627,16 @@ class WebApi {
     if (connection.responseCode != 200)
       throw Exception("Error connection: ${connection.responseCode}")
 
+    return connection
+  }
+
+  private fun downloadHTML(data: JSONObject): String {
+    val url = data.optString("url", "")
+    Validation.link(url, "url")
+
+    val cookie = data.optString("cookie", "")
+    val connection = getConnection(URL(url), cookie)
+
     // Читаем входной поток
     val inputStream = connection.inputStream
     val inputStreamReader = InputStreamReader(inputStream)
@@ -655,28 +654,11 @@ class WebApi {
     connection.inputStream.close()
     connection.disconnect()
 
-    return stringBuilder.toString()
+    // @TODO Fuck
+    return "\"${stringBuilder.replace(Regex("""""""), "\\\\\\\"")}\""
   }
 
   private fun migrate(): Boolean {
-    val files = filesController.readAll()
-
-    files.forEach { file ->
-      val appFile = filesController.read(file.id)
-      if (appFile != null) {
-        filesController.update(
-          AppFileUpdate(
-            id = appFile.id,
-            mdate = "",
-            name = appFile.name,
-            mime = appFile.mime,
-            size = appFile.size,
-            path = File(FileManager.COMICS_DIR_NAME, appFile.name).path,
-          )
-        )
-      }
-    }
-
     return true
   }
 

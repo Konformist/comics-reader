@@ -5,11 +5,6 @@ import com.konformist.comicsreader.db.parser.ParserCreate
 import com.konformist.comicsreader.db.parser.ParserDao
 import com.konformist.comicsreader.db.parser.ParserDelete
 import com.konformist.comicsreader.db.parser.ParserUpdate
-import com.konformist.comicsreader.db.tag.Tag
-import com.konformist.comicsreader.db.tag.TagCreate
-import com.konformist.comicsreader.db.tag.TagDao
-import com.konformist.comicsreader.db.tag.TagDelete
-import com.konformist.comicsreader.db.tag.TagUpdate
 import com.konformist.comicsreader.exceptions.DatabaseException
 import com.konformist.comicsreader.utils.DatesUtils
 import com.konformist.comicsreader.webapi.Validation

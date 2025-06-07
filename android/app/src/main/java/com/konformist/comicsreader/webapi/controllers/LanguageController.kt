@@ -1,10 +1,5 @@
 package com.konformist.comicsreader.webapi.controllers
 
-import com.konformist.comicsreader.db.author.Author
-import com.konformist.comicsreader.db.author.AuthorCreate
-import com.konformist.comicsreader.db.author.AuthorDao
-import com.konformist.comicsreader.db.author.AuthorDelete
-import com.konformist.comicsreader.db.author.AuthorUpdate
 import com.konformist.comicsreader.db.language.Language
 import com.konformist.comicsreader.db.language.LanguageCreate
 import com.konformist.comicsreader.db.language.LanguageDao

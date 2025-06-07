@@ -7,6 +7,7 @@ import com.konformist.comicsreader.db.chapterpage.ChapterPageCreate
 import com.konformist.comicsreader.db.comic.ComicCreate
 import com.konformist.comicsreader.exceptions.FilesException
 import com.konformist.comicsreader.exceptions.ValidationException
+import com.konformist.comicsreader.utils.AcbfXml
 import com.konformist.comicsreader.utils.FileManager
 import com.konformist.comicsreader.utils.archive.ArchiveFormat
 import com.konformist.comicsreader.utils.archive.ArchiveUtils
@@ -51,13 +52,19 @@ class ArchiveComic(
     return when (extension) {
       ComicController.FORMAT_CBZ,
       ComicController.FORMAT_ZIP -> ArchiveFormat.ZIP
+
       ComicController.FORMAT_CBT,
       ComicController.FORMAT_TAR -> ArchiveFormat.TAR
+
       else -> throw FilesException("Unknown extension $extension")
     }
   }
 
-  private fun extractArchive(inputStream: InputStream, archiveFormat: ArchiveFormat, outFile: File) {
+  private fun extractArchive(
+    inputStream: InputStream,
+    archiveFormat: ArchiveFormat,
+    outFile: File
+  ) {
     val extractor = ArchiveUtils.extractFactory()
     extractor.extract(inputStream, archiveFormat, outFile)
   }
@@ -100,21 +107,28 @@ class ArchiveComic(
     val chapters = chapterController.readByComicAll(id)
 
     val compress = ArchiveUtils.compressFactory()
-    val chaptersLength = chapters.size.toString().length
+    val chaptersLength = getPadCount(chapters.size)
 
     chapters.forEachIndexed { index, chapter ->
-      val chapterDir = createChapterDirectory(dirTmp, index + 1, chaptersLength)
+      val chapterDir = createChapterDirectory(dirTmp, index, chaptersLength)
       compress.addFile(chapterDir)
-      val pagesLength = chapter.pages.size.toString().length
+      val pagesLength = getPadCount(chapter.pages.size)
 
       chapter.pages.forEachIndexed { iPage, page ->
         page.file?.let { file ->
           val fileFrom = File(FileManager.filesDir, file.path)
-          val fileTo = createPageFile(chapterDir, fileFrom, iPage + 1, pagesLength)
+          val fileTo = createPageFile(chapterDir, fileFrom, iPage, pagesLength)
           fileFrom.copyTo(fileTo)
         }
       }
     }
+
+    val xmlFile = File(dirTmp, "meta.acbf")
+    AcbfXml()
+      .addComic(comic)
+      .addChapters(chapters)
+      .create(xmlFile)
+    compress.addFile(xmlFile)
 
     val outFile = createOutputFile(comic.name)
     val parentDir = outFile.parentFile ?: return false
@@ -133,15 +147,29 @@ class ArchiveComic(
     return dirTmp
   }
 
-  private fun createChapterDirectory(parentDir: File, chapterIndex: Int, chaptersLength: Int): File {
-    val chapterDirName = "%0${chaptersLength}d".format(chapterIndex)
+  companion object {
+    fun getPadCount(size: Int): Int {
+      return size.toString().length
+    }
+
+    fun createPadName(length: Int, index: Int): String {
+      return "%0${length}d".format(index + 1)
+    }
+  }
+
+  private fun createChapterDirectory(
+    parentDir: File,
+    chapterIndex: Int,
+    chaptersLength: Int
+  ): File {
+    val chapterDirName = createPadName(chaptersLength, chapterIndex)
     val chapterDir = File(parentDir.absolutePath, chapterDirName)
     chapterDir.mkdirs()
     return chapterDir
   }
 
   private fun createPageFile(chapterDir: File, file: File, pageIndex: Int, pagesLength: Int): File {
-    val fileToName = "%0${pagesLength}d".format(pageIndex)
+    val fileToName = createPadName(pagesLength, pageIndex)
     return File(chapterDir.absolutePath, "$fileToName.${file.extension}")
   }
 

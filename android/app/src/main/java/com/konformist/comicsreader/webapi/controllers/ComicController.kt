@@ -1,6 +1,5 @@
 package com.konformist.comicsreader.webapi.controllers
 
-import com.konformist.comicsreader.db.chapter.ChapterDao
 import com.konformist.comicsreader.db.comic.Comic
 import com.konformist.comicsreader.db.comic.ComicCreate
 import com.konformist.comicsreader.db.comic.ComicDao
@@ -12,7 +11,6 @@ import com.konformist.comicsreader.db.comiccover.ComicCoverCreate
 import com.konformist.comicsreader.db.comiccover.ComicCoverDao
 import com.konformist.comicsreader.db.comiccover.ComicCoverDelete
 import com.konformist.comicsreader.db.comiccover.ComicCoverUpdate
-import com.konformist.comicsreader.db.comiccover.ComicCoverWithFile
 import com.konformist.comicsreader.db.comicoverride.ComicOverride
 import com.konformist.comicsreader.db.comicoverride.ComicOverrideCreate
 import com.konformist.comicsreader.db.comicoverride.ComicOverrideDao

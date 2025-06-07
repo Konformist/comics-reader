@@ -3,7 +3,6 @@ package com.konformist.comicsreader.webapi
 import android.util.Log
 import androidx.core.net.toUri
 import androidx.room.Room
-import com.getcapacitor.util.JSONUtils
 import com.konformist.comicsreader.App
 import com.konformist.comicsreader.AppBackup
 import com.konformist.comicsreader.db.AppDatabase
@@ -51,7 +50,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.json.JSONArray
 import org.json.JSONObject
-import org.json.JSONStringer
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileInputStream

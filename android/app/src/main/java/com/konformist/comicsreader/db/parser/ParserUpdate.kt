@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ParserUpdate(
   val id: Long,
-  val mdate: String,
+  var mdate: String,
   val name: String,
   @ColumnInfo(name = "site_url") val siteUrl: String?,
 

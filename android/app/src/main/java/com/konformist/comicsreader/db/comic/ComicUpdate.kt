@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ComicUpdate(
   val id: Long,
-  val mdate: String,
+  var mdate: String,
   val name: String,
 
   @ColumnInfo(name = "parser_id") val parserId: Long?,

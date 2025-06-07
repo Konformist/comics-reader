@@ -6,10 +6,10 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ComicCoverUpdate(
   val id: Long,
-  val mdate: String,
+  var mdate: String,
 
   /* ID привязанного файла */
-  @ColumnInfo(name = "file_id") val fileId: Long?,
+  @ColumnInfo(name = "file_id") var fileId: Long? = 0L,
   /* Ссылка на источник */
-  @ColumnInfo(name = "from_url") val fromUrl: String?,
+  @ColumnInfo(name = "from_url") val fromUrl: String? = "",
 )

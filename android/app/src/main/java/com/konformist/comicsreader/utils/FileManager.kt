@@ -1,6 +1,9 @@
 package com.konformist.comicsreader.utils
 
 import android.net.Uri
+import android.os.Environment
+import com.konformist.comicsreader.App
+import com.konformist.comicsreader.db.AppDatabase
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -9,8 +12,24 @@ import java.io.FileWriter
 import java.io.IOException
 import java.io.InputStream
 
-class FileUtils {
+class FileManager {
   companion object {
+    val filesDir: File get() = App.context.filesDir
+    val cacheDir: File get() = App.context.cacheDir
+
+    val dataBaseFile: File get() = App.context.getDatabasePath(AppDatabase.DATABASE_NAME)
+
+    const val COMICS_DIR_NAME: String = "comics-images"
+    const val BACKUPS_DIR_NAME: String = "backups"
+
+    val comicsImagesDir: File get() = File(filesDir, COMICS_DIR_NAME)
+
+    val downloadsDir: File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+    val documentsDir: File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
+
+    val downloadsAppDir: File get() = File(downloadsDir, App.appName)
+    val documentsAppDir: File get() = File(documentsDir, App.appName)
+
     fun getExtensionFromMime(mimeType: String?): String {
       if (mimeType == null) return "bin" // Если MIME не найден, даём расширение по умолчанию
 
@@ -33,6 +52,13 @@ class FileUtils {
         "gif" -> "image/gif"
         else -> "" // Для всех других типов возвращаем расширение по умолчанию
       }
+    }
+
+    fun getFileExtension(uriStr: String): String {
+      val lastDotIndex = uriStr.lastIndexOf('.')
+
+      return if (lastDotIndex == -1 || lastDotIndex >= uriStr.length - 1) ""
+      else uriStr.substring(lastDotIndex + 1)
     }
 
     fun writeStream(outputStream: FileOutputStream, inputStream: InputStream) {

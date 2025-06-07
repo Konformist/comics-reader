@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 @Entity(tableName = "files")
 data class AppFileUpdate(
   val id: Long,
-  val mdate: String,
+  var mdate: String,
   val name: String,
   val mime: String,
   val size: Long,

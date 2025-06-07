@@ -30,7 +30,7 @@ class WebApiPlugin : Plugin() {
   @OptIn(DelicateCoroutinesApi::class)
   override fun load() {
     super.load()
-    webApi = WebApi(context)
+    webApi = WebApi()
 
     // @TODO Что-то с ней сделать надо
     activityResultLauncher = activity.registerForActivityResult(
@@ -40,10 +40,10 @@ class WebApiPlugin : Plugin() {
         val uri = if (value.resultCode == AppCompatActivity.RESULT_OK) value.data?.data else null
         val data = methodCall?.data?.optJSONObject("body")?.put("uri", uri)
         val result = if (uri != null && data != null) webApi.api(queryPath, data)
-        else JSONObject().put("result", false)
+        else webApi.wrappedToResult(false)
 
         withContext(Dispatchers.Main) {
-          methodCall?.resolve(JSObject.fromJSONObject(result))
+          methodCall?.resolve(JSObject(result))
           methodCall = null
         }
       }
@@ -87,7 +87,7 @@ class WebApiPlugin : Plugin() {
       }
 
       else -> {
-        call.resolve(JSObject.fromJSONObject(webApi.api(path, body)))
+        call.resolve(JSObject(webApi.api(path, body)))
       }
     }
   }

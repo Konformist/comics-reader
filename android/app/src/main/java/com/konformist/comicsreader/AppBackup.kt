@@ -1,9 +1,8 @@
 package com.konformist.comicsreader
 
-import android.content.Context
 import com.konformist.comicsreader.db.AppDatabase
-import com.konformist.comicsreader.utils.AppDirectory
 import com.konformist.comicsreader.utils.DatesUtils
+import com.konformist.comicsreader.utils.FileManager
 import com.konformist.comicsreader.utils.archive.ArchiveFormat
 import com.konformist.comicsreader.utils.archive.ArchiveUtils
 import java.io.File
@@ -11,17 +10,12 @@ import java.io.InputStream
 import java.time.LocalDate
 
 
-class AppBackup(
-  private val documentsApp: File,
-  private val comicsImagesDir: File,
-  context: Context,
-) {
+class AppBackup {
   private val backupFileName = "backup-db"
-  private val dbFile = context.getDatabasePath(AppDatabase.DATABASE_NAME)
 
-  private val dirTmp = File("${context.cacheDir}${File.separator}tmp")
-  private val backupTmp = File("${dirTmp}${File.separator}${backupFileName}")
-  private val comicsTmp = File("${dirTmp}${File.separator}${AppDirectory.COMICS_IMAGES}")
+  private val dirTmp = File("${FileManager.cacheDir}", "tmp")
+  private val backupTmp = File(dirTmp, backupFileName)
+  private val comicsTmp = File(dirTmp, FileManager.COMICS_DIR_NAME)
 
   private fun deleteTmpDir() {
     if (dirTmp.exists()) dirTmp.deleteRecursively()
@@ -32,18 +26,17 @@ class AppBackup(
     dirTmp.mkdirs()
 
     db.close()
-    dbFile.copyTo(target = backupTmp, overwrite = true)
+    FileManager.dataBaseFile.copyTo(target = backupTmp, overwrite = true)
 
-    val backupsDir = File("${documentsApp}${File.separator}${AppDirectory.BACKUPS}")
+    val backupsDir = File(FileManager.documentsAppDir, FileManager.BACKUPS_DIR_NAME)
     if (!backupsDir.exists()) backupsDir.mkdirs()
 
-    val backupFile =
-      File("${backupsDir}${File.separator}backup-${DatesUtils.dateFormatted(LocalDate.now())}.tar")
+    val backupFile = File(backupsDir, "backup-${DatesUtils.dateFormatted(LocalDate.now())}.tar")
     if (!backupFile.exists()) backupFile.createNewFile()
 
     val compress = ArchiveUtils.compressFactory()
     compress.addFile(backupTmp)
-    compress.addFile(comicsImagesDir)
+    compress.addFile(FileManager.comicsImagesDir)
     compress.compress(backupFile, ArchiveFormat.TAR)
 
     deleteTmpDir()
@@ -59,10 +52,10 @@ class AppBackup(
 
     if (!backupTmp.exists() || !comicsTmp.exists()) return false
     db.close()
-    backupTmp.copyTo(target = dbFile, overwrite = true)
+    backupTmp.copyTo(target = FileManager.dataBaseFile, overwrite = true)
 
-    if (!comicsImagesDir.exists()) comicsImagesDir.mkdirs()
-    comicsTmp.copyRecursively(target = comicsImagesDir, overwrite = true)
+    if (!FileManager.comicsImagesDir.exists()) FileManager.comicsImagesDir.mkdirs()
+    comicsTmp.copyRecursively(target = FileManager.comicsImagesDir, overwrite = true)
 
     deleteTmpDir()
     return true

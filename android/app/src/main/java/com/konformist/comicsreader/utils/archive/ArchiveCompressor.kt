@@ -25,7 +25,7 @@ class ArchiveCompressor {
     tarOut.putArchiveEntry(tarEntry)
 
     if (file.isFile) {
-      IOUtils.copy(FileInputStream(file), tarOut)
+      FileInputStream(file).use { item -> IOUtils.copy(item, tarOut) }
       tarOut.closeArchiveEntry()
     } else if (file.isDirectory) {
       tarOut.closeArchiveEntry()

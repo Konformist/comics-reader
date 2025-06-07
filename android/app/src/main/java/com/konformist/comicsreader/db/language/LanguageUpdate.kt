@@ -5,6 +5,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class LanguageUpdate(
   val id: Long,
-  val mdate: String,
+  var mdate: String,
   val name: String,
 )

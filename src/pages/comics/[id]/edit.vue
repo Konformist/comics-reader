@@ -116,6 +116,14 @@
     icon="$plus"
     @click="createChapter()"
   />
+  <DictionaryEditDialog
+    v-model="chapterName"
+    v-model:opened="chapterModal"
+    :disabled="loadingGlobal"
+    is-created
+    @save="createChapter()"
+    @update:opened="chapterName = ''"
+  />
 </template>
 
 <script lang="ts" setup>
@@ -278,18 +286,20 @@ const loadChapters = async () => {
   chapters.value = await ChapterController.loadAll(comicId);
 };
 
+const chapterModal = ref(false);
+const chapterName = ref('');
+
 const createChapter = async () => {
   try {
     loadingGlobalStart();
-    const chapterId = await ChapterController.save(new ChapterModel({ comicId }));
-
-    if (!chapterId) return;
-
+    await ChapterController.save(new ChapterModel({
+      comicId,
+      name: chapterName.value,
+    }));
+    chapterModal.value = false;
+    chapterName.value = '';
+    await loadChapters();
     Toast.show({ text: 'Глава создана' });
-    await router.push({
-      name: '/chapters/[id]/edit',
-      params: { id: chapterId.toString() },
-    });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {

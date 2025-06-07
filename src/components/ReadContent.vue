@@ -57,15 +57,17 @@ const moveSlide = (index: number): void => {
   if (swiperRef.value) swiperRef.value.swiper.slideTo(index);
 };
 
-const modeWebtoon = computed<SwiperOptions>(() => ({
+const modeWebtoon = computed(() => ({
   direction: 'vertical',
   resistanceRatio: 0.5,
   freeMode: true,
+  shortSwipes: false,
+  longSwipes: false,
   slidesPerView: 'auto',
   modules: [FreeMode],
-}));
+} as SwiperOptions));
 
-const modeVertical = computed<SwiperOptions>(() => ({
+const modeVertical = computed(() => ({
   direction: 'vertical',
   autoplay: {
     enabled: appStore.settings.autoReading,
@@ -73,9 +75,9 @@ const modeVertical = computed<SwiperOptions>(() => ({
     stopOnLastSlide: true,
   },
   modules: [Autoplay],
-}));
+} as SwiperOptions));
 
-const modeHorizontal = computed<SwiperOptions>(() => ({
+const modeHorizontal = computed(() => ({
   direction: 'horizontal',
   autoplay: {
     enabled: appStore.settings.autoReading,
@@ -83,7 +85,7 @@ const modeHorizontal = computed<SwiperOptions>(() => ({
     stopOnLastSlide: true,
   },
   modules: [Autoplay],
-}));
+} as SwiperOptions));
 
 const swiperMode = computed(() => {
   switch (appStore.settings.readingMode) {

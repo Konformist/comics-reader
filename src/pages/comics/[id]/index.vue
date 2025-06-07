@@ -69,7 +69,10 @@
             :to="chapter.total ? {
               name: '/chapters/[id]/read',
               params: { id: chapter.id },
-              query: { comic: comicId, page: chapter.readLast },
+              query: {
+                comic: comicId,
+                page: chapter.readLast,
+              },
             } : undefined"
           >
             <template #append>

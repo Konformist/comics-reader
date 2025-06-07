@@ -14,7 +14,7 @@
         :loading="loading"
         @click-item="$router.push({
           name: '/parsers/[id]/',
-          params: { id: $event }
+          params: { id: $event },
         })"
       />
     </v-container>

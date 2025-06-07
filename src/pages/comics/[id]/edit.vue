@@ -86,7 +86,7 @@
       </div>
     </v-container>
     <v-container
-      v-else-if="frame===2"
+      v-else-if="frame === 2"
       class="pb-16 mb-4"
     >
       <DictionaryList
@@ -95,7 +95,7 @@
         :loading="loading"
         @click-item="router.push({
           name: '/chapters/[id]/edit',
-          params: { id: $event }
+          params: { id: $event },
         })"
       />
     </v-container>

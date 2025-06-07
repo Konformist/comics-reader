@@ -114,7 +114,7 @@
     appear
     :disabled="loading || loadingGlobal"
     icon="$plus"
-    @click="createChapter()"
+    @click="chapterModal = true"
   />
   <DictionaryEditDialog
     v-model="chapterName"

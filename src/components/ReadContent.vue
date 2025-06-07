@@ -145,11 +145,10 @@ onMounted(() => {
   nextTick(() => {
     if (!swiperRef.value) return;
 
+    moveSlide(model.value);
+
     swiperRef.value.swiper.on('activeIndexChange', (swiper) => {
       model.value = swiper.activeIndex;
-    });
-    swiperRef.value.swiper.on('afterInit', (swiper) => {
-      swiper.slideTo(model.value);
     });
     swiperRef.value.swiper.on('reachEnd', () => {
       model.value = items.length - 1;

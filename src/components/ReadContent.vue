@@ -62,7 +62,10 @@ const modeWebtoon = computed(() => ({
   direction: 'vertical',
   resistanceRatio: 0.5,
   freeMode: true,
-  zoom: true,
+  zoom: {
+    maxRatio: 5,
+    minRatio: 1,
+  },
   shortSwipes: false,
   longSwipes: false,
   slidesPerView: 'auto',
@@ -71,7 +74,10 @@ const modeWebtoon = computed(() => ({
 
 const modeVertical = computed(() => ({
   direction: 'vertical',
-  zoom: true,
+  zoom: {
+    maxRatio: 5,
+    minRatio: 1,
+  },
   autoplay: {
     enabled: appStore.settings.autoReading,
     delay: appStore.settings.autoReadingTimeout,
@@ -82,7 +88,10 @@ const modeVertical = computed(() => ({
 
 const modeHorizontal = computed(() => ({
   direction: 'horizontal',
-  zoom: true,
+  zoom: {
+    maxRatio: 5,
+    minRatio: 1,
+  },
   autoplay: {
     enabled: appStore.settings.autoReading,
     delay: appStore.settings.autoReadingTimeout,

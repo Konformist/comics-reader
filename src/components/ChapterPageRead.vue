@@ -1,5 +1,5 @@
 <template>
-  <div class="position-relative">
+  <div class="position-relative swiper-zoom-container">
     <img
       v-intersect.once="onRead"
       :src="item.file?.url"

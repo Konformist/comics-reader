@@ -1,11 +1,14 @@
 package com.konformist.comicsreader.data.comiccover
 
+import androidx.core.net.toUri
 import com.konformist.comicsreader.exceptions.DatabaseException
 import com.konformist.comicsreader.data.appfile.AppFileController
 import com.konformist.comicsreader.utils.FileManager
+import com.konformist.comicsreader.utils.RequestUtils
 import com.konformist.comicsreader.webapi.Validation
 import java.io.File
 import java.io.InputStream
+import java.net.URL
 
 class ComicCoverController(
   private val dao: ComicCoverDao,
@@ -23,6 +26,28 @@ class ComicCoverController(
     val count = dao.updateFile(update.merge(value))
     Validation.dbUpdate(count, entityName)
     return rowId
+  }
+
+  fun createFileFromRequest(comicId: Long, link: String, cookie: String): Long {
+    val connection = RequestUtils.getConnection(URL(link), cookie)
+    val mimeType = connection.contentType
+
+    return connection.inputStream.use {
+      val row = readByComic(comicId) ?: return 0L
+      val result = createFile(row, mimeType, it)
+      connection.disconnect()
+      result
+    }
+  }
+
+  fun createFileFromUri(comicId: Long, uri: String): Long {
+    val extension = FileManager.getFileExtension(uri)
+    val mime = FileManager.getMimeFromExtension(extension)
+    val result = FileManager.getInputByUri(uri.toUri()) { file ->
+      readByComic(comicId)?.let { row -> createFile(row, mime, file) }
+    }
+
+    return result ?: 0L
   }
 
   @Throws(DatabaseException::class)

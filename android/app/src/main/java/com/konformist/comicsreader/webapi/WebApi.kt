@@ -337,18 +337,8 @@ class WebApi {
     Validation.link(link, "link")
 
     val cookie = data.optString("cookie", "")
-    val connection = RequestUtils.getConnection(URL(link), cookie)
 
-    // Получаем MIME тип из заголовков
-    val mimeType = connection.contentType
-
-    val cover = comicCoverController.readByComic(comicId) ?: return 0L
-    val result = comicCoverController.createFile(cover, mimeType, connection.inputStream)
-
-    connection.inputStream.close()
-    connection.disconnect()
-
-    return result
+    return comicCoverController.createFileFromRequest(comicId, link, cookie)
   }
 
   @Throws(ValidationException::class, DatabaseException::class)
@@ -359,15 +349,7 @@ class WebApi {
     val uriStr = data.optString("uri")
     Validation.uri(uriStr, "uri")
 
-    val extension = FileManager.getFileExtension(uriStr)
-    val mime = FileManager.getMimeFromExtension(extension)
-    val result = FileManager.getInputByUri(uriStr.toUri()) { file ->
-      comicCoverController.read(comicId)?.let { row ->
-        comicCoverController.createFile(row, mime, file)
-      }
-    }
-
-    return result ?: 0L
+    return comicCoverController.createFileFromUri(comicId, uriStr)
   }
 
   @Throws(ValidationException::class, DatabaseException::class)
@@ -472,48 +454,26 @@ class WebApi {
 
   @Throws(ValidationException::class, DatabaseException::class)
   private fun downloadChapterPageFile(data: JSONObject): Long {
-    val chapterPageId = data.optLong("chapterPageId")
-    Validation.id(chapterPageId, "chapterPageId")
+    val id = data.optLong("chapterPageId")
+    Validation.id(id, "chapterPageId")
 
     val link = data.optString("link", "")
     Validation.link(link, "link")
 
     val cookie = data.optString("cookie", "")
-    val connection = RequestUtils.getConnection(URL(link), cookie)
 
-    // Получаем MIME тип из заголовков
-    val mimeType = connection.contentType
-
-    val row = chapterPageController.read(chapterPageId) ?: return 0L
-    val result = chapterPageController.createFile(
-      row,
-      mimeType,
-      connection.inputStream,
-    )
-
-    connection.inputStream.close()
-    connection.disconnect()
-
-    return result
+    return chapterPageController.createFileFromRequest(id, link, cookie)
   }
 
   @Throws(ValidationException::class, DatabaseException::class)
   private fun addChapterPageFile(data: JSONObject): Long {
-    val chapterPageId = data.optLong("chapterPageId")
-    Validation.id(chapterPageId, "chapterPageId")
+    val id = data.optLong("chapterPageId")
+    Validation.id(id, "chapterPageId")
 
     val uriStr = data.optString("uri")
     Validation.uri(uriStr, "uri")
 
-    val extension = FileManager.getFileExtension(uriStr)
-    val mime = FileManager.getMimeFromExtension(extension)
-    val result = FileManager.getInputByUri(uriStr.toUri()) { file ->
-      chapterPageController.read(chapterPageId)?.let { row ->
-        chapterPageController.createFile(row, mime, file)
-      }
-    }
-
-    return result ?: 0L
+    return chapterPageController.createFileFromUri(id, uriStr)
   }
 
   @Throws(ValidationException::class, DatabaseException::class)

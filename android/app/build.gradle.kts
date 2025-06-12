@@ -66,14 +66,21 @@ dependencies {
     implementation("androidx.room:room-ktx:2.7.1")
 
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
-    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("androidx.coordinatorlayout:coordinatorlayout:1.3.0")
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation(project(":capacitor-android"))
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.2.1")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
     implementation(project(":capacitor-cordova-android-plugins"))
+
+    val mockito = "5.18.0"
+    val androidJunit = "1.2.1"
+
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.mockito:mockito-core:$mockito")
+    androidTestImplementation("org.mockito:mockito-android:$mockito")
+    androidTestImplementation("androidx.test.ext:junit:$androidJunit")
+    androidTestImplementation("androidx.test.ext:junit-ktx:$androidJunit")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
 }
 
 apply(from = "capacitor.build.gradle")

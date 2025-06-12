@@ -10,8 +10,10 @@ class ImageUtils {
   companion object {
     private const val SIZE_ZERO = 0
 
-    fun writeStream(filePath: FileOutputStream, bitmap: Bitmap, quality: Int = 100) {
-      bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, quality, filePath)
+    fun writeStream(filePath: File, bitmap: Bitmap, quality: Int = 100) {
+      FileOutputStream(filePath).use {
+        bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, quality, it)
+      }
     }
 
     /**
@@ -41,12 +43,10 @@ class ImageUtils {
         maxHeightFloat / imgHeightFloat
       }
 
-      FileOutputStream(file).use { item ->
-        writeStream(
-          item,
-          bitmap.scale((imgWidthFloat * coef).toInt(), (imgHeightFloat * coef).toInt()),
-        )
-      }
+      writeStream(
+        file,
+        bitmap.scale((imgWidthFloat * coef).toInt(), (imgHeightFloat * coef).toInt()),
+      )
 
       bitmap.recycle()
 

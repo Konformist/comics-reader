@@ -1,0 +1,78 @@
+package com.konformist.comicsreader.language
+
+import android.content.Context
+import androidx.room.Room
+import androidx.test.core.app.ApplicationProvider
+import com.konformist.comicsreader.data.language.LanguageController
+import com.konformist.comicsreader.data.language.LanguageCreate
+import com.konformist.comicsreader.data.language.LanguageDelete
+import com.konformist.comicsreader.data.language.LanguageUpdate
+import com.konformist.comicsreader.db.AppDatabase
+import org.junit.After
+import org.junit.Assert
+import org.junit.Before
+import org.junit.Test
+
+class LanguageControllerTest {
+  private lateinit var db: AppDatabase
+  private lateinit var controller: LanguageController
+
+  @Before
+  fun setUp() {
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    db = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java)
+      .allowMainThreadQueries()
+      .build()
+
+    controller = LanguageController(db.languageDao())
+  }
+
+  @Test
+  @Throws(Exception::class)
+  fun testCreate() {
+    val create = LanguageCreate(name = "New row")
+    val rowId = controller.create(create)
+
+    val row = controller.read(rowId)
+    Assert.assertNotNull(row)
+    Assert.assertEquals("New row", row?.name)
+  }
+
+  @Test
+  @Throws(Exception::class)
+  fun testUpdate() {
+    val create = LanguageCreate(name = "New row")
+    val rowId = controller.create(create)
+    val rowCreated = controller.read(rowId)
+
+    val update = LanguageUpdate(
+      id = rowId,
+      name = "New row 2",
+    )
+    Thread.sleep(1000)
+    controller.update(update)
+
+    val rowUpdated = controller.read(rowId)
+    Assert.assertEquals(rowCreated?.cdate, rowUpdated?.cdate)
+    Assert.assertNotEquals("", rowUpdated?.mdate)
+    Assert.assertNotEquals(rowCreated?.mdate, rowUpdated?.mdate)
+    Assert.assertEquals("New row 2", rowUpdated?.name)
+  }
+
+  @Test
+  @Throws(Exception::class)
+  fun testDelete() {
+    val create = LanguageCreate(name = "New row")
+    val rowId = controller.create(create)
+    val delete = LanguageDelete(id = rowId)
+    controller.delete(delete)
+    val row = controller.read(rowId)
+
+    Assert.assertNull(row)
+  }
+
+  @After
+  fun tearDown() {
+    db.close()
+  }
+}

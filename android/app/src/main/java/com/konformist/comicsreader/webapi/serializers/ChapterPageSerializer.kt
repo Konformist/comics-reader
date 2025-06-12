@@ -1,6 +1,6 @@
 package com.konformist.comicsreader.webapi.serializers
 
-import com.konformist.comicsreader.db.chapterpage.ChapterPageWithFile
+import com.konformist.comicsreader.data.chapterpage.ChapterPageWithFile
 import kotlinx.serialization.json.Json
 import org.json.JSONArray
 import org.json.JSONObject

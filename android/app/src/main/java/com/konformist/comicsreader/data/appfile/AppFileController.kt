@@ -3,13 +3,12 @@ package com.konformist.comicsreader.data.appfile
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
+import com.konformist.comicsreader.db.AppDataStore
 import com.konformist.comicsreader.exceptions.DatabaseException
 import com.konformist.comicsreader.utils.FileManager
 import com.konformist.comicsreader.utils.ImageUtils
-import com.konformist.comicsreader.db.AppDataStore
 import com.konformist.comicsreader.webapi.Validation
 import java.io.File
-import java.io.FileInputStream
 import java.io.InputStream
 
 class AppFileController(private val appFileDao: AppFileDao) {

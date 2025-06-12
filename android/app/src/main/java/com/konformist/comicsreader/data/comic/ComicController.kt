@@ -1,5 +1,9 @@
 package com.konformist.comicsreader.data.comic
 
+import com.konformist.comicsreader.data.chapter.ChapterController
+import com.konformist.comicsreader.data.chapter.ChapterCreate
+import com.konformist.comicsreader.data.chapter.ChapterDelete
+import com.konformist.comicsreader.data.chapterpage.ChapterPageCreate
 import com.konformist.comicsreader.data.comiccover.ComicCoverController
 import com.konformist.comicsreader.data.comiccover.ComicCoverCreate
 import com.konformist.comicsreader.data.comiccover.ComicCoverDelete
@@ -7,10 +11,6 @@ import com.konformist.comicsreader.data.comicoverride.ComicOverrideController
 import com.konformist.comicsreader.data.comicoverride.ComicOverrideCreate
 import com.konformist.comicsreader.data.comicoverride.ComicOverrideDelete
 import com.konformist.comicsreader.exceptions.DatabaseException
-import com.konformist.comicsreader.data.chapter.ChapterController
-import com.konformist.comicsreader.data.chapter.ChapterCreate
-import com.konformist.comicsreader.data.chapter.ChapterDelete
-import com.konformist.comicsreader.data.chapterpage.ChapterPageCreate
 import com.konformist.comicsreader.utils.FileManager
 import com.konformist.comicsreader.utils.comicarchive.ComicArchive
 import com.konformist.comicsreader.webapi.Validation
@@ -103,10 +103,12 @@ class ComicController(
 
     val comicId = create(result.comic)
     result.chapters.forEach { chapter ->
-      val chapterId = chapterController.create(ChapterCreate(
-        name = chapter.chapter.name,
-        comicId = comicId,
-      ))
+      val chapterId = chapterController.create(
+        ChapterCreate(
+          name = chapter.chapter.name,
+          comicId = comicId,
+        )
+      )
 
       chapter.files.forEach { file ->
         val pageId = chapterController.createPage(ChapterPageCreate(chapterId = chapterId))

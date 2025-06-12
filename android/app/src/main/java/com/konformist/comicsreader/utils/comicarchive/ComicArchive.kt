@@ -31,8 +31,10 @@ class ComicArchive() {
     return when (extension) {
       ComicController.FORMAT_CBZ,
       ComicController.FORMAT_ZIP -> ArchiveFormat.ZIP
+
       ComicController.FORMAT_CBT,
       ComicController.FORMAT_TAR -> ArchiveFormat.TAR
+
       else -> throw FilesException("Unknown extension $extension")
     }
   }
@@ -41,6 +43,7 @@ class ComicArchive() {
     val chapter: ChapterCreate,
     val files: List<File>,
   )
+
   data class FromResult(
     val comic: ComicCreate,
     val chapters: List<ChapterResult>
@@ -60,8 +63,8 @@ class ComicArchive() {
 
       // TODO хз, вроде хрень
       runBlocking {
-        dirTemp.walk().forEach {
-          file -> if (file.isFile) files.add(file)
+        dirTemp.walk().forEach { file ->
+          if (file.isFile) files.add(file)
         }
       }
 
@@ -81,7 +84,9 @@ class ComicArchive() {
   private fun pad(length: Int, index: Int): String = "%0${length}d".format(index)
 
   private fun createOutputFile(comicName: String): File {
-    val nameDir = comicName.replace(Regex("""\W+"""), "_")
+    val nameDir = comicName
+      .replace(Regex("""\W+"""), " ")
+      .trim()
     return File(FileManager.downloadsAppDir, "$nameDir.${ComicController.FORMAT_CBZ}")
   }
 

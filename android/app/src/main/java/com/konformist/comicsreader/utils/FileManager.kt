@@ -27,8 +27,10 @@ class FileManager {
     val comicsDir: File get() = File(filesDir, COMICS_DIR_NAME)
     val chaptersDir: File get() = File(filesDir, CHAPTERS_DIR_NAME)
 
-    val downloadsDir: File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-    val documentsDir: File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
+    val downloadsDir: File =
+      Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+    val documentsDir: File =
+      Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
 
     val downloadsAppDir: File get() = File(downloadsDir, App.appName)
     val documentsAppDir: File get() = File(documentsDir, App.appName)

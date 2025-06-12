@@ -1,7 +1,6 @@
 package com.konformist.comicsreader.data.language
 
 import com.konformist.comicsreader.exceptions.DatabaseException
-import com.konformist.comicsreader.utils.DatesUtils
 import com.konformist.comicsreader.webapi.Validation
 
 class LanguageController(private val dao: LanguageDao) {

@@ -5,53 +5,52 @@ import androidx.core.net.toUri
 import androidx.room.Room
 import com.konformist.comicsreader.App
 import com.konformist.comicsreader.AppBackup
-import com.konformist.comicsreader.db.AppDatabase
+import com.konformist.comicsreader.data.appfile.AppFileController
 import com.konformist.comicsreader.data.author.Author
+import com.konformist.comicsreader.data.author.AuthorController
 import com.konformist.comicsreader.data.author.AuthorCreate
 import com.konformist.comicsreader.data.author.AuthorDelete
 import com.konformist.comicsreader.data.author.AuthorUpdate
+import com.konformist.comicsreader.data.chapter.ChapterController
 import com.konformist.comicsreader.data.chapter.ChapterCreate
+import com.konformist.comicsreader.data.chapter.ChapterDelete
 import com.konformist.comicsreader.data.chapter.ChapterUpdate
+import com.konformist.comicsreader.data.chapter.ChapterUpdateComic
+import com.konformist.comicsreader.data.chapterpage.ChapterPageController
 import com.konformist.comicsreader.data.chapterpage.ChapterPageCreate
+import com.konformist.comicsreader.data.chapterpage.ChapterPageDelete
 import com.konformist.comicsreader.data.chapterpage.ChapterPageUpdate
+import com.konformist.comicsreader.data.comic.ComicController
 import com.konformist.comicsreader.data.comic.ComicCreate
 import com.konformist.comicsreader.data.comic.ComicDelete
 import com.konformist.comicsreader.data.comic.ComicUpdate
+import com.konformist.comicsreader.data.comiccover.ComicCoverController
 import com.konformist.comicsreader.data.comiccover.ComicCoverUpdate
 import com.konformist.comicsreader.data.comicoverride.ComicOverride
+import com.konformist.comicsreader.data.comicoverride.ComicOverrideController
 import com.konformist.comicsreader.data.comicoverride.ComicOverrideUpdate
 import com.konformist.comicsreader.data.language.Language
+import com.konformist.comicsreader.data.language.LanguageController
 import com.konformist.comicsreader.data.language.LanguageCreate
 import com.konformist.comicsreader.data.language.LanguageDelete
 import com.konformist.comicsreader.data.language.LanguageUpdate
 import com.konformist.comicsreader.data.parserconfig.ParserConfig
+import com.konformist.comicsreader.data.parserconfig.ParserConfigController
 import com.konformist.comicsreader.data.parserconfig.ParserConfigCreate
 import com.konformist.comicsreader.data.parserconfig.ParserConfigDelete
 import com.konformist.comicsreader.data.parserconfig.ParserConfigUpdate
 import com.konformist.comicsreader.data.tag.Tag
+import com.konformist.comicsreader.data.tag.TagController
 import com.konformist.comicsreader.data.tag.TagCreate
 import com.konformist.comicsreader.data.tag.TagDelete
 import com.konformist.comicsreader.data.tag.TagUpdate
+import com.konformist.comicsreader.db.AppDataStore
+import com.konformist.comicsreader.db.AppDatabase
+import com.konformist.comicsreader.db.Settings
 import com.konformist.comicsreader.exceptions.DatabaseException
 import com.konformist.comicsreader.exceptions.FilesException
 import com.konformist.comicsreader.exceptions.ValidationException
 import com.konformist.comicsreader.utils.FileManager
-import com.konformist.comicsreader.data.appfile.AppFileController
-import com.konformist.comicsreader.data.appfile.AppFileUpdate
-import com.konformist.comicsreader.data.author.AuthorController
-import com.konformist.comicsreader.data.chapterpage.ChapterPageController
-import com.konformist.comicsreader.data.chapterpage.ChapterPageDelete
-import com.konformist.comicsreader.data.comiccover.ComicCoverController
-import com.konformist.comicsreader.data.comicoverride.ComicOverrideController
-import com.konformist.comicsreader.data.chapter.ChapterController
-import com.konformist.comicsreader.data.chapter.ChapterDelete
-import com.konformist.comicsreader.data.chapter.ChapterUpdateComic
-import com.konformist.comicsreader.data.comic.ComicController
-import com.konformist.comicsreader.data.language.LanguageController
-import com.konformist.comicsreader.data.parserconfig.ParserConfigController
-import com.konformist.comicsreader.data.tag.TagController
-import com.konformist.comicsreader.db.AppDataStore
-import com.konformist.comicsreader.db.Settings
 import com.konformist.comicsreader.utils.RequestUtils
 import com.konformist.comicsreader.webapi.serializers.ChapterPageSerializer
 import com.konformist.comicsreader.webapi.serializers.ChapterSerializer
@@ -569,57 +568,6 @@ class WebApi {
   }
 
   private fun migrate(): Boolean {
-    for (comic in comicController.readLiteAll()) {
-      if (comic.comic == null
-        || comic.cover == null
-        || comic.cover.file == null) continue
-
-      val newDir = File(FileManager.comicsDir, comic.comic.id.toString())
-      if (!newDir.exists()) newDir.mkdirs()
-
-      val file = comic.cover.file
-      val oldPath = File(FileManager.filesDir, file.path)
-      val newPath = File(newDir, file.name)
-      oldPath.renameTo(newPath)
-      filesController.read(file.id)?.let {
-        filesController.update(AppFileUpdate(
-          id = it.id,
-          name = it.name,
-          mime = it.mime,
-          size = it.size,
-          path = newPath.relativeTo(FileManager.filesDir).path,
-        ))
-      }
-
-      for (chapter in chapterController.readByComicAll(comic.comic.id)) {
-        if (chapter.chapter == null) continue
-
-        val newCDir = File(FileManager.chaptersDir, chapter.chapter.id.toString())
-        if (!newCDir.exists()) newCDir.mkdirs()
-
-        for (page in chapter.pages) {
-          if (page.page == null
-            || page.file == null) continue
-
-          val oldPagePath = File(FileManager.filesDir, page.file.path)
-          val newPagePath = File(newCDir, page.file.name)
-          oldPagePath.renameTo(newPagePath)
-
-          filesController.read(page.file.id)?.let {
-            filesController.update(AppFileUpdate(
-              id = it.id,
-              name = it.name,
-              mime = it.mime,
-              size = it.size,
-              path = newPagePath.relativeTo(FileManager.filesDir).path,
-            ))
-          }
-        }
-      }
-    }
-
-    File(FileManager.filesDir, "comics-images").deleteRecursively()
-
     return true
   }
 

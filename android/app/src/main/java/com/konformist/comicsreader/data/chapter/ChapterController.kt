@@ -1,6 +1,5 @@
 package com.konformist.comicsreader.data.chapter
 
-import com.konformist.comicsreader.data.chapterpage.ChapterPage
 import com.konformist.comicsreader.data.chapterpage.ChapterPageController
 import com.konformist.comicsreader.data.chapterpage.ChapterPageCreate
 import com.konformist.comicsreader.data.chapterpage.ChapterPageDelete

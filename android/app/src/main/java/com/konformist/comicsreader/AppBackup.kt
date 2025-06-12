@@ -57,7 +57,8 @@ class AppBackup {
 
     if (!backupTmp.exists()
       || !comicsTmp.exists()
-      || !chaptersTmp.exists())
+      || !chaptersTmp.exists()
+    )
       return false
 
     db.close()

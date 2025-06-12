@@ -5,44 +5,53 @@ import androidx.core.net.toUri
 import androidx.room.Room
 import com.konformist.comicsreader.App
 import com.konformist.comicsreader.AppBackup
+import com.konformist.comicsreader.data.appfile.AppFileController
+import com.konformist.comicsreader.data.author.Author
+import com.konformist.comicsreader.data.author.AuthorController
+import com.konformist.comicsreader.data.author.AuthorCreate
+import com.konformist.comicsreader.data.author.AuthorDelete
+import com.konformist.comicsreader.data.author.AuthorUpdate
+import com.konformist.comicsreader.data.chapter.ChapterController
+import com.konformist.comicsreader.data.chapter.ChapterCreate
+import com.konformist.comicsreader.data.chapter.ChapterDelete
+import com.konformist.comicsreader.data.chapter.ChapterUpdate
+import com.konformist.comicsreader.data.chapter.ChapterUpdateComic
+import com.konformist.comicsreader.data.chapterpage.ChapterPageController
+import com.konformist.comicsreader.data.chapterpage.ChapterPageCreate
+import com.konformist.comicsreader.data.chapterpage.ChapterPageDelete
+import com.konformist.comicsreader.data.chapterpage.ChapterPageUpdate
+import com.konformist.comicsreader.data.comic.ComicController
+import com.konformist.comicsreader.data.comic.ComicCreate
+import com.konformist.comicsreader.data.comic.ComicDelete
+import com.konformist.comicsreader.data.comic.ComicUpdate
+import com.konformist.comicsreader.data.comiccover.ComicCoverController
+import com.konformist.comicsreader.data.comiccover.ComicCoverUpdate
+import com.konformist.comicsreader.data.comicoverride.ComicOverride
+import com.konformist.comicsreader.data.comicoverride.ComicOverrideController
+import com.konformist.comicsreader.data.comicoverride.ComicOverrideUpdate
+import com.konformist.comicsreader.data.language.Language
+import com.konformist.comicsreader.data.language.LanguageController
+import com.konformist.comicsreader.data.language.LanguageCreate
+import com.konformist.comicsreader.data.language.LanguageDelete
+import com.konformist.comicsreader.data.language.LanguageUpdate
+import com.konformist.comicsreader.data.parserconfig.ParserConfig
+import com.konformist.comicsreader.data.parserconfig.ParserConfigController
+import com.konformist.comicsreader.data.parserconfig.ParserConfigCreate
+import com.konformist.comicsreader.data.parserconfig.ParserConfigDelete
+import com.konformist.comicsreader.data.parserconfig.ParserConfigUpdate
+import com.konformist.comicsreader.data.tag.Tag
+import com.konformist.comicsreader.data.tag.TagController
+import com.konformist.comicsreader.data.tag.TagCreate
+import com.konformist.comicsreader.data.tag.TagDelete
+import com.konformist.comicsreader.data.tag.TagUpdate
+import com.konformist.comicsreader.db.AppDataStore
 import com.konformist.comicsreader.db.AppDatabase
-import com.konformist.comicsreader.db.author.Author
-import com.konformist.comicsreader.db.author.AuthorCreate
-import com.konformist.comicsreader.db.author.AuthorDelete
-import com.konformist.comicsreader.db.author.AuthorUpdate
-import com.konformist.comicsreader.db.chapter.ChapterCreate
-import com.konformist.comicsreader.db.chapter.ChapterUpdate
-import com.konformist.comicsreader.db.chapterpage.ChapterPageCreate
-import com.konformist.comicsreader.db.chapterpage.ChapterPageUpdate
-import com.konformist.comicsreader.db.comic.ComicCreate
-import com.konformist.comicsreader.db.comic.ComicDelete
-import com.konformist.comicsreader.db.comic.ComicUpdate
-import com.konformist.comicsreader.db.comiccover.ComicCoverUpdate
-import com.konformist.comicsreader.db.comicoverride.ComicOverride
-import com.konformist.comicsreader.db.comicoverride.ComicOverrideUpdate
-import com.konformist.comicsreader.db.language.Language
-import com.konformist.comicsreader.db.language.LanguageCreate
-import com.konformist.comicsreader.db.language.LanguageDelete
-import com.konformist.comicsreader.db.language.LanguageUpdate
-import com.konformist.comicsreader.db.parser.Parser
-import com.konformist.comicsreader.db.parser.ParserCreate
-import com.konformist.comicsreader.db.parser.ParserDelete
-import com.konformist.comicsreader.db.parser.ParserUpdate
-import com.konformist.comicsreader.db.tag.Tag
-import com.konformist.comicsreader.db.tag.TagCreate
-import com.konformist.comicsreader.db.tag.TagDelete
-import com.konformist.comicsreader.db.tag.TagUpdate
+import com.konformist.comicsreader.db.Settings
 import com.konformist.comicsreader.exceptions.DatabaseException
 import com.konformist.comicsreader.exceptions.FilesException
 import com.konformist.comicsreader.exceptions.ValidationException
 import com.konformist.comicsreader.utils.FileManager
-import com.konformist.comicsreader.webapi.controllers.AppFilesController
-import com.konformist.comicsreader.webapi.controllers.AuthorController
-import com.konformist.comicsreader.webapi.controllers.ChapterController
-import com.konformist.comicsreader.webapi.controllers.ComicController
-import com.konformist.comicsreader.webapi.controllers.LanguageController
-import com.konformist.comicsreader.webapi.controllers.ParserController
-import com.konformist.comicsreader.webapi.controllers.TagController
+import com.konformist.comicsreader.utils.RequestUtils
 import com.konformist.comicsreader.webapi.serializers.ChapterPageSerializer
 import com.konformist.comicsreader.webapi.serializers.ChapterSerializer
 import com.konformist.comicsreader.webapi.serializers.ComicSerializer
@@ -54,7 +63,6 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStreamReader
-import java.net.HttpURLConnection
 import java.net.URL
 
 class WebApi {
@@ -68,22 +76,25 @@ class WebApi {
   private val tagController = TagController(db.tagDao())
   private val authorController = AuthorController(db.authorDao())
   private val languageController = LanguageController(db.languageDao())
-  private val parserController = ParserController(db.parserDao())
-  private val filesController = AppFilesController(db.appFileDao())
-  private val chapterController = ChapterController(
-    db.chapterDao(),
+  private val parserConfigController = ParserConfigController(db.parserDao())
+  private val filesController = AppFileController(db.appFileDao())
+  private val chapterPageController = ChapterPageController(
     db.chapterPageDao(),
     filesController,
   )
-  private val comicController = ComicController(
-    db.comicCoverDao(),
-    db.comicOverrideDao(),
-    db.comicDao(),
-    filesController,
-    chapterController,
+  private val chapterController = ChapterController(
+    db.chapterDao(),
+    chapterPageController,
   )
-  private val archiveComic = ArchiveComic(
-    comicController,
+  private val comicCoverController = ComicCoverController(
+    db.comicCoverDao(),
+    filesController,
+  )
+  private val comicOverrideController = ComicOverrideController(db.comicOverrideDao())
+  private val comicController = ComicController(
+    db.comicDao(),
+    comicCoverController,
+    comicOverrideController,
     chapterController,
   )
 
@@ -104,7 +115,7 @@ class WebApi {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
 
-    return Json.encodeToString<Tag>(tagController.read(rowId))
+    return Json.encodeToString<Tag?>(tagController.read(rowId))
   }
 
   @Throws(DatabaseException::class)
@@ -140,7 +151,7 @@ class WebApi {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
 
-    return Json.encodeToString<Author>(authorController.read(rowId))
+    return Json.encodeToString<Author?>(authorController.read(rowId))
   }
 
   @Throws(DatabaseException::class)
@@ -176,7 +187,7 @@ class WebApi {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
 
-    return Json.encodeToString<Language>(languageController.read(rowId))
+    return Json.encodeToString<Language?>(languageController.read(rowId))
   }
 
   @Throws(DatabaseException::class)
@@ -204,7 +215,7 @@ class WebApi {
   }
 
   private fun getParsersAll(): String {
-    return Json.encodeToString<List<Parser>>(parserController.readAll())
+    return Json.encodeToString<List<ParserConfig>>(parserConfigController.readAll())
   }
 
   @Throws(ValidationException::class)
@@ -212,13 +223,13 @@ class WebApi {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
 
-    return Json.encodeToString<Parser>(parserController.read(rowId))
+    return Json.encodeToString<ParserConfig?>(parserConfigController.read(rowId))
   }
 
   @Throws(DatabaseException::class)
   private fun addParser(data: JSONObject): Long {
-    val decode = jsonIgnore.decodeFromString<ParserCreate>(data.toString())
-    return parserController.create(decode)
+    val decode = jsonIgnore.decodeFromString<ParserConfigCreate>(data.toString())
+    return parserConfigController.create(decode)
   }
 
   @Throws(ValidationException::class, DatabaseException::class)
@@ -226,8 +237,8 @@ class WebApi {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
 
-    val decode = jsonIgnore.decodeFromString<ParserUpdate>(data.toString())
-    return parserController.update(decode)
+    val decode = jsonIgnore.decodeFromString<ParserConfigUpdate>(data.toString())
+    return parserConfigController.update(decode)
   }
 
   @Throws(ValidationException::class, DatabaseException::class)
@@ -235,8 +246,8 @@ class WebApi {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
 
-    val decode = jsonIgnore.decodeFromString<ParserDelete>(data.toString())
-    return parserController.delete(decode)
+    val decode = jsonIgnore.decodeFromString<ParserConfigDelete>(data.toString())
+    return parserConfigController.delete(decode)
   }
 
   private fun getComicsAll(): JSONArray {
@@ -244,7 +255,7 @@ class WebApi {
   }
 
   @Throws(ValidationException::class)
-  private fun getComic(data: JSONObject): JSONObject {
+  private fun getComic(data: JSONObject): JSONObject? {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
 
@@ -280,7 +291,7 @@ class WebApi {
     val id = data.optLong("id")
     Validation.id(id, "id")
 
-    return archiveComic.uploadComic(id)
+    return comicController.toArchive(id)
   }
 
   @Throws(ValidationException::class, FilesException::class)
@@ -288,18 +299,14 @@ class WebApi {
     val uriStr = data.optString("uri")
     Validation.uri(uriStr, "uri")
 
-    return archiveComic.addComicFromArchive(uriStr)
+    return comicController.fromArchive(uriStr)
   }
 
   @Throws(ValidationException::class)
   private fun getComicOverride(data: JSONObject): String? {
     val comicId = data.optLong("comicId")
     Validation.id(comicId, "comicId")
-
-    return when (val row = comicController.readOverrideByComic(comicId)) {
-      null -> null
-      else -> Json.encodeToString<ComicOverride>(row)
-    }
+    return Json.encodeToString<ComicOverride?>(comicOverrideController.readByComic(comicId))
   }
 
   @Throws(ValidationException::class, DatabaseException::class)
@@ -308,7 +315,7 @@ class WebApi {
     Validation.id(rowId, "id")
 
     val decode = jsonIgnore.decodeFromString<ComicOverrideUpdate>(data.toString())
-    return comicController.updateOverride(decode)
+    return comicOverrideController.update(decode)
   }
 
   @Throws(ValidationException::class, DatabaseException::class)
@@ -316,10 +323,8 @@ class WebApi {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
 
-    val cover = comicController.readCover(rowId) ?: return false
     val decode = jsonIgnore.decodeFromString<ComicCoverUpdate>(data.toString())
-    decode.fileId = cover.fileId
-    return comicController.updateCover(decode)
+    return comicCoverController.update(decode)
   }
 
   @Throws(ValidationException::class, DatabaseException::class)
@@ -331,18 +336,8 @@ class WebApi {
     Validation.link(link, "link")
 
     val cookie = data.optString("cookie", "")
-    val connection = getConnection(URL(link), cookie)
 
-    // Получаем MIME тип из заголовков
-    val mimeType = connection.contentType
-
-    val cover = comicController.readCoverByComic(comicId) ?: return 0L
-    val result = comicController.createCoverFile(cover, mimeType, connection.inputStream)
-
-    connection.inputStream.close()
-    connection.disconnect()
-
-    return result
+    return comicCoverController.createFileFromRequest(comicId, link, cookie)
   }
 
   @Throws(ValidationException::class, DatabaseException::class)
@@ -353,21 +348,7 @@ class WebApi {
     val uriStr = data.optString("uri")
     Validation.uri(uriStr, "uri")
 
-    val extension = FileManager.getFileExtension(uriStr)
-    val path = App.context.contentResolver.openFileDescriptor(uriStr.toUri(), "r") ?: return 0L
-    val inputStream = FileInputStream(path.fileDescriptor)
-
-    val cover = comicController.readCoverByComic(comicId) ?: return 0L
-    val result = comicController.createCoverFile(
-      cover,
-      FileManager.getMimeFromExtension(extension),
-      inputStream,
-    )
-
-    inputStream.close()
-    path.close()
-
-    return result
+    return comicCoverController.createFileFromUri(comicId, uriStr)
   }
 
   @Throws(ValidationException::class, DatabaseException::class)
@@ -375,8 +356,8 @@ class WebApi {
     val comicId = data.optLong("comicId")
     Validation.id(comicId, "comicId")
 
-    val cover = comicController.readCoverByComic(comicId) ?: return false
-    return comicController.deleteCoverFile(cover)
+    val cover = comicCoverController.readByComic(comicId) ?: return false
+    return comicCoverController.deleteFile(cover)
   }
 
   @Throws(ValidationException::class)
@@ -411,12 +392,23 @@ class WebApi {
   }
 
   @Throws(ValidationException::class, DatabaseException::class)
+  private fun setChapterComic(data: JSONObject): Boolean {
+    val rowId = data.optLong("id")
+    Validation.id(rowId, "id")
+    val comicId = data.optLong("comicId")
+    Validation.id(comicId, "comicId")
+
+    val decode = jsonIgnore.decodeFromString<ChapterUpdateComic>(data.toString())
+    return chapterController.updateComic(decode)
+  }
+
+  @Throws(ValidationException::class, DatabaseException::class)
   private fun delChapter(data: JSONObject): Boolean {
     val rowId = data.getLong("id")
     Validation.id(rowId, "id")
 
-    val chapter = chapterController.read(rowId)
-    return chapterController.delete(chapter)
+    val decode = jsonIgnore.decodeFromString<ChapterDelete>(data.toString())
+    return chapterController.delete(decode)
   }
 
   @Throws(ValidationException::class)
@@ -424,7 +416,7 @@ class WebApi {
     val chapterId = data.getLong("chapterId")
     Validation.id(chapterId, "chapterId")
 
-    return ChapterPageSerializer.toJSONArray(chapterController.readPageByChapterAll(chapterId))
+    return ChapterPageSerializer.toJSONArray(chapterPageController.readByChapterAll(chapterId))
   }
 
   @Throws(ValidationException::class)
@@ -432,13 +424,13 @@ class WebApi {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
 
-    return ChapterPageSerializer.toJSON(chapterController.readPageWithFile(rowId))
+    return ChapterPageSerializer.toJSON(chapterPageController.readWithFile(rowId))
   }
 
   @Throws(ValidationException::class, DatabaseException::class)
   private fun addChapterPage(data: JSONObject): Long {
     val decode = jsonIgnore.decodeFromString<ChapterPageCreate>(data.toString())
-    return chapterController.createPage(decode)
+    return chapterPageController.create(decode)
   }
 
   @Throws(ValidationException::class, DatabaseException::class)
@@ -446,10 +438,8 @@ class WebApi {
     val rowId = data.getLong("id")
     Validation.id(rowId, "id")
 
-    val row = chapterController.readPage(rowId)
     val decode = jsonIgnore.decodeFromString<ChapterPageUpdate>(data.toString())
-    decode.fileId = row.fileId
-    return chapterController.updatePage(decode)
+    return chapterPageController.update(decode)
   }
 
   @Throws(ValidationException::class, DatabaseException::class)
@@ -457,61 +447,32 @@ class WebApi {
     val rowId = data.getLong("id")
     Validation.id(rowId, "id")
 
-    val row = chapterController.readPage(rowId)
-    return chapterController.deletePage(row)
+    val decode = jsonIgnore.decodeFromString<ChapterPageDelete>(data.toString())
+    return chapterPageController.delete(decode)
   }
 
   @Throws(ValidationException::class, DatabaseException::class)
   private fun downloadChapterPageFile(data: JSONObject): Long {
-    val chapterPageId = data.optLong("chapterPageId")
-    Validation.id(chapterPageId, "chapterPageId")
+    val id = data.optLong("chapterPageId")
+    Validation.id(id, "chapterPageId")
 
     val link = data.optString("link", "")
     Validation.link(link, "link")
 
     val cookie = data.optString("cookie", "")
-    val connection = getConnection(URL(link), cookie)
 
-    // Получаем MIME тип из заголовков
-    val mimeType = connection.contentType
-
-    val result = chapterController.createPageFile(
-      chapterController.readPage(chapterPageId),
-      mimeType,
-      connection.inputStream,
-    )
-
-    connection.inputStream.close()
-    connection.disconnect()
-
-    return result
+    return chapterPageController.createFileFromRequest(id, link, cookie)
   }
 
   @Throws(ValidationException::class, DatabaseException::class)
   private fun addChapterPageFile(data: JSONObject): Long {
-    val chapterPageId = data.optLong("chapterPageId")
-    Validation.id(chapterPageId, "chapterPageId")
+    val id = data.optLong("chapterPageId")
+    Validation.id(id, "chapterPageId")
 
     val uriStr = data.optString("uri")
     Validation.uri(uriStr, "uri")
 
-    val lastDotIndex = uriStr.lastIndexOf('.')
-    val extension = if (lastDotIndex == -1 || lastDotIndex >= uriStr.length - 1) ""
-    else uriStr.substring(lastDotIndex + 1) // No extension found
-
-    val path = App.context.contentResolver.openFileDescriptor(uriStr.toUri(), "r") ?: return 0L
-    val fileInputStream = FileInputStream(path.fileDescriptor)
-
-    val result = chapterController.createPageFile(
-      chapterController.readPage(chapterPageId),
-      FileManager.getMimeFromExtension(extension),
-      fileInputStream,
-    )
-
-    fileInputStream.close()
-    path.close()
-
-    return result
+    return chapterPageController.createFileFromUri(id, uriStr)
   }
 
   @Throws(ValidationException::class, DatabaseException::class)
@@ -519,30 +480,21 @@ class WebApi {
     val chapterPageId = data.optLong("chapterPageId")
     Validation.id(chapterPageId, "chapterPageId")
 
-    val page = chapterController.readPage(chapterPageId)
-    return chapterController.deletePageFile(page)
+    val page = chapterPageController.read(chapterPageId) ?: return false
+    return chapterPageController.deleteFile(page)
   }
 
-  private fun getSettings(): JSONObject {
+  private fun getSettings(): String {
     runBlocking { AppDataStore.readStore() }
-    val result = JSONObject()
-    result.put("autoReading", AppDataStore.settings.autoReading)
-    result.put("autoReadingTimeout", AppDataStore.settings.autoReadingTimeout)
-    result.put("readingMode", AppDataStore.settings.readingMode)
-    result.put("isCompress", AppDataStore.settings.isCompress)
-    return result
+    return Json.encodeToString<Settings>(AppDataStore.settings)
   }
 
   private fun setSettings(data: JSONObject): Boolean {
     val readingMode = data.optString("readingMode")
-
     Validation.string(readingMode, "readingMode")
     Validation.contain(readingMode, AppDataStore.readingModeList, "readingMode")
 
-    AppDataStore.settings.autoReading = data.optBoolean("autoReading", false)
-    AppDataStore.settings.autoReadingTimeout = data.optInt("autoReadingTimeout", 0)
-    AppDataStore.settings.readingMode = readingMode
-    AppDataStore.settings.isCompress = data.optBoolean("isCompress", true)
+    AppDataStore.settings = Json.decodeFromString<Settings>(data.toString())
     return runBlocking { AppDataStore.saveStore() }
   }
 
@@ -587,53 +539,12 @@ class WebApi {
     return true
   }
 
-  private fun getConnection(url: URL, cookie: String? = ""): HttpURLConnection {
-    val connection = url.openConnection() as HttpURLConnection
-    connection.requestMethod = "GET"
-
-    if (!cookie.isNullOrBlank()) connection.setRequestProperty("Cookie", cookie)
-
-    connection.setRequestProperty(
-      "User-Agent",
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
-    )
-    connection.setRequestProperty("Accept-Language", "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7")
-    connection.setRequestProperty("Priority", "u=0, i")
-    connection.setRequestProperty("Referer", "${url.protocol}://${url.host}")
-    connection.setRequestProperty(
-      "sec-ch-ua",
-      "\"Chromium\";v=\"136\", \"Google Chrome\";v=\"136\", \"Not.A/Brand\";v=\"99\""
-    )
-    connection.setRequestProperty("sec-ch-ua-arch", "\"x86\"")
-    connection.setRequestProperty("sec-ch-ua-bitness", "\"64\"")
-    connection.setRequestProperty("sec-ch-ua-full-version", "\"136.0.7103.114\"")
-    connection.setRequestProperty(
-      "sec-ch-ua-full-version-list",
-      "\"Chromium\";v=\"136.0.7103.114\", \"Google Chrome\";v=\"136.0.7103.114\", \"Not.A/Brand\";v=\"99.0.0.0\""
-    )
-    connection.setRequestProperty("sec-ch-ua-mobile", "?0")
-    connection.setRequestProperty("sec-ch-ua-model", "\"\"")
-    connection.setRequestProperty("sec-ch-ua-platform", "\"Windows\"")
-    connection.setRequestProperty("sec-ch-ua-platform-version", "\"19.0.0\"")
-    connection.setRequestProperty("sec-fetch-dest", "document")
-    connection.setRequestProperty("sec-fetch-mode", "navigate")
-    connection.setRequestProperty("sec-fetch-site", "same-origin")
-    connection.setRequestProperty("sec-fetch-user", "?1")
-    connection.setRequestProperty("upgrade-insecure-requests", "1")
-    connection.connect()
-
-    if (connection.responseCode != 200)
-      throw Exception("Error connection: ${connection.responseCode}")
-
-    return connection
-  }
-
   private fun downloadHTML(data: JSONObject): String {
     val url = data.optString("url", "")
     Validation.link(url, "url")
 
     val cookie = data.optString("cookie", "")
-    val connection = getConnection(URL(url), cookie)
+    val connection = RequestUtils.getConnection(URL(url), cookie)
 
     // Читаем входной поток
     val inputStream = connection.inputStream
@@ -700,6 +611,7 @@ class WebApi {
         Query.CHAPTER_CHAPTER_GET to { getChapter(data) },
         Query.CHAPTER_CHAPTER_ADD to { addChapter(data) },
         Query.CHAPTER_CHAPTER_SET to { setChapter(data) },
+        Query.CHAPTER_COMIC_SET to { setChapterComic(data) },
         Query.CHAPTER_CHAPTER_DEL to { delChapter(data) },
         Query.CHAPTER_PAGE_LIST to { getChapterPagesAll(data) },
         Query.CHAPTER_PAGE_GET to { getChapterPage(data) },

@@ -7,7 +7,10 @@
   >
     <template #default="{ props, isActive }">
       <v-text-field
-        v-bind="{ ...props, ...$attrs }"
+        v-bind="{
+          ...props,
+          ...$attrs,
+        }"
         :active="chips.length > 0"
         :label="label"
         readonly

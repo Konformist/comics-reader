@@ -11,6 +11,7 @@ import type {
 } from '@/plugins/WebApiPlugin.ts';
 import { faker } from '@faker-js/faker';
 
+// @todo добавить предсоздание данных
 export default class WebApiPluginFake {
   LANGUAGE_COUNT = 10;
   TAG_COUNT = 50;

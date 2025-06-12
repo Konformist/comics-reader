@@ -1,7 +1,7 @@
 package com.konformist.comicsreader.webapi.serializers
 
-import com.konformist.comicsreader.db.comiccover.ComicCover
-import com.konformist.comicsreader.db.comiccover.ComicCoverWithFile
+import com.konformist.comicsreader.data.comiccover.ComicCover
+import com.konformist.comicsreader.data.comiccover.ComicCoverWithFile
 import kotlinx.serialization.json.Json
 import org.json.JSONObject
 

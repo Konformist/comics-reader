@@ -69,7 +69,10 @@
             :to="chapter.total ? {
               name: '/chapters/[id]/read',
               params: { id: chapter.id },
-              query: { comic: comicId, page: chapter.readLast },
+              query: {
+                comic: comicId,
+                page: chapter.readLast,
+              },
             } : undefined"
           >
             <template #append>
@@ -136,13 +139,20 @@ const {
 
 const chapters = ref<ChapterModel[]>([]);
 const chaptersList = computed(() => (
-  chapters.value.map((e, i) => ({
-    id: e.id,
-    name: e.name || `Глава ${i + 1}`,
-    readLast: e.pages.findIndex((e) => !e.isRead),
-    read: e.pages.filter((e) => e.isRead).length,
-    total: e.pages.length,
-  }))
+  chapters.value
+    .map((e, i) => {
+      const total = e.pages.length;
+      const read = e.pages.filter((e) => e.isRead).length;
+      const readIndex = e.pages.findIndex((e) => !e.isRead);
+      return {
+        id: e.id,
+        name: e.name || `Глава ${i + 1}`,
+        readLast: readIndex < 1 ? 0 : readIndex - 1,
+        read,
+        total,
+      };
+    })
+    .reverse()
 ));
 
 const loadChapters = async () => {

@@ -61,6 +61,12 @@ export default defineConfig([
         },
       }],
 
+      'vue/space-infix-ops': 'error',
+      'vue/object-curly-spacing': ['error', 'always'],
+      'vue/object-curly-newline': ['error', { multiline: true }],
+      'vue/object-property-newline': 'error',
+      'vue/comma-dangle': ['error', 'always-multiline'],
+      'vue/quote-props': ['error', 'consistent-as-needed'],
       'vue/script-indent': ['error', 2],
       'vue/first-attribute-linebreak': ['error', {
         singleline: 'ignore',

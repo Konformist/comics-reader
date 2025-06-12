@@ -1,7 +1,7 @@
 package com.konformist.comicsreader.webapi.serializers
 
 import android.net.Uri
-import com.konformist.comicsreader.db.appfile.AppFile
+import com.konformist.comicsreader.data.appfile.AppFile
 import com.konformist.comicsreader.utils.FileManager
 import kotlinx.serialization.json.Json
 import org.json.JSONObject

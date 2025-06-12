@@ -7,6 +7,7 @@ import com.konformist.comicsreader.db.AppDatabase
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.FileWriter
 import java.io.IOException
@@ -19,10 +20,12 @@ class FileManager {
 
     val dataBaseFile: File get() = App.context.getDatabasePath(AppDatabase.DATABASE_NAME)
 
-    const val COMICS_DIR_NAME: String = "comics-images"
+    const val CHAPTERS_DIR_NAME: String = "chapters"
+    const val COMICS_DIR_NAME: String = "comics"
     const val BACKUPS_DIR_NAME: String = "backups"
 
-    val comicsImagesDir: File get() = File(filesDir, COMICS_DIR_NAME)
+    val comicsDir: File get() = File(filesDir, COMICS_DIR_NAME)
+    val chaptersDir: File get() = File(filesDir, CHAPTERS_DIR_NAME)
 
     val downloadsDir: File =
       Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
@@ -31,6 +34,8 @@ class FileManager {
 
     val downloadsAppDir: File get() = File(downloadsDir, App.appName)
     val documentsAppDir: File get() = File(documentsDir, App.appName)
+
+    val backupsDir: File get() = File(documentsAppDir, BACKUPS_DIR_NAME)
 
     fun getExtensionFromMime(mimeType: String?): String {
       if (mimeType == null) return "bin" // Если MIME не найден, даём расширение по умолчанию
@@ -63,11 +68,21 @@ class FileManager {
       else uriStr.substring(lastDotIndex + 1)
     }
 
-    fun writeStream(outputStream: FileOutputStream, inputStream: InputStream) {
-      val buffer = ByteArray(4096)
-      var bytesRead: Int
-      while (inputStream.read(buffer).also { bytesRead = it } != -1) {
-        outputStream.write(buffer, 0, bytesRead)
+    fun <T> getInputByUri(uri: Uri, callback: (value: FileInputStream) -> T?): T? {
+      return App.context.contentResolver.openFileDescriptor(uri, "r")?.use {
+        FileInputStream(it.fileDescriptor).use { fileIn ->
+          return callback(fileIn)
+        }
+      }
+    }
+
+    fun writeStream(outFile: File, inputStream: InputStream) {
+      FileOutputStream(outFile).use { it ->
+        val buffer = ByteArray(4096)
+        var bytesRead: Int
+        while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+          it.write(buffer, 0, bytesRead)
+        }
       }
     }
 

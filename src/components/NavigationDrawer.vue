@@ -1,9 +1,7 @@
 <template>
   <v-dialog
     v-model="model"
-    :content-props="{
-      style: 'margin: 0 64px 0 0',
-    }"
+    :content-props="{ style: 'margin: 0 64px 0 0' }"
     height="100vh"
     max-height="100vh"
     max-width="calc(100vw - 64px)"

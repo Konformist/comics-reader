@@ -6,6 +6,7 @@
 
 // Styles
 import 'swiper/css';
+import 'swiper/css/zoom';
 import 'unfonts.css';
 import '@/styles/styles.scss';
 

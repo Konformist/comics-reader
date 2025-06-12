@@ -58,11 +58,11 @@
     appear
     append-icon="$arrow-right"
     text="Продолжить"
-    :to="{
+    @click="$router.replace({
       name: '/chapters/[id]/read',
       params: { id: nextChapterId },
       query: { comic: comicId },
-    }"
+    })"
   />
 </template>
 
@@ -106,6 +106,10 @@ const readContentRef = ref<typeof ReadContent>();
 const showPages = ref(false);
 const currentPage = ref(+(route.query?.page || 0));
 
+router.beforeResolve(() => {
+  currentPage.value = 0;
+});
+
 const onOpenPages = () => {
   readContentRef.value?.stop();
   showPages.value = true;
@@ -148,26 +152,18 @@ onMounted(async () => {
 
   if (!chapter.value.id) {
     router.replace({ name: '/' });
-    return;
-  }
-
-  loadChapters();
-
-  if ((await KeepAwake.isSupported()).isSupported) {
-    await KeepAwake.keepAwake();
-  }
-
-  if (Capacitor.isNativePlatform()) {
-    await StatusBar.hide();
+  } else {
+    loadChapters();
+    if (Capacitor.isNativePlatform()) {
+      await KeepAwake.keepAwake();
+      await StatusBar.hide();
+    }
   }
 });
 
 onBeforeUnmount(async () => {
-  if ((await KeepAwake.isSupported()).isSupported) {
-    await KeepAwake.allowSleep();
-  }
-
   if (Capacitor.isNativePlatform()) {
+    await KeepAwake.allowSleep();
     await StatusBar.show();
   }
 });

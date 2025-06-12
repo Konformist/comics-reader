@@ -1,26 +1,39 @@
 <template>
-  <v-img
-    v-intersect.once="onRead"
-    :max-height="maxHeight"
-    :max-width="maxWidth"
-    :min-height="!load || error || !item.file?.url ? '100vh' : undefined"
-    :src="item.file?.url"
-    @error="onError()"
-    @load="onLoad()"
-  >
-    <template #placeholder>
-      <div class="w-100 h-100 d-flex justify-center align-center">
-        <v-progress-circular
-          indeterminate
-        />
+  <div class="position-relative swiper-zoom-container">
+    <img
+      v-intersect.once="onRead"
+      :src="item.file?.url"
+      :style="{
+        display: 'block',
+        maxWidth: maxWidth,
+        maxHeight: maxHeight,
+        height: loading || error || !item.file?.url ? '100vh' : undefined,
+      }"
+      @error="onError()"
+      @load="onLoad()"
+    >
+    <div
+      class="position-absolute w-100 h-100 d-flex justify-center align-center"
+      style="inset: 0"
+    >
+      <v-progress-circular
+        v-if="loading"
+        indeterminate
+      />
+      <div
+        v-else-if="error"
+        class="text-body-2 text-grey-darken-2"
+      >
+        Ошибка загрузки
       </div>
-    </template>
-    <template #error>
-      <div class="w-100 h-100 d-flex justify-center align-center text-body-2 text-grey-darken-2">
+      <div
+        v-else-if="!item.file?.url"
+        class="text-body-2 text-grey-darken-2"
+      >
         Нет изображения
       </div>
-    </template>
-  </v-img>
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -38,17 +51,18 @@ const { item, maxWidth = undefined, maxHeight = undefined } = defineProps<{
   maxHeight?: string
 }>();
 
-const load = ref(false);
 const error = ref(false);
 
+const loading = ref(!!item.file?.url);
+
 const onError = (): void => {
-  load.value = false;
+  loading.value = false;
   error.value = true;
   emit('error');
 };
 
 const onLoad = (): void => {
-  load.value = true;
+  loading.value = false;
   error.value = false;
   emit('load');
 };
@@ -56,7 +70,9 @@ const onLoad = (): void => {
 const onRead = (isIntersect: boolean): void => {
   if (item.file?.url
     && !item.isRead
-    && isIntersect) {
+    && isIntersect
+    && !loading.value
+    && !error.value) {
     emit('read');
   }
 };

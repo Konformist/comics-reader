@@ -52,7 +52,6 @@ import com.konformist.comicsreader.exceptions.FilesException
 import com.konformist.comicsreader.exceptions.ValidationException
 import com.konformist.comicsreader.parser.ParserController
 import com.konformist.comicsreader.utils.FileManager
-import com.konformist.comicsreader.utils.RequestUtils
 import com.konformist.comicsreader.webapi.serializers.ChapterPageSerializer
 import com.konformist.comicsreader.webapi.serializers.ChapterSerializer
 import com.konformist.comicsreader.webapi.serializers.ComicSerializer
@@ -60,11 +59,8 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.BufferedReader
 import java.io.File
 import java.io.FileInputStream
-import java.io.InputStreamReader
-import java.net.URL
 
 class WebApi {
   private val jsonIgnore = Json { ignoreUnknownKeys = true }
@@ -572,34 +568,6 @@ class WebApi {
     return true
   }
 
-  private fun downloadHTML(data: JSONObject): String {
-    val url = data.optString("url", "")
-    Validation.link(url, "url")
-
-    val cookie = data.optString("cookie", "")
-    val connection = RequestUtils.getConnection(URL(url), cookie)
-
-    // Читаем входной поток
-    val inputStream = connection.inputStream
-    val inputStreamReader = InputStreamReader(inputStream)
-    val reader = BufferedReader(inputStreamReader)
-    val stringBuilder = StringBuilder()
-
-    var line: String?
-    while (reader.readLine().also { line = it } != null) {
-      stringBuilder.append(line)
-    }
-
-    reader.close()
-    inputStreamReader.close()
-    inputStream.close()
-    connection.inputStream.close()
-    connection.disconnect()
-
-    // @TODO Fuck
-    return "\"${stringBuilder.replace(Regex("""""""), "\\\\\\\"")}\""
-  }
-
   private fun migrate(): Boolean {
     return true
   }
@@ -664,7 +632,6 @@ class WebApi {
         Query.SETTINGS_SETTINGS_SET to { setSettings(data) },
         Query.BACKUP_BACKUP_ADD to { addBackup() },
         Query.BACKUP_BACKUP_RESTORE to { restoreBackup(data) },
-        Query.PARSER_HTML_DOWNLOAD to { downloadHTML(data) },
         Query.DATA_DATA_MIGRATE to { migrate() }
       )
 

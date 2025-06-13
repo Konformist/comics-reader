@@ -67,7 +67,6 @@ class Query {
     const val BACKUP_BACKUP_ADD = "backup/backup/add"
     const val BACKUP_BACKUP_RESTORE = "backup/backup/restore"
 
-    const val PARSER_HTML_DOWNLOAD = "parser/html/download"
     const val DATA_DATA_MIGRATE = "data/data/migrate"
   }
 }

@@ -15,6 +15,7 @@ import com.konformist.comicsreader.utils.FileManager
 import com.konformist.comicsreader.utils.comicarchive.ComicArchive
 import com.konformist.comicsreader.webapi.Validation
 import java.io.File
+import java.io.FileInputStream
 
 class ComicController(
   private val dao: ComicDao,
@@ -101,18 +102,31 @@ class ComicController(
   fun fromArchive(uri: String): Long {
     val result = archive.comicFromArchive(uri) ?: return 0L
 
-    val comicId = create(result.comic)
+    val comicId = create(
+      ComicCreate(
+        name = result.title,
+        annotation = result.annotation,
+      )
+    )
+
+    if (result.cover.isNotBlank()) {
+      comicCoverController.readByComic(comicId)?.let { cover ->
+        FileInputStream(result.cover).use {
+          val extension = FileManager.getFileExtension(result.cover)
+          val mime = FileManager.getMimeFromExtension(extension)
+          comicCoverController.createFile(cover, mime, it)
+        }
+      }
+    }
+
     result.chapters.forEach { chapter ->
       val chapterId = chapterController.create(
-        ChapterCreate(
-          name = chapter.chapter.name,
-          comicId = comicId,
-        )
+        ChapterCreate(name = chapter.title, comicId = comicId)
       )
 
-      chapter.files.forEach { file ->
+      chapter.pages.forEach { file ->
         val pageId = chapterController.createPage(ChapterPageCreate(chapterId = chapterId))
-        chapterController.createPageFile(pageId, file)
+        chapterController.createPageFile(pageId, File(file))
       }
     }
 

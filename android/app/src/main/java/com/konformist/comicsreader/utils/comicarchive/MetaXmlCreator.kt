@@ -1,44 +1,47 @@
-package com.konformist.comicsreader.utils
+package com.konformist.comicsreader.utils.comicarchive
 
 import android.util.Xml
-import com.konformist.comicsreader.db.author.Author
-import com.konformist.comicsreader.db.chapter.ChapterWithPages
-import com.konformist.comicsreader.db.comic.Comic
-import com.konformist.comicsreader.db.comiccover.ComicCover
-import com.konformist.comicsreader.db.language.Language
-import com.konformist.comicsreader.webapi.ArchiveComic
+import com.konformist.comicsreader.data.author.Author
+import com.konformist.comicsreader.data.comic.Comic
+import com.konformist.comicsreader.data.language.Language
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import java.io.FileOutputStream
 
-class AcbfXml {
-  private var comic: Comic? = null
-  private var comicCover: ComicCover? = null
-  private var chapters: List<ChapterWithPages>? = null
+class MetaXmlCreator {
   private var authors: List<Author>? = null
   private var language: Language? = null
+  private var comic: Comic? = null
+  private var cover: String = ""
 
-  fun addComic(value: Comic): AcbfXml {
+  private data class Chapter(
+    val name: String,
+    val pages: List<String>,
+  )
+
+  private var chapters: MutableList<Chapter> = mutableListOf()
+
+  fun addComic(value: Comic): MetaXmlCreator {
     comic = value
     return this
   }
 
-  fun addCover(value: ComicCover): AcbfXml {
-    comicCover = value
+  fun addCover(value: String): MetaXmlCreator {
+    cover = value
     return this
   }
 
-  fun addChapters(value: List<ChapterWithPages>): AcbfXml {
-    chapters = value
+  fun addChapter(name: String, pages: List<String>): MetaXmlCreator {
+    chapters.add(Chapter(name = name, pages = pages))
     return this
   }
 
-  fun addAuthors(value: List<Author>): AcbfXml {
+  fun addAuthors(value: List<Author>): MetaXmlCreator {
     authors = value
     return this
   }
 
-  fun addLanguage(value: Language): AcbfXml {
+  fun addLanguage(value: Language): MetaXmlCreator {
     language = value
     return this
   }
@@ -52,19 +55,19 @@ class AcbfXml {
   }
 
   private fun createCoverpage(serializer: XmlSerializer) {
-    if (comicCover == null) return
-
-    serializer.startTag("", "coverpage")
-    createImage(serializer, "cover.jpg")
-    serializer.endTag("", "coverpage")
+    if (cover.isNotBlank()) {
+      serializer.startTag("", "coverpage")
+      createImage(serializer, cover)
+      serializer.endTag("", "coverpage")
+    }
   }
 
   private fun createAuthor(serializer: XmlSerializer, author: Author) {
-    if (author.name.isBlank()) return
-
-    serializer.startTag("", "author")
-    serializer.text(author.name)
-    serializer.endTag("", "author")
+    if (author.name.isNotBlank()) {
+      serializer.startTag("", "author")
+      serializer.text(author.name)
+      serializer.endTag("", "author")
+    }
   }
 
   private fun createTitle(serializer: XmlSerializer, title: String) {
@@ -76,46 +79,38 @@ class AcbfXml {
     }
   }
 
-  private fun createBookAnnotation(serializer: XmlSerializer) {
-    if (comic?.annotation.isNullOrBlank()) return
-
-    serializer.startTag("", "annotation")
+  private fun createBookAnnotation(serializer: XmlSerializer, value: String) {
+    if (value.isNotBlank()) {
+      serializer.startTag("", "annotation")
 //    serializer.attribute("", "lang", "en")
-    serializer.text(comic?.annotation)
-    serializer.endTag("", "annotation")
+      serializer.text(value)
+      serializer.endTag("", "annotation")
+    }
   }
 
   private fun createMetaData(serializer: XmlSerializer) {
     serializer.startTag("", "meta-data")
     serializer.startTag("", "book-info")
+
     authors?.forEach { author -> createAuthor(serializer, author) }
-    comic?.let { createTitle(serializer, it.name) }
-    createBookAnnotation(serializer)
+    comic?.let {
+      createTitle(serializer, it.name)
+      createBookAnnotation(serializer, it.annotation)
+    }
     createCoverpage(serializer)
+
     serializer.endTag("", "book-info")
     serializer.endTag("", "meta-data")
   }
 
   private fun createBody(serializer: XmlSerializer) {
-    if (chapters.isNullOrEmpty()) return
-
     serializer.startTag("", "body")
-    val chaptersLength = if (chapters == null) 0
-    else ArchiveComic.getPadCount(chapters!!.size)
-
-    chapters!!.forEachIndexed { iChapter, chapter ->
-      val length = ArchiveComic.getPadCount(chapter.pages.size)
-      val dirName = ArchiveComic.createPadName(chaptersLength, iChapter)
-
+    chapters.forEach { chapter ->
       chapter.pages.forEachIndexed { index, page ->
-        page.file?.let { file ->
-          serializer.startTag("", "page")
-          if (index == 0) chapter.chapter.name?.let { createTitle(serializer, it) }
-          val ext = File(file.path).extension
-          val fileName = "${ArchiveComic.createPadName(length, index)}.$ext"
-          createImage(serializer, "$dirName/$fileName")
-          serializer.endTag("", "page")
-        }
+        serializer.startTag("", "page")
+        if (index == 0) createTitle(serializer, chapter.name)
+        createImage(serializer, page)
+        serializer.endTag("", "page")
       }
     }
     serializer.endTag("", "body")

@@ -1,20 +1,18 @@
 package com.konformist.comicsreader.utils.comicarchive
 
 import androidx.core.net.toUri
-import com.konformist.comicsreader.data.chapter.ChapterCreate
 import com.konformist.comicsreader.data.chapter.ChapterWithPages
 import com.konformist.comicsreader.data.comic.ComicController
-import com.konformist.comicsreader.data.comic.ComicCreate
 import com.konformist.comicsreader.data.comic.ComicLite
 import com.konformist.comicsreader.exceptions.FilesException
 import com.konformist.comicsreader.utils.FileManager
 import com.konformist.comicsreader.utils.archive.ArchiveFormat
 import com.konformist.comicsreader.utils.archive.ArchiveUtils
-import kotlinx.coroutines.runBlocking
 import java.io.File
 
 class ComicArchive() {
   private val dirTemp = File(FileManager.cacheDir, "comic-temp")
+  private val metaXml = "meta.acbf"
 
   private fun deleteTempDirectory() {
     if (dirTemp.exists()) dirTemp.deleteRecursively()
@@ -39,17 +37,37 @@ class ComicArchive() {
     }
   }
 
-  data class ChapterResult(
-    val chapter: ChapterCreate,
-    val files: List<File>,
-  )
+  private fun readWithoutMeta(tree: Sequence<File>): MetaXmlReader.Result {
+    val pages: MutableList<String> = tree
+      .map { it.path }
+      .toMutableList()
 
-  data class FromResult(
-    val comic: ComicCreate,
-    val chapters: List<ChapterResult>
-  )
+    return MetaXmlReader.Result(
+      title = "New Comic",
+      cover = tree.first().path,
+      chapters = mutableListOf(
+        MetaXmlReader.ResultChapter(pages = pages)
+      )
+    )
+  }
 
-  fun comicFromArchive(uriStr: String): FromResult? {
+  private fun readWithMeta(meta: File): MetaXmlReader.Result {
+    val xmlReader = MetaXmlReader()
+    val data = xmlReader.read(meta)
+
+    if (data.cover.isNotBlank())
+      data.cover = File(dirTemp, data.cover).path
+
+    data.chapters.forEach { item ->
+      item.pages = item.pages
+        .map { page -> File(dirTemp, page).path }
+        .toMutableList()
+    }
+
+    return data
+  }
+
+  fun comicFromArchive(uriStr: String): MetaXmlReader.Result? {
     val extension = FileManager.getFileExtension(uriStr)
     val archiveFormat = getArchiveFormat(extension)
 
@@ -59,25 +77,10 @@ class ComicArchive() {
         .extractFactory()
         .extract(file, archiveFormat, dirTemp)
 
-      val files = mutableListOf<File>()
+      val tree = dirTemp.walk().filter { file -> file.isFile }
+      val meta = tree.find { file -> file.name == metaXml }
 
-      // TODO хз, вроде хрень
-      runBlocking {
-        dirTemp.walk().forEach { file ->
-          if (file.isFile) files.add(file)
-        }
-      }
-
-      val comic = ComicCreate(name = "New Comic")
-      val chapter = ChapterResult(
-        chapter = ChapterCreate(comicId = 0),
-        files = files,
-      )
-
-      FromResult(
-        comic = comic,
-        chapters = listOf(chapter)
-      )
+      meta?.let { readWithMeta(it) } ?: readWithoutMeta(tree)
     }
   }
 
@@ -98,24 +101,47 @@ class ComicArchive() {
     val compress = ArchiveUtils.compressFactory()
     val chaptersLength = chapters.size.toString().length
 
-    chapters.forEachIndexed { iChapter, chapter ->
-      val chapterPad = pad(chaptersLength, iChapter + 1)
-      val chapterNameDir = if (chapter.chapter?.name?.isNotBlank() != true) chapterPad
-      else "$chapterPad-${chapter.chapter.name}"
-      val chapterDir = File(dirTemp, chapterNameDir)
-      chapterDir.mkdirs()
-      compress.addFile(chapterDir)
+    val metaFile = File(dirTemp, metaXml)
+    compress.addFile(metaFile)
+    val meta = MetaXmlCreator()
+      .addComic(comic.comic)
 
-      val pagesLength = chapter.pages.size.toString().length
-      chapter.pages.forEachIndexed { iPage, page ->
-        page.file?.let { file ->
-          val pagePad = pad(pagesLength, iPage + 1)
-          val fileFrom = File(FileManager.filesDir, file.path)
-          val fileTo = File(chapterDir, "$pagePad.${FileManager.getExtensionFromMime(file.mime)}")
-          fileFrom.copyTo(fileTo)
+    if (comic.cover?.file != null) {
+      val coverFrom = File(FileManager.filesDir, comic.cover.file.path)
+      val coverTo = File(dirTemp, "cover.${coverFrom.extension}")
+      coverFrom.copyTo(coverTo)
+      compress.addFile(coverTo)
+      meta.addCover(coverTo.relativeTo(dirTemp).path)
+    }
+
+    chapters.forEachIndexed { iChapter, chapter ->
+      chapter.chapter?.let {
+        val chapterPad = pad(chaptersLength, iChapter + 1)
+        val chapterDir = File(dirTemp, chapterPad)
+
+        chapterDir.mkdirs()
+        compress.addFile(chapterDir)
+
+        val files = mutableListOf<String>()
+
+        val pagesLength = chapter.pages.size.toString().length
+        chapter.pages.forEachIndexed { iPage, page ->
+          page.file?.let { file ->
+            val pagePad = pad(pagesLength, iPage + 1)
+            val fileFrom = File(FileManager.filesDir, file.path)
+            val fileTo = File(chapterDir, "$pagePad.${fileFrom.extension}")
+            fileFrom.copyTo(fileTo)
+            files.add(fileTo.relativeTo(dirTemp).path)
+          }
         }
+
+        val name = if (chapter.chapter.name.isBlank()) chapterPad
+        else chapter.chapter.name
+        meta.addChapter(name, files)
       }
     }
+
+    meta.create(metaFile)
 
     val outFile = createOutputFile(comic.comic.name)
     val parentDir = outFile.parentFile ?: return false

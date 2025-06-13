@@ -204,6 +204,13 @@ export interface IApi {
     request: { id: number }
     response: boolean
   }
+  'comic/comic/parse': {
+    request: {
+      id: number
+      cookie?: string
+    }
+    response: boolean
+  }
   'comic/comic/upload': {
     request: { id: number }
     response: boolean
@@ -317,13 +324,6 @@ export interface IApi {
     request: object
     response: boolean
   }
-  'parser/html/download': {
-    request: {
-      url: string
-      cookie?: string
-    }
-    response: string
-  }
   'data/data/migrate': {
     request: object
     response: boolean
@@ -422,7 +422,6 @@ class WebApiPlugin extends WebPlugin implements IWebApiPlugin {
       case 'settings/settings/set': result = true; break;
       case 'backup/backup/add': result = true; break;
       case 'backup/backup/restore': result = true; break;
-      case 'parser/html/download': result = ''; break;
       default: break;
     }
 

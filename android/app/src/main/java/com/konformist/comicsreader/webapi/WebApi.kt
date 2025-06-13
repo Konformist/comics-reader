@@ -50,6 +50,7 @@ import com.konformist.comicsreader.db.Settings
 import com.konformist.comicsreader.exceptions.DatabaseException
 import com.konformist.comicsreader.exceptions.FilesException
 import com.konformist.comicsreader.exceptions.ValidationException
+import com.konformist.comicsreader.parser.ParserController
 import com.konformist.comicsreader.utils.FileManager
 import com.konformist.comicsreader.utils.RequestUtils
 import com.konformist.comicsreader.webapi.serializers.ChapterPageSerializer
@@ -96,6 +97,16 @@ class WebApi {
     comicCoverController,
     comicOverrideController,
     chapterController,
+  )
+
+  private val parserController = ParserController(
+    tagController,
+    authorController,
+    languageController,
+    comicController,
+    comicCoverController,
+    chapterController,
+    chapterPageController,
   )
 
   fun <T : Exception> wrappedToError(value: T): String {
@@ -285,6 +296,28 @@ class WebApi {
     Validation.id(rowId, "id")
 
     return comicController.delete(jsonIgnore.decodeFromString<ComicDelete>(data.toString()))
+  }
+
+  @Throws(ValidationException::class)
+  private fun parseComic(data: JSONObject): Boolean {
+    val rowId = data.getLong("id")
+    Validation.id(rowId, "id")
+    val cookie = data.optString("cookie", "")
+
+    val comic = comicController.read(rowId) ?: return false
+    if (comic.fromUrl.isBlank() || comic.parserId == 0L) return false
+
+    val parserConfig = parserConfigController.read(comic.parserId) ?: return false
+    val override = comicOverrideController.readByComic(comic.id) ?: return false
+
+    val parsedData = parserController.parse(
+      comic.fromUrl,
+      cookie,
+      parserConfig,
+      override,
+    )
+
+    return parserController.saveData(rowId, parsedData)
   }
 
   private fun uploadComic(data: JSONObject): Boolean {
@@ -603,6 +636,7 @@ class WebApi {
         Query.COMIC_COMIC_ADD to { addComic(data) },
         Query.COMIC_COMIC_SET to { setComic(data) },
         Query.COMIC_COMIC_DEL to { delComic(data) },
+        Query.COMIC_COMIC_PARSE to { parseComic(data) },
         Query.COMIC_COMIC_UPLOAD to { uploadComic(data) },
         Query.COMIC_ARCHIVE_ADD to { addComicArchive(data) },
         Query.COMIC_OVERRIDE_GET to { getComicOverride(data) },

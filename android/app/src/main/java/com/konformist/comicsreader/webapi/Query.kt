@@ -31,6 +31,7 @@ class Query {
     const val COMIC_COMIC_ADD = "comic/comic/add"
     const val COMIC_COMIC_SET = "comic/comic/set"
     const val COMIC_COMIC_DEL = "comic/comic/del"
+    const val COMIC_COMIC_PARSE = "comic/comic/parse"
     const val COMIC_COMIC_UPLOAD = "comic/comic/upload"
     const val COMIC_ARCHIVE_ADD = "comic/archive/add"
 

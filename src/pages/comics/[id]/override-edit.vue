@@ -120,7 +120,7 @@
         :disabled="!comic.parserId || !comic.fromUrl || loading || loadingGlobal"
         text="Загрузить"
         variant="tonal"
-        @click="onLoadInfo()"
+        @click="parseComic()"
       />
     </v-container>
     <v-fab
@@ -133,23 +133,14 @@
 
 <script setup lang="ts">
 import useLoading from '@/composables/useLoading.ts';
-import AuthorController from '@/core/entities/author/AuthorController.ts';
-import AuthorModel from '@/core/entities/author/AuthorModel.ts';
-import ChapterPageController from '@/core/entities/chapter-page/ChapterPageController.ts';
-import ChapterPageModel from '@/core/entities/chapter-page/ChapterPageModel.ts';
 import ChapterController from '@/core/entities/chapter/ChapterController.ts';
 import ChapterModel from '@/core/entities/chapter/ChapterModel.ts';
 import ComicOverrideController from '@/core/entities/comic-override/ComicOverrideController.ts';
 import ComicOverrideModel from '@/core/entities/comic-override/ComicOverrideModel.ts';
 import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
-import LanguageController from '@/core/entities/language/LanguageController.ts';
-import LanguageModel from '@/core/entities/language/LanguageModel.ts';
-import Parser from '@/core/entities/parser/Parser.ts';
 import ParserController from '@/core/entities/parser/ParserController.ts';
 import ParserModel from '@/core/entities/parser/ParserModel.ts';
-import TagController from '@/core/entities/tag/TagController.ts';
-import TagModel from '@/core/entities/tag/TagModel.ts';
 import { useAuthorsStore } from '@/stores/authors.ts';
 import { useComicsStore } from '@/stores/comics.ts';
 import { useLanguagesStore } from '@/stores/languages.ts';
@@ -322,97 +313,10 @@ const updateParser = () => {
   loadParser();
 };
 
-const onLoadInfo = async () => {
-  if (!comic.value.fromUrl || !parser.value) return;
-
+const parseComic = async () => {
   try {
     loadingGlobalStart();
-    const newComic = new ComicModel(comic.value.getDTO());
-    const parserUtil = new Parser();
-    parserUtil.setParseInfo(parser.value, comicOverride.value);
-    const result = await parserUtil.parse(comic.value.fromUrl, cookie.value);
-
-    const oldTags = tagsStore.tags.map((e) => e.name.toLowerCase());
-    const saveTags = result.tags.filter((e) => e && !oldTags.includes(e.toLowerCase()));
-
-    for (const item of saveTags) {
-      await TagController.save(new TagModel({ name: item }));
-    }
-
-    const oldAuthors = authorsStore.authors.map((e) => e.name.toLowerCase());
-    const saveAuthors = result.authors.filter((e) => e && !oldAuthors.includes(e.toLowerCase()));
-
-    for (const item of saveAuthors) {
-      await AuthorController.save(new AuthorModel({ name: item }));
-    }
-
-    const oldLanguages = languagesStore.languages.map((e) => e.name.toLowerCase());
-    const saveLanguages = [result.language].filter((e) => e && !oldLanguages.includes(e.toLowerCase()));
-
-    for (const item of saveLanguages) {
-      await LanguageController.save(new LanguageModel({ name: item }));
-    }
-
-    await Promise.all([
-      tagsStore.loadTagsForce(),
-      authorsStore.loadAuthorsForce(),
-      languagesStore.loadLanguagesForce(),
-    ]);
-
-    for (let i = 0; i < result.chapters.length; i++) {
-      const newChapter = result.chapters[i];
-      const chapter = chapters.value[i];
-
-      const chapterId = chapter?.id
-        ? chapter.id
-        : await ChapterController.save(new ChapterModel({
-          name: newChapter.name,
-          comicId,
-        }));
-
-      for (let j = 0; j < newChapter.pages.length; j++) {
-        const newPage = newChapter.pages[j];
-        const page = chapter?.pages[j];
-
-        if (page) {
-          page.fromUrl = newPage || page.fromUrl;
-          await ChapterPageController.save(page);
-        } else if (typeof chapterId === 'number') {
-          await ChapterPageController.save(new ChapterPageModel({
-            fromUrl: newPage,
-            chapterId,
-          }));
-        }
-      }
-    }
-
-    newComic.name = result.name || comic.value.name;
-    newComic.annotation = result.annotation || comic.value.annotation;
-    newComic.cover.fromUrl = result.cover || comic.value.cover.fromUrl;
-
-    const language = languagesStore.languages.find((e) => e.name.toLowerCase() === result.language.toLowerCase());
-    newComic.languageId = language?.id || comic.value.languageId;
-
-    const newTags = result.tags.map((e) => e.toLowerCase());
-    const tags = tagsStore.tags
-      .filter((e) => newTags.includes(e.name.toLowerCase()))
-      .map((e) => e.id);
-    newComic.tags = tags.length ? tags : comic.value.tags;
-
-    const newAuthors = result.authors.map((e) => e.toLowerCase());
-    const authors = authorsStore.authors
-      .filter((e) => newAuthors.includes(e.name.toLowerCase()))
-      .map((e) => e.id);
-    newComic.authors = authors.length ? authors : comic.value.authors;
-    comic.value = new ComicModel(newComic.getDTO());
-
-    await saveComic();
-    await saveComicOverride();
-    await Promise.all([
-      comicsStore.loadComicsForce(),
-      loadComicOverride(),
-    ]);
-    comic.value = new ComicModel(comicsStore.comic.getDTO());
+    await ComicController.parse(comicId, cookie.value);
     Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });

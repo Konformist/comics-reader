@@ -21,11 +21,4 @@ export default class ParserController {
   static remove(id: number) {
     return Api.api('parser/parser/del', { id });
   }
-
-  static loadHTMLRaw(url: string, cookie: string = ''): Promise<string> {
-    return Api.api('parser/html/download', {
-      url,
-      cookie,
-    });
-  }
 }

@@ -61,7 +61,6 @@ import kotlinx.serialization.json.Json
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
-import java.io.FileInputStream
 
 class WebApi {
   private val jsonDecode = Json { ignoreUnknownKeys = true }
@@ -538,15 +537,9 @@ class WebApi {
     val uriStr = data.optString("uri")
     Validation.uri(uriStr, "uri")
 
-    val path = App.context.contentResolver
-      .openFileDescriptor(uriStr.toUri(), "r") ?: return false
-    val fileInputStream = FileInputStream(path.fileDescriptor)
-
-    val result = dbBackup.restore(db, fileInputStream)
-    fileInputStream.close()
-    path.close()
-
-    return result
+    return FileManager.getInputByUri(uriStr.toUri()) { file ->
+      dbBackup.restore(db, file)
+    } == true
   }
 
   private fun getFilesTree(): String {

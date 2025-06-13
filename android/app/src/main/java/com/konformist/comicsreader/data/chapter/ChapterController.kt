@@ -22,7 +22,7 @@ class ChapterController(
 
       chapterPageController.createFile(
         page,
-        FileManager.getMimeFromExtension(file.extension),
+        FileManager.getMimeType(file),
         it,
       )
     }

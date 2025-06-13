@@ -40,8 +40,7 @@ class ChapterPageController(
   }
 
   fun createFileFromUri(id: Long, uri: String): Long {
-    val extension = FileManager.getFileExtension(uri)
-    val mime = FileManager.getMimeFromExtension(extension)
+    val mime = FileManager.getMimeType(uri)
     val result = FileManager.getInputByUri(uri.toUri()) { file ->
       read(id)?.let { row -> createFile(row, mime, file) }
     }

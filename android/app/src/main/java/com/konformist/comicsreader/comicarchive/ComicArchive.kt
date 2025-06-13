@@ -68,7 +68,7 @@ class ComicArchive() {
   }
 
   fun comicFromArchive(uriStr: String): MetaXmlReader.Result? {
-    val extension = FileManager.getFileExtension(uriStr)
+    val extension = FileManager.getExtension(uriStr)
     val archiveFormat = getArchiveFormat(extension)
 
     return FileManager.getInputByUri(uriStr.toUri()) { file ->

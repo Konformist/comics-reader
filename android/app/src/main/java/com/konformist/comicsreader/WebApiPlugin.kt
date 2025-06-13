@@ -55,7 +55,12 @@ class WebApiPlugin : Plugin() {
 
     when (path) {
       Query.BACKUP_BACKUP_RESTORE -> pickFile(path, call, arrayOf("application/x-tar"))
-      Query.COMIC_ARCHIVE_ADD -> pickFile(path, call, arrayOf("application/*"))
+      Query.COMIC_ARCHIVE_ADD -> pickFile(
+        path,
+        call,
+        arrayOf("application/zip", "application/x-tar", "application/vnd.comicbook+zip")
+      )
+
       Query.FILE_COMIC_COVER_ADD,
       Query.FILE_CHAPTER_PAGE_ADD -> pickFile(path, call, arrayOf("image/*"))
 

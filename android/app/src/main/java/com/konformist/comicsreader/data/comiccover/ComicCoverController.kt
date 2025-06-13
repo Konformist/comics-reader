@@ -41,8 +41,7 @@ class ComicCoverController(
   }
 
   fun createFileFromUri(comicId: Long, uri: String): Long {
-    val extension = FileManager.getFileExtension(uri)
-    val mime = FileManager.getMimeFromExtension(extension)
+    val mime = FileManager.getMimeType(uri)
     val result = FileManager.getInputByUri(uri.toUri()) { file ->
       readByComic(comicId)?.let { row -> createFile(row, mime, file) }
     }

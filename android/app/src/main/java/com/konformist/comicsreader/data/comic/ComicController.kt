@@ -112,8 +112,7 @@ class ComicController(
     if (result.cover.isNotBlank()) {
       comicCoverController.readByComic(comicId)?.let { cover ->
         FileInputStream(result.cover).use {
-          val extension = FileManager.getFileExtension(result.cover)
-          val mime = FileManager.getMimeFromExtension(extension)
+          val mime = FileManager.getMimeType(result.cover)
           comicCoverController.createFile(cover, mime, it)
         }
       }

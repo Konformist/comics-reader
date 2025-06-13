@@ -38,34 +38,11 @@ class FileManager {
     val backupsDir: File get() = File(documentsAppDir, BACKUPS_DIR_NAME)
 
     fun getExtensionFromMime(mimeType: String?): String {
-      if (mimeType == null) return "bin" // Если MIME не найден, даём расширение по умолчанию
-
-      return when (mimeType) {
-        "image/jpeg" -> "jpg"
-        "image/webp" -> "webp"
-        "image/png" -> "png"
-        "image/gif" -> "gif"
-        else -> "bin" // Для всех других типов возвращаем расширение по умолчанию
-      }
+      return MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType) ?: ""
     }
 
-    fun getMimeFromExtension(extension: String?): String {
-      if (extension == null) return "" // Если MIME не найден, даём расширение по умолчанию
-
-      return when (extension) {
-        "jpg" -> "image/jpeg"
-        "webp" -> "image/webp"
-        "png" -> "image/png"
-        "gif" -> "image/gif"
-        else -> "" // Для всех других типов возвращаем расширение по умолчанию
-      }
-    }
-
-    fun getFileExtension(uriStr: String): String {
-      val lastDotIndex = uriStr.lastIndexOf('.')
-
-      return if (lastDotIndex == -1 || lastDotIndex >= uriStr.length - 1) ""
-      else uriStr.substring(lastDotIndex + 1)
+    fun getExtension(uriStr: String): String {
+      return MimeTypeMap.getFileExtensionFromUrl(uriStr)
     }
 
     fun <T> getInputByUri(uri: Uri, callback: (value: FileInputStream) -> T?): T? {
@@ -113,10 +90,15 @@ class FileManager {
       val children: List<FileNode>? = null,
     )
 
-    fun getMimeType(file: File): String? {
-      val extension = MimeTypeMap.getFileExtensionFromUrl(file.name)
-      return if (extension.isNullOrEmpty()) null
+    fun getMimeType(file: String): String {
+      val extension = getExtension(file)
+      val result = if (extension.isEmpty()) null
       else MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
+      return result ?: ""
+    }
+
+    fun getMimeType(file: File): String {
+      return getMimeType(file.name)
     }
 
     private fun getDirectory(file: File, children: List<FileNode>): FileNode {

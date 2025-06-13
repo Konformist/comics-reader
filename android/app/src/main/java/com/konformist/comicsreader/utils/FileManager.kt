@@ -2,10 +2,10 @@ package com.konformist.comicsreader.utils
 
 import android.net.Uri
 import android.os.Environment
+import android.webkit.MimeTypeMap
 import com.konformist.comicsreader.App
 import com.konformist.comicsreader.db.AppDatabase
-import org.json.JSONArray
-import org.json.JSONObject
+import kotlinx.serialization.Serializable
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -97,40 +97,59 @@ class FileManager {
         outputStreamWriter.write(data)
         outputStreamWriter.close()
         return true
-      } catch (e: IOException) {
+      } catch (_: IOException) {
         return false
       }
     }
 
-    // @TODO Нужен DTO
-    fun tree(path: File): JSONObject {
-      val result = JSONObject()
+    @Serializable
+    data class FileNode(
+      val name: String,
+      val path: String,
+      val isDirectory: Boolean,
+      val mimeType: String? = null,
+      val size: Long = 0L,
+      val lastModified: Long = 0L,
+      val children: List<FileNode>? = null,
+    )
 
-      if (path.isFile) {
-        result.put("type", "file")
-        result.put("name", path.name)
-        result.put("extension", path.extension)
-        result.put("size", path.length())
-        result.put("lastModified", path.lastModified())
-        result.put("path", Uri.fromFile(path))
-      } else {
-        result.put("type", "directory")
-        result.put("name", path.name)
-        val childes = JSONArray()
+    fun getMimeType(file: File): String? {
+      val extension = MimeTypeMap.getFileExtensionFromUrl(file.name)
+      return if (extension.isNullOrEmpty()) null
+      else MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
+    }
 
-        if (path.isDirectory) {
-          val list = path.listFiles()
+    private fun getDirectory(file: File, children: List<FileNode>): FileNode {
+      return FileNode(
+        name = file.name,
+        path = Uri.fromFile(file).toString(),
+        isDirectory = true,
+        lastModified = file.lastModified(),
+        children = children,
+      )
+    }
 
-          if (list != null) {
-            for (file in list) childes.put(tree(file))
-          }
-        }
+    private fun getFile(file: File): FileNode {
+      return FileNode(
+        name = file.name,
+        path = Uri.fromFile(file).toString(),
+        isDirectory = false,
+        size = file.length(),
+        lastModified = file.lastModified(),
+        mimeType = getMimeType(file),
+      )
+    }
 
-        result.put("count", childes.length())
-        result.put("childes", childes)
-      }
+    fun getFileTree(rootFile: File): FileNode {
+      if (!rootFile.isDirectory) return getFile(rootFile)
 
-      return result
+      // Рекурсивно обрабатываем содержимое директории
+      val children = rootFile.listFiles()?.map {
+        if (it.isDirectory) getFileTree(it)
+        else getFile(it)
+      }?.toList() ?: emptyList()
+
+      return getDirectory(rootFile, children)
     }
   }
 }

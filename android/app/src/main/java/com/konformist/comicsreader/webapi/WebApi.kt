@@ -55,7 +55,8 @@ import com.konformist.comicsreader.utils.FileManager
 import com.konformist.comicsreader.webapi.serializers.ChapterPageSerializer
 import com.konformist.comicsreader.webapi.serializers.ChapterSerializer
 import com.konformist.comicsreader.webapi.serializers.ComicSerializer
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import org.json.JSONArray
 import org.json.JSONObject
@@ -515,24 +516,18 @@ class WebApi {
     return chapterPageController.deleteFile(page)
   }
 
-  private fun getSettings(): String {
-    val encode = runBlocking {
-      AppDataStore.readStore()
-      jsonEncode.encodeToString<Settings>(AppDataStore.settings)
-    }
-
-    return encode
+  private suspend fun getSettings(): String {
+    AppDataStore.readStore()
+    return jsonEncode.encodeToString<Settings>(AppDataStore.settings)
   }
 
-  private fun setSettings(data: JSONObject): Boolean {
+  private suspend fun setSettings(data: JSONObject): Boolean {
     val readingMode = data.optString("readingMode")
     Validation.string(readingMode, "readingMode")
     Validation.contain(readingMode, AppDataStore.readingModeList, "readingMode")
 
-    return runBlocking {
-      AppDataStore.settings = jsonDecode.decodeFromString<Settings>(data.toString())
-      AppDataStore.saveStore()
-    }
+    AppDataStore.settings = jsonDecode.decodeFromString<Settings>(data.toString())
+    return AppDataStore.saveStore()
   }
 
   private fun addBackup(): Boolean {
@@ -554,13 +549,15 @@ class WebApi {
     return result
   }
 
-  private fun getFilesTree(): JSONArray {
-    val tree = JSONArray()
-    tree.put(FileManager.tree(FileManager.filesDir))
-    tree.put(FileManager.tree(FileManager.cacheDir))
-    tree.put(FileManager.tree(FileManager.documentsDir))
-    tree.put(FileManager.tree(FileManager.downloadsDir))
-    return tree
+  private fun getFilesTree(): String {
+    val result = listOf<FileManager.Companion.FileNode>(
+      FileManager.getFileTree(FileManager.filesDir),
+      FileManager.getFileTree(FileManager.cacheDir),
+      FileManager.getFileTree(FileManager.documentsDir),
+      FileManager.getFileTree(FileManager.downloadsDir),
+    )
+
+    return jsonEncode.encodeToString<List<FileManager.Companion.FileNode>>(result)
   }
 
   private fun setFileToDownloads(data: JSONObject): Boolean {
@@ -580,13 +577,12 @@ class WebApi {
     return true
   }
 
-  fun api(query: String, data: JSONObject? = JSONObject()): String {
+  suspend fun api(query: String, data: JSONObject? = JSONObject()): String {
     try {
-      // Если data null, выбрасываем исключение
       data ?: throw ValidationException("Body is null")
 
       // Создаем Map с ассоциациями между запросами и методами
-      val actions: Map<String, (JSONObject) -> Any?> = mapOf(
+      val actions: Map<String, suspend (JSONObject) -> Any?> = mapOf(
         Query.TAG_TAG_LIST to { getTagsAll() },
         Query.TAG_TAG_GET to { getTag(data) },
         Query.TAG_TAG_ADD to { addTag(data) },
@@ -645,7 +641,9 @@ class WebApi {
 
       // Выполнение нужной операции, если запрос найден в map
       val action = actions[query] ?: throw Exception("Not implemented")
-      return wrappedToResult(action.invoke(data))
+      return withContext(Dispatchers.IO) {
+        wrappedToResult(action.invoke(data))
+      }
     } catch (e: Exception) {
       Log.d("Api Error", e.toString())
       return wrappedToError(e)

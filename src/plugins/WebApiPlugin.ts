@@ -23,19 +23,23 @@ interface DBDates {
 }
 
 export interface ITreeFile {
-  type: 'file'
   name: string
-  extension: string
+  path: string
+  isDirectory: false
   size: number
   lastModified: number
-  path: string
+  mimeType: string | null
+  children: null
 }
 
 export interface ITreeDirectory {
-  type: 'directory'
   name: string
-  count: number
-  childes: Array<ITreeDirectory | ITreeFile>
+  path: string
+  isDirectory: true
+  size: number
+  lastModified: number
+  mimeType: null
+  children: Array<ITreeDirectory | ITreeFile>
 }
 
 export interface ITagDTO extends DBDates {name: string}
@@ -411,12 +415,56 @@ class WebApiPlugin extends WebPlugin implements IWebApiPlugin {
       case 'file/chapter-page/download': result = 1; break;
       case 'file/chapter-page/add': result = 1; break;
       case 'file/chapter-page/del': result = true; break;
-      case 'file/files/tree': result = [{
-        type: 'directory',
-        name: 'files',
-        count: 0,
-        childes: [],
-      }]; break;
+      case 'file/files/tree': {
+        result = [{
+          name: 'Download',
+          path: '/storage/emulated/0/Download',
+          isDirectory: true,
+          mimeType: null,
+          size: 0,
+          lastModified: Date.now(),
+          children: [
+            {
+              name: 'file1.txt',
+              path: '/storage/emulated/0/Download/file1.txt',
+              isDirectory: false,
+              size: 1024,
+              lastModified: Date.now(),
+              mimeType: 'text/plain',
+              children: null,
+            },
+            {
+              name: 'FolderA',
+              path: '/storage/emulated/0/Download/FolderA',
+              isDirectory: true,
+              size: 0,
+              lastModified: Date.now(),
+              mimeType: null,
+              children: [
+                {
+                  name: 'fileA1.txt',
+                  path: '/storage/emulated/0/Download/FolderA/fileA1.txt',
+                  isDirectory: false,
+                  size: 2048,
+                  lastModified: Date.now(),
+                  mimeType: 'text/plain',
+                  children: null,
+                },
+                {
+                  name: 'fileA2.jpg',
+                  path: '/storage/emulated/0/Download/FolderA/fileA2.jpg',
+                  isDirectory: false,
+                  size: 512,
+                  lastModified: Date.now(),
+                  mimeType: 'image/jpeg',
+                  children: null,
+                },
+              ],
+            },
+          ],
+        }];
+        break;
+      }
       case 'file/file/downloads': result = true; break;
       case 'settings/settings/get': result = this.fake.getSettings(); break;
       case 'settings/settings/set': result = true; break;

@@ -31,10 +31,12 @@ class AppDataStore {
     suspend fun readStore(): Boolean {
       val storeSync = dataStore.data.first()
 
-      settings.autoReading = storeSync[AUTO_READING_KEY] == true
-      settings.autoReadingTimeout = storeSync[AUTO_READING_TIMEOUT_KEY] ?: 20000
-      settings.readingMode = storeSync[READING_MODE_KEY] ?: readingModeList[0]
-      settings.isCompress = storeSync[IS_COMPRESS_KEY] != false
+      settings = Settings(
+        autoReading = storeSync[AUTO_READING_KEY] == true,
+        autoReadingTimeout = storeSync[AUTO_READING_TIMEOUT_KEY] ?: 20000,
+        readingMode = storeSync[READING_MODE_KEY] ?: readingModeList[0],
+        isCompress = storeSync[IS_COMPRESS_KEY] == true,
+      )
 
       return true
     }

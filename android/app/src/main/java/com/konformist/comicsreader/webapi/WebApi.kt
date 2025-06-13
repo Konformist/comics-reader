@@ -63,7 +63,9 @@ import java.io.File
 import java.io.FileInputStream
 
 class WebApi {
-  private val jsonIgnore = Json { ignoreUnknownKeys = true }
+  private val jsonDecode = Json { ignoreUnknownKeys = true }
+  private val jsonEncode = Json { encodeDefaults = true }
+
   private val db: AppDatabase = Room
     .databaseBuilder(App.context, AppDatabase::class.java, AppDatabase.DATABASE_NAME)
     .build()
@@ -114,7 +116,7 @@ class WebApi {
   }
 
   private fun getTagsAll(): String {
-    return Json.encodeToString<List<Tag>>(tagController.readAll())
+    return jsonEncode.encodeToString<List<Tag>>(tagController.readAll())
   }
 
   @Throws(ValidationException::class)
@@ -122,12 +124,12 @@ class WebApi {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
 
-    return Json.encodeToString<Tag?>(tagController.read(rowId))
+    return jsonEncode.encodeToString<Tag?>(tagController.read(rowId))
   }
 
   @Throws(DatabaseException::class)
   private fun addTag(data: JSONObject): Long {
-    val decoded = jsonIgnore.decodeFromString<TagCreate>(data.toString())
+    val decoded = jsonDecode.decodeFromString<TagCreate>(data.toString())
     return tagController.create(decoded)
   }
 
@@ -136,7 +138,7 @@ class WebApi {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
 
-    val decoded = jsonIgnore.decodeFromString<TagUpdate>(data.toString())
+    val decoded = jsonDecode.decodeFromString<TagUpdate>(data.toString())
     return tagController.update(decoded)
   }
 
@@ -145,12 +147,12 @@ class WebApi {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
 
-    val decoded = jsonIgnore.decodeFromString<TagDelete>(data.toString())
+    val decoded = jsonDecode.decodeFromString<TagDelete>(data.toString())
     return tagController.delete(decoded)
   }
 
   private fun getAuthorsAll(): String {
-    return Json.encodeToString<List<Author>>(authorController.readAll())
+    return jsonEncode.encodeToString<List<Author>>(authorController.readAll())
   }
 
   @Throws(ValidationException::class)
@@ -158,12 +160,12 @@ class WebApi {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
 
-    return Json.encodeToString<Author?>(authorController.read(rowId))
+    return jsonEncode.encodeToString<Author?>(authorController.read(rowId))
   }
 
   @Throws(DatabaseException::class)
   private fun addAuthor(data: JSONObject): Long {
-    val decoded = jsonIgnore.decodeFromString<AuthorCreate>(data.toString())
+    val decoded = jsonDecode.decodeFromString<AuthorCreate>(data.toString())
     return authorController.create(decoded)
   }
 
@@ -172,7 +174,7 @@ class WebApi {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
 
-    val decoded = jsonIgnore.decodeFromString<AuthorUpdate>(data.toString())
+    val decoded = jsonDecode.decodeFromString<AuthorUpdate>(data.toString())
     return authorController.update(decoded)
   }
 
@@ -181,12 +183,12 @@ class WebApi {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
 
-    val decoded = jsonIgnore.decodeFromString<AuthorDelete>(data.toString())
+    val decoded = jsonDecode.decodeFromString<AuthorDelete>(data.toString())
     return authorController.delete(decoded)
   }
 
   private fun getLanguagesAll(): String {
-    return Json.encodeToString<List<Language>>(languageController.readAll())
+    return jsonEncode.encodeToString<List<Language>>(languageController.readAll())
   }
 
   @Throws(ValidationException::class)
@@ -194,12 +196,12 @@ class WebApi {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
 
-    return Json.encodeToString<Language?>(languageController.read(rowId))
+    return jsonEncode.encodeToString<Language?>(languageController.read(rowId))
   }
 
   @Throws(DatabaseException::class)
   private fun addLanguage(data: JSONObject): Long {
-    val decode = jsonIgnore.decodeFromString<LanguageCreate>(data.toString())
+    val decode = jsonDecode.decodeFromString<LanguageCreate>(data.toString())
     return languageController.create(decode)
   }
 
@@ -208,7 +210,7 @@ class WebApi {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
 
-    val decode = jsonIgnore.decodeFromString<LanguageUpdate>(data.toString())
+    val decode = jsonDecode.decodeFromString<LanguageUpdate>(data.toString())
     return languageController.update(decode)
   }
 
@@ -217,12 +219,12 @@ class WebApi {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
 
-    val decode = jsonIgnore.decodeFromString<LanguageDelete>(data.toString())
+    val decode = jsonDecode.decodeFromString<LanguageDelete>(data.toString())
     return languageController.delete(decode)
   }
 
   private fun getParsersAll(): String {
-    return Json.encodeToString<List<ParserConfig>>(parserConfigController.readAll())
+    return jsonEncode.encodeToString<List<ParserConfig>>(parserConfigController.readAll())
   }
 
   @Throws(ValidationException::class)
@@ -230,12 +232,12 @@ class WebApi {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
 
-    return Json.encodeToString<ParserConfig?>(parserConfigController.read(rowId))
+    return jsonEncode.encodeToString<ParserConfig?>(parserConfigController.read(rowId))
   }
 
   @Throws(DatabaseException::class)
   private fun addParser(data: JSONObject): Long {
-    val decode = jsonIgnore.decodeFromString<ParserConfigCreate>(data.toString())
+    val decode = jsonDecode.decodeFromString<ParserConfigCreate>(data.toString())
     return parserConfigController.create(decode)
   }
 
@@ -244,7 +246,7 @@ class WebApi {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
 
-    val decode = jsonIgnore.decodeFromString<ParserConfigUpdate>(data.toString())
+    val decode = jsonDecode.decodeFromString<ParserConfigUpdate>(data.toString())
     return parserConfigController.update(decode)
   }
 
@@ -253,7 +255,7 @@ class WebApi {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
 
-    val decode = jsonIgnore.decodeFromString<ParserConfigDelete>(data.toString())
+    val decode = jsonDecode.decodeFromString<ParserConfigDelete>(data.toString())
     return parserConfigController.delete(decode)
   }
 
@@ -271,7 +273,7 @@ class WebApi {
 
   @Throws(DatabaseException::class)
   private fun addComic(data: JSONObject): Long {
-    val comic = jsonIgnore.decodeFromString<ComicCreate>(data.toString())
+    val comic = jsonDecode.decodeFromString<ComicCreate>(data.toString())
     return comicController.create(comic)
   }
 
@@ -283,7 +285,7 @@ class WebApi {
     val coverJSON = data.optJSONObject("cover")
     if (coverJSON != null) setCover(coverJSON)
 
-    return comicController.update(jsonIgnore.decodeFromString<ComicUpdate>(data.toString()))
+    return comicController.update(jsonDecode.decodeFromString<ComicUpdate>(data.toString()))
   }
 
   @Throws(ValidationException::class, DatabaseException::class)
@@ -291,7 +293,7 @@ class WebApi {
     val rowId = data.getLong("id")
     Validation.id(rowId, "id")
 
-    return comicController.delete(jsonIgnore.decodeFromString<ComicDelete>(data.toString()))
+    return comicController.delete(jsonDecode.decodeFromString<ComicDelete>(data.toString()))
   }
 
   @Throws(ValidationException::class)
@@ -335,7 +337,7 @@ class WebApi {
   private fun getComicOverride(data: JSONObject): String? {
     val comicId = data.optLong("comicId")
     Validation.id(comicId, "comicId")
-    return Json.encodeToString<ComicOverride?>(comicOverrideController.readByComic(comicId))
+    return jsonEncode.encodeToString<ComicOverride?>(comicOverrideController.readByComic(comicId))
   }
 
   @Throws(ValidationException::class, DatabaseException::class)
@@ -343,7 +345,7 @@ class WebApi {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
 
-    val decode = jsonIgnore.decodeFromString<ComicOverrideUpdate>(data.toString())
+    val decode = jsonDecode.decodeFromString<ComicOverrideUpdate>(data.toString())
     return comicOverrideController.update(decode)
   }
 
@@ -352,7 +354,7 @@ class WebApi {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
 
-    val decode = jsonIgnore.decodeFromString<ComicCoverUpdate>(data.toString())
+    val decode = jsonDecode.decodeFromString<ComicCoverUpdate>(data.toString())
     return comicCoverController.update(decode)
   }
 
@@ -407,7 +409,7 @@ class WebApi {
 
   @Throws(ValidationException::class, DatabaseException::class)
   private fun addChapter(data: JSONObject): Long {
-    val decode = jsonIgnore.decodeFromString<ChapterCreate>(data.toString())
+    val decode = jsonDecode.decodeFromString<ChapterCreate>(data.toString())
     return chapterController.create(decode)
   }
 
@@ -416,7 +418,7 @@ class WebApi {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
 
-    val decode = jsonIgnore.decodeFromString<ChapterUpdate>(data.toString())
+    val decode = jsonDecode.decodeFromString<ChapterUpdate>(data.toString())
     return chapterController.update(decode)
   }
 
@@ -427,7 +429,7 @@ class WebApi {
     val comicId = data.optLong("comicId")
     Validation.id(comicId, "comicId")
 
-    val decode = jsonIgnore.decodeFromString<ChapterUpdateComic>(data.toString())
+    val decode = jsonDecode.decodeFromString<ChapterUpdateComic>(data.toString())
     return chapterController.updateComic(decode)
   }
 
@@ -436,7 +438,7 @@ class WebApi {
     val rowId = data.getLong("id")
     Validation.id(rowId, "id")
 
-    val decode = jsonIgnore.decodeFromString<ChapterDelete>(data.toString())
+    val decode = jsonDecode.decodeFromString<ChapterDelete>(data.toString())
     return chapterController.delete(decode)
   }
 
@@ -458,7 +460,7 @@ class WebApi {
 
   @Throws(ValidationException::class, DatabaseException::class)
   private fun addChapterPage(data: JSONObject): Long {
-    val decode = jsonIgnore.decodeFromString<ChapterPageCreate>(data.toString())
+    val decode = jsonDecode.decodeFromString<ChapterPageCreate>(data.toString())
     return chapterPageController.create(decode)
   }
 
@@ -467,7 +469,7 @@ class WebApi {
     val rowId = data.getLong("id")
     Validation.id(rowId, "id")
 
-    val decode = jsonIgnore.decodeFromString<ChapterPageUpdate>(data.toString())
+    val decode = jsonDecode.decodeFromString<ChapterPageUpdate>(data.toString())
     return chapterPageController.update(decode)
   }
 
@@ -476,7 +478,7 @@ class WebApi {
     val rowId = data.getLong("id")
     Validation.id(rowId, "id")
 
-    val decode = jsonIgnore.decodeFromString<ChapterPageDelete>(data.toString())
+    val decode = jsonDecode.decodeFromString<ChapterPageDelete>(data.toString())
     return chapterPageController.delete(decode)
   }
 
@@ -514,8 +516,12 @@ class WebApi {
   }
 
   private fun getSettings(): String {
-    runBlocking { AppDataStore.readStore() }
-    return Json.encodeToString<Settings>(AppDataStore.settings)
+    val encode = runBlocking {
+      AppDataStore.readStore()
+      jsonEncode.encodeToString<Settings>(AppDataStore.settings)
+    }
+
+    return encode
   }
 
   private fun setSettings(data: JSONObject): Boolean {
@@ -523,8 +529,10 @@ class WebApi {
     Validation.string(readingMode, "readingMode")
     Validation.contain(readingMode, AppDataStore.readingModeList, "readingMode")
 
-    AppDataStore.settings = Json.decodeFromString<Settings>(data.toString())
-    return runBlocking { AppDataStore.saveStore() }
+    return runBlocking {
+      AppDataStore.settings = jsonDecode.decodeFromString<Settings>(data.toString())
+      AppDataStore.saveStore()
+    }
   }
 
   private fun addBackup(): Boolean {

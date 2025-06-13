@@ -1,4 +1,4 @@
-package com.konformist.comicsreader.utils.comicarchive
+package com.konformist.comicsreader.comicarchive
 
 import org.jsoup.Jsoup
 import org.jsoup.parser.Parser

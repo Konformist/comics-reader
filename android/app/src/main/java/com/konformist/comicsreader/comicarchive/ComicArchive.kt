@@ -1,4 +1,4 @@
-package com.konformist.comicsreader.utils.comicarchive
+package com.konformist.comicsreader.comicarchive
 
 import androidx.core.net.toUri
 import com.konformist.comicsreader.data.chapter.ChapterWithPages

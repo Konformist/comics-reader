@@ -1,5 +1,6 @@
 package com.konformist.comicsreader.data.comic
 
+import com.konformist.comicsreader.comicarchive.ComicArchive
 import com.konformist.comicsreader.data.chapter.ChapterController
 import com.konformist.comicsreader.data.chapter.ChapterCreate
 import com.konformist.comicsreader.data.chapter.ChapterDelete
@@ -12,7 +13,6 @@ import com.konformist.comicsreader.data.comicoverride.ComicOverrideCreate
 import com.konformist.comicsreader.data.comicoverride.ComicOverrideDelete
 import com.konformist.comicsreader.exceptions.DatabaseException
 import com.konformist.comicsreader.utils.FileManager
-import com.konformist.comicsreader.utils.comicarchive.ComicArchive
 import com.konformist.comicsreader.webapi.Validation
 import java.io.File
 import java.io.FileInputStream

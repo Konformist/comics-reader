@@ -1,4 +1,4 @@
-package com.konformist.comicsreader.utils.comicarchive
+package com.konformist.comicsreader.comicarchive
 
 import android.util.Xml
 import com.konformist.comicsreader.data.author.Author

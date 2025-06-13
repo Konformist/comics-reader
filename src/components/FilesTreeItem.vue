@@ -1,25 +1,25 @@
 <template>
   <v-list-item
-    :active="item.type === 'file' && model?.path === item.path"
+    :active="!item.isDirectory && model?.path === item.path"
     :prepend-icon="icon"
-    :title="`${item.name}${item.type === 'directory' ? '/' : ''}`"
+    :title="`${item.name}${item.isDirectory ? '/' : ''}`"
     @click="onClick()"
   >
     <template #append>
-      <v-list-item-subtitle v-if="item.type === 'file'">
+      <v-list-item-subtitle v-if="!item.isDirectory">
         {{ formatBytes(item.size) }}
       </v-list-item-subtitle>
       <v-list-item-subtitle v-else>
-        Элементов: {{ item.count }}
+        Элем: {{ item.children.length }}
       </v-list-item-subtitle>
     </template>
   </v-list-item>
-  <template v-if="item.type === 'directory' && item.count && opened">
-    <v-divider class="mt-2 mx-4" />
+  <template v-if="item.isDirectory && item.children.length && opened">
+    <v-divider class="mt-2 mb-1 mx-4" />
     <FilesTree
       v-model="model"
       is-child
-      :tree="item.childes"
+      :tree="item.children"
     />
   </template>
 </template>
@@ -39,13 +39,13 @@ const toggleOpened = () => {
 };
 
 const icon = computed(() => {
-  if (item.type === 'directory') {
+  if (item.isDirectory) {
     return opened.value ? '$folder-open' : '$folder';
   }
 
-  if (item.extension === 'json') {
+  if (item.mimeType === 'application/json') {
     return '$file-code';
-  } else if (['webp', 'jpg', 'jpeg', 'png'].includes(item.extension)) {
+  } else if (item.mimeType?.includes('image/')) {
     return '$file-image';
   } else {
     return '$file';
@@ -53,7 +53,7 @@ const icon = computed(() => {
 });
 
 const onClick = () => {
-  if (item.type === 'directory') toggleOpened();
+  if (item.isDirectory) toggleOpened();
   else model.value = item;
 };
 </script>

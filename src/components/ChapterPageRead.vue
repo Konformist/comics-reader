@@ -1,7 +1,7 @@
 <template>
   <div class="position-relative swiper-zoom-container">
     <img
-      v-intersect.once="onRead"
+      v-intersect="onRead"
       :src="item.file?.url"
       :style="{
         display: 'block',
@@ -68,9 +68,9 @@ const onLoad = (): void => {
 };
 
 const onRead = (isIntersect: boolean): void => {
-  if (item.file?.url
+  if (isIntersect
+    && item.file?.url
     && !item.isRead
-    && isIntersect
     && !loading.value
     && !error.value) {
     emit('read');

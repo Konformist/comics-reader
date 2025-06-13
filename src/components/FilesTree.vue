@@ -1,6 +1,6 @@
 <template>
   <v-list
-    :class="isChild ? 'pl-4 pr-0' : ''"
+    :class="isChild ? 'pl-4 pr-0 pt-0 pb-0' : ''"
     slim
   >
     <v-skeleton-loader

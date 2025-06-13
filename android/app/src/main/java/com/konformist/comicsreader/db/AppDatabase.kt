@@ -4,29 +4,29 @@ import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.konformist.comicsreader.db.appfile.AppFile
-import com.konformist.comicsreader.db.appfile.AppFileDao
-import com.konformist.comicsreader.db.author.Author
-import com.konformist.comicsreader.db.author.AuthorDao
-import com.konformist.comicsreader.db.chapter.Chapter
-import com.konformist.comicsreader.db.chapter.ChapterDao
-import com.konformist.comicsreader.db.chapterpage.ChapterPage
-import com.konformist.comicsreader.db.chapterpage.ChapterPageDao
-import com.konformist.comicsreader.db.comic.Comic
-import com.konformist.comicsreader.db.comic.ComicDao
-import com.konformist.comicsreader.db.comiccover.ComicCover
-import com.konformist.comicsreader.db.comiccover.ComicCoverDao
-import com.konformist.comicsreader.db.comicoverride.ComicOverride
-import com.konformist.comicsreader.db.comicoverride.ComicOverrideDao
-import com.konformist.comicsreader.db.language.Language
-import com.konformist.comicsreader.db.language.LanguageDao
-import com.konformist.comicsreader.db.parser.ParserConfig
-import com.konformist.comicsreader.db.parser.ParserDao
-import com.konformist.comicsreader.db.tag.Tag
-import com.konformist.comicsreader.db.tag.TagDao
+import com.konformist.comicsreader.data.appfile.AppFile
+import com.konformist.comicsreader.data.appfile.AppFileDao
+import com.konformist.comicsreader.data.author.Author
+import com.konformist.comicsreader.data.author.AuthorDao
+import com.konformist.comicsreader.data.chapter.Chapter
+import com.konformist.comicsreader.data.chapter.ChapterDao
+import com.konformist.comicsreader.data.chapterpage.ChapterPage
+import com.konformist.comicsreader.data.chapterpage.ChapterPageDao
+import com.konformist.comicsreader.data.comic.Comic
+import com.konformist.comicsreader.data.comic.ComicDao
+import com.konformist.comicsreader.data.comiccover.ComicCover
+import com.konformist.comicsreader.data.comiccover.ComicCoverDao
+import com.konformist.comicsreader.data.comicoverride.ComicOverride
+import com.konformist.comicsreader.data.comicoverride.ComicOverrideDao
+import com.konformist.comicsreader.data.language.Language
+import com.konformist.comicsreader.data.language.LanguageDao
+import com.konformist.comicsreader.data.parserconfig.ParserConfig
+import com.konformist.comicsreader.data.parserconfig.ParserConfigDao
+import com.konformist.comicsreader.data.tag.Tag
+import com.konformist.comicsreader.data.tag.TagDao
 
 @Database(
-  version = 2,
+  version = 3,
   entities = [
     Comic::class,
     ComicCover::class,
@@ -39,7 +39,7 @@ import com.konformist.comicsreader.db.tag.TagDao
     Tag::class,
     AppFile::class
   ],
-  autoMigrations = [AutoMigration(from = 1, to = 2)]
+  autoMigrations = [AutoMigration(from = 2, to = 3)]
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
@@ -52,7 +52,7 @@ abstract class AppDatabase : RoomDatabase() {
   abstract fun comicOverrideDao(): ComicOverrideDao
   abstract fun chapterDao(): ChapterDao
   abstract fun chapterPageDao(): ChapterPageDao
-  abstract fun parserDao(): ParserDao
+  abstract fun parserDao(): ParserConfigDao
   abstract fun tagDao(): TagDao
   abstract fun authorDao(): AuthorDao
   abstract fun languageDao(): LanguageDao

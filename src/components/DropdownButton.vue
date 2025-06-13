@@ -7,7 +7,10 @@
   >
     <template #default="{ isActive, props }">
       <v-btn
-        v-bind="{ ...props, ...$attrs }"
+        v-bind="{
+          ...props,
+          ...$attrs,
+        }"
         color="primary"
         :prepend-icon="prependIcon"
         rounded="md"

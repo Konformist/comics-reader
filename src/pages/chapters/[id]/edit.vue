@@ -247,6 +247,7 @@ const uploadImage = async (item: ChapterPageModel) => {
   try {
     loadingGlobalStart();
     await saveChapter();
+    await savePageChapters();
     await ChapterPageController.saveFile(item.id);
     await loadChapter();
     Toast.show({ text: 'Глава сохранена' });
@@ -263,6 +264,7 @@ const onLoadImage = async (item: ChapterPageModel) => {
   try {
     loadingGlobalStart();
     await saveChapter();
+    await savePageChapters();
     await ChapterPageController.downloadFile(item.id, item.fromUrl);
     await loadChapter();
     Toast.show({ text: 'Глава сохранена' });
@@ -280,12 +282,13 @@ const canLoadImages = computed(() => (
 const onLoadImages = async (force: boolean = false) => {
   loadingGlobalStart();
   await saveChapter();
+  await savePageChapters();
 
   let isError = false;
 
   try {
     for (const item of chapter.value.pages) {
-      if (item.fromUrl && (!item.file || force)) {
+      if (item.id && item.fromUrl && (!item.file || force)) {
         await ChapterPageController.downloadFile(item.id, item.fromUrl);
       }
     }
@@ -316,6 +319,8 @@ const delPage = async (item: ChapterPageModel) => {
 
   try {
     loadingGlobalStart();
+    await saveChapter();
+    await savePageChapters();
     await ChapterPageController.remove(item.id);
     await loadChapter();
     Toast.show({ text: 'Глава сохранена' });

@@ -25,9 +25,10 @@
 import type { SwiperOptions } from 'swiper/types';
 import { register } from 'swiper/element';
 import type { SwiperContainer, SwiperSlide } from 'swiper/element';
-import { Autoplay, FreeMode } from 'swiper/modules';
+import { Autoplay, FreeMode, Zoom } from 'swiper/modules';
 import type ChapterPageModel from '@/core/entities/chapter-page/ChapterPageModel.ts';
 import { useAppStore } from '@/stores/app.ts';
+import debounce from '@/core/utils/debounce.ts';
 
 register();
 
@@ -45,45 +46,59 @@ const { items } = defineProps<{ items: ChapterPageModel[] }>();
 const swiperRef = ref<SwiperContainer>();
 
 const swiperStop = () => {
-  if (swiperRef.value) swiperRef.value.swiper.autoplay?.stop();
+  swiperRef.value?.swiper.autoplay?.stop();
 };
 
 const swiperStart = () => {
-  if (!swiperRef.value || !appStore.settings.autoReading) return;
-  swiperRef.value.swiper.autoplay?.start();
+  if (!appStore.settings.autoReading) return;
+  swiperRef.value?.swiper.autoplay?.start();
 };
 
 const moveSlide = (index: number): void => {
-  if (swiperRef.value) swiperRef.value.swiper.slideTo(index);
+  swiperRef.value?.swiper.slideTo(index);
 };
 
-const modeWebtoon = computed<SwiperOptions>(() => ({
+const modeWebtoon = computed(() => ({
   direction: 'vertical',
   resistanceRatio: 0.5,
   freeMode: true,
+  zoom: {
+    maxRatio: 5,
+    minRatio: 1,
+  },
+  shortSwipes: false,
+  longSwipes: false,
   slidesPerView: 'auto',
-  modules: [FreeMode],
-}));
+  modules: [FreeMode, Zoom],
+} as SwiperOptions));
 
-const modeVertical = computed<SwiperOptions>(() => ({
+const modeVertical = computed(() => ({
   direction: 'vertical',
+  zoom: {
+    maxRatio: 5,
+    minRatio: 1,
+  },
   autoplay: {
     enabled: appStore.settings.autoReading,
     delay: appStore.settings.autoReadingTimeout,
     stopOnLastSlide: true,
   },
-  modules: [Autoplay],
-}));
+  modules: [Autoplay, Zoom],
+} as SwiperOptions));
 
-const modeHorizontal = computed<SwiperOptions>(() => ({
+const modeHorizontal = computed(() => ({
   direction: 'horizontal',
+  zoom: {
+    maxRatio: 5,
+    minRatio: 1,
+  },
   autoplay: {
     enabled: appStore.settings.autoReading,
     delay: appStore.settings.autoReadingTimeout,
     stopOnLastSlide: true,
   },
-  modules: [Autoplay],
-}));
+  modules: [Autoplay, Zoom],
+} as SwiperOptions));
 
 const swiperMode = computed(() => {
   switch (appStore.settings.readingMode) {
@@ -108,29 +123,16 @@ const swiperSlideMode = computed(() => {
   }
 });
 
-const updateSwiper = () => (
+const updateSwiper = debounce(() => (
   nextTick(() => {
     swiperRef.value?.swiper.update();
   })
-);
-
-watch(
-  () => items,
-  () => {
-    swiperRef.value?.swiper.disable();
-    swiperRef.value?.swiper.enable();
-    nextTick(() => {
-      swiperRef.value?.swiper.update();
-    });
-  },
-  { deep: true },
-);
+), 200);
 
 watch(
   model,
   (value) => {
-    if (swiperRef.value
-      && swiperRef.value.swiper.activeIndex !== value) {
+    if (swiperRef.value?.swiper.activeIndex !== value) {
       moveSlide(value);
     }
   },
@@ -143,15 +145,13 @@ defineExpose({
 
 onMounted(() => {
   nextTick(() => {
-    if (!swiperRef.value) return;
-
     moveSlide(model.value);
 
-    swiperRef.value.swiper.on('activeIndexChange', (swiper) => {
+    swiperRef.value?.swiper.on('activeIndexChange', (swiper) => {
       model.value = swiper.activeIndex;
     });
-    swiperRef.value.swiper.on('reachEnd', () => {
-      model.value = items.length - 1;
+    swiperRef.value?.swiper.on('progress', (_, value) => {
+      if (value > 0.9) model.value = items.length - 1;
     });
   });
 });

@@ -12,6 +12,8 @@
           initialSlide: active,
           modules: [FreeMode],
           slidesPerView: 'auto',
+          shortSwipes: false,
+          longSwipes: false,
         }"
       >
         <swiper-slide

@@ -1,7 +1,7 @@
 package com.konformist.comicsreader.webapi.serializers
 
-import com.konformist.comicsreader.db.chapter.Chapter
-import com.konformist.comicsreader.db.chapter.ChapterWithPages
+import com.konformist.comicsreader.data.chapter.Chapter
+import com.konformist.comicsreader.data.chapter.ChapterWithPages
 import kotlinx.serialization.json.Json
 import org.json.JSONArray
 import org.json.JSONObject
@@ -9,7 +9,7 @@ import org.json.JSONObject
 class ChapterSerializer {
   companion object {
     fun toJSON(item: ChapterWithPages): JSONObject {
-      return JSONObject(Json.encodeToString<Chapter>(item.chapter)).apply {
+      return JSONObject(Json.encodeToString<Chapter?>(item.chapter)).apply {
         put("pages", ChapterPageSerializer.toJSONArray(item.pages))
       }
     }

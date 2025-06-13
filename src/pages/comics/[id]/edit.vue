@@ -86,7 +86,7 @@
       </div>
     </v-container>
     <v-container
-      v-else-if="frame===2"
+      v-else-if="frame === 2"
       class="pb-16 mb-4"
     >
       <DictionaryList
@@ -95,7 +95,7 @@
         :loading="loading"
         @click-item="router.push({
           name: '/chapters/[id]/edit',
-          params: { id: $event }
+          params: { id: $event },
         })"
       />
     </v-container>
@@ -114,7 +114,15 @@
     appear
     :disabled="loading || loadingGlobal"
     icon="$plus"
-    @click="createChapter()"
+    @click="chapterModal = true"
+  />
+  <DictionaryEditDialog
+    v-model="chapterName"
+    v-model:opened="chapterModal"
+    :disabled="loadingGlobal"
+    is-created
+    @save="createChapter()"
+    @update:opened="chapterName = ''"
   />
 </template>
 
@@ -267,29 +275,33 @@ const deleteComic = async () => {
 
 const chapters = ref<ChapterModel[]>([]);
 const chaptersList = computed(() => (
-  chapters.value.map((e, i) => ({
-    id: e.id,
-    name: e.name || `Глава ${i + 1}`,
-    count: `${e.pages.reduce((a,c) => a + (c.file ? 1 : 0), 0)} / ${e.pages.length}`,
-  }))
+  chapters.value
+    .map((e, i) => ({
+      id: e.id,
+      name: e.name || `Глава ${i + 1}`,
+      count: `${e.pages.reduce((a,c) => a + (c.file ? 1 : 0), 0)} / ${e.pages.length}`,
+    }))
+    .reverse()
 ));
 
 const loadChapters = async () => {
   chapters.value = await ChapterController.loadAll(comicId);
 };
 
+const chapterModal = ref(false);
+const chapterName = ref('');
+
 const createChapter = async () => {
   try {
     loadingGlobalStart();
-    const chapterId = await ChapterController.save(new ChapterModel({ comicId }));
-
-    if (!chapterId) return;
-
+    await ChapterController.save(new ChapterModel({
+      comicId,
+      name: chapterName.value,
+    }));
+    chapterModal.value = false;
+    chapterName.value = '';
+    await loadChapters();
     Toast.show({ text: 'Глава создана' });
-    await router.push({
-      name: '/chapters/[id]/edit',
-      params: { id: chapterId.toString() },
-    });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });
   } finally {

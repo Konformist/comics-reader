@@ -2,7 +2,7 @@
   <v-card
     :to="{
       name: '/comics/[id]/',
-      params: { id: comic.id }
+      params: { id: comic.id },
     }"
   >
     <div class="d-flex flex-no-wrap justify-space-between">

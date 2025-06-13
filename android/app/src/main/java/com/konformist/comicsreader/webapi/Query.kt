@@ -41,6 +41,7 @@ class Query {
     const val CHAPTER_CHAPTER_GET = "chapter/chapter/get"
     const val CHAPTER_CHAPTER_ADD = "chapter/chapter/add"
     const val CHAPTER_CHAPTER_SET = "chapter/chapter/set"
+    const val CHAPTER_COMIC_SET = "chapter/comic/set"
     const val CHAPTER_CHAPTER_DEL = "chapter/chapter/del"
 
     const val CHAPTER_PAGE_LIST = "chapter/page/list"

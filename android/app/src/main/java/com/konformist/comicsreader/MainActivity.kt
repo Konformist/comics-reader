@@ -6,7 +6,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import com.getcapacitor.BridgeActivity
-import com.konformist.comicsreader.webapi.AppDataStore
+import com.konformist.comicsreader.db.AppDataStore
 import kotlinx.coroutines.runBlocking
 
 class MainActivity : BridgeActivity() {

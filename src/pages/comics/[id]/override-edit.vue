@@ -133,8 +133,6 @@
 
 <script setup lang="ts">
 import useLoading from '@/composables/useLoading.ts';
-import ChapterController from '@/core/entities/chapter/ChapterController.ts';
-import ChapterModel from '@/core/entities/chapter/ChapterModel.ts';
 import ComicOverrideController from '@/core/entities/comic-override/ComicOverrideController.ts';
 import ComicOverrideModel from '@/core/entities/comic-override/ComicOverrideModel.ts';
 import ComicController from '@/core/entities/comic/ComicController.ts';
@@ -195,11 +193,6 @@ const loadComicOverride = async () => {
 
 const saveComicOverride = async () => {
   await ComicOverrideController.save(comicOverride.value);
-};
-
-const chapters = ref<ChapterModel[]>([]);
-const loadChapters = async () => {
-  chapters.value = await ChapterController.loadAll(comicId);
 };
 
 const onSave = async () => {
@@ -288,11 +281,7 @@ const init = async () => {
   } else {
     await Promise.all([
       parsersStore.loadParsers(),
-      tagsStore.loadTags(),
-      authorsStore.loadAuthors(),
-      languagesStore.loadLanguages(),
       loadComicOverride(),
-      loadChapters(),
       loadParser(),
     ]);
   }
@@ -317,6 +306,12 @@ const parseComic = async () => {
   try {
     loadingGlobalStart();
     await ComicController.parse(comicId, cookie.value);
+    await Promise.all([
+      tagsStore.loadTagsForce(),
+      authorsStore.loadAuthorsForce(),
+      languagesStore.loadLanguagesForce(),
+      comicsStore.loadComicsForce(),
+    ]);
     Toast.show({ text: 'Комикс сохранён' });
   } catch (e) {
     Toast.show({ text: `Ошибка: ${e}` });

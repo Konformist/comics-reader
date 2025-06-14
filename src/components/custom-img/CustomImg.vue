@@ -10,7 +10,7 @@
   >
     <template #placeholder>
       <v-skeleton-loader
-        v-if="insertLoading || loading"
+        v-if="src && (insertLoading || loading)"
         class="rounded-xl"
         :height="height"
         :width="width"

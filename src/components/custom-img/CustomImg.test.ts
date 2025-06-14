@@ -12,7 +12,10 @@ describe('CustomImg', () => {
 
   test('loading', async () => {
     const wrapper = mount(CustomImg, {
-      props: { loading: true },
+      props: {
+        loading: true,
+        src: 'test',
+      },
       global: { plugins: [vuetify] },
     });
 

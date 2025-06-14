@@ -41,24 +41,21 @@ class ParserController(
 
   private fun downloadHTML(url: String, cookie: String): Document {
     val connection = RequestUtils.getConnection(URL(url), cookie)
+    connection.inputStream.use { inStream ->
+      InputStreamReader(inStream).use { inReader ->
+        BufferedReader(inReader).use { reader ->
+          val stringBuilder = StringBuilder()
 
-    val inputStream = connection.inputStream
-    val inputStreamReader = InputStreamReader(inputStream)
-    val reader = BufferedReader(inputStreamReader)
-    val stringBuilder = StringBuilder()
+          var line: String?
+          while (reader.readLine().also { line = it } != null) {
+            stringBuilder.append(line)
+          }
 
-    var line: String?
-    while (reader.readLine().also { line = it } != null) {
-      stringBuilder.append(line)
+          connection.disconnect()
+          return Parser.getDocument(stringBuilder.toString())
+        }
+      }
     }
-
-    reader.close()
-    inputStreamReader.close()
-    inputStream.close()
-    connection.inputStream.close()
-    connection.disconnect()
-
-    return Parser.getDocument(stringBuilder.toString())
   }
 
   fun parse(
@@ -240,7 +237,7 @@ class ParserController(
         id = comicId,
         name = setNotBlank(data.title, comic.name),
         annotation = setNotBlank(data.annotation, comic.annotation),
-        languageId = setNotBlank(languagesComic[0], comic.languageId),
+        languageId = setNotBlank(languagesComic.getOrNull(0) ?: 0L, comic.languageId),
         authors = setNotBlank(authorsComic, comic.authors),
         tags = setNotBlank(tagsComic, comic.tags),
       )

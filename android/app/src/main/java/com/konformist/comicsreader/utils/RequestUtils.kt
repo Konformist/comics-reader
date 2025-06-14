@@ -1,10 +1,15 @@
 package com.konformist.comicsreader.utils
 
+import android.content.Intent
+import com.konformist.comicsreader.App
+import com.konformist.comicsreader.CaptchaWebViewActivity
 import java.net.HttpURLConnection
 import java.net.URL
 
 class RequestUtils {
   companion object {
+    const val CAPTCHA_REQUEST_CODE = 1001
+
     fun getConnection(url: URL, cookie: String? = ""): HttpURLConnection {
       val connection = url.openConnection() as HttpURLConnection
       connection.requestMethod = "GET"
@@ -40,8 +45,13 @@ class RequestUtils {
       connection.setRequestProperty("upgrade-insecure-requests", "1")
       connection.connect()
 
-      if (connection.responseCode != 200)
+      if (connection.responseCode == 403) {
+        val intent = Intent(App.context, CaptchaWebViewActivity::class.java)
+        intent.putExtra("captcha_url", url)
+        App.context.startActivity(intent)
+      } else if (connection.responseCode != 200) {
         throw Exception("Error connection: ${connection.responseCode}")
+      }
 
       return connection
     }

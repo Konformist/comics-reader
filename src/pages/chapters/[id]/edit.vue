@@ -189,10 +189,12 @@ const saveChapter = async () => {
 const savePageChapters = async () => {
   const forSave = chapter.value.pages;
   const exists = chapter.value.pages.map((e) => e.id);
-  const forDelete = chapterReserve.value.pages.filter((e) => !exists.includes(e.id));
+  const forDelete = chapterReserve.value.pages
+    .filter((e) => !exists.includes(e.id))
+    .map((e) => e.id);
 
-  await Promise.all(forDelete.map((e) => ChapterPageController.remove(e.id)));
-  await Promise.all(forSave.map((e) => ChapterPageController.save(e)));
+  await ChapterPageController.sequenceRemove(forDelete);
+  await ChapterPageController.sequenceSave(forSave);
 };
 
 const init = async () => {
@@ -342,10 +344,7 @@ const delPages = async () => {
   try {
     loadingGlobalStart();
     await saveChapter();
-    await Promise.all(
-      chapter.value.pages
-        .map((e) => (ChapterPageController.remove(e.id))),
-    );
+    await ChapterPageController.sequenceRemove(chapter.value.pages.map((e) => e.id));
     await loadChapter();
     Toast.show({ text: 'Глава сохранена' });
   } catch (e) {

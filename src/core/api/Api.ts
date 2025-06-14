@@ -14,4 +14,13 @@ export default {
 
     return result.result;
   },
+
+  async sequenceApi<K extends keyof IApi>(path: K, body: Array<IApi[K]['request']> = []): Promise<Array<IApi[K]['response']>> {
+    const result: Array<IApi[K]['response']> = [];
+    for (const item of body) {
+      const response = await this.api<K>(path, item);
+      result.push(response);
+    }
+    return result;
+  },
 };

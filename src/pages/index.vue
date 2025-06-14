@@ -25,6 +25,11 @@
         class="w-100 d-flex"
         style="overflow-x: auto;"
       >
+        <SmallBtn
+          class="mr-2"
+          text="Удивить"
+          @click="moveRandomComic()"
+        />
         <DropdownButton
           v-model="comicsPageStore.filters.tags"
           class="mr-2"
@@ -151,6 +156,20 @@ const filterArrays = <T>(f: T[], s: T[]): boolean => (
   !s.length
   || f.some((e) => s.includes(e))
 );
+
+const randomInteger = (min: number, max: number): number => (
+  Math.floor(Math.random() * (max - min + 1)) + min
+);
+
+const moveRandomComic = () => {
+  const ids = comicsStore.comics.map((e) => e.id);
+  const id = ids[randomInteger(0, ids.length - 1)];
+
+  router.push({
+    name: '/comics/[id]/',
+    params: { id },
+  });
+};
 
 const comicsFiltered = computed(() => (
   comicsStore.comics

@@ -181,10 +181,6 @@ const createComic = async () => {
   });
 };
 
-const movePage = (callback?: () => void) => {
-  scrollY(0);
-};
-
 const moveComic = (id: number) => {
   comicsPageStore.scroll = document.scrollingElement?.scrollTop ?? 0;
 

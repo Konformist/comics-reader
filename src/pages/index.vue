@@ -25,11 +25,18 @@
         class="w-100 d-flex"
         style="overflow-x: auto;"
       >
-        <SmallBtn
+        <DropdownButton
+          v-model="comicsPageStore.sort"
           class="mr-2"
-          prepend-icon="$shuffle"
-          text="Удивить"
-          @click="moveRandomComic()"
+          :items="sortItems"
+          prepend-icon="$sort"
+          text="Сортировка"
+        />
+        <SmallBtn
+          class="mr-6 pl-1 pr-1"
+          :icon="comicsPageStore.invertSort ? '$sort-bottom' : '$sort-top'"
+          style="min-width: 32px;"
+          @click="comicsPageStore.invertSort = !comicsPageStore.invertSort"
         />
         <DropdownButton
           v-model="comicsPageStore.filters.tags"
@@ -60,6 +67,13 @@
       </div>
     </v-toolbar>
     <v-container class="pb-16 mb-4">
+      <v-btn
+        class="mb-4 w-100"
+        prepend-icon="$shuffle"
+        text="Удивить"
+        variant="tonal"
+        @click="moveRandomComic()"
+      />
       <template v-if="loading">
         <v-skeleton-loader
           v-for="i in 2"
@@ -73,7 +87,7 @@
       <v-data-iterator
         v-else
         v-model:page="comicsPageStore.filters.page"
-        :items="comicsFiltered"
+        :items="comicsPageStore.comicsSorted"
         items-per-page="20"
       >
         <template #header="{ pageCount, prevPage, nextPage }">
@@ -129,7 +143,7 @@ import { useTagsStore } from '@/stores/tags.ts';
 import { Toast } from '@capacitor/toast';
 import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
-import { useComicsPageStore } from '@/stores/comicsPage.ts';
+import { ESORT_TYPE, useComicsPageStore } from '@/stores/comicsPage.ts';
 import useLoading from '@/composables/useLoading.ts';
 import ComicGallery from '@/components/ComicGallery.vue';
 import { onBeforeMount } from 'vue';
@@ -156,17 +170,20 @@ const {
   loadingGlobal,
 } = useLoading();
 
+const sortItems = [
+  {
+    id: ESORT_TYPE.NAME,
+    name: 'По имени',
+  },
+  {
+    id: ESORT_TYPE.DATE,
+    name: 'По дате обновления',
+  },
+];
+
 const scrollY = (value: number) => {
   nextTick(() => document.scrollingElement?.scrollTo(0, value));
 };
-
-const filterString = (v: string, s: string) => (
-  v.toLowerCase().includes(s.toLowerCase())
-);
-const filterArrays = <T>(f: T[], s: T[]): boolean => (
-  !s.length
-  || f.some((e) => s.includes(e))
-);
 
 const randomInteger = (min: number, max: number): number => (
   Math.floor(Math.random() * (max - min + 1)) + min
@@ -181,22 +198,6 @@ const moveRandomComic = () => {
     params: { id },
   });
 };
-
-const comicsFiltered = computed(() => (
-  comicsStore.comics
-    .filter((item) => {
-      if ((comicsPageStore.filters.filling === 1 && !item.isFilled)
-        || (comicsPageStore.filters.filling === 2 && item.isFilled)) {
-        return false;
-      }
-
-      return filterString(item.name, comicsPageStore.filters.search)
-        && filterArrays(item.tags, comicsPageStore.filters.tags)
-        && filterArrays(item.authors, comicsPageStore.filters.authors)
-        && filterArrays([item.languageId], comicsPageStore.filters.languages);
-    })
-    .reverse()
-));
 
 const createComic = async () => {
   const comicId = await ComicController.save(new ComicModel());

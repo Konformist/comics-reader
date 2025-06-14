@@ -10,12 +10,7 @@
           :key="item.id"
           :active="active === item.id"
           :title="item.name || `Глава ${i + 1}`"
-          :to="{
-            name: '/chapters/[id]/read',
-            params: { id: item.id },
-            query: { comic: comicId },
-          }"
-          @click="opened = false"
+          @click="$emit('move-chapter', item.id)"
         />
       </v-list>
     </v-card>
@@ -26,6 +21,7 @@ import type ChapterModel from '@/core/entities/chapter/ChapterModel.ts';
 
 const opened = defineModel<boolean>('opened', { default: false });
 
+defineEmits<{ (e: 'move-chapter', v: number): void }>();
 defineProps<{
   items: ChapterModel[]
   active: number

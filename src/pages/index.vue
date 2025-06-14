@@ -78,6 +78,7 @@
             :class="index ? 'mt-4' : ''"
             :comic="item.raw"
             :tags="tagsStore.tags"
+            @move-comic="moveComic($event)"
           />
         </template>
         <template #footer="{ pageCount, prevPage, nextPage }">
@@ -85,8 +86,9 @@
             v-model="comicsPageStore.filters.page"
             class="mt-4"
             :length="pageCount"
-            @next="nextPage()"
-            @prev="prevPage()"
+            @next="nextPage(); scrollY(0)"
+            @prev="prevPage(); scrollY(0)"
+            @update:model-value="scrollY(0)"
           />
         </template>
       </v-data-iterator>
@@ -114,6 +116,7 @@ import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import { useComicsPageStore } from '@/stores/comicsPage.ts';
 import useLoading from '@/composables/useLoading.ts';
 import ComicGallery from '@/components/ComicGallery.vue';
+import { onBeforeMount } from 'vue';
 
 definePage({
   meta: {
@@ -136,6 +139,10 @@ const {
   loadingEnd,
   loadingGlobal,
 } = useLoading();
+
+const scrollY = (value: number) => {
+  nextTick(() => document.scrollingElement?.scrollTo(0, value));
+};
 
 const filterString = (v: string, s: string) => (
   v.toLowerCase().includes(s.toLowerCase())
@@ -174,6 +181,19 @@ const createComic = async () => {
   });
 };
 
+const movePage = (callback?: () => void) => {
+  scrollY(0);
+};
+
+const moveComic = (id: number) => {
+  comicsPageStore.scroll = document.scrollingElement?.scrollTop ?? 0;
+
+  router.push({
+    name: '/comics/[id]/',
+    params: { id },
+  });
+};
+
 const init = async () => {
   loadingStart();
   await Promise.all([
@@ -185,5 +205,8 @@ const init = async () => {
   loadingEnd();
 };
 
-init();
+onBeforeMount(async () => {
+  await init();
+  scrollY(comicsPageStore.scroll);
+});
 </script>

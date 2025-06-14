@@ -1,5 +1,6 @@
 export const useComicsPageStore = defineStore('comicsPage', {
   state: () => ({
+    scroll: 0,
     filters: {
       page: 1 as number,
       search: '',

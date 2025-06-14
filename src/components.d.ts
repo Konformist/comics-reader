@@ -27,5 +27,6 @@ declare module 'vue' {
     ReadContent: typeof import('./components/ReadContent.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SmallBtn: typeof import('./components/SmallBtn.vue')['default']
   }
 }

@@ -1,7 +1,7 @@
 <template>
   <div class="position-relative swiper-zoom-container">
     <img
-      v-intersect="onRead"
+      v-intersect.once="onIntersect"
       :src="item.file?.url"
       :style="{
         display: 'block',
@@ -16,9 +16,12 @@
       class="position-absolute w-100 h-100 d-flex justify-center align-center"
       style="inset: 0"
     >
-      <v-progress-circular
+      <v-skeleton-loader
         v-if="loading"
-        indeterminate
+        class="rounded-0"
+        height="100%"
+        type="ossein"
+        width="100%"
       />
       <div
         v-else-if="error"
@@ -45,15 +48,37 @@ const emit = defineEmits<{
   (e: 'error', v: void): void
 }>();
 
-const { item, maxWidth = undefined, maxHeight = undefined } = defineProps<{
+const {
+  item,
+  maxWidth = undefined,
+  maxHeight = undefined,
+} = defineProps<{
   item: ChapterPageModel
   maxWidth?: string
   maxHeight?: string
 }>();
 
 const error = ref(false);
-
 const loading = ref(!!item.file?.url);
+
+const intersect = ref(false);
+
+const onRead = (): void => {
+  if (intersect.value
+    && item.file?.url
+    && !error.value
+    && !loading.value
+    && !item.isRead) {
+    emit('read');
+  }
+};
+
+const onIntersect = (isIntersect: boolean) => {
+  if (isIntersect) {
+    intersect.value = isIntersect;
+    onRead();
+  }
+};
 
 const onError = (): void => {
   loading.value = false;
@@ -64,16 +89,7 @@ const onError = (): void => {
 const onLoad = (): void => {
   loading.value = false;
   error.value = false;
+  onRead();
   emit('load');
-};
-
-const onRead = (isIntersect: boolean): void => {
-  if (isIntersect
-    && item.file?.url
-    && !item.isRead
-    && !loading.value
-    && !error.value) {
-    emit('read');
-  }
 };
 </script>

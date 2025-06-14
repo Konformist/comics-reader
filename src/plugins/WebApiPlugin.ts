@@ -1,4 +1,3 @@
-import WebApiPluginFake from '@/plugins/WebApiPluginFake.ts';
 import { type PluginListenerHandle, registerPlugin, WebPlugin } from '@capacitor/core';
 
 interface IApiError { error: string }
@@ -351,129 +350,16 @@ interface IWebApiPlugin {
 }
 
 class WebApiPlugin extends WebPlugin implements IWebApiPlugin {
-  fake: WebApiPluginFake = new WebApiPluginFake();
-
-  // eslint-disable-next-line complexity
   async api<K extends keyof IApi>(options: {
     path: K
     body: IApi[K]['request']
   }): Promise<{ result: IApi[K]['response'] } | IApiError> {
-    let result: IApi[K]['response'] = true;
-
-    console.log(options.path, options.body);
-
-    switch (options.path) {
-      case 'tag/tag/list': result = this.fake.getTags(); break;
-      // @ts-expect-error fuck
-      case 'tag/tag/get': result = this.fake.getTag({ id: options.body.id }); break;
-      case 'tag/tag/add': result = this.fake.getTagId(); break;
-      case 'tag/tag/set': result = true; break;
-      case 'tag/tag/del': result = true; break;
-      case 'author/author/list': result = this.fake.getAuthors(); break;
-      // @ts-expect-error fuck
-      case 'author/author/get': result = this.fake.getAuthor({ id: options.body.id }); break;
-      case 'author/author/add': result = this.fake.getAuthorId(); break;
-      case 'author/author/set': result = true; break;
-      case 'author/author/del': result = true; break;
-      case 'language/language/list': result = this.fake.getLanguages(); break;
-      // @ts-expect-error fuck
-      case 'language/language/get': result = this.fake.getLanguage({ id: options.body.id }); break;
-      case 'language/language/add': result = this.fake.getLanguageId(); break;
-      case 'language/language/set': result = true; break;
-      case 'language/language/del': result = true; break;
-      case 'parser/parser/list': result = this.fake.getParsers(); break;
-      // @ts-expect-error fuck
-      case 'parser/parser/get': result = this.fake.getParser({ id: options.body.id }); break;
-      case 'parser/parser/add': result = this.fake.getParserId(); break;
-      case 'parser/parser/set': result = true; break;
-      case 'parser/parser/del': result = true; break;
-      case 'comic/comic/list': result = this.fake.getComics(); break;
-      // @ts-expect-error fuck
-      case 'comic/comic/get': result = this.fake.getComic({ id: options.body.id }); break;
-      case 'comic/comic/add': result = this.fake.getComicId(); break;
-      case 'comic/comic/set': result = true; break;
-      case 'comic/comic/del': result = true; break;
-      case 'comic/override/get': result = this.fake.getComicOverride(); break;
-      case 'comic/override/set': result = true; break;
-      // @ts-expect-error fuck
-      case 'chapter/chapter/list': result = this.fake.getChapters(options.body.comicId); break;
-      // @ts-expect-error fuck
-      case 'chapter/chapter/get': result = this.fake.getChapter({ id: options.body.id }); break;
-      case 'chapter/chapter/add': result = this.fake.getChapterId(); break;
-      case 'chapter/chapter/set': result = true; break;
-      case 'chapter/chapter/del': result = true; break;
-      // @ts-expect-error fuck
-      case 'chapter/page/list': result = this.fake.getChapterPages(options.body.chapterId); break;
-      // @ts-expect-error fuck
-      case 'chapter/page/get': result = this.fake.getChapterPage({ id: options.body.id }); break;
-      case 'chapter/page/add': result = this.fake.getChapterPageId(); break;
-      case 'chapter/page/set': result = true; break;
-      case 'chapter/page/del': result = true; break;
-      case 'file/comic-cover/download': result = 1; break;
-      case 'file/comic-cover/add': result = 1; break;
-      case 'file/comic-cover/del': result = true; break;
-      case 'file/chapter-page/download': result = 1; break;
-      case 'file/chapter-page/add': result = 1; break;
-      case 'file/chapter-page/del': result = true; break;
-      case 'file/files/tree': {
-        result = [{
-          name: 'Download',
-          path: '/storage/emulated/0/Download',
-          isDirectory: true,
-          mimeType: null,
-          size: 0,
-          lastModified: Date.now(),
-          children: [
-            {
-              name: 'file1.txt',
-              path: '/storage/emulated/0/Download/file1.txt',
-              isDirectory: false,
-              size: 1024,
-              lastModified: Date.now(),
-              mimeType: 'text/plain',
-              children: null,
-            },
-            {
-              name: 'FolderA',
-              path: '/storage/emulated/0/Download/FolderA',
-              isDirectory: true,
-              size: 0,
-              lastModified: Date.now(),
-              mimeType: null,
-              children: [
-                {
-                  name: 'fileA1.txt',
-                  path: '/storage/emulated/0/Download/FolderA/fileA1.txt',
-                  isDirectory: false,
-                  size: 2048,
-                  lastModified: Date.now(),
-                  mimeType: 'text/plain',
-                  children: null,
-                },
-                {
-                  name: 'fileA2.jpg',
-                  path: '/storage/emulated/0/Download/FolderA/fileA2.jpg',
-                  isDirectory: false,
-                  size: 512,
-                  lastModified: Date.now(),
-                  mimeType: 'image/jpeg',
-                  children: null,
-                },
-              ],
-            },
-          ],
-        }];
-        break;
-      }
-      case 'file/file/downloads': result = true; break;
-      case 'settings/settings/get': result = this.fake.getSettings(); break;
-      case 'settings/settings/set': result = true; break;
-      case 'backup/backup/add': result = true; break;
-      case 'backup/backup/restore': result = true; break;
-      default: break;
-    }
-
-    return { result };
+    const result = await fetch('/api', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(options),
+    });
+    return result.json();
   }
 }
 

@@ -1,9 +1,6 @@
 <template>
   <v-card
-    :to="{
-      name: '/comics/[id]/',
-      params: { id: comic.id },
-    }"
+    @click="$emit('move-comic', comic.id)"
   >
     <div class="d-flex flex-no-wrap justify-space-between">
       <CustomImg
@@ -49,6 +46,8 @@
 import type AuthorModel from '@/core/entities/author/AuthorModel.ts';
 import type ComicModel from '@/core/entities/comic/ComicModel.ts';
 import type TagModel from '@/core/entities/tag/TagModel.ts';
+
+defineEmits<{ (e: 'move-comic', v: number): void }>();
 
 const {
   comic,

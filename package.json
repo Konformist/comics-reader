@@ -12,7 +12,8 @@
     "lint": "eslint . --fix",
     "test": "vitest run",
     "cap:sync": "npm run type-check && npm run lint && npm run test && npm run build-only && npx cap sync",
-    "cap:assets": "npx capacitor-assets generate --android --splashBackgroundColor=#122212"
+    "cap:assets": "npx capacitor-assets generate --android --splashBackgroundColor=#122212",
+    "fake": "node ./server/fakeServer.mjs"
   },
   "dependencies": {
     "@capacitor-community/keep-awake": "^7.0.0",
@@ -43,6 +44,7 @@
     "@vue/tsconfig": "^0.7.0",
     "eslint": "^9.23.0",
     "eslint-config-vuetify": "^3.0.3",
+    "express": "^5.1.0",
     "jsdom": "^26.1.0",
     "npm-run-all2": "^7.0.2",
     "pinia": "^3.0.1",

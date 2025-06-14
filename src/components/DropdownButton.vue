@@ -6,17 +6,13 @@
     :multiple="multiple"
   >
     <template #default="{ isActive, props }">
-      <v-btn
+      <SmallBtn
         v-bind="{
           ...props,
           ...$attrs,
         }"
-        color="primary"
         :prepend-icon="prependIcon"
-        rounded="md"
-        size="small"
         :text="btnText"
-        variant="outlined"
       >
         <template #append>
           <v-icon
@@ -26,7 +22,7 @@
             size="10"
           />
         </template>
-      </v-btn>
+      </SmallBtn>
     </template>
   </CustomListDialog>
 </template>

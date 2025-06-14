@@ -1,32 +1,44 @@
 <template>
   <v-app-bar
     class="rounded-b-xl"
-    title="Чтение"
+    :elevation="!showInterface ? 0 : undefined"
+    :model-value="showInterface"
+    :title="chapter.name || `Глава ${chapterIndex + 1}`"
   >
     <template #prepend>
       <v-btn
         icon="$arrow-left"
         rounded="pill"
-        @click="router.back()"
+        @click="$router.replace({
+          name: '/comics/[id]/',
+          params: { id: comicId },
+        })"
       />
     </template>
-    <template #append>
-      <v-btn
-        :active="showChapters"
-        icon="$menu"
-        rounded="pill"
-        @click="onOpenChapters()"
-      />
+    <template #extension>
+      <div class="d-flex px-4 w-100">
+        <v-spacer />
+        <SmallBtn
+          :active="showChapters"
+          prepend-icon="$menu"
+          text="Главы"
+          @click="showChapters = true"
+        />
+      </div>
     </template>
   </v-app-bar>
-  <v-main style="height: 100vh">
+  <v-main
+    class="pt-0 pb-0"
+    style="height: 100vh"
+  >
     <v-container class="pa-0 h-100">
       <ReadContent
+        :key="chapterId"
         ref="readContentRef"
         v-model="currentPage"
         class="h-100 w-100"
         :items="chapter.pages"
-        @open-pages="onOpenPages()"
+        @click="toggleInterface()"
         @read="onRead($event)"
       />
     </v-container>
@@ -34,22 +46,21 @@
   <PagesSheet
     :active="currentPage"
     :items="chapter.pages"
-    :opened="showPages"
+    :opened="showInterface"
     @move="currentPage = $event"
-    @update:opened="onClosePages()"
   />
   <ChaptersSheet
+    v-model="showChapters"
     :active="chapterId"
     :comic-id="comicId"
     :items="chapters"
-    :opened="showChapters"
-    @update:opened="onCloseChapters()"
+    @move-chapter="moveChapter($event)"
   />
   <v-progress-linear
     class="position-fixed"
     location="bottom"
-    :max="chapter.pages.length - 1"
-    :model-value="currentPage"
+    :max="chapter.pages.length"
+    :model-value="currentPage + 1"
     style="z-index: 1"
   />
   <v-fab
@@ -58,16 +69,13 @@
     appear
     append-icon="$arrow-right"
     text="Продолжить"
-    @click="$router.replace({
-      name: '/chapters/[id]/read',
-      params: { id: nextChapterId },
-      query: { comic: comicId },
-    })"
+    @click="moveChapter(nextChapterId)"
   />
 </template>
 
 <script lang="ts" setup>
 import type ReadContent from '@/components/ReadContent.vue';
+import SmallBtn from '@/components/SmallBtn.vue';
 import ChapterPageController from '@/core/entities/chapter-page/ChapterPageController.ts';
 import type ChapterPageModel from '@/core/entities/chapter-page/ChapterPageModel.ts';
 import { KeepAwake } from '@capacitor-community/keep-awake';
@@ -92,47 +100,44 @@ const chapterId = ref(+(route.params.id || 0));
 
 const chapters = ref<ChapterModel[]>([]);
 
-const nextChapterId = computed(() => {
-  const index = chapters.value.findIndex((chapter) => chapter.id === chapterId.value);
-  return chapters.value[index + 1]?.id;
-});
-
 const loadChapters = async () => {
   chapters.value = await ChapterController.loadAll(comicId);
 };
 
 const readContentRef = ref<typeof ReadContent>();
 
-const showPages = ref(false);
+const showInterface = ref(false);
 const currentPage = ref(+(route.query?.page || 0));
 
 router.beforeResolve(() => {
   currentPage.value = 0;
 });
 
-const onOpenPages = () => {
-  readContentRef.value?.stop();
-  showPages.value = true;
-};
-
-const onClosePages = () => {
-  showPages.value = false;
-  readContentRef.value?.start();
+const toggleInterface = (value?: boolean) => {
+  showInterface.value = value ?? !showInterface.value;
+  if (showInterface.value) readContentRef.value?.stop();
+  else readContentRef.value?.start();
 };
 
 const showChapters = ref(false);
 
-const onOpenChapters = () => {
-  readContentRef.value?.stop();
-  showChapters.value = true;
-};
-
-const onCloseChapters = () => {
+const moveChapter = (id: number) => {
+  toggleInterface(false);
   showChapters.value = false;
-  readContentRef.value?.start();
+  router.replace({
+    name: '/chapters/[id]/read',
+    params: { id },
+    query: { comic: comicId },
+  });
 };
 
 const chapter = ref<ChapterModel>(new ChapterModel());
+const chapterIndex = computed(() => (
+  chapters.value.findIndex((e) => e.id === chapterId.value)
+));
+
+const nextChapterId = computed(() => (chapters.value[chapterIndex.value + 1]?.id));
+
 const loadChapter = async () => {
   chapter.value = await ChapterController.load(chapterId.value);
 };

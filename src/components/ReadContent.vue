@@ -7,7 +7,6 @@
       v-for="item in items"
       :key="item.id"
       v-bind="swiperSlideMode"
-      @click="$emit('open-pages')"
     >
       <ChapterPageRead
         :item="item"
@@ -36,10 +35,7 @@ const appStore = useAppStore();
 
 const model = defineModel<number>({ default: 0 });
 
-defineEmits<{
-  (e: 'open-pages', v: void): void
-  (e: 'read', v: ChapterPageModel): void
-}>();
+defineEmits<{ (e: 'read', v: ChapterPageModel): void }>();
 
 const { items } = defineProps<{ items: ChapterPageModel[] }>();
 
@@ -74,6 +70,7 @@ const modeWebtoon = computed(() => ({
 
 const modeVertical = computed(() => ({
   direction: 'vertical',
+  spaceBetween: 40,
   zoom: {
     maxRatio: 5,
     minRatio: 1,
@@ -88,6 +85,7 @@ const modeVertical = computed(() => ({
 
 const modeHorizontal = computed(() => ({
   direction: 'horizontal',
+  spaceBetween: 40,
   zoom: {
     maxRatio: 5,
     minRatio: 1,

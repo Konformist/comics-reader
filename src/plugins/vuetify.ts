@@ -35,9 +35,10 @@ import {
   mdiInformation,
   mdiMenu,
   mdiPencil,
-  mdiPlus, mdiSort,
-  mdiTag,
-  mdiTranslate, mdiTriangleDown,
+  mdiPlus, mdiShuffle,
+  mdiSort,
+  mdiTag, mdiTranslate,
+  mdiTriangleDown,
   mdiViewDashboard,
   mdiViewList,
 } from '@mdi/js';
@@ -82,6 +83,7 @@ export default createVuetify({
       'dev': mdiDevTo,
       'read': mdiBookOpenPageVariant,
       'triangleDown': mdiTriangleDown,
+      'shuffle': mdiShuffle,
     },
     sets: { mdi },
   },
@@ -110,7 +112,10 @@ export default createVuetify({
     VBtn: { size: 'large' },
     VBtnToggle: { color: 'primary' },
     VAlert: { rounded: 'xl' },
-    VPagination: { rounded: true },
+    VPagination: {
+      rounded: true,
+      density: 'comfortable',
+    },
     VBottomNavigation: { elevation: '2' },
     VCard: { rounded: 'xl' },
     VChip: {

@@ -27,6 +27,7 @@
       >
         <SmallBtn
           class="mr-2"
+          prepend-icon="$shuffle"
           text="Удивить"
           @click="moveRandomComic()"
         />
@@ -75,6 +76,16 @@
         :items="comicsFiltered"
         items-per-page="20"
       >
+        <template #header="{ pageCount, prevPage, nextPage }">
+          <v-pagination
+            v-model="comicsPageStore.filters.page"
+            class="mb-4"
+            :length="pageCount"
+            @next="nextPage(); scrollY(0)"
+            @prev="prevPage(); scrollY(0)"
+            @update:model-value="scrollY(0)"
+          />
+        </template>
         <template #default="{ items }">
           <ComicGallery
             v-for="(item, index) in items"

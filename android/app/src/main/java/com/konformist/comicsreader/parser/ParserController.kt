@@ -20,11 +20,6 @@ import com.konformist.comicsreader.data.language.LanguageCreate
 import com.konformist.comicsreader.data.parserconfig.ParserConfig
 import com.konformist.comicsreader.data.tag.TagController
 import com.konformist.comicsreader.data.tag.TagCreate
-import com.konformist.comicsreader.utils.RequestUtils
-import org.jsoup.nodes.Document
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.net.URL
 
 class ParserController(
   private val tagController: TagController,
@@ -36,25 +31,9 @@ class ParserController(
   private val chapterPageController: ChapterPageController,
 ) {
   companion object {
-    fun createParser() = Parser()
-  }
-
-  private fun downloadHTML(url: String, cookie: String): Document {
-    val connection = RequestUtils.getConnection(URL(url), cookie)
-    connection.inputStream.use { inStream ->
-      InputStreamReader(inStream).use { inReader ->
-        BufferedReader(inReader).use { reader ->
-          val stringBuilder = StringBuilder()
-
-          var line: String?
-          while (reader.readLine().also { line = it } != null) {
-            stringBuilder.append(line)
-          }
-
-          connection.disconnect()
-          return Parser.getDocument(stringBuilder.toString())
-        }
-      }
+    fun createParser(config: ParserConfig, override: ComicOverride): Parser {
+      val queryElements = QueryElements.from(config, override)
+      return Parser(queryElements)
     }
   }
 
@@ -63,169 +42,168 @@ class ParserController(
     cookie: String,
     config: ParserConfig,
     override: ComicOverride
-  ): Parser.Result {
-    val parser = createParser().mergeQuery(config, override)
+  ): ParserResult {
+    val parser = createParser(config, override)
+    val mainDoc = HtmlLoader.loadHTML(url, cookie)
+    val result = ParserResult()
 
-    val comicHTML = downloadHTML(url, cookie)
-    parser.parseComic(comicHTML)
-      .parseCover(comicHTML)
-      .parseTags(comicHTML)
-      .parseAuthors(comicHTML)
-      .parseLanguages(comicHTML)
-      .parseChapters(comicHTML)
+    parser.parseComic(mainDoc, result)
+      .let { parser.parseCover(mainDoc, it) }
+      .let { parser.parseTags(mainDoc, it) }
+      .let { parser.parseAuthors(mainDoc, it) }
+      .let { parser.parseLanguages(mainDoc, it) }
+      .let { parser.parseChapters(mainDoc, it) }
 
     if (parser.queryElements.pagesTemplateUrl.isNotBlank()) {
-      parser.chapterLinks.forEachIndexed { iChapter, chapter ->
-        if (chapter.isNotBlank()) {
-          val linkFirstPage = parser.mergePageLink(chapter, 1)
-          val firstPageHTML = downloadHTML(linkFirstPage, cookie)
-          parser.parseCountPages(firstPageHTML, iChapter)
+      result.chapters.forEachIndexed { iChapter, chapter ->
+        val baseUrl = if (chapter.link.isNotBlank()) chapter.link else url
+        val updatedUrl = parser.setDomain(url, baseUrl)
 
-          parser.result.chapters[iChapter].pages.forEachIndexed { iPage, page ->
-            val linkPage = parser.mergePageLink(chapter, iPage + 1)
-            val pageHTML = downloadHTML(linkPage, cookie)
-            parser.parseChapterPage(pageHTML, iChapter, iPage)
+        val firstPageUrl = parser.mergePageLink(updatedUrl, 1)
+        val firstPageDoc = HtmlLoader.loadHTML(firstPageUrl, cookie)
+
+        if (chapter.pages.isNotEmpty()) {
+          for (pageIndex in 1..chapter.pages.size) {
+            val page = chapter.pages[pageIndex - 1]
+            val pageUrl = if (page.isNotBlank()) parser.setDomain(url, page)
+            else parser.mergePageLink(updatedUrl, pageIndex)
+
+            val pageDoc = HtmlLoader.loadHTML(pageUrl, cookie)
+            chapter.pages[pageIndex - 1] = parser.parseChapterPage(pageDoc)
+          }
+        } else {
+          val count = parser.parseCountPages(firstPageDoc)
+          repeat(count) { chapter.pages.add("") }
+
+          for (pageIndex in 1..count) {
+            val pageUrl = parser.mergePageLink(updatedUrl, pageIndex)
+            val pageDoc = HtmlLoader.loadHTML(pageUrl, cookie)
+            chapter.pages[pageIndex - 1] = parser.parseChapterPage(pageDoc)
           }
         }
       }
     }
 
-    return parser.result
+    return result
   }
 
-  private fun <T> setNotBlank(first: List<T>, last: List<T>): List<T> {
-    return if (first.isNotEmpty()) first else last
+  fun <T> setNotBlank(newValue: T, oldValue: T): T = when (newValue) {
+    is String -> if (newValue.isNotBlank()) newValue else oldValue
+    is Collection<*> -> if (newValue.isNotEmpty()) newValue else oldValue
+    is Long -> if (newValue != 0L) newValue else oldValue
+    else -> newValue ?: oldValue
   }
 
-  private fun setNotBlank(first: Long, last: Long): Long {
-    return if (first != 0L) first else last
-  }
-
-  private fun setNotBlank(first: String, last: String): String {
-    return if (first.isNotBlank()) first else last
-  }
-
-  private fun updateTags(data: Parser.Result): List<Long> {
-    val tags = tagController.readAll()
-    val tagsNames = tags.map { it.name.lowercase() }
+  private fun updateTags(data: ParserResult): List<Long> {
+    val items = tagController.readAll()
+    val itemsLower = items.map { it.name.lowercase() }
     val result = mutableListOf<Long>()
 
-    data.tags.forEach { item ->
-      if (!tagsNames.contains(item.lowercase())) {
-        val rowId = tagController.create(TagCreate(name = item))
+    data.tags.forEach { name ->
+      val idx = itemsLower.indexOf(name.lowercase())
+      if (idx == -1) {
+        val rowId = tagController.create(TagCreate(name = name))
         result.add(rowId)
       } else {
-        tags.find { it.name.lowercase() == item.lowercase() }?.let {
-          result.add(it.id)
-        }
+        result.add(items[idx].id)
       }
     }
 
     return result
   }
 
-  private fun updateAuthors(data: Parser.Result): List<Long> {
-    val authors = authorController.readAll()
-    val authorsNames = authors.map { it.name.lowercase() }
+  private fun updateAuthors(data: ParserResult): List<Long> {
+    val items = authorController.readAll()
+    val itemsLower = items.map { it.name.lowercase() }
     val result = mutableListOf<Long>()
 
-    data.authors.forEach { item ->
-      if (!authorsNames.contains(item.lowercase())) {
-        val rowId = authorController.create(AuthorCreate(name = item))
+    data.authors.forEach { name ->
+      val idx = itemsLower.indexOf(name.lowercase())
+      if (idx == -1) {
+        val rowId = authorController.create(AuthorCreate(name = name))
         result.add(rowId)
       } else {
-        authors.find { it.name.lowercase() == item.lowercase() }?.let {
-          result.add(it.id)
-        }
+        result.add(items[idx].id)
       }
     }
 
     return result
   }
 
-  private fun updateLanguages(data: Parser.Result): List<Long> {
-    val languages = languageController.readAll()
-    val languagesNames = languages.map { it.name.lowercase() }
+  private fun updateLanguages(data: ParserResult): List<Long> {
+    val items = languageController.readAll()
+    val itemsLower = items.map { it.name.lowercase() }
     val result = mutableListOf<Long>()
 
-    data.languages.forEach { item ->
-      if (!languagesNames.contains(item.lowercase())) {
-        val rowId = languageController.create(LanguageCreate(name = item))
+    data.languages.forEach { name ->
+      val idx = itemsLower.indexOf(name.lowercase())
+      if (idx == -1) {
+        val rowId = languageController.create(LanguageCreate(name = name))
         result.add(rowId)
       } else {
-        languages.find { it.name.lowercase() == item.lowercase() }?.let {
-          result.add(it.id)
-        }
+        result.add(items[idx].id)
       }
     }
 
     return result
   }
 
-  private fun updateCover(data: Parser.Result, comicId: Long) {
+  private fun updateCover(data: ParserResult, comicId: Long) {
     if (data.coverUrl.isNotBlank()) {
       comicCoverController.readByComic(comicId)?.let { cover ->
         comicCoverController.update(
-          ComicCoverUpdate(
-            id = cover.id,
-            fromUrl = data.coverUrl,
-          )
+          ComicCoverUpdate(id = cover.id, fromUrl = data.coverUrl)
         )
       }
     }
   }
 
-  private fun updatePage(data: String, chapterId: Long, page: ChapterPageWithFile?) {
-    if (page?.page == null) {
+  private fun updatePage(imageUrl: String, chapterId: Long, existingPage: ChapterPageWithFile?) {
+    if (existingPage?.page == null) {
       chapterPageController.create(
-        ChapterPageCreate(
-          chapterId = chapterId,
-          fromUrl = data,
-        )
+        ChapterPageCreate(chapterId = chapterId, fromUrl = imageUrl)
       )
-    } else if (data.isNotBlank()) {
+    } else if (imageUrl.isNotBlank()) {
       chapterPageController.update(
-        ChapterPageUpdate(
-          id = page.page.id,
-          fromUrl = data,
-        )
+        ChapterPageUpdate(id = existingPage.page.id, fromUrl = imageUrl)
       )
     }
   }
 
-  private fun updateChapter(data: Parser.ResultChapter, comicId: Long, chapter: ChapterWithPages?) {
-    var chapterId = 0L
-
-    if (chapter?.chapter == null) {
-      chapterId = chapterController.create(
-        ChapterCreate(comicId = comicId, name = data.title)
-      )
+  private fun updateChapter(
+    chapterData: ParserChapterResult,
+    comicId: Long,
+    existingChapter: ChapterWithPages?
+  ) {
+    var chapterId = if (existingChapter?.chapter == null) {
+      chapterController.create(ChapterCreate(comicId = comicId, name = chapterData.title))
     } else {
-      chapterId = chapter.chapter.id
       chapterController.update(
         ChapterUpdate(
-          id = chapterId,
-          name = setNotBlank(data.title, chapter.chapter.name),
+          id = existingChapter.chapter.id,
+          name = setNotBlank(chapterData.title, existingChapter.chapter.name),
         )
       )
+      existingChapter.chapter.id
     }
 
-    data.pages.forEachIndexed { iPage, page ->
-      updatePage(page, chapterId, chapter?.pages?.getOrNull(iPage))
+    chapterData.pages.forEachIndexed { i, pageUrl ->
+      val existingPage = existingChapter?.pages?.getOrNull(i)
+      updatePage(pageUrl, chapterId, existingPage)
     }
   }
 
-  private fun updateChapters(data: Parser.Result, comicId: Long) {
+  private fun updateChapters(data: ParserResult, comicId: Long) {
     if (data.chapters.isEmpty()) return
 
-    val chapters = chapterController.readByComicAll(comicId)
-
-    data.chapters.forEachIndexed { iChapter, chapter ->
-      updateChapter(chapter, comicId, chapters.getOrNull(iChapter))
+    val existingChapters = chapterController.readByComicAll(comicId)
+    data.chapters.forEachIndexed { i, chapterData ->
+      val existingChapter = existingChapters.getOrNull(i)
+      updateChapter(chapterData, comicId, existingChapter)
     }
   }
 
-  fun saveData(comicId: Long, data: Parser.Result): Boolean {
+  fun saveData(comicId: Long, data: ParserResult): Boolean {
     val comic = comicController.read(comicId) ?: return false
 
     val tagsComic = updateTags(data)

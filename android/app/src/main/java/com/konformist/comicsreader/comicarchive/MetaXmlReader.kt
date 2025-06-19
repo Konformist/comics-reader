@@ -1,9 +1,8 @@
 package com.konformist.comicsreader.comicarchive
 
-import org.jsoup.Jsoup
-import org.jsoup.parser.Parser
+import com.fleeksoft.ksoup.Ksoup
+import com.fleeksoft.ksoup.parser.Parser
 import java.io.File
-import java.io.FileInputStream
 
 class MetaXmlReader {
   data class ResultChapter(
@@ -20,28 +19,26 @@ class MetaXmlReader {
 
   fun read(xml: File): Result {
     val result = Result()
+    val xmlParsed =
+      Ksoup.parse(html = xml.readText(charset = Charsets.UTF_8), parser = Parser.xmlParser())
+    val bookInfo = xmlParsed.select("book-info")
 
-    FileInputStream(xml).use {
-      val xmlParsed = Jsoup.parse(xml, "UTF-8", "", Parser.xmlParser())
-      val bookInfo = xmlParsed.select("book-info")
+    result.title = bookInfo.select("title").text()
+    result.annotation = bookInfo.select("annotation").text()
+    result.cover = bookInfo.select("coverpage > image").attr("href")
 
-      result.title = bookInfo.select("title").text()
-      result.annotation = bookInfo.select("annotation").text()
-      result.cover = bookInfo.select("coverpage > image").attr("href")
+    var chapter = ResultChapter()
 
-      var chapter = ResultChapter()
-
-      xmlParsed.select("body > page").forEach { page ->
-        val title = page.select("title").text()
-        if (title.isNotBlank()) {
-          chapter = ResultChapter(title = title)
-          result.chapters.add(chapter)
-        }
-
-        chapter.pages.add(page.select("image").attr("href"))
+    xmlParsed.select("body > page").forEach { page ->
+      val title = page.select("title").text()
+      if (title.isNotBlank()) {
+        chapter = ResultChapter(title = title)
+        result.chapters.add(chapter)
       }
 
-      return result
+      chapter.pages.add(page.select("image").attr("href"))
     }
+
+    return result
   }
 }

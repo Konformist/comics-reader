@@ -8,14 +8,9 @@ import java.net.URL
 
 class RequestUtils {
   companion object {
-    const val CAPTCHA_REQUEST_CODE = 1001
-
-    fun getConnection(url: URL, cookie: String? = ""): HttpURLConnection {
-      val connection = url.openConnection() as HttpURLConnection
-      connection.requestMethod = "GET"
-
-      if (!cookie.isNullOrBlank()) connection.setRequestProperty("Cookie", cookie)
-
+    //    const val CAPTCHA_REQUEST_CODE = 1001
+    private fun updateAsBrowser(url: URL, connection: HttpURLConnection, cookie: String) {
+      if (cookie.isNotBlank()) connection.setRequestProperty("Cookie", cookie)
       connection.setRequestProperty(
         "User-Agent",
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
@@ -43,6 +38,29 @@ class RequestUtils {
       connection.setRequestProperty("sec-fetch-site", "same-origin")
       connection.setRequestProperty("sec-fetch-user", "?1")
       connection.setRequestProperty("upgrade-insecure-requests", "1")
+    }
+
+    fun getConnection(url: URL, cookie: String = ""): HttpURLConnection {
+      val connection = url.openConnection() as HttpURLConnection
+      connection.requestMethod = "GET"
+      updateAsBrowser(url, connection, cookie)
+      connection.connect()
+
+      if (connection.responseCode == 403) {
+        val intent = Intent(App.context, CaptchaWebViewActivity::class.java)
+        intent.putExtra("captcha_url", url)
+        App.context.startActivity(intent)
+      } else if (connection.responseCode != 200) {
+        throw Exception("Error connection: ${connection.responseCode}")
+      }
+
+      return connection
+    }
+
+    fun postConnection(url: URL, cookie: String = ""): HttpURLConnection {
+      val connection = url.openConnection() as HttpURLConnection
+      connection.requestMethod = "POST"
+      updateAsBrowser(url, connection, cookie)
       connection.connect()
 
       if (connection.responseCode == 403) {

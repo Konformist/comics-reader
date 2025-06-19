@@ -1,190 +1,150 @@
 package com.konformist.comicsreader.parser
 
-import android.net.Uri
-import com.konformist.comicsreader.data.comicoverride.ComicOverride
-import com.konformist.comicsreader.data.parserconfig.ParserConfig
-import com.konformist.comicsreader.data.parserconfig.QueryData
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
+import com.fleeksoft.ksoup.Ksoup
+import com.fleeksoft.ksoup.nodes.Document
+import java.net.URL
 
-class Parser {
-  data class QueryElements(
-    override var titleCSS: String = "",
-    override var annotationCSS: String = "",
-    override var coverCSS: String = "",
-    override var authorsCSS: String = "",
-    override var authorsTextCSS: String = "",
-    override var languageCSS: String = "",
-    override var tagsCSS: String = "",
-    override var tagsTextCSS: String = "",
-    override var chaptersCSS: String = "",
-    override var chaptersTitleCSS: String = "",
-    override var pagesTemplateUrl: String = "",
-    override var pagesCSS: String = "",
-    override var pagesImageCSS: String = "",
-  ) : QueryData
-
-  data class ResultChapter(
-    val title: String = "",
-    val pages: MutableList<String> = mutableListOf<String>(),
-  )
-
-  data class Result(
-    var title: String = "",
-    var annotation: String = "",
-    var coverUrl: String = "",
-    val tags: MutableList<String> = mutableListOf<String>(),
-    val authors: MutableList<String> = mutableListOf<String>(),
-    val languages: MutableList<String> = mutableListOf<String>(),
-    val chapters: MutableList<ResultChapter> = mutableListOf<ResultChapter>(),
-  )
-
+class Parser(val queryElements: QueryElements) {
   companion object {
-    val indexPageTemp = "<PAGE_ID>"
+    private const val PAGE_ID = "<PAGE_ID>"
 
-    fun getDocument(html: String): Document {
-      return Jsoup.parse(html)
+    fun getDocument(html: String): Document = Ksoup.parse(html)
+  }
+
+  private fun getFullDomain(url: String): String? {
+    return try {
+      val parsedUrl = URL(url)
+      "${parsedUrl.protocol}://${parsedUrl.host}"
+    } catch (e: Exception) {
+      null
     }
   }
 
-  fun mergePageLink(link: String, index: Int): String {
-    val pathTemp = queryElements.pagesTemplateUrl.replace(indexPageTemp, index.toString())
+  fun setDomain(baseUrl: String, relativeUrl: String): String {
+    val baseDomain = getFullDomain(baseUrl) ?: ""
+    return when {
+      relativeUrl.contains("://localhost") -> relativeUrl.replace(
+        Regex("""http://localhost(:\d+)?"""),
+        baseDomain
+      )
 
-    return Uri.Builder()
-      .path(link)
-      .appendPath(pathTemp)
-      .toString()
-  }
-
-  private fun getQuery(override: String, parser: String): String {
-    return if (override.isNotBlank()) override
-    else if (parser.isNotBlank()) parser
-    else ""
-  }
-
-  var queryElements = QueryElements()
-
-  fun mergeQuery(config: ParserConfig, override: ComicOverride): Parser {
-    queryElements = QueryElements(
-      titleCSS = getQuery(override.titleCSS, config.titleCSS),
-      annotationCSS = getQuery(override.annotationCSS, config.annotationCSS),
-      coverCSS = getQuery(override.coverCSS, config.coverCSS),
-      authorsCSS = getQuery(override.authorsCSS, config.authorsCSS),
-      authorsTextCSS = getQuery(override.authorsTextCSS, config.authorsTextCSS),
-      languageCSS = getQuery(override.languageCSS, config.languageCSS),
-      tagsCSS = getQuery(override.tagsCSS, config.tagsCSS),
-      tagsTextCSS = getQuery(override.tagsTextCSS, config.tagsTextCSS),
-      chaptersCSS = getQuery(override.chaptersCSS, config.chaptersCSS),
-      chaptersTitleCSS = getQuery(override.chaptersTitleCSS, config.chaptersTitleCSS),
-      pagesTemplateUrl = getQuery(override.pagesTemplateUrl, config.pagesTemplateUrl),
-      pagesCSS = getQuery(override.pagesCSS, config.pagesCSS),
-      pagesImageCSS = getQuery(override.pagesImageCSS, config.pagesImageCSS),
-    )
-    return this
-  }
-
-  private fun Document.parseElement(textQuery: String, action: (String) -> Unit) {
-    val result = if (textQuery.isBlank()) ""
-    else selectFirst(textQuery)?.text()?.trim()
-
-    result?.takeIf { it.isNotBlank() }?.let { action(it) }
-  }
-
-  private fun <T> Document.parseElements(
-    itemsQuery: String,
-    textQuery: String,
-    action: (String) -> T
-  ): List<T> {
-    val results = mutableListOf<T>()
-    if (itemsQuery.isBlank()) return results
-
-    select(itemsQuery).forEach { item ->
-      val text = if (textQuery.isBlank()) item.text()
-      else item.selectFirst(textQuery)?.text()
-
-      text?.takeIf { it.isNotBlank() }?.let {
-        results.add(action(it.trim()))
-      }
+      relativeUrl.contains("https://") || relativeUrl.contains("http://") -> relativeUrl
+      else -> mergeLink(baseDomain, relativeUrl)
     }
-    return results
   }
 
-  val result: Result = Result()
-  val chapterLinks: MutableList<String> = mutableListOf()
-
-  fun parseComic(document: Document): Parser {
-    document.parseElement(queryElements.titleCSS) { text -> result.title = text }
-    document.parseElement(queryElements.annotationCSS) { text -> result.annotation = text }
-    return this
+  fun mergeLink(baseUrl: String, part: String): String {
+    return baseUrl.trimEnd('/') + "/" + part.trimStart('/')
   }
 
-  fun parseCover(document: Document): Parser {
-    document.parseElement(queryElements.coverCSS) { text -> result.coverUrl = text }
-    return this
+  fun mergePageLink(baseUrl: String, pageIndex: Int): String {
+    val pagePart = queryElements.pagesTemplateUrl.replace(PAGE_ID, pageIndex.toString())
+    return mergeLink(baseUrl, pagePart)
   }
 
-  fun parseTags(document: Document): Parser {
+  // Приватные хелперы для безопасного парсинга элементов
+  private fun Document.selectSrc(cssQuery: String): String? {
+    return if (cssQuery.isBlank()) null
+    else selectFirst(cssQuery)?.attr("src")?.trim()?.takeIf { it.isNotBlank() }
+  }
+
+  // Приватные хелперы для безопасного парсинга элементов
+  private fun Document.selectHref(cssQuery: String): String? {
+    return if (cssQuery.isBlank()) null
+    else selectFirst(cssQuery)?.attr("href")?.trim()?.takeIf { it.isNotBlank() }
+  }
+
+  // Приватные хелперы для безопасного парсинга элементов
+  private fun Document.selectFirstText(cssQuery: String): String? {
+    return if (cssQuery.isBlank()) null
+    else selectFirst(cssQuery)?.text()?.trim()?.takeIf { it.isNotBlank() }
+  }
+
+  private fun Document.selectElementsTexts(itemsQuery: String, textQuery: String): List<String> {
+    if (itemsQuery.isBlank()) return emptyList()
+
+    return select(itemsQuery).mapNotNull { elem ->
+      val text = if (textQuery.isBlank()) elem.text()
+      else elem.selectFirst(textQuery)?.text()
+      text?.trim()?.takeIf { it.isNotBlank() }
+    }
+  }
+
+  fun parseComic(document: Document, result: ParserResult = ParserResult()): ParserResult {
+    result.title = document.selectFirstText(queryElements.titleCSS) ?: ""
+    result.annotation = document.selectFirstText(queryElements.annotationCSS) ?: ""
+    return result
+  }
+
+  fun parseCover(document: Document, result: ParserResult): ParserResult {
+    result.coverUrl = document.selectSrc(queryElements.coverCSS) ?: ""
+    return result
+  }
+
+  fun parseTags(document: Document, result: ParserResult): ParserResult {
     result.tags.addAll(
-      document.parseElements(queryElements.tagsCSS, queryElements.tagsTextCSS) { it }
+      document.selectElementsTexts(
+        queryElements.tagsCSS,
+        queryElements.tagsTextCSS
+      )
     )
-
-    return this
+    return result
   }
 
-  fun parseAuthors(document: Document): Parser {
+  fun parseAuthors(document: Document, result: ParserResult): ParserResult {
     result.authors.addAll(
-      document.parseElements(queryElements.authorsCSS, queryElements.authorsTextCSS) { it }
+      document.selectElementsTexts(
+        queryElements.authorsCSS,
+        queryElements.authorsTextCSS
+      )
     )
-
-    return this
+    return result
   }
 
-  fun parseLanguages(document: Document): Parser {
-    document.parseElement(queryElements.languageCSS) { result.languages.add(it) }
-
-    return this
+  fun parseLanguages(document: Document, result: ParserResult): ParserResult {
+    document.selectFirstText(queryElements.languageCSS)?.let {
+      result.languages.add(it)
+    }
+    return result
   }
 
-  fun parseChapters(document: Document): Parser {
+  fun parseChapters(document: Document, result: ParserResult): ParserResult {
     if (queryElements.chaptersCSS.isNotBlank()) {
-      document.select(queryElements.chaptersCSS).forEach { element ->
-        val link = element.selectFirst("a")?.attr("href")?.trim() ?: ""
-        chapterLinks.add(link)
+      val chapters = document.select(queryElements.chaptersCSS)
+      chapters.forEach { element ->
+        val linkSelector = if (queryElements.chaptersTitleCSS.isBlank()) "a"
+        else queryElements.chaptersTitleCSS
 
-        document.parseElement(queryElements.chaptersTitleCSS) {
-          result.chapters.add(ResultChapter(title = it))
-        }
+        val link = element.selectFirst(linkSelector)?.attr("href")?.trim().orEmpty()
+        val title = element.selectFirst(queryElements.chaptersTitleCSS)?.text()?.trim().orEmpty()
+
+        result.chapters.add(
+          ParserChapterResult(
+            title = title,
+            link = link
+          )
+        )
       }
     } else if (queryElements.pagesCSS.isNotBlank()) {
-      val chapter = ResultChapter()
+      val chapter = ParserChapterResult()
       result.chapters.add(chapter)
 
-      document.select(queryElements.pagesCSS).forEach { _ ->
-        chapter.pages.add("")
+      val pages = document.select(queryElements.pagesCSS)
+      pages.forEach { element ->
+        val link = element.selectFirst("a")?.attr("href").orEmpty()
+        chapter.pages.add(link)
       }
     }
 
-    return this
+    return result
   }
 
-  fun parseCountPages(document: Document, chapterIndex: Int): Parser {
-    var count = 0
-    document.parseElement(queryElements.pagesCSS) { count = it.toInt() }
-
-    var i = 0
-    while (i < count) {
-      result.chapters[chapterIndex].pages.add("")
-      i++
-    }
-
-    return this
+  fun parseCountPages(document: Document): Int {
+    val countText = document.selectFirstText(queryElements.pagesCSS)
+    return countText?.toIntOrNull() ?: 0
   }
 
-  fun parseChapterPage(document: Document, chapterIndex: Int, pageIndex: Int): Parser {
-    document.parseElement(queryElements.pagesImageCSS) {
-      result.chapters[chapterIndex].pages[pageIndex] = it
-    }
-
-    return this
+  fun parseChapterPage(document: Document): String {
+    return document.selectSrc(queryElements.pagesImageCSS).orEmpty()
   }
 }

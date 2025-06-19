@@ -19,7 +19,7 @@ class HtmlLoader {
             stringBuilder.append(line)
           }
 
-          return Parser.getDocument(stringBuilder.toString())
+          return HTMLParser.getDocument(stringBuilder.toString())
         }
       }
     }

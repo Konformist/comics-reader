@@ -31,9 +31,9 @@ class ParserController(
   private val chapterPageController: ChapterPageController,
 ) {
   companion object {
-    fun createParser(config: ParserConfig, override: ComicOverride): Parser {
+    fun createParser(config: ParserConfig, override: ComicOverride): HTMLParser {
       val queryElements = QueryElements.from(config, override)
-      return Parser(queryElements)
+      return HTMLParser(queryElements)
     }
   }
 

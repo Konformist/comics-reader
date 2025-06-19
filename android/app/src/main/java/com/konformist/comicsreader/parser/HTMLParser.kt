@@ -4,7 +4,7 @@ import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.nodes.Document
 import java.net.URL
 
-class Parser(val queryElements: QueryElements) {
+class HTMLParser(val queryElements: QueryElements) {
   companion object {
     private const val PAGE_ID = "<PAGE_ID>"
 

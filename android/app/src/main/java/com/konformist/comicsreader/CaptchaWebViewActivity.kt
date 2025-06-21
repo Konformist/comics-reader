@@ -1,14 +1,17 @@
 package com.konformist.comicsreader
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.os.Bundle
 import android.webkit.CookieManager
 import android.webkit.WebResourceRequest
-import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
+import com.konformist.comicsreader.db.GlobalCookieManager
+import com.konformist.comicsreader.utils.RequestUtils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class CaptchaWebViewActivity : AppCompatActivity() {
   private lateinit var webView: WebView
@@ -25,7 +28,8 @@ class CaptchaWebViewActivity : AppCompatActivity() {
     val settings = webView.settings
     settings.javaScriptEnabled = true
     settings.domStorageEnabled = true
-    settings.userAgentString = WebSettings.getDefaultUserAgent(this)
+    settings.userAgentString =
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
 
     val cookieManager = CookieManager.getInstance()
     cookieManager.setAcceptCookie(true)
@@ -36,9 +40,10 @@ class CaptchaWebViewActivity : AppCompatActivity() {
         super.onPageFinished(view, url)
         if (url != null && isCaptchaPassed(url)) {
           val cookies = cookieManager.getCookie(url)
-          val resultIntent = Intent()
-          resultIntent.putExtra("cookie", cookies)
-          setResult(RESULT_OK, resultIntent)
+
+          CoroutineScope(Dispatchers.IO).launch {
+            GlobalCookieManager.save(RequestUtils.getDomain(url), cookies)
+          }
           finish()
         }
       }

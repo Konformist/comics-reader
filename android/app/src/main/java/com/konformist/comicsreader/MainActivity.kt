@@ -20,6 +20,7 @@ class MainActivity : BridgeActivity() {
     GlobalCookieManager.dataStore = cookieStore
     runBlocking { AppDataStore.readStore() }
     registerPlugin(WebApiPlugin::class.java)
+    registerPlugin(UIPlugin::class.java)
     super.onCreate(savedInstanceState)
 
     // Настроим cookies

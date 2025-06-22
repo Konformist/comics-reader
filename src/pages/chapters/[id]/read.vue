@@ -78,10 +78,7 @@ import type ReadContent from '@/components/ReadContent.vue';
 import SmallBtn from '@/components/SmallBtn.vue';
 import ChapterPageController from '@/core/entities/chapter-page/ChapterPageController.ts';
 import type ChapterPageModel from '@/core/entities/chapter-page/ChapterPageModel.ts';
-import { KeepAwake } from '@capacitor-community/keep-awake';
-import { Capacitor } from '@capacitor/core';
-import { StatusBar } from '@capacitor/status-bar';
-import { Toast } from '@capacitor/toast';
+import UI from '@/plugins/UIPlugin.ts';
 import ChapterController from '@/core/entities/chapter/ChapterController.ts';
 import ChapterModel from '@/core/entities/chapter/ChapterModel.ts';
 
@@ -159,18 +156,12 @@ onMounted(async () => {
     router.replace({ name: '/' });
   } else {
     loadChapters();
-    if (Capacitor.isNativePlatform()) {
-      await KeepAwake.keepAwake();
-      await StatusBar.hide();
-    }
+    UI.reading({ mode: 'start' });
   }
 });
 
 onBeforeUnmount(async () => {
-  if (Capacitor.isNativePlatform()) {
-    await KeepAwake.allowSleep();
-    await StatusBar.show();
-  }
+  UI.reading({ mode: 'end' });
 });
 
 const onRead = async (item: ChapterPageModel) => {
@@ -180,7 +171,7 @@ const onRead = async (item: ChapterPageModel) => {
     item.isRead = true;
     await ChapterPageController.save(item);
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
+    UI.toast({ text: `Ошибка: ${e}` });
   }
 };
 </script>

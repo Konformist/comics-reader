@@ -42,8 +42,8 @@
 </template>
 
 <script setup lang="ts">
+import UI from '@/plugins/UIPlugin.ts';
 import { Dialog } from '@capacitor/dialog';
-import { Toast } from '@capacitor/toast';
 import { useComicsStore } from '@/stores/comics.ts';
 import { useTagsStore } from '@/stores/tags.ts';
 import { sortString } from '@/core/utils/array.ts';
@@ -142,9 +142,9 @@ const saveTag = async () => {
     await TagController.save(selectedTag.value);
     await tagsStore.loadTagsForce();
     dialog.value = false;
-    Toast.show({ text: 'Тег сохранён' });
+    UI.toast({ text: 'Тег сохранён' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
+    UI.toast({ text: `Ошибка: ${e}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -163,9 +163,9 @@ const deleteTag = async () => {
     await TagController.remove(selectedTag.value.id);
     await tagsStore.loadTagsForce();
     dialog.value = false;
-    Toast.show({ text: 'Тег удалён' });
+    UI.toast({ text: 'Тег удалён' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
+    UI.toast({ text: `Ошибка: ${e}` });
   } finally {
     loadingGlobalEnd();
   }

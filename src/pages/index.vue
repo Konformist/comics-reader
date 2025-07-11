@@ -135,12 +135,12 @@
 </template>
 
 <script lang="ts" setup>
+import UI from '@/plugins/UIPlugin.ts';
 import { useAppStore } from '@/stores/app.ts';
 import { useAuthorsStore } from '@/stores/authors.ts';
 import { useComicsStore } from '@/stores/comics.ts';
 import { useLanguagesStore } from '@/stores/languages.ts';
 import { useTagsStore } from '@/stores/tags.ts';
-import { Toast } from '@capacitor/toast';
 import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import { ESORT_TYPE, useComicsPageStore } from '@/stores/comicsPage.ts';
@@ -205,7 +205,7 @@ const createComic = async () => {
   if (typeof comicId !== 'number') return;
 
   await comicsStore.loadComicsForce();
-  Toast.show({ text: 'Комикс создан' });
+  UI.toast({ text: 'Комикс создан' });
   await router.push({
     name: '/comics/[id]/',
     params: { id: comicId },

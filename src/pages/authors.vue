@@ -42,8 +42,8 @@
 </template>
 
 <script setup lang="ts">
+import UI from '@/plugins/UIPlugin.ts';
 import { Dialog } from '@capacitor/dialog';
-import { Toast } from '@capacitor/toast';
 import useLoading from '@/composables/useLoading.ts';
 import { sortString } from '@/core/utils/array.ts';
 import { useAuthorsStore } from '@/stores/authors.ts';
@@ -142,9 +142,9 @@ const saveAuthor = async () => {
     await AuthorController.save(selectedAuthor.value);
     await authorsStore.loadAuthorsForce();
     dialog.value = false;
-    Toast.show({ text: 'Автор сохранён' });
+    UI.toast({ text: 'Автор сохранён' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
+    UI.toast({ text: `Ошибка: ${e}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -163,9 +163,9 @@ const deleteAuthor = async () => {
     await AuthorController.remove(selectedAuthor.value.id);
     await authorsStore.loadAuthorsForce();
     dialog.value = false;
-    Toast.show({ text: 'Автор удалён' });
+    UI.toast({ text: 'Автор удалён' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
+    UI.toast({ text: `Ошибка: ${e}` });
   } finally {
     loadingGlobalEnd();
   }

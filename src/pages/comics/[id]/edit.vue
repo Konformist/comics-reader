@@ -130,12 +130,12 @@
 import ChapterController from '@/core/entities/chapter/ChapterController.ts';
 import ChapterModel from '@/core/entities/chapter/ChapterModel.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
+import UI from '@/plugins/UIPlugin.ts';
 import { useAuthorsStore } from '@/stores/authors.ts';
 import { useComicsStore } from '@/stores/comics.ts';
 import { useLanguagesStore } from '@/stores/languages.ts';
 import { useTagsStore } from '@/stores/tags.ts';
 import { Dialog } from '@capacitor/dialog';
-import { Toast } from '@capacitor/toast';
 import useLoading from '@/composables/useLoading.ts';
 import ComicCoverController from '@/core/entities/comic-cover/ComicCoverController.ts';
 import ComicController from '@/core/entities/comic/ComicController.ts';
@@ -197,9 +197,9 @@ const uploadComic = async () => {
     loadingGlobalStart();
     await saveComic();
     await ComicController.upload(comic.value.id);
-    Toast.show({ text: 'Комикс сохранён в Загрузки' });
+    UI.toast({ text: 'Комикс сохранён в Загрузки' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
+    UI.toast({ text: `Ошибка: ${e}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -212,9 +212,9 @@ const uploadCover = async () => {
     await ComicCoverController.saveFile(comic.value.id);
     await comicsStore.loadComicsForce();
     comic.value = new ComicModel(comicsStore.comic.getDTO());
-    Toast.show({ text: 'Комикс сохранён' });
+    UI.toast({ text: 'Комикс сохранён' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
+    UI.toast({ text: `Ошибка: ${e}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -229,9 +229,9 @@ const loadByLink = async () => {
     await ComicCoverController.downloadFile(comic.value.id, comic.value.cover.fromUrl);
     await comicsStore.loadComicsForce();
     comic.value = new ComicModel(comicsStore.comic.getDTO());
-    Toast.show({ text: 'Комикс сохранён' });
+    UI.toast({ text: 'Комикс сохранён' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
+    UI.toast({ text: `Ошибка: ${e}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -243,9 +243,9 @@ const onSave = async () => {
     await saveComic();
     await comicsStore.loadComicsForce();
     comic.value = new ComicModel(comicsStore.comic.getDTO());
-    Toast.show({ text: 'Комикс сохранён' });
+    UI.toast({ text: 'Комикс сохранён' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
+    UI.toast({ text: `Ошибка: ${e}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -263,11 +263,11 @@ const deleteComic = async () => {
     loadingGlobalStart();
     await ComicController.remove(comic.value.id);
     await comicsStore.loadComicsForce();
-    Toast.show({ text: 'Комикс удалён' });
+    UI.toast({ text: 'Комикс удалён' });
     router.replace({ name: '/' });
   } catch (e) {
     alert(e);
-    Toast.show({ text: `Ошибка: ${e}` });
+    UI.toast({ text: `Ошибка: ${e}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -301,9 +301,9 @@ const createChapter = async () => {
     chapterModal.value = false;
     chapterName.value = '';
     await loadChapters();
-    Toast.show({ text: 'Глава создана' });
+    UI.toast({ text: 'Глава создана' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
+    UI.toast({ text: `Ошибка: ${e}` });
   } finally {
     loadingGlobalEnd();
   }

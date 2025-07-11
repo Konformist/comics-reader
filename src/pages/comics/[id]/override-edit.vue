@@ -185,13 +185,13 @@ import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import ParserController from '@/core/entities/parser/ParserController.ts';
 import ParserModel from '@/core/entities/parser/ParserModel.ts';
+import UI from '@/plugins/UIPlugin.ts';
 import type { IParseData } from '@/plugins/WebApiPlugin.ts';
 import { useAuthorsStore } from '@/stores/authors.ts';
 import { useComicsStore } from '@/stores/comics.ts';
 import { useLanguagesStore } from '@/stores/languages.ts';
 import { useParsersStore } from '@/stores/parsers.ts';
 import { useTagsStore } from '@/stores/tags.ts';
-import { Toast } from '@capacitor/toast';
 
 definePage({
   meta: {
@@ -247,9 +247,9 @@ const onSave = async () => {
     loadingGlobalStart();
     await saveComic();
     await saveComicOverride();
-    Toast.show({ text: 'Комикс сохранён' });
+    UI.toast({ text: 'Комикс сохранён' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
+    UI.toast({ text: `Ошибка: ${e}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -377,9 +377,9 @@ const parseComic = async () => {
       languagesStore.loadLanguagesForce(),
       comicsStore.loadComicsForce(),
     ]);
-    Toast.show({ text: 'Комикс сохранён' });
+    UI.toast({ text: 'Комикс сохранён' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
+    UI.toast({ text: `Ошибка: ${e}` });
   } finally {
     loadingGlobalEnd();
   }

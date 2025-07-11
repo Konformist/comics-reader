@@ -1,4 +1,4 @@
-import { KeepAwake } from '@capacitor-community/keep-awake';
+import UI from '@/plugins/UIPlugin.ts';
 
 const countGlobal = ref(0);
 const loadingGlobal = computed(() => !!countGlobal.value);
@@ -14,10 +14,10 @@ const loadingGlobalEnd = () => {
 watch(
   loadingGlobal,
   async (value, oldValue) => {
-    if (oldValue === value || !(await KeepAwake.isSupported()).isSupported) return;
+    if (oldValue === value) return;
 
-    if (value) await KeepAwake.keepAwake();
-    else await KeepAwake.allowSleep();
+    if (value) UI.loading({ show: true });
+    else UI.loading({ show: false });
   },
 );
 

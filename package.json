@@ -16,15 +16,12 @@
     "fake": "node ./server/fakeServer.mjs"
   },
   "dependencies": {
-    "@capacitor-community/keep-awake": "^7.0.0",
     "@capacitor/android": "^7.2.0",
     "@capacitor/app": "^7.0.1",
     "@capacitor/clipboard": "^7.0.1",
     "@capacitor/core": "^7.2.0",
     "@capacitor/dialog": "^7.0.1",
     "@capacitor/keyboard": "^7.0.1",
-    "@capacitor/status-bar": "^7.0.1",
-    "@capacitor/toast": "^7.0.1",
     "@fontsource/roboto": "5.2.5",
     "@mdi/font": "7.4.47",
     "swiper": "^11.2.6",

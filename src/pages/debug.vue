@@ -44,13 +44,13 @@
 <script setup lang="ts">
 import useLoading from '@/composables/useLoading.ts';
 import Api from '@/core/api/Api.ts';
+import UI from '@/plugins/UIPlugin.ts';
 import type { ITreeDirectory } from '@/plugins/WebApiPlugin.ts';
 import { useAuthorsStore } from '@/stores/authors.ts';
 import { useComicsStore } from '@/stores/comics.ts';
 import { useLanguagesStore } from '@/stores/languages.ts';
 import { useParsersStore } from '@/stores/parsers.ts';
 import { useTagsStore } from '@/stores/tags.ts';
-import { Toast } from '@capacitor/toast';
 
 definePage({
   meta: {
@@ -88,9 +88,9 @@ const addBackup = async () => {
   try {
     loadingGlobalStart();
     await Api.api('backup/backup/add');
-    Toast.show({ text: 'Данные выгружены' });
+    UI.toast({ text: 'Данные выгружены' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
+    UI.toast({ text: `Ошибка: ${e}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -108,9 +108,9 @@ const restoreBackup = async () => {
       parsersStore.loadParsersForce(),
     ]);
     loadTreeFiles();
-    Toast.show({ text: 'Данные восстановлены' });
+    UI.toast({ text: 'Данные восстановлены' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
+    UI.toast({ text: `Ошибка: ${e}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -120,9 +120,9 @@ const migrate = async () => {
   try {
     loadingGlobalStart();
     await Api.api('data/data/migrate');
-    Toast.show({ text: 'Миграция прошла успешно' });
+    UI.toast({ text: 'Миграция прошла успешно' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
+    UI.toast({ text: `Ошибка: ${e}` });
   } finally {
     loadingGlobalEnd();
   }

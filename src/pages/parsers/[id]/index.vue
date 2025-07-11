@@ -128,8 +128,8 @@
 
 <script lang="ts" setup>
 import useLoading from '@/composables/useLoading.ts';
+import UI from '@/plugins/UIPlugin.ts';
 import { Clipboard } from '@capacitor/clipboard';
-import { Toast } from '@capacitor/toast';
 import ParserController from '@/core/entities/parser/ParserController.ts';
 import ParserModel from '@/core/entities/parser/ParserModel.ts';
 
@@ -159,6 +159,6 @@ onMounted(async () => {
 
 const onCopy = async (string: string) => {
   await Clipboard.write({ string });
-  Toast.show({ text: 'Скопировано' });
+  UI.toast({ text: 'Скопировано' });
 };
 </script>

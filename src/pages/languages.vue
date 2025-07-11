@@ -46,10 +46,10 @@ import DictionaryEditDialog from '@/components/DictionaryEditDialog.vue';
 import DictionaryList from '@/components/DictionaryList.vue';
 import useLoading from '@/composables/useLoading.ts';
 import { sortString } from '@/core/utils/array.ts';
+import UI from '@/plugins/UIPlugin.ts';
 import { useComicsStore } from '@/stores/comics.ts';
 import { useLanguagesStore } from '@/stores/languages.ts';
 import { Dialog } from '@capacitor/dialog';
-import { Toast } from '@capacitor/toast';
 import LanguageController from '@/core/entities/language/LanguageController.ts';
 import LanguageModel from '@/core/entities/language/LanguageModel.ts';
 
@@ -144,9 +144,9 @@ const saveLanguage = async () => {
     await LanguageController.save(selectedLanguage.value);
     await languagesStore.loadLanguagesForce();
     dialog.value = false;
-    Toast.show({ text: 'Язык сохранён' });
+    UI.toast({ text: 'Язык сохранён' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
+    UI.toast({ text: `Ошибка: ${e}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -165,9 +165,9 @@ const deleteLanguage = async () => {
     await LanguageController.remove(selectedLanguage.value.id);
     await languagesStore.loadLanguagesForce();
     dialog.value = false;
-    Toast.show({ text: 'Язык удалён' });
+    UI.toast({ text: 'Язык удалён' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
+    UI.toast({ text: `Ошибка: ${e}` });
   } finally {
     loadingGlobalEnd();
   }

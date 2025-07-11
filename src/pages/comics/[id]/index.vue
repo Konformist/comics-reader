@@ -104,12 +104,12 @@
 </template>
 
 <script lang="ts" setup>
+import UI from '@/plugins/UIPlugin.ts';
 import { useAuthorsStore } from '@/stores/authors.ts';
 import { useComicsStore } from '@/stores/comics.ts';
 import { useLanguagesStore } from '@/stores/languages.ts';
 import { useTagsStore } from '@/stores/tags.ts';
 import { Clipboard } from '@capacitor/clipboard';
-import { Toast } from '@capacitor/toast';
 import useLoading from '@/composables/useLoading.ts';
 import ChapterController from '@/core/entities/chapter/ChapterController.ts';
 import ChapterModel from '@/core/entities/chapter/ChapterModel.ts';
@@ -173,7 +173,7 @@ const tagsChips = computed(() => (
 
 const onCopy = async (string: string) => {
   await Clipboard.write({ string });
-  Toast.show({ text: 'Скопировано' });
+  UI.toast({ text: 'Скопировано' });
 };
 
 const init = async () => {

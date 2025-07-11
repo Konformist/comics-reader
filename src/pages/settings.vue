@@ -64,9 +64,9 @@
 import useLoading from '@/composables/useLoading.ts';
 import Api from '@/core/api/Api.ts';
 import { settingsDirectionItems } from '@/core/entities/settings/settingsUtils.ts';
+import UI from '@/plugins/UIPlugin.ts';
 import { useAppStore } from '@/stores/app.ts';
 import { useComicsStore } from '@/stores/comics.ts';
-import { Toast } from '@capacitor/toast';
 
 const appStore = useAppStore();
 const comicsStore = useComicsStore();
@@ -93,9 +93,9 @@ const getComicArchive = async () => {
     loadingGlobalStart();
     await Api.api('comic/archive/add');
     await comicsStore.loadComicsForce();
-    Toast.show({ text: 'Комикс успешно загружен' });
+    UI.toast({ text: 'Комикс успешно загружен' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
+    UI.toast({ text: `Ошибка: ${e}` });
   } finally {
     loadingGlobalEnd();
   }

@@ -30,8 +30,8 @@
 </template>
 
 <script lang="ts" setup>
+import UI from '@/plugins/UIPlugin.ts';
 import { useParsersStore } from '@/stores/parsers.ts';
-import { Toast } from '@capacitor/toast';
 import ParserController from '@/core/entities/parser/ParserController.ts';
 import ParserModel from '@/core/entities/parser/ParserModel.ts';
 import useLoading from '@/composables/useLoading.ts';
@@ -69,13 +69,13 @@ const createParser = async () => {
     if (typeof parserId !== 'number') return;
 
     await parsersStore.loadParsersForce();
-    Toast.show({ text: 'Парсер создан' });
+    UI.toast({ text: 'Парсер создан' });
     router.push({
       name: '/parsers/[id]/',
       params: { id: parserId },
     });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
+    UI.toast({ text: `Ошибка: ${e}` });
   } finally {
     loadingGlobalEnd();
   }

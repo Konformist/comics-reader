@@ -174,9 +174,9 @@
 <script lang="ts" setup>
 import useLoading from '@/composables/useLoading.ts';
 import Api from '@/core/api/Api.ts';
+import UI from '@/plugins/UIPlugin.ts';
 import { useParsersStore } from '@/stores/parsers.ts';
 import { Dialog } from '@capacitor/dialog';
-import { Toast } from '@capacitor/toast';
 import ParserController from '@/core/entities/parser/ParserController.ts';
 import ParserModel from '@/core/entities/parser/ParserModel.ts';
 
@@ -216,9 +216,9 @@ const saveParser = async () => {
     await ParserController.save(parser.value);
     await parsersStore.loadParsersForce();
     loadParser();
-    Toast.show({ text: 'Парсер сохранён' });
+    UI.toast({ text: 'Парсер сохранён' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
+    UI.toast({ text: `Ошибка: ${e}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -235,9 +235,9 @@ const setParser = async (value: File | File[]) => {
     const parsed = JSON.parse(result);
     parsed.id = parser.value.id;
     parser.value = new ParserModel(parsed);
-    Toast.show({ text: 'Парсен обновлён' });
+    UI.toast({ text: 'Парсен обновлён' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
+    UI.toast({ text: `Ошибка: ${e}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -252,9 +252,9 @@ const toDownloads = async () => {
       file: JSON.stringify(parserDTO),
       fileName: `${parser.value.name}.json`,
     });
-    Toast.show({ text: 'Парсер сохранён в Загрузки' });
+    UI.toast({ text: 'Парсер сохранён в Загрузки' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
+    UI.toast({ text: `Ошибка: ${e}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -272,10 +272,10 @@ const deleteParser = async () => {
     loadingGlobalStart();
     await ParserController.remove(parser.value.id);
     await parsersStore.loadParsersForce();
-    Toast.show({ text: 'Парсер удалён' });
+    UI.toast({ text: 'Парсер удалён' });
     router.replace({ name: '/parsers/' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
+    UI.toast({ text: `Ошибка: ${e}` });
   } finally {
     loadingGlobalEnd();
   }

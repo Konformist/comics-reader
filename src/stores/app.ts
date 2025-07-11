@@ -1,8 +1,8 @@
-import SettingsController from '@/core/entities/settings/SettingsController.ts';
-import SettingsModel from '@/core/entities/settings/SettingsModel.ts';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
-import { Toast } from '@capacitor/toast';
+import SettingsController from '@/core/entities/settings/SettingsController.ts';
+import SettingsModel from '@/core/entities/settings/SettingsModel.ts';
+import UI from '@/plugins/UIPlugin.ts';
 import { version } from '../../package.json';
 import { defineStore } from 'pinia';
 
@@ -20,7 +20,7 @@ export const useAppStore = defineStore('app', {
   actions: {
     async saveSettings() {
       await SettingsController.save(this.settings);
-      Toast.show({ text: 'Настройки сохранены' });
+      UI.toast({ text: 'Настройки сохранены' });
     },
 
     async loadSettings() {

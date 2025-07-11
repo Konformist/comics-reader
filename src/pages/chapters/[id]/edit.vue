@@ -141,8 +141,8 @@
 </template>
 
 <script lang="ts" setup>
+import UI from '@/plugins/UIPlugin.ts';
 import { Dialog } from '@capacitor/dialog';
-import { Toast } from '@capacitor/toast';
 import useLoading from '@/composables/useLoading.ts';
 import ChapterPageController from '@/core/entities/chapter-page/ChapterPageController.ts';
 import type ChapterPageModel from '@/core/entities/chapter-page/ChapterPageModel.ts';
@@ -237,9 +237,9 @@ const onSave = async () => {
     await saveChapter();
     await savePageChapters();
     await loadChapter();
-    Toast.show({ text: 'Глава сохранена' });
+    UI.toast({ text: 'Глава сохранена' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
+    UI.toast({ text: `Ошибка: ${e}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -252,9 +252,9 @@ const uploadImage = async (item: ChapterPageModel) => {
     await savePageChapters();
     await ChapterPageController.saveFile(item.id);
     await loadChapter();
-    Toast.show({ text: 'Глава сохранена' });
+    UI.toast({ text: 'Глава сохранена' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
+    UI.toast({ text: `Ошибка: ${e}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -269,9 +269,9 @@ const onLoadImage = async (item: ChapterPageModel) => {
     await savePageChapters();
     await ChapterPageController.downloadFile(item.id, item.fromUrl);
     await loadChapter();
-    Toast.show({ text: 'Глава сохранена' });
+    UI.toast({ text: 'Глава сохранена' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
+    UI.toast({ text: `Ошибка: ${e}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -296,13 +296,13 @@ const onLoadImages = async (force: boolean = false) => {
     }
   } catch (e) {
     isError = true;
-    Toast.show({ text: `Ошибка: ${e}` });
+    UI.toast({ text: `Ошибка: ${e}` });
   }
 
   if (isError) {
-    Toast.show({ text: 'Некоторые изображения не загружены' });
+    UI.toast({ text: 'Некоторые изображения не загружены' });
   } else {
-    Toast.show({ text: 'Изображения загружены' });
+    UI.toast({ text: 'Изображения загружены' });
   }
 
   await loadChapter();
@@ -325,9 +325,9 @@ const delPage = async (item: ChapterPageModel) => {
     await savePageChapters();
     await ChapterPageController.remove(item.id);
     await loadChapter();
-    Toast.show({ text: 'Глава сохранена' });
+    UI.toast({ text: 'Глава сохранена' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
+    UI.toast({ text: `Ошибка: ${e}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -346,9 +346,9 @@ const delPages = async () => {
     await saveChapter();
     await ChapterPageController.sequenceRemove(chapter.value.pages.map((e) => e.id));
     await loadChapter();
-    Toast.show({ text: 'Глава сохранена' });
+    UI.toast({ text: 'Глава сохранена' });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
+    UI.toast({ text: `Ошибка: ${e}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -365,13 +365,13 @@ const delChapter = async () => {
   try {
     loadingGlobalStart();
     await ChapterController.remove(chapterId);
-    Toast.show({ text: 'Глава удалена' });
+    UI.toast({ text: 'Глава удалена' });
     router.replace({
       name: '/comics/[id]/',
       params: { id: chapter.value.comicId },
     });
   } catch (e) {
-    Toast.show({ text: `Ошибка: ${e}` });
+    UI.toast({ text: `Ошибка: ${e}` });
   } finally {
     loadingGlobalEnd();
   }

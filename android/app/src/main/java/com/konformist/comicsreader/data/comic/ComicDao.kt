@@ -17,6 +17,9 @@ interface ComicDao {
   @Query("SELECT * FROM comics WHERE id = :id")
   fun readLite(id: Long): ComicLite
 
+  @Query("SELECT * FROM comics")
+  fun readAll(): List<Comic>
+
   @Query("SELECT * FROM comics WHERE id = :id")
   fun read(id: Long): Comic?
 

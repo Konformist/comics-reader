@@ -91,6 +91,8 @@ export interface IComicDTO extends DBDates {
   authors: number[]
   tags: number[]
   cover: IComicCoverDTO | null
+  override: IComicOverrideDTO | null
+  chapters: Array<IChapterDTO>
 }
 
 export interface IChapterPageDTO extends DBDates {

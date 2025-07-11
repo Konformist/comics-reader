@@ -81,6 +81,7 @@ import ChapterPageController from '@/core/entities/chapter-page/ChapterPageContr
 import ChapterController from '@/core/entities/chapter/ChapterController.ts';
 import ChapterModel from '@/core/entities/chapter/ChapterModel.ts';
 import UI from '@/plugins/UIPlugin.ts';
+import { useComicsStore } from '@/stores/comics.ts';
 
 definePage({
   meta: {
@@ -91,6 +92,7 @@ definePage({
 
 const route = useRoute('/chapters/[id]/read');
 const router = useRouter();
+const comicsStore = useComicsStore();
 
 const comicId = +(route.query?.comic || 0);
 const chapterId = ref(+(route.params.id || 0));
@@ -170,6 +172,7 @@ const onRead = async (item: ChapterPageModel) => {
   try {
     item.isRead = true;
     await ChapterPageController.save(item);
+    comicsStore.loadComicForce(comicId);
   } catch (error) {
     UI.toast({ text: `Ошибка: ${error}` });
   }

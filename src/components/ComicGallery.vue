@@ -1,15 +1,24 @@
 <template>
-  <v-card
-    @click="$emit('move-comic', comic.id)"
-  >
+  <v-card @click="$emit('move-comic', comic.id)">
     <div class="d-flex flex-no-wrap justify-space-between">
-      <CustomImg
-        class="flex-0-0"
-        cover
-        height="200"
-        :src="comic.cover?.file?.url"
-        width="140"
-      />
+      <div
+        class="flex-0-0 position-relative"
+      >
+        <CustomImg
+          cover
+          height="200"
+          :src="comic.cover?.file?.url"
+          width="140"
+        />
+        <div class="pa-1 position-absolute top-0 right-0">
+          <v-badge
+            :color="readProcessColor"
+            :content="readProcessText"
+            inline
+            size="small"
+          />
+        </div>
+      </div>
       <div
         class="flex-1-1 py-4"
         style="min-width: 0"
@@ -45,6 +54,7 @@
 <script lang="ts" setup>
 import type AuthorModel from '@/core/entities/author/AuthorModel.ts';
 import type ComicModel from '@/core/entities/comic/ComicModel.ts';
+import { COMIC_READ_STATUS } from '@/core/entities/comic/ComicTypes.ts';
 import type TagModel from '@/core/entities/tag/TagModel.ts';
 
 defineEmits<{ (e: 'move-comic', v: number): void }>();
@@ -58,6 +68,22 @@ const {
   tags?: TagModel[]
   authors?: AuthorModel[]
 }>();
+
+const readProcessText = computed(() => {
+  switch (comic.status) {
+  case COMIC_READ_STATUS.PROCESS: return 'В процессе';
+  case COMIC_READ_STATUS.FULL: return 'Прочитано';
+  default: return 'Не начато';
+  }
+});
+
+const readProcessColor = computed(() => {
+  switch (comic.status) {
+  case COMIC_READ_STATUS.PROCESS: return 'warning';
+  case COMIC_READ_STATUS.FULL: return 'success';
+  default: return '';
+  }
+});
 
 const comicAuthors = computed(() => (
   authors

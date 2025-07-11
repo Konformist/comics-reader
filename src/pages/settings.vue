@@ -20,7 +20,7 @@
           />
         </v-label>
         <v-number-input
-          v-model.number="appStore.settings.readingTimeoutSec"
+          v-model="appStore.settings.readingTimeoutSec"
           class="mt-4"
           :disabled="!appStore.settings.autoReading || appStore.settings.readingMode === 'webtoon'"
           label="До перелистывания"

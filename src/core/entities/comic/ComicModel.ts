@@ -1,6 +1,10 @@
 import type { IComicDTO } from '@/plugins/WebApiPlugin.ts';
-import ComicCoverModel from '@/core/entities/comic-cover/ComicCoverModel.ts';
 import Entity from '@/core/entities/Entity.ts';
+import ChapterModel from '@/core/entities/chapter/ChapterModel.ts';
+import { CHAPTER_READ_STATUS } from '@/core/entities/chapter/ChapterTypes.ts';
+import { COMIC_READ_STATUS } from '@/core/entities/comic/ComicTypes.ts';
+import ComicOverrideModel from '@/core/entities/comic-override/ComicOverrideModel.ts';
+import ComicCoverModel from '@/core/entities/comic-cover/ComicCoverModel.ts';
 
 export default class ComicModel extends Entity<IComicDTO> implements IComicDTO {
   id: number;
@@ -14,6 +18,8 @@ export default class ComicModel extends Entity<IComicDTO> implements IComicDTO {
   authors: number[];
   tags: number[];
   cover: ComicCoverModel;
+  override: ComicOverrideModel;
+  chapters: Array<ChapterModel>;
 
   constructor(dto?: Partial<IComicDTO>) {
     super();
@@ -29,13 +35,24 @@ export default class ComicModel extends Entity<IComicDTO> implements IComicDTO {
     this.authors = dto?.authors ?? [];
     this.tags = dto?.tags ?? [];
     this.cover = new ComicCoverModel(dto?.cover || undefined);
+    this.override = new ComicOverrideModel(dto?.override || undefined);
+    this.chapters = (dto?.chapters || []).map((e) => new ChapterModel(e));
   }
 
-  get isFilled(): boolean {
-    return !!this.cover.file?.url
-      && !!this.name
-      && !!this.languageId
-      && this.authors.length > 0;
+  get status() {
+    if (!this.countRead || !this.chapters.length) {
+      return COMIC_READ_STATUS.NONE;
+    } else if (this.countRead === this.chapters.length) {
+      return COMIC_READ_STATUS.FULL;
+    } else {
+      return COMIC_READ_STATUS.PROCESS;
+    }
+  }
+
+  get countRead() {
+    return this.chapters
+      .filter((e) => e.status === CHAPTER_READ_STATUS.FULL)
+      .length;
   }
 
   getDTO(): IComicDTO {
@@ -51,6 +68,8 @@ export default class ComicModel extends Entity<IComicDTO> implements IComicDTO {
       authors: [...this.authors],
       tags: [...this.tags],
       cover: this.cover.getDTO(),
+      override: this.override.getDTO(),
+      chapters: this.chapters.map((e) => e.getDTO()),
     };
   }
 }

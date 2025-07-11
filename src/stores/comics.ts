@@ -27,6 +27,13 @@ export const useComicsStore = defineStore('comicsStore', {
       }
     },
 
+    async loadComicForce(id: number) {
+      const comic = await ComicController.load(id);
+      const index = this.comics.findIndex((e) => e.id === comic.id);
+
+      this.comics.splice(index, 1, comic);
+    },
+
     async loadComics() {
       if (this.loaded) {
         return;

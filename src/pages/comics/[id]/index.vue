@@ -76,13 +76,8 @@
             } : undefined"
           >
             <template #append>
-              <v-list-item-subtitle
-                class="mr-4"
-              >
-                {{ chapter.read }} / {{ chapter.total }}
-              </v-list-item-subtitle>
               <v-icon
-                :color="chapter.total && chapter.read === chapter.total ? 'success' : ''"
+                :color="getReadProcessColor(chapter.status)"
                 icon="$read"
               />
             </template>
@@ -105,6 +100,7 @@
 
 <script lang="ts" setup>
 import type ChapterModel from '@/core/entities/chapter/ChapterModel.ts';
+import { CHAPTER_READ_STATUS } from '@/core/entities/chapter/ChapterTypes.ts';
 import { Clipboard } from '@capacitor/clipboard';
 import useLoading from '@/composables/useLoading.ts';
 import ChapterController from '@/core/entities/chapter/ChapterController.ts';
@@ -140,20 +136,23 @@ const {
 const chapters = ref<ChapterModel[]>([]);
 const chaptersList = computed(() => (
   chapters.value
-    .map((e, i) => {
-      const total = e.pages.length;
-      const read = e.pages.filter((e) => e.isRead).length;
-      const readIndex = e.pages.findIndex((e) => !e.isRead);
-      return {
-        id: e.id,
-        name: e.name || `Глава ${i + 1}`,
-        readLast: readIndex < 1 ? 0 : readIndex - 1,
-        read,
-        total,
-      };
-    })
+    .map((e, i) => ({
+      id: e.id,
+      name: e.name || `Глава ${i + 1}`,
+      status: e.status,
+      readLast: e.lastPageUnread < 1 ? 0 : e.lastPageUnread - 1,
+      total: e.pages.length,
+    }))
     .reverse()
 ));
+
+const getReadProcessColor = (status: CHAPTER_READ_STATUS) => {
+  switch (status) {
+  case CHAPTER_READ_STATUS.PROCESS: return 'warning';
+  case CHAPTER_READ_STATUS.FULL: return 'success';
+  default: return '';
+  }
+};
 
 const loadChapters = async () => {
   chapters.value = await ChapterController.loadAll(comicId);

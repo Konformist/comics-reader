@@ -68,6 +68,10 @@ class ComicCoverController(
     return dao.readByComic(id)
   }
 
+  fun readByComicWithFile(id: Long): ComicCoverWithFile? {
+    return dao.readByComicWithFile(id)
+  }
+
   @Throws(DatabaseException::class)
   fun create(cover: ComicCoverCreate): Long {
     val rowId = dao.create(cover)

@@ -260,7 +260,7 @@ class WebApi {
   }
 
   private fun getComicsAll(): JSONArray {
-    return ComicSerializer.toJSONArray(comicController.readLiteAll())
+    return ComicSerializer.toJSONArray(comicController.readFullAll())
   }
 
   @Throws(ValidationException::class)
@@ -268,7 +268,7 @@ class WebApi {
     val rowId = data.optLong("id")
     Validation.id(rowId, "id")
 
-    return ComicSerializer.toJSON(comicController.readLite(rowId))
+    return ComicSerializer.toJSON(comicController.readFull(rowId))
   }
 
   @Throws(DatabaseException::class)

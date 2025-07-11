@@ -22,9 +22,8 @@
       <v-divider />
       <div class="pa-4">
         <v-number-input
-          v-model.number="pages"
+          v-model="pages"
           class="mb-4"
-          control-variant="hidden"
           label="Количество страниц"
           :min="minPages"
           @change="setPages()"
@@ -41,8 +40,9 @@
           rows="2"
         />
         <v-number-input
-          v-model.number="imagesTemplateStart"
+          v-model="imagesTemplateStart"
           class="mb-4"
+          control-variant="split"
           label="Начальный ID"
           :min="0"
           type="number"
@@ -207,6 +207,7 @@ const init = async () => {
 init();
 
 const setPages = () => {
+  console.log(pages.value);
   const diff = pages.value - chapter.value.pages.length;
 
   if (diff > 0) {

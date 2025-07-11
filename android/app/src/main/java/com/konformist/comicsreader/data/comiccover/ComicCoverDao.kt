@@ -11,6 +11,9 @@ interface ComicCoverDao {
   @Query("SELECT * FROM comic_covers WHERE comic_id = :comicId")
   fun readByComic(comicId: Long): ComicCover?
 
+  @Query("SELECT * FROM comic_covers WHERE comic_id = :comicId")
+  fun readByComicWithFile(comicId: Long): ComicCoverWithFile?
+
   @Query("SELECT * FROM comic_covers WHERE id = :id")
   fun read(id: Long): ComicCover?
 

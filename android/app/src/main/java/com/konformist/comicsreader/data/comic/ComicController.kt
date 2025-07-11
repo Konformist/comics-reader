@@ -34,12 +34,37 @@ class ComicController(
 
   private val entityName = "Comic"
 
-  fun readLiteAll(): List<ComicLite> {
-    return dao.readLiteAll()
-  }
-
   fun readLite(id: Long): ComicLite {
     return dao.readLite(id)
+  }
+
+  fun readFullAll(): List<ComicFull> {
+    return dao.readAll().map { comic ->
+      val cover = comicCoverController.readByComicWithFile(comic.id)
+      val override = comicOverrideController.readByComic(comic.id)
+      val chapters = chapterController.readByComicAll(comic.id)
+
+      ComicFull(
+        comic = comic,
+        cover = cover,
+        override = override,
+        chapters = chapters,
+      )
+    }
+  }
+
+  fun readFull(id: Long): ComicFull? {
+    val comic = dao.read(id) ?: return null
+    val cover = comicCoverController.readByComicWithFile(id)
+    val override = comicOverrideController.readByComic(id)
+    val chapters = chapterController.readByComicAll(id)
+
+    return ComicFull(
+      comic = comic,
+      cover = cover,
+      override = override,
+      chapters = chapters,
+    )
   }
 
   fun read(id: Long): Comic? {

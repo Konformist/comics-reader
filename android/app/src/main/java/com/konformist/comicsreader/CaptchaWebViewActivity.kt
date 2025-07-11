@@ -2,6 +2,7 @@ package com.konformist.comicsreader
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.webkit.CookieManager
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -28,6 +29,7 @@ class CaptchaWebViewActivity : AppCompatActivity() {
     val settings = webView.settings
     settings.javaScriptEnabled = true
     settings.domStorageEnabled = true
+    settings.loadsImagesAutomatically = true
     settings.userAgentString =
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
 
@@ -36,30 +38,41 @@ class CaptchaWebViewActivity : AppCompatActivity() {
     cookieManager.setAcceptThirdPartyCookies(webView, true)
 
     webView.webViewClient = object : WebViewClient() {
-      override fun onPageFinished(view: WebView?, url: String?) {
-        super.onPageFinished(view, url)
-        if (url != null && isCaptchaPassed(url)) {
-          val cookies = cookieManager.getCookie(url)
-
-          CoroutineScope(Dispatchers.IO).launch {
-            GlobalCookieManager.save(RequestUtils.getDomain(url), cookies)
-          }
-          finish()
-        }
+      override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+        val url = request?.url.toString()
+        Log.d("Captcha", "Navigating to: $url")
+        return false // Разрешаем WebView загружать URL
       }
 
-      // Опционально: блокируем редиректы на сторонние сайты
-      override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-        return false
+      override fun onPageFinished(view: WebView?, url: String?) {
+        super.onPageFinished(view, url)
+
+        if (url != null) {
+          val cookies = cookieManager.getCookie(url)
+          Log.d("Captcha", "Finished loading: $url")
+          Log.d("Captcha", "Cookies: $cookies")
+
+          if (isCaptchaPassed(url) && !cookies.isNullOrEmpty()) {
+            CoroutineScope(Dispatchers.IO).launch {
+              GlobalCookieManager.save(RequestUtils.getDomain(url), cookies)
+              Log.d("Captcha", "Cookies saved for ${RequestUtils.getDomain(url)}")
+            }
+            finish()
+          }
+        }
       }
     }
 
     webView.loadUrl(captchaUrl)
   }
 
+  /**
+   * Проверка, что мы прошли капчу.
+   * Можно адаптировать под конкретные сайты (убрать challenge или captcha в URL).
+   */
   private fun isCaptchaPassed(url: String): Boolean {
-    // Здесь можно точнее подстраиваться под реальный сайт
-    // return url.contains("example.com") && !url.contains("captcha")
-    return true
+    return !url.contains("captcha", ignoreCase = true) &&
+        !url.contains("challenge", ignoreCase = true) &&
+        !url.contains("cloudflare", ignoreCase = true)
   }
 }

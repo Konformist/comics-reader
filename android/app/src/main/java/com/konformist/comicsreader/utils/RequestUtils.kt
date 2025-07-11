@@ -31,6 +31,12 @@ class RequestUtils {
     fun getConnection(url: URL, cookie: String = ""): HttpURLConnection {
       val connection = url.openConnection() as HttpURLConnection
       connection.requestMethod = "GET"
+      connection.instanceFollowRedirects = true
+
+      // ⏱️ Добавляем таймауты
+      connection.connectTimeout = 10_000 // 10 секунд на подключение
+      connection.readTimeout = 15_000    // 15 секунд на чтение
+
       updateAsBrowser(url, connection, cookie)
       connection.connect()
 
@@ -38,23 +44,6 @@ class RequestUtils {
         val intent = Intent(App.context, CaptchaWebViewActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         intent.putExtra("captcha_url", url.toString())
-        App.context.startActivity(intent)
-      } else if (connection.responseCode != 200) {
-        throw Exception("Error connection: ${connection.responseCode}")
-      }
-
-      return connection
-    }
-
-    fun postConnection(url: URL, cookie: String = ""): HttpURLConnection {
-      val connection = url.openConnection() as HttpURLConnection
-      connection.requestMethod = "POST"
-      updateAsBrowser(url, connection, cookie)
-      connection.connect()
-
-      if (connection.responseCode == 403) {
-        val intent = Intent(App.context, CaptchaWebViewActivity::class.java)
-        intent.putExtra("captcha_url", url)
         App.context.startActivity(intent)
       } else if (connection.responseCode != 200) {
         throw Exception("Error connection: ${connection.responseCode}")

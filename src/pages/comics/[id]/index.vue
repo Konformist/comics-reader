@@ -38,13 +38,13 @@
       </template>
       <v-divider />
       <p class="pa-4">
-        <b class="font-weight-medium">Авторы:</b> {{ authorsChips.length ? authorsChips.map((e) => e.name).join(", ") : '—' }}
+        <b class="font-weight-medium">Авторы:</b> {{ authorsChips.length > 0 ? authorsChips.map((e) => e.name).join(", ") : '—' }}
       </p>
       <v-divider />
       <p class="pa-4">
-        <b class="font-weight-medium">Язык:</b> {{ languagesChips.length ? languagesChips[0].name : '—' }}
+        <b class="font-weight-medium">Язык:</b> {{ languagesChips.length > 0 ? languagesChips[0].name : '—' }}
       </p>
-      <template v-if="tagsChips.length">
+      <template v-if="tagsChips.length > 0">
         <v-divider />
         <p class="pa-4 d-flex flex-wrap ga-1 align-center">
           <v-chip
@@ -56,7 +56,7 @@
           />
         </p>
       </template>
-      <template v-if="chaptersList.length">
+      <template v-if="chaptersList.length > 0">
         <v-divider />
         <v-list
           activable
@@ -104,15 +104,15 @@
 </template>
 
 <script lang="ts" setup>
+import type ChapterModel from '@/core/entities/chapter/ChapterModel.ts';
+import { Clipboard } from '@capacitor/clipboard';
+import useLoading from '@/composables/useLoading.ts';
+import ChapterController from '@/core/entities/chapter/ChapterController.ts';
 import UI from '@/plugins/UIPlugin.ts';
 import { useAuthorsStore } from '@/stores/authors.ts';
 import { useComicsStore } from '@/stores/comics.ts';
 import { useLanguagesStore } from '@/stores/languages.ts';
 import { useTagsStore } from '@/stores/tags.ts';
-import { Clipboard } from '@capacitor/clipboard';
-import useLoading from '@/composables/useLoading.ts';
-import ChapterController from '@/core/entities/chapter/ChapterController.ts';
-import ChapterModel from '@/core/entities/chapter/ChapterModel.ts';
 
 definePage({
   meta: {
@@ -180,15 +180,15 @@ const init = async () => {
   loadingStart();
   await loadComic();
 
-  if (!comicsStore.comic.id) {
-    router.replace({ name: '/' });
-  } else {
+  if (comicsStore.comic.id) {
     await Promise.all([
       languagesStore.loadLanguages(),
       authorsStore.loadAuthors(),
       tagsStore.loadTags(),
       loadChapters(),
     ]);
+  } else {
+    router.replace({ name: '/' });
   }
 
   loadingEnd();

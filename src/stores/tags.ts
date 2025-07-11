@@ -1,5 +1,5 @@
-import TagController from '@/core/entities/tag/TagController.ts';
 import type TagModel from '@/core/entities/tag/TagModel.ts';
+import TagController from '@/core/entities/tag/TagController.ts';
 
 export const useTagsStore = defineStore('tagsStore', {
   state() {
@@ -11,7 +11,9 @@ export const useTagsStore = defineStore('tagsStore', {
 
   actions: {
     async loadTags() {
-      if (this.loaded) return;
+      if (this.loaded) {
+        return;
+      }
       this.tags = await TagController.loadAll();
       this.loaded = true;
     },

@@ -8,7 +8,7 @@
       <v-spacer />
       <DropdownButton
         v-model="sortValue"
-        :disabled="!languagesStore.languages.length"
+        :disabled="languagesStore.languages.length === 0"
         :items="sortItems"
         prepend-icon="$sort"
         text="Сортировать"
@@ -16,7 +16,7 @@
     </v-toolbar>
     <v-container class="pb-16 mb-4">
       <DictionaryList
-        v-if="sortedLanguages.length"
+        v-if="sortedLanguages.length > 0"
         :items="sortedLanguages"
         :loading="loading"
         @click-item="clickLanguage($event)"
@@ -42,16 +42,16 @@
 </template>
 
 <script setup lang="ts">
+import { Dialog } from '@capacitor/dialog';
 import DictionaryEditDialog from '@/components/DictionaryEditDialog.vue';
 import DictionaryList from '@/components/DictionaryList.vue';
 import useLoading from '@/composables/useLoading.ts';
+import LanguageController from '@/core/entities/language/LanguageController.ts';
+import LanguageModel from '@/core/entities/language/LanguageModel.ts';
 import { sortString } from '@/core/utils/array.ts';
 import UI from '@/plugins/UIPlugin.ts';
 import { useComicsStore } from '@/stores/comics.ts';
 import { useLanguagesStore } from '@/stores/languages.ts';
-import { Dialog } from '@capacitor/dialog';
-import LanguageController from '@/core/entities/language/LanguageController.ts';
-import LanguageModel from '@/core/entities/language/LanguageModel.ts';
 
 definePage({
   meta: {
@@ -114,9 +114,9 @@ const languagesCount = computed(() => (
   languagesStore.languages.reduce((acc, languale) => {
     acc[languale.id] = 0;
 
-    comicsStore.comics.forEach((item) => {
+    for (const item of comicsStore.comics) {
       if (item.languageId === languale.id) acc[languale.id]++;
-    });
+    }
 
     return acc;
   }, {} as Record<number, number>)
@@ -131,10 +131,16 @@ const fullLanguages = computed(() => (
 
 const sortedLanguages = computed(() => (
   [...fullLanguages.value].sort((a, b) => {
-    if (sortValue.value === 1) return sortString(b.name, a.name);
-    else if (sortValue.value === 2) return a.count - b.count;
-    else if (sortValue.value === 3) return b.count - a.count;
-    else return sortString(a.name, b.name);
+    switch (sortValue.value) {
+    case 1: { return sortString(b.name, a.name);
+    }
+    case 2: { return a.count - b.count;
+    }
+    case 3: { return b.count - a.count;
+    }
+    default: { return sortString(a.name, b.name);
+    }
+    }
   })
 ));
 
@@ -145,8 +151,8 @@ const saveLanguage = async () => {
     await languagesStore.loadLanguagesForce();
     dialog.value = false;
     UI.toast({ text: 'Язык сохранён' });
-  } catch (e) {
-    UI.toast({ text: `Ошибка: ${e}` });
+  } catch (error) {
+    UI.toast({ text: `Ошибка: ${error}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -166,8 +172,8 @@ const deleteLanguage = async () => {
     await languagesStore.loadLanguagesForce();
     dialog.value = false;
     UI.toast({ text: 'Язык удалён' });
-  } catch (e) {
-    UI.toast({ text: `Ошибка: ${e}` });
+  } catch (error) {
+    UI.toast({ text: `Ошибка: ${error}` });
   } finally {
     loadingGlobalEnd();
   }

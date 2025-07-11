@@ -38,9 +38,12 @@ export const useComicsPageStore = defineStore('comicsPage', {
     comicsSorted(): ComicModel[] {
       return [...this.comicsFiltered].sort((a, b) => {
         switch (this.sort) {
-          case ESORT_TYPE.NAME: return sortString(a.name, b.name, this.invertSort);
-          case ESORT_TYPE.DATE: return sortString(a.mdate, b.mdate, this.invertSort);
-          default: return 0;
+          case ESORT_TYPE.NAME: { return sortString(a.name, b.name, this.invertSort);
+          }
+          case ESORT_TYPE.DATE: { return sortString(a.mdate, b.mdate, this.invertSort);
+          }
+          default: { return 0;
+          }
         }
       });
     },

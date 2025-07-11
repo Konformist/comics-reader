@@ -127,11 +127,11 @@
 </template>
 
 <script lang="ts" setup>
-import useLoading from '@/composables/useLoading.ts';
-import UI from '@/plugins/UIPlugin.ts';
 import { Clipboard } from '@capacitor/clipboard';
+import useLoading from '@/composables/useLoading.ts';
 import ParserController from '@/core/entities/parser/ParserController.ts';
 import ParserModel from '@/core/entities/parser/ParserModel.ts';
+import UI from '@/plugins/UIPlugin.ts';
 
 definePage({
   meta: {

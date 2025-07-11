@@ -1,6 +1,5 @@
 import { defineConfig } from 'eslint/config';
 import pluginVue from 'eslint-plugin-vue';
-import stylistic from '@stylistic/eslint-plugin';
 import vuetifyPlugin from 'eslint-config-vuetify/index.ts.mjs';
 
 export default defineConfig([
@@ -8,10 +7,7 @@ export default defineConfig([
   ...vuetifyPlugin,
   ...pluginVue.configs['flat/recommended'],
   {
-    plugins: {
-      '@stylistic': stylistic,
-      'vue': pluginVue,
-    },
+    plugins: { vue: pluginVue },
     languageOptions: { globals: { definePage: 'readonly' } },
     rules: {
       '@stylistic/comma-dangle': ['error', 'always-multiline'],

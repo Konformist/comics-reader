@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils';
+import { vuetify } from 'tests/globals.ts';
 import { describe, expect, test } from 'vitest';
 import { VSkeletonLoader } from 'vuetify/components';
-import { vuetify } from 'tests/globals.ts';
 import CustomImg from '@/components/custom-img/CustomImg.vue';
 
 describe('CustomImg', () => {

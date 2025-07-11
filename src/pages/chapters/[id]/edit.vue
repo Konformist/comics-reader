@@ -77,7 +77,7 @@
         <v-btn
           class="mt-4 w-100"
           color="error"
-          :disabled="!chapter.pages.length || loadingGlobal"
+          :disabled="chapter.pages.length === 0 || loadingGlobal"
           :loading="loading"
           text="Удалить все страницы"
           variant="tonal"
@@ -141,13 +141,13 @@
 </template>
 
 <script lang="ts" setup>
-import UI from '@/plugins/UIPlugin.ts';
+import type ChapterPageModel from '@/core/entities/chapter-page/ChapterPageModel.ts';
 import { Dialog } from '@capacitor/dialog';
 import useLoading from '@/composables/useLoading.ts';
 import ChapterPageController from '@/core/entities/chapter-page/ChapterPageController.ts';
-import type ChapterPageModel from '@/core/entities/chapter-page/ChapterPageModel.ts';
 import ChapterController from '@/core/entities/chapter/ChapterController.ts';
 import ChapterModel from '@/core/entities/chapter/ChapterModel.ts';
+import UI from '@/plugins/UIPlugin.ts';
 
 definePage({
   meta: {
@@ -188,9 +188,9 @@ const saveChapter = async () => {
 
 const savePageChapters = async () => {
   const forSave = chapter.value.pages;
-  const exists = chapter.value.pages.map((e) => e.id);
+  const exists = new Set(chapter.value.pages.map((e) => e.id));
   const forDelete = chapterReserve.value.pages
-    .filter((e) => !exists.includes(e.id))
+    .filter((e) => !exists.has(e.id))
     .map((e) => e.id);
 
   await ChapterPageController.sequenceRemove(forDelete);
@@ -225,10 +225,10 @@ const imagesTemplate = ref('');
 const imagesTemplateStart = ref(1);
 
 const setTemplate = () => {
-  chapter.value.pages.forEach((image, index) => {
+  for (const [index, image] of chapter.value.pages.entries()) {
     image.fromUrl = imagesTemplate.value
       .replace('<ID>', (imagesTemplateStart.value + index).toString());
-  });
+  }
 };
 
 const onSave = async () => {
@@ -238,8 +238,8 @@ const onSave = async () => {
     await savePageChapters();
     await loadChapter();
     UI.toast({ text: 'Глава сохранена' });
-  } catch (e) {
-    UI.toast({ text: `Ошибка: ${e}` });
+  } catch (error) {
+    UI.toast({ text: `Ошибка: ${error}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -253,8 +253,8 @@ const uploadImage = async (item: ChapterPageModel) => {
     await ChapterPageController.saveFile(item.id);
     await loadChapter();
     UI.toast({ text: 'Глава сохранена' });
-  } catch (e) {
-    UI.toast({ text: `Ошибка: ${e}` });
+  } catch (error) {
+    UI.toast({ text: `Ошибка: ${error}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -270,8 +270,8 @@ const onLoadImage = async (item: ChapterPageModel) => {
     await ChapterPageController.downloadFile(item.id, item.fromUrl);
     await loadChapter();
     UI.toast({ text: 'Глава сохранена' });
-  } catch (e) {
-    UI.toast({ text: `Ошибка: ${e}` });
+  } catch (error) {
+    UI.toast({ text: `Ошибка: ${error}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -281,7 +281,7 @@ const canLoadImages = computed(() => (
   chapter.value.pages.some((e) => e.fromUrl)
 ));
 
-const onLoadImages = async (force: boolean = false) => {
+const onLoadImages = async (force = false) => {
   loadingGlobalStart();
   await saveChapter();
   await savePageChapters();
@@ -294,9 +294,9 @@ const onLoadImages = async (force: boolean = false) => {
         await ChapterPageController.downloadFile(item.id, item.fromUrl);
       }
     }
-  } catch (e) {
+  } catch (error) {
     isError = true;
-    UI.toast({ text: `Ошибка: ${e}` });
+    UI.toast({ text: `Ошибка: ${error}` });
   }
 
   if (isError) {
@@ -326,8 +326,8 @@ const delPage = async (item: ChapterPageModel) => {
     await ChapterPageController.remove(item.id);
     await loadChapter();
     UI.toast({ text: 'Глава сохранена' });
-  } catch (e) {
-    UI.toast({ text: `Ошибка: ${e}` });
+  } catch (error) {
+    UI.toast({ text: `Ошибка: ${error}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -347,8 +347,8 @@ const delPages = async () => {
     await ChapterPageController.sequenceRemove(chapter.value.pages.map((e) => e.id));
     await loadChapter();
     UI.toast({ text: 'Глава сохранена' });
-  } catch (e) {
-    UI.toast({ text: `Ошибка: ${e}` });
+  } catch (error) {
+    UI.toast({ text: `Ошибка: ${error}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -370,8 +370,8 @@ const delChapter = async () => {
       name: '/comics/[id]/',
       params: { id: chapter.value.comicId },
     });
-  } catch (e) {
-    UI.toast({ text: `Ошибка: ${e}` });
+  } catch (error) {
+    UI.toast({ text: `Ошибка: ${error}` });
   } finally {
     loadingGlobalEnd();
   }

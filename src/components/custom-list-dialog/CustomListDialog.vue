@@ -94,16 +94,16 @@ const filteredItems = computed(() => (
   items
     .filter((e) => !selected.value || modelArray.value.includes(e.id))
     .filter((e) => e.name.toLowerCase().includes(search.value.toLowerCase()))
-    .sort((a,b) => sortString(a.name,b.name))
+    .sort((a, b) => sortString(a.name, b.name))
 ));
 
 const toggleModel = (id: number) => {
-  if (!multiple) {
-    model.value = id;
-  } else {
+  if (multiple) {
     model.value = modelArray.value.includes(id)
       ? modelArray.value.filter((e) => e !== id)
       : [...modelArray.value, id];
+  } else {
+    model.value = id;
   }
 };
 </script>

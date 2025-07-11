@@ -1,5 +1,5 @@
-import Api from '@/core/api/Api.ts';
 import type ChapterPageModel from '@/core/entities/chapter-page/ChapterPageModel.ts';
+import Api from '@/core/api/Api.ts';
 
 export default class ChapterPageController {
   static save(value: ChapterPageModel) {

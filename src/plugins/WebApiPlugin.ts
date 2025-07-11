@@ -1,4 +1,4 @@
-import { type PluginListenerHandle, registerPlugin, WebPlugin } from '@capacitor/core';
+import { registerPlugin, WebPlugin } from '@capacitor/core';
 
 interface IApiError { error: string }
 
@@ -41,11 +41,11 @@ export interface ITreeDirectory {
   children: Array<ITreeDirectory | ITreeFile>
 }
 
-export interface ITagDTO extends DBDates {name: string}
+export interface ITagDTO extends DBDates { name: string }
 
-export interface IAuthorDTO extends DBDates {name: string}
+export interface IAuthorDTO extends DBDates { name: string }
 
-export interface ILanguageDTO extends DBDates {name: string}
+export interface ILanguageDTO extends DBDates { name: string }
 
 export interface IParseData {
   titleCSS: string
@@ -338,15 +338,6 @@ interface IWebApiPlugin {
     path: K
     body?: IApi[K]['request']
   }): Promise<{ result: IApi[K]['response'] } | IApiError>
-
-  /** Listens for screen orientation changes. */
-  addListener(
-    eventName: 'filePick',
-    listenerFunc: (data: { result: boolean }) => void,
-  ): Promise<PluginListenerHandle>
-
-  /** Removes all listeners */
-  removeAllListeners(): Promise<void>
 }
 
 class WebApiPlugin extends WebPlugin implements IWebApiPlugin {

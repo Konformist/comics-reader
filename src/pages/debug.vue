@@ -42,10 +42,10 @@
 </template>
 
 <script setup lang="ts">
+import type { ITreeDirectory } from '@/plugins/WebApiPlugin.ts';
 import useLoading from '@/composables/useLoading.ts';
 import Api from '@/core/api/Api.ts';
 import UI from '@/plugins/UIPlugin.ts';
-import type { ITreeDirectory } from '@/plugins/WebApiPlugin.ts';
 import { useAuthorsStore } from '@/stores/authors.ts';
 import { useComicsStore } from '@/stores/comics.ts';
 import { useLanguagesStore } from '@/stores/languages.ts';
@@ -89,8 +89,8 @@ const addBackup = async () => {
     loadingGlobalStart();
     await Api.api('backup/backup/add');
     UI.toast({ text: 'Данные выгружены' });
-  } catch (e) {
-    UI.toast({ text: `Ошибка: ${e}` });
+  } catch (error) {
+    UI.toast({ text: `Ошибка: ${error}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -109,8 +109,8 @@ const restoreBackup = async () => {
     ]);
     loadTreeFiles();
     UI.toast({ text: 'Данные восстановлены' });
-  } catch (e) {
-    UI.toast({ text: `Ошибка: ${e}` });
+  } catch (error) {
+    UI.toast({ text: `Ошибка: ${error}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -121,8 +121,8 @@ const migrate = async () => {
     loadingGlobalStart();
     await Api.api('data/data/migrate');
     UI.toast({ text: 'Миграция прошла успешно' });
-  } catch (e) {
-    UI.toast({ text: `Ошибка: ${e}` });
+  } catch (error) {
+    UI.toast({ text: `Ошибка: ${error}` });
   } finally {
     loadingGlobalEnd();
   }

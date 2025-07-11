@@ -1,6 +1,6 @@
 import type { IChapterDTO } from '@/plugins/WebApiPlugin.ts';
-import Entity from '@/core/entities/Entity.ts';
 import ChapterPageModel from '@/core/entities/chapter-page/ChapterPageModel.ts';
+import Entity from '@/core/entities/Entity.ts';
 
 export default class ChapterModel extends Entity<IChapterDTO> implements IChapterDTO {
   id: number;

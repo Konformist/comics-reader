@@ -8,7 +8,7 @@
       <v-spacer />
       <DropdownButton
         v-model="sortValue"
-        :disabled="!tagsStore.tags.length"
+        :disabled="tagsStore.tags.length === 0"
         :items="sortItems"
         prepend-icon="$sort"
         text="Сортировать"
@@ -16,7 +16,7 @@
     </v-toolbar>
     <v-container class="pb-16 mb-4">
       <DictionaryList
-        v-if="sortedTags.length"
+        v-if="sortedTags.length > 0"
         :items="sortedTags"
         :loading="loading"
         @click-item="clickTag($event)"
@@ -42,14 +42,14 @@
 </template>
 
 <script setup lang="ts">
-import UI from '@/plugins/UIPlugin.ts';
 import { Dialog } from '@capacitor/dialog';
-import { useComicsStore } from '@/stores/comics.ts';
-import { useTagsStore } from '@/stores/tags.ts';
-import { sortString } from '@/core/utils/array.ts';
+import useLoading from '@/composables/useLoading.ts';
 import TagController from '@/core/entities/tag/TagController.ts';
 import TagModel from '@/core/entities/tag/TagModel.ts';
-import useLoading from '@/composables/useLoading.ts';
+import { sortString } from '@/core/utils/array.ts';
+import UI from '@/plugins/UIPlugin.ts';
+import { useComicsStore } from '@/stores/comics.ts';
+import { useTagsStore } from '@/stores/tags.ts';
 
 definePage({
   meta: {
@@ -112,9 +112,9 @@ const tagsCount = computed(() => (
   tagsStore.tags.reduce((acc, tag) => {
     acc[tag.id] = 0;
 
-    comicsStore.comics.forEach((item) => {
+    for (const item of comicsStore.comics) {
       if (item.tags.includes(tag.id)) acc[tag.id]++;
-    });
+    }
 
     return acc;
   }, {} as Record<number, number>)
@@ -129,10 +129,16 @@ const fullTags = computed(() => (
 
 const sortedTags = computed(() => (
   [...fullTags.value].sort((a, b) => {
-    if (sortValue.value === 1) return sortString(b.name, a.name);
-    else if (sortValue.value === 2) return a.count - b.count;
-    else if (sortValue.value === 3) return b.count - a.count;
-    else return sortString(a.name, b.name);
+    switch (sortValue.value) {
+    case 1: { return sortString(b.name, a.name);
+    }
+    case 2: { return a.count - b.count;
+    }
+    case 3: { return b.count - a.count;
+    }
+    default: { return sortString(a.name, b.name);
+    }
+    }
   })
 ));
 
@@ -143,8 +149,8 @@ const saveTag = async () => {
     await tagsStore.loadTagsForce();
     dialog.value = false;
     UI.toast({ text: 'Тег сохранён' });
-  } catch (e) {
-    UI.toast({ text: `Ошибка: ${e}` });
+  } catch (error) {
+    UI.toast({ text: `Ошибка: ${error}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -164,8 +170,8 @@ const deleteTag = async () => {
     await tagsStore.loadTagsForce();
     dialog.value = false;
     UI.toast({ text: 'Тег удалён' });
-  } catch (e) {
-    UI.toast({ text: `Ошибка: ${e}` });
+  } catch (error) {
+    UI.toast({ text: `Ошибка: ${error}` });
   } finally {
     loadingGlobalEnd();
   }

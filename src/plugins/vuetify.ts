@@ -4,14 +4,6 @@
  * Framework documentation: https://vuetifyjs.com`
  */
 
-// Styles
-import 'vuetify/styles';
-
-// Composables
-import { createVuetify } from 'vuetify';
-import { md3 } from 'vuetify/blueprints';
-import { ru } from 'vuetify/locale';
-import { aliases, mdi } from 'vuetify/iconsets/mdi-svg';
 import {
   mdiAccount,
   mdiArrowLeft,
@@ -46,6 +38,14 @@ import {
   mdiViewDashboard,
   mdiViewList,
 } from '@mdi/js';
+
+// Composables
+import { createVuetify } from 'vuetify';
+import { md3 } from 'vuetify/blueprints';
+import { aliases, mdi } from 'vuetify/iconsets/mdi-svg';
+import { ru } from 'vuetify/locale';
+// Styles
+import 'vuetify/styles';
 
 // https://vuetifyjs.com/en/introduction/why-vuetify/#feature-guides
 export default createVuetify({

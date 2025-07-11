@@ -14,14 +14,19 @@ const loadingGlobalEnd = () => {
 watch(
   loadingGlobal,
   async (value, oldValue) => {
-    if (oldValue === value) return;
+    if (oldValue === value) {
+      return;
+    }
 
-    if (value) UI.loading({ show: true });
-    else UI.loading({ show: false });
+    if (value) {
+      UI.loading({ show: true });
+    } else {
+      UI.loading({ show: false });
+    }
   },
 );
 
-export default () => {
+const useLoading = () => {
   const count = ref(0);
   const loading = computed(() => !!count.value);
 
@@ -42,3 +47,5 @@ export default () => {
     loadingEnd,
   };
 };
+
+export default useLoading;

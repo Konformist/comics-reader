@@ -26,7 +26,7 @@ export default class ComicController {
     return Api.api('comic/comic/upload', { id });
   }
 
-  static parse(id: number, cookie: string = '') {
+  static parse(id: number, cookie = '') {
     return Api.api('comic/comic/parse', {
       id,
       cookie,

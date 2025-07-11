@@ -75,12 +75,12 @@
 
 <script lang="ts" setup>
 import type ReadContent from '@/components/ReadContent.vue';
+import type ChapterPageModel from '@/core/entities/chapter-page/ChapterPageModel.ts';
 import SmallBtn from '@/components/SmallBtn.vue';
 import ChapterPageController from '@/core/entities/chapter-page/ChapterPageController.ts';
-import type ChapterPageModel from '@/core/entities/chapter-page/ChapterPageModel.ts';
-import UI from '@/plugins/UIPlugin.ts';
 import ChapterController from '@/core/entities/chapter/ChapterController.ts';
 import ChapterModel from '@/core/entities/chapter/ChapterModel.ts';
+import UI from '@/plugins/UIPlugin.ts';
 
 definePage({
   meta: {
@@ -152,11 +152,11 @@ watch(
 onMounted(async () => {
   await loadChapter();
 
-  if (!chapter.value.id) {
-    router.replace({ name: '/' });
-  } else {
+  if (chapter.value.id) {
     loadChapters();
     UI.reading({ mode: 'start' });
+  } else {
+    router.replace({ name: '/' });
   }
 });
 
@@ -170,8 +170,8 @@ const onRead = async (item: ChapterPageModel) => {
   try {
     item.isRead = true;
     await ChapterPageController.save(item);
-  } catch (e) {
-    UI.toast({ text: `Ошибка: ${e}` });
+  } catch (error) {
+    UI.toast({ text: `Ошибка: ${error}` });
   }
 };
 </script>

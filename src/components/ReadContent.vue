@@ -21,13 +21,13 @@
 </template>
 
 <script setup lang="ts">
-import type { SwiperOptions } from 'swiper/types';
-import { register } from 'swiper/element';
 import type { SwiperContainer, SwiperSlide } from 'swiper/element';
-import { Autoplay, FreeMode, Zoom } from 'swiper/modules';
+import type { SwiperOptions } from 'swiper/types';
 import type ChapterPageModel from '@/core/entities/chapter-page/ChapterPageModel.ts';
-import { useAppStore } from '@/stores/app.ts';
+import { register } from 'swiper/element';
+import { Autoplay, FreeMode, Zoom } from 'swiper/modules';
 import debounce from '@/core/utils/debounce.ts';
+import { useAppStore } from '@/stores/app.ts';
 
 register();
 
@@ -100,9 +100,12 @@ const modeHorizontal = computed(() => ({
 
 const swiperMode = computed(() => {
   switch (appStore.settings.readingMode) {
-  case 'webtoon': return modeWebtoon.value;
-  case 'horizontal': return modeHorizontal.value;
-  default: return modeVertical.value;
+  case 'webtoon': { return modeWebtoon.value;
+  }
+  case 'horizontal': { return modeHorizontal.value;
+  }
+  default: { return modeVertical.value;
+  }
   }
 });
 
@@ -115,9 +118,12 @@ const modeSlideHorizontal = computed(() => ({ class: 'd-flex align-center justif
 
 const swiperSlideMode = computed(() => {
   switch (appStore.settings.readingMode) {
-  case 'webtoon': return modeSlideWebtoon.value;
-  case 'horizontal': return modeSlideHorizontal.value;
-  default: return modeSlideVertical.value;
+  case 'webtoon': { return modeSlideWebtoon.value;
+  }
+  case 'horizontal': { return modeSlideHorizontal.value;
+  }
+  default: { return modeSlideVertical.value;
+  }
   }
 });
 

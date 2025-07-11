@@ -8,7 +8,7 @@
       <v-spacer />
       <DropdownButton
         v-model="sortValue"
-        :disabled="!authorsStore.authors.length"
+        :disabled="authorsStore.authors.length === 0"
         :items="sortItems"
         prepend-icon="$sort"
         text="Сортировать"
@@ -16,7 +16,7 @@
     </v-toolbar>
     <v-container class="pb-16 mb-4">
       <DictionaryList
-        v-if="sortedAuthors.length"
+        v-if="sortedAuthors.length > 0"
         :items="sortedAuthors"
         :loading="loading"
         @click-item="clickAuthor($event)"
@@ -42,14 +42,14 @@
 </template>
 
 <script setup lang="ts">
-import UI from '@/plugins/UIPlugin.ts';
 import { Dialog } from '@capacitor/dialog';
 import useLoading from '@/composables/useLoading.ts';
-import { sortString } from '@/core/utils/array.ts';
-import { useAuthorsStore } from '@/stores/authors.ts';
-import { useComicsStore } from '@/stores/comics.ts';
 import AuthorController from '@/core/entities/author/AuthorController.ts';
 import AuthorModel from '@/core/entities/author/AuthorModel.ts';
+import { sortString } from '@/core/utils/array.ts';
+import UI from '@/plugins/UIPlugin.ts';
+import { useAuthorsStore } from '@/stores/authors.ts';
+import { useComicsStore } from '@/stores/comics.ts';
 
 definePage({
   meta: {
@@ -112,9 +112,9 @@ const authorsCount = computed(() => (
   authorsStore.authors.reduce((acc, author) => {
     acc[author.id] = 0;
 
-    comicsStore.comics.forEach((item) => {
+    for (const item of comicsStore.comics) {
       if (item.authors.includes(author.id)) acc[author.id]++;
-    });
+    }
 
     return acc;
   }, {} as Record<number, number>)
@@ -129,10 +129,16 @@ const fullAuthors = computed(() => (
 
 const sortedAuthors = computed(() => (
   [...fullAuthors.value].sort((a, b) => {
-    if (sortValue.value === 1) return sortString(b.name, a.name);
-    else if (sortValue.value === 2) return a.count - b.count;
-    else if (sortValue.value === 3) return b.count - a.count;
-    else return sortString(a.name, b.name);
+    switch (sortValue.value) {
+    case 1: { return sortString(b.name, a.name);
+    }
+    case 2: { return a.count - b.count;
+    }
+    case 3: { return b.count - a.count;
+    }
+    default: { return sortString(a.name, b.name);
+    }
+    }
   })
 ));
 
@@ -143,8 +149,8 @@ const saveAuthor = async () => {
     await authorsStore.loadAuthorsForce();
     dialog.value = false;
     UI.toast({ text: 'Автор сохранён' });
-  } catch (e) {
-    UI.toast({ text: `Ошибка: ${e}` });
+  } catch (error) {
+    UI.toast({ text: `Ошибка: ${error}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -164,8 +170,8 @@ const deleteAuthor = async () => {
     await authorsStore.loadAuthorsForce();
     dialog.value = false;
     UI.toast({ text: 'Автор удалён' });
-  } catch (e) {
-    UI.toast({ text: `Ошибка: ${e}` });
+  } catch (error) {
+    UI.toast({ text: `Ошибка: ${error}` });
   } finally {
     loadingGlobalEnd();
   }

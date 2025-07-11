@@ -35,7 +35,7 @@ export default class ComicModel extends Entity<IComicDTO> implements IComicDTO {
     return !!this.cover.file?.url
       && !!this.name
       && !!this.languageId
-      && !!this.authors.length;
+      && this.authors.length > 0;
   }
 
   getDTO(): IComicDTO {

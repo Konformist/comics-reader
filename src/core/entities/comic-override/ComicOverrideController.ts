@@ -8,6 +8,6 @@ export default class ComicOverrideController {
   }
 
   static save(value: ComicOverrideModel) {
-    return Api.api('comic/override/set',value.getDTO());
+    return Api.api('comic/override/set', value.getDTO());
   }
 }

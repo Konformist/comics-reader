@@ -1,6 +1,6 @@
-import Entity from '@/core/entities/Entity.ts';
 import type { IFileDTO } from '@/plugins/WebApiPlugin.ts';
 import { Capacitor } from '@capacitor/core';
+import Entity from '@/core/entities/Entity.ts';
 
 export default class FileModel extends Entity<IFileDTO> implements IFileDTO {
   id: number;

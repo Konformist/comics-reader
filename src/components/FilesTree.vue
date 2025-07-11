@@ -26,8 +26,8 @@
 </template>
 
 <script lang="ts" setup>
-import FilesTreeItem from '@/components/FilesTreeItem.vue';
 import type { ITreeDirectory, ITreeFile } from '@/plugins/WebApiPlugin.ts';
+import FilesTreeItem from '@/components/FilesTreeItem.vue';
 
 const model = defineModel<ITreeFile>();
 

@@ -90,7 +90,7 @@
       class="pb-16 mb-4"
     >
       <DictionaryList
-        v-if="chaptersList.length"
+        v-if="chaptersList.length > 0"
         :items="chaptersList"
         :loading="loading"
         @click-item="router.push({
@@ -127,18 +127,18 @@
 </template>
 
 <script lang="ts" setup>
+import { Dialog } from '@capacitor/dialog';
+import useLoading from '@/composables/useLoading.ts';
 import ChapterController from '@/core/entities/chapter/ChapterController.ts';
 import ChapterModel from '@/core/entities/chapter/ChapterModel.ts';
+import ComicCoverController from '@/core/entities/comic-cover/ComicCoverController.ts';
+import ComicController from '@/core/entities/comic/ComicController.ts';
 import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import UI from '@/plugins/UIPlugin.ts';
 import { useAuthorsStore } from '@/stores/authors.ts';
 import { useComicsStore } from '@/stores/comics.ts';
 import { useLanguagesStore } from '@/stores/languages.ts';
 import { useTagsStore } from '@/stores/tags.ts';
-import { Dialog } from '@capacitor/dialog';
-import useLoading from '@/composables/useLoading.ts';
-import ComicCoverController from '@/core/entities/comic-cover/ComicCoverController.ts';
-import ComicController from '@/core/entities/comic/ComicController.ts';
 
 definePage({
   meta: {
@@ -198,8 +198,8 @@ const uploadComic = async () => {
     await saveComic();
     await ComicController.upload(comic.value.id);
     UI.toast({ text: 'Комикс сохранён в Загрузки' });
-  } catch (e) {
-    UI.toast({ text: `Ошибка: ${e}` });
+  } catch (error) {
+    UI.toast({ text: `Ошибка: ${error}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -213,8 +213,8 @@ const uploadCover = async () => {
     await comicsStore.loadComicsForce();
     comic.value = new ComicModel(comicsStore.comic.getDTO());
     UI.toast({ text: 'Комикс сохранён' });
-  } catch (e) {
-    UI.toast({ text: `Ошибка: ${e}` });
+  } catch (error) {
+    UI.toast({ text: `Ошибка: ${error}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -230,8 +230,8 @@ const loadByLink = async () => {
     await comicsStore.loadComicsForce();
     comic.value = new ComicModel(comicsStore.comic.getDTO());
     UI.toast({ text: 'Комикс сохранён' });
-  } catch (e) {
-    UI.toast({ text: `Ошибка: ${e}` });
+  } catch (error) {
+    UI.toast({ text: `Ошибка: ${error}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -244,8 +244,8 @@ const onSave = async () => {
     await comicsStore.loadComicsForce();
     comic.value = new ComicModel(comicsStore.comic.getDTO());
     UI.toast({ text: 'Комикс сохранён' });
-  } catch (e) {
-    UI.toast({ text: `Ошибка: ${e}` });
+  } catch (error) {
+    UI.toast({ text: `Ошибка: ${error}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -265,9 +265,9 @@ const deleteComic = async () => {
     await comicsStore.loadComicsForce();
     UI.toast({ text: 'Комикс удалён' });
     router.replace({ name: '/' });
-  } catch (e) {
-    alert(e);
-    UI.toast({ text: `Ошибка: ${e}` });
+  } catch (error) {
+    alert(error);
+    UI.toast({ text: `Ошибка: ${error}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -279,7 +279,7 @@ const chaptersList = computed(() => (
     .map((e, i) => ({
       id: e.id,
       name: e.name || `Глава ${i + 1}`,
-      count: `${e.pages.reduce((a,c) => a + (c.file ? 1 : 0), 0)} / ${e.pages.length}`,
+      count: `${e.pages.reduce((a, c) => a + (c.file ? 1 : 0), 0)} / ${e.pages.length}`,
     }))
     .reverse()
 ));
@@ -302,8 +302,8 @@ const createChapter = async () => {
     chapterName.value = '';
     await loadChapters();
     UI.toast({ text: 'Глава создана' });
-  } catch (e) {
-    UI.toast({ text: `Ошибка: ${e}` });
+  } catch (error) {
+    UI.toast({ text: `Ошибка: ${error}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -314,15 +314,15 @@ onMounted(async () => {
 
   await comicsStore.loadComic(comicId);
   comic.value = new ComicModel(comicsStore.comic.getDTO());
-  if (!comic.value.id) {
-    router.replace({ name: '/' });
-  } else {
+  if (comic.value.id) {
     await Promise.all([
       tagsStore.loadTags(),
       authorsStore.loadAuthors(),
       languagesStore.loadLanguages(),
       loadChapters(),
     ]);
+  } else {
+    router.replace({ name: '/' });
   }
 
   loadingEnd();

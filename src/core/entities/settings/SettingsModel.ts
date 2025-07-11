@@ -2,9 +2,9 @@ import type { ISettingsDTO, TReaderDirection } from '@/plugins/WebApiPlugin.ts';
 import Entity from '@/core/entities/Entity.ts';
 
 export default class SettingsModel extends Entity<ISettingsDTO> implements ISettingsDTO {
-  public autoReading: boolean = false;
-  public autoReadingTimeout: number = 20000;
-  public isCompress: boolean = false;
+  public autoReading = false;
+  public autoReadingTimeout = 20_000;
+  public isCompress = false;
   public readingMode: TReaderDirection = 'horizontal';
 
   constructor(dto?: Partial<ISettingsDTO>) {
@@ -12,7 +12,7 @@ export default class SettingsModel extends Entity<ISettingsDTO> implements ISett
 
     if (dto) {
       this.autoReading = dto.autoReading ?? false;
-      this.autoReadingTimeout = dto.autoReadingTimeout ?? 20000;
+      this.autoReadingTimeout = dto.autoReadingTimeout ?? 20_000;
       this.isCompress = dto.isCompress ?? false;
       this.readingMode = dto.readingMode ?? 'horizontal';
     }

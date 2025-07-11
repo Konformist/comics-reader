@@ -4,21 +4,21 @@
  * Bootstraps Vuetify and other plugins then mounts the App`
  */
 
-// Styles
-import 'swiper/css';
-import 'swiper/css/zoom';
-import 'unfonts.css';
-import '@/styles/styles.scss';
-
+// Composables
+import { createApp } from 'vue';
+// Components
+import App from '@/App.vue';
 // Plugins
 import { registerPlugins } from '@/plugins';
 import { useAppStore } from '@/stores/app.ts';
 
-// Components
-import App from '@/App.vue';
+// Styles
+import 'swiper/css';
+import 'swiper/css/zoom';
 
-// Composables
-import { createApp } from 'vue';
+import 'unfonts.css';
+
+import '@/styles/styles.scss';
 
 const init = async () => {
   const app = createApp(App);

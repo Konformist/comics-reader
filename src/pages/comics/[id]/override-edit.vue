@@ -11,7 +11,7 @@
           Работают с DOM деревом. См. CSS.
         </v-alert>
         <CustomSelect
-          v-if="parsersStore.parsers.length"
+          v-if="parsersStore.parsers.length > 0"
           v-model="comic.parserId"
           class="mb-4"
           :items="parsersStore.parsers"
@@ -178,6 +178,7 @@
 </template>
 
 <script setup lang="ts">
+import type { IParseData } from '@/plugins/WebApiPlugin.ts';
 import useLoading from '@/composables/useLoading.ts';
 import ComicOverrideController from '@/core/entities/comic-override/ComicOverrideController.ts';
 import ComicOverrideModel from '@/core/entities/comic-override/ComicOverrideModel.ts';
@@ -186,7 +187,6 @@ import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import ParserController from '@/core/entities/parser/ParserController.ts';
 import ParserModel from '@/core/entities/parser/ParserModel.ts';
 import UI from '@/plugins/UIPlugin.ts';
-import type { IParseData } from '@/plugins/WebApiPlugin.ts';
 import { useAuthorsStore } from '@/stores/authors.ts';
 import { useComicsStore } from '@/stores/comics.ts';
 import { useLanguagesStore } from '@/stores/languages.ts';
@@ -248,8 +248,8 @@ const onSave = async () => {
     await saveComic();
     await saveComicOverride();
     UI.toast({ text: 'Комикс сохранён' });
-  } catch (e) {
-    UI.toast({ text: `Ошибка: ${e}` });
+  } catch (error) {
+    UI.toast({ text: `Ошибка: ${error}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -341,14 +341,14 @@ const init = async () => {
   await comicsStore.loadComic(comicId);
   comic.value = new ComicModel(comicsStore.comic.getDTO());
 
-  if (!comic.value.id) {
-    router.replace({ name: '/' });
-  } else {
+  if (comic.value.id) {
     await Promise.all([
       parsersStore.loadParsers(),
       loadComicOverride(),
       loadParser(),
     ]);
+  } else {
+    router.replace({ name: '/' });
   }
 
   loadingEnd();
@@ -378,8 +378,8 @@ const parseComic = async () => {
       comicsStore.loadComicsForce(),
     ]);
     UI.toast({ text: 'Комикс сохранён' });
-  } catch (e) {
-    UI.toast({ text: `Ошибка: ${e}` });
+  } catch (error) {
+    UI.toast({ text: `Ошибка: ${error}` });
   } finally {
     loadingGlobalEnd();
   }

@@ -172,13 +172,13 @@
 </template>
 
 <script lang="ts" setup>
+import { Dialog } from '@capacitor/dialog';
 import useLoading from '@/composables/useLoading.ts';
 import Api from '@/core/api/Api.ts';
-import UI from '@/plugins/UIPlugin.ts';
-import { useParsersStore } from '@/stores/parsers.ts';
-import { Dialog } from '@capacitor/dialog';
 import ParserController from '@/core/entities/parser/ParserController.ts';
 import ParserModel from '@/core/entities/parser/ParserModel.ts';
+import UI from '@/plugins/UIPlugin.ts';
+import { useParsersStore } from '@/stores/parsers.ts';
 
 definePage({
   meta: {
@@ -217,8 +217,8 @@ const saveParser = async () => {
     await parsersStore.loadParsersForce();
     loadParser();
     UI.toast({ text: 'Парсер сохранён' });
-  } catch (e) {
-    UI.toast({ text: `Ошибка: ${e}` });
+  } catch (error) {
+    UI.toast({ text: `Ошибка: ${error}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -236,8 +236,8 @@ const setParser = async (value: File | File[]) => {
     parsed.id = parser.value.id;
     parser.value = new ParserModel(parsed);
     UI.toast({ text: 'Парсен обновлён' });
-  } catch (e) {
-    UI.toast({ text: `Ошибка: ${e}` });
+  } catch (error) {
+    UI.toast({ text: `Ошибка: ${error}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -253,8 +253,8 @@ const toDownloads = async () => {
       fileName: `${parser.value.name}.json`,
     });
     UI.toast({ text: 'Парсер сохранён в Загрузки' });
-  } catch (e) {
-    UI.toast({ text: `Ошибка: ${e}` });
+  } catch (error) {
+    UI.toast({ text: `Ошибка: ${error}` });
   } finally {
     loadingGlobalEnd();
   }
@@ -274,8 +274,8 @@ const deleteParser = async () => {
     await parsersStore.loadParsersForce();
     UI.toast({ text: 'Парсер удалён' });
     router.replace({ name: '/parsers/' });
-  } catch (e) {
-    UI.toast({ text: `Ошибка: ${e}` });
+  } catch (error) {
+    UI.toast({ text: `Ошибка: ${error}` });
   } finally {
     loadingGlobalEnd();
   }

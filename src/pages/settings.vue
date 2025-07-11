@@ -94,8 +94,8 @@ const getComicArchive = async () => {
     await Api.api('comic/archive/add');
     await comicsStore.loadComicsForce();
     UI.toast({ text: 'Комикс успешно загружен' });
-  } catch (e) {
-    UI.toast({ text: `Ошибка: ${e}` });
+  } catch (error) {
+    UI.toast({ text: `Ошибка: ${error}` });
   } finally {
     loadingGlobalEnd();
   }

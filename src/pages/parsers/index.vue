@@ -8,7 +8,7 @@
         Парсеры работают с DOM деревом. См. CSS.
       </v-alert>
       <DictionaryList
-        v-if="parsersStore.parsers.length"
+        v-if="parsersStore.parsers.length > 0"
         class="mt-4"
         :items="parsersStore.parsers"
         :loading="loading"
@@ -30,11 +30,11 @@
 </template>
 
 <script lang="ts" setup>
-import UI from '@/plugins/UIPlugin.ts';
-import { useParsersStore } from '@/stores/parsers.ts';
+import useLoading from '@/composables/useLoading.ts';
 import ParserController from '@/core/entities/parser/ParserController.ts';
 import ParserModel from '@/core/entities/parser/ParserModel.ts';
-import useLoading from '@/composables/useLoading.ts';
+import UI from '@/plugins/UIPlugin.ts';
+import { useParsersStore } from '@/stores/parsers.ts';
 
 definePage({
   meta: {
@@ -74,8 +74,8 @@ const createParser = async () => {
       name: '/parsers/[id]/',
       params: { id: parserId },
     });
-  } catch (e) {
-    UI.toast({ text: `Ошибка: ${e}` });
+  } catch (error) {
+    UI.toast({ text: `Ошибка: ${error}` });
   } finally {
     loadingGlobalEnd();
   }

@@ -1,5 +1,5 @@
-import Entity from '@/core/entities/Entity.ts';
 import type { IComicOverrideDTO } from '@/plugins/WebApiPlugin.ts';
+import Entity from '@/core/entities/Entity.ts';
 
 export default class ComicOverrideModel extends Entity<IComicOverrideDTO> implements IComicOverrideDTO {
   id: number;

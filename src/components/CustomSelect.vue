@@ -25,7 +25,7 @@
           @click.stop="onDelete(item.id)"
         />
         <span
-          v-if="chipsOther.length"
+          v-if="chipsOther.length > 0"
           class="text-grey text-caption align-self-center"
         >
           +{{ chipsOther.length }}
@@ -67,8 +67,7 @@ const modelArray = computed<number[]>(() => (
 ));
 
 const onDelete = (id: number) => {
-  if (multiple) model.value = modelArray.value.filter((item) => item !== id);
-  else model.value = 0;
+  model.value = multiple ? modelArray.value.filter((item) => item !== id) : 0;
 };
 
 const chips = computed(() => (

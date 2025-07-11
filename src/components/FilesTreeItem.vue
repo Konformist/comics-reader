@@ -14,7 +14,7 @@
       </v-list-item-subtitle>
     </template>
   </v-list-item>
-  <template v-if="item.isDirectory && item.children.length && opened">
+  <template v-if="item.isDirectory && item.children.length > 0 && opened">
     <v-divider class="mt-2 mb-1 mx-4" />
     <FilesTree
       v-model="model"

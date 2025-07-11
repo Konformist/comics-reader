@@ -41,7 +41,7 @@
         <DropdownButton
           v-model="comicsPageStore.filters.tags"
           class="mr-2"
-          :disabled="!tagsStore.tags.length"
+          :disabled="tagsStore.tags.length === 0"
           :items="tagsStore.tags"
           multiple
           prepend-icon="$filter"
@@ -50,7 +50,7 @@
         <DropdownButton
           v-model="comicsPageStore.filters.authors"
           class="mr-2"
-          :disabled="!authorsStore.authors.length"
+          :disabled="authorsStore.authors.length === 0"
           :items="authorsStore.authors"
           multiple
           prepend-icon="$filter"
@@ -58,7 +58,7 @@
         />
         <DropdownButton
           v-model="comicsPageStore.filters.languages"
-          :disabled="!languagesStore.languages.length"
+          :disabled="languagesStore.languages.length === 0"
           :items="languagesStore.languages"
           multiple
           prepend-icon="$filter"
@@ -135,18 +135,18 @@
 </template>
 
 <script lang="ts" setup>
+import { onBeforeMount } from 'vue';
+import ComicGallery from '@/components/ComicGallery.vue';
+import useLoading from '@/composables/useLoading.ts';
+import ComicController from '@/core/entities/comic/ComicController.ts';
+import ComicModel from '@/core/entities/comic/ComicModel.ts';
 import UI from '@/plugins/UIPlugin.ts';
 import { useAppStore } from '@/stores/app.ts';
 import { useAuthorsStore } from '@/stores/authors.ts';
 import { useComicsStore } from '@/stores/comics.ts';
+import { ESORT_TYPE, useComicsPageStore } from '@/stores/comicsPage.ts';
 import { useLanguagesStore } from '@/stores/languages.ts';
 import { useTagsStore } from '@/stores/tags.ts';
-import ComicController from '@/core/entities/comic/ComicController.ts';
-import ComicModel from '@/core/entities/comic/ComicModel.ts';
-import { ESORT_TYPE, useComicsPageStore } from '@/stores/comicsPage.ts';
-import useLoading from '@/composables/useLoading.ts';
-import ComicGallery from '@/components/ComicGallery.vue';
-import { onBeforeMount } from 'vue';
 
 definePage({
   meta: {

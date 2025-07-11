@@ -41,8 +41,8 @@
 </template>
 
 <script setup lang="ts">
-import type ChapterPageModel from '@/core/entities/chapter-page/ChapterPageModel.ts';
 import type { SwiperContainer, SwiperSlide } from 'swiper/element';
+import type ChapterPageModel from '@/core/entities/chapter-page/ChapterPageModel.ts';
 import { FreeMode } from 'swiper/modules';
 
 const opened = defineModel<boolean>('opened', { default: false });

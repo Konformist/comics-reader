@@ -1,5 +1,5 @@
-import ParserController from '@/core/entities/parser/ParserController.ts';
 import type ParserModel from '@/core/entities/parser/ParserModel.ts';
+import ParserController from '@/core/entities/parser/ParserController.ts';
 
 export const useParsersStore = defineStore('parsersStore', {
   state() {
@@ -11,7 +11,9 @@ export const useParsersStore = defineStore('parsersStore', {
 
   actions: {
     async loadParsers() {
-      if (this.loaded) return;
+      if (this.loaded) {
+        return;
+      }
       this.parsers = await ParserController.loadAll();
       this.loaded = true;
     },

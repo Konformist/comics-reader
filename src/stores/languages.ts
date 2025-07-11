@@ -1,5 +1,5 @@
-import LanguageController from '@/core/entities/language/LanguageController.ts';
 import type LanguageModel from '@/core/entities/language/LanguageModel.ts';
+import LanguageController from '@/core/entities/language/LanguageController.ts';
 
 export const useLanguagesStore = defineStore('languagesStore', {
   state() {
@@ -11,7 +11,9 @@ export const useLanguagesStore = defineStore('languagesStore', {
 
   actions: {
     async loadLanguages() {
-      if (this.loaded) return;
+      if (this.loaded) {
+        return;
+      }
       this.languages = await LanguageController.loadAll();
       this.loaded = true;
     },

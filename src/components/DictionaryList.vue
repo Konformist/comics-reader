@@ -7,7 +7,7 @@
     />
   </v-list>
   <v-list
-    v-else-if="items.length"
+    v-else-if="items.length > 0"
     v-model:selected="selected"
     :items="items"
     select-strategy="single-independent"
@@ -44,7 +44,7 @@ const selected = computed({
     return [model.value];
   },
   set(value) {
-    if (!value.length) return;
+    if (value.length === 0) return;
     model.value = value[0];
   },
 });

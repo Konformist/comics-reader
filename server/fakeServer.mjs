@@ -26,7 +26,7 @@ const comicIds = faker.helpers.uniqueArray(uniqArrInt(1, COMIC_COUNT), COMIC_COU
 
 const getFileSize = () => faker.number.int({
   min: 0,
-  max: 1000000000,
+  max: 1_000_000_000,
 });
 
 const getTag = (override) => ({
@@ -205,18 +205,56 @@ app.post('/api', (req, res) => {
   const result = { result: {} };
 
   switch (req.body.path) {
-    case 'tag/tag/list': result.result = tags; break;
-    case 'author/author/list': result.result = authors; break;
-    case 'language/language/list': result.result = languages; break;
-    case 'parser/parser/list': result.result = parsers; break;
-    case 'parser/parser/get': result.result = parserSingle(body.id); break;
-    case 'comic/comic/list': result.result = comics; break;
-    case 'comic/comic/get': result.result = comicSingle(body.id); break;
-    case 'comic/override/get': result.result = overrideSingle(body.comicId); break;
-    case 'chapter/chapter/get': result.result = chapterSingle(body.id); break;
-    case 'chapter/chapter/list': result.result = chaptersByComic(body.comicId); break;
-    case 'chapter/page/set': result.result = true; updatePage(body); break;
-    case 'chapter/page/del': result.result = true; deletePage(body.id); break;
+    case 'tag/tag/list': {
+      result.result = tags;
+      break;
+    }
+    case 'author/author/list': {
+      result.result = authors;
+      break;
+    }
+    case 'language/language/list': {
+      result.result = languages;
+      break;
+    }
+    case 'parser/parser/list': {
+      result.result = parsers;
+      break;
+    }
+    case 'parser/parser/get': {
+      result.result = parserSingle(body.id);
+      break;
+    }
+    case 'comic/comic/list': {
+      result.result = comics;
+      break;
+    }
+    case 'comic/comic/get': {
+      result.result = comicSingle(body.id);
+      break;
+    }
+    case 'comic/override/get': {
+      result.result = overrideSingle(body.comicId);
+      break;
+    }
+    case 'chapter/chapter/get': {
+      result.result = chapterSingle(body.id);
+      break;
+    }
+    case 'chapter/chapter/list': {
+      result.result = chaptersByComic(body.comicId);
+      break;
+    }
+    case 'chapter/page/set': {
+      result.result = true;
+      updatePage(body);
+      break;
+    }
+    case 'chapter/page/del': {
+      result.result = true;
+      deletePage(body.id);
+      break;
+    }
   }
 
   res.send(JSON.stringify(result));

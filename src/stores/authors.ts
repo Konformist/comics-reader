@@ -1,5 +1,5 @@
-import AuthorController from '@/core/entities/author/AuthorController.ts';
 import type AuthorModel from '@/core/entities/author/AuthorModel.ts';
+import AuthorController from '@/core/entities/author/AuthorController.ts';
 
 export const useAuthorsStore = defineStore('authorsStore', {
   state() {
@@ -11,7 +11,9 @@ export const useAuthorsStore = defineStore('authorsStore', {
 
   actions: {
     async loadAuthors() {
-      if (this.loaded) return;
+      if (this.loaded) {
+        return;
+      }
       this.authors = await AuthorController.loadAll();
       this.loaded = true;
     },

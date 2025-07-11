@@ -3,6 +3,6 @@ export const filterString = (v: string, s: string) => (
 );
 
 export const filterArrays = <T>(f: T[], s: T[]): boolean => (
-  !s.length
+  s.length === 0
   || f.some((e) => s.includes(e))
 );

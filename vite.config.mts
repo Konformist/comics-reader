@@ -1,17 +1,17 @@
+import { fileURLToPath, URL } from 'node:url';
+import Vue from '@vitejs/plugin-vue';
 /// <reference types="vitest" />
 // Plugins
 import AutoImport from 'unplugin-auto-import/vite';
-import Components from 'unplugin-vue-components/vite';
 import Fonts from 'unplugin-fonts/vite';
-import Layouts from 'vite-plugin-vue-layouts-next';
-import Vue from '@vitejs/plugin-vue';
-import VueRouter from 'unplugin-vue-router/vite';
+import Components from 'unplugin-vue-components/vite';
 import { VueRouterAutoImports } from 'unplugin-vue-router';
-import Vuetify, { transformAssetUrls } from 'vite-plugin-vuetify';
-
+import VueRouter from 'unplugin-vue-router/vite';
 // Utilities
 import { defineConfig, loadEnv } from 'vite';
-import { fileURLToPath, URL } from 'node:url';
+
+import Layouts from 'vite-plugin-vue-layouts-next';
+import Vuetify, { transformAssetUrls } from 'vite-plugin-vuetify';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -56,21 +56,21 @@ export default defineConfig(({ mode }) => {
         styles: { configFile: 'src/styles/settings.scss' },
       }),
       Fonts({
-        fontsource: {
+        custom: {
           families: [
             {
               name: 'Roboto',
-              weights: [400, 500],
-              styles: ['normal'],
-              subset: 'latin',
-            },
-            {
-              name: 'Roboto',
-              weights: [400, 500],
-              styles: ['normal'],
-              subset: 'cyrillic',
+              local: 'Roboto',
+              src: [
+                './node_modules/@fontsource/roboto/files/roboto-latin-400-normal.woff2',
+                './node_modules/@fontsource/roboto/files/roboto-latin-500-normal.woff2',
+                './node_modules/@fontsource/roboto/files/roboto-cyrillic-400-normal.woff2',
+                './node_modules/@fontsource/roboto/files/roboto-cyrillic-500-normal.woff2',
+              ],
             },
           ],
+          display: 'swap',
+          preload: true,
         },
       }),
     ],
@@ -86,8 +86,8 @@ export default defineConfig(({ mode }) => {
     define: { 'process.env': env },
     resolve: {
       alias: {
-        '@': fileURLToPath(new URL('./src', import.meta.url)),
-        'tests': fileURLToPath(new URL('./tests', import.meta.url)),
+        '@': fileURLToPath(new URL('src', import.meta.url)),
+        'tests': fileURLToPath(new URL('tests', import.meta.url)),
       },
       extensions: [
         '.js',

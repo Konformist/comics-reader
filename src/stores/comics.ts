@@ -22,11 +22,15 @@ export const useComicsStore = defineStore('comicsStore', {
       this.comicId = id;
       const ids = this.comics.map((comic) => comic.id);
 
-      if (!ids.includes(id)) this.loadComics();
+      if (!ids.includes(id)) {
+        this.loadComics();
+      }
     },
 
     async loadComics() {
-      if (this.loaded) return;
+      if (this.loaded) {
+        return;
+      }
       this.comics = await ComicController.loadAll();
       this.loaded = true;
     },

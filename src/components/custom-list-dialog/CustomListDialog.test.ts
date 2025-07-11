@@ -1,12 +1,12 @@
 import { mount } from '@vue/test-utils';
-import { describe, expect, test, vi } from 'vitest';
 import { vuetify } from 'tests/globals.ts';
-import CustomListDialog from '@/components/custom-list-dialog/CustomListDialog.vue';
+import { describe, expect, test, vi } from 'vitest';
 import { VCardTitle, VTextField } from 'vuetify/components';
+import CustomListDialog from '@/components/custom-list-dialog/CustomListDialog.vue';
 
 vi.stubGlobal('visualViewport', new EventTarget());
 
-const items = (new Array(10))
+const items = (Array.from({ length: 10 }))
   .fill(0)
   .map((_, i) => ({
     id: i,
